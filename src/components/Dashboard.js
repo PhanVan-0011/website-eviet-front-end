@@ -1,78 +1,123 @@
 import React from 'react'
+import requestApi from '../helpers/api'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom';
+
+import { useDispatch } from 'react-redux';
+import * as actions from '../redux/actions/index';
 
 const Dashboard = () => {
+    const [dashboardData, setDashboardData] = useState({});
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(actions.controlLoading(true)); // Bắt đầu loading
+        Promise.all([requestApi('/users', 'GET'), requestApi('/posts', 'GET')]).then((response) => {
+            setDashboardData({...dashboardData,  
+                totalUser: response[0].data.total,
+                totalPost: response[1].data.total
+            });
+            dispatch(actions.controlLoading(false));
+            console.log("User data: ", response[0].data);
+            console.log("Product data: ", response[1].data);
+        }
+        ).catch((error) => {
+            dispatch(actions.controlLoading(false));
+            console.log("User error: ", error);
+        });
+        // requestApi('/products', 'GET', []).then((response) => {
+        //     setDashboardData({...dashboardData, totalProduct: response.data.total});
+        // requestApi('/users', 'GET', []).then((response) => {
+        //     setDashboardData({...dashboardData, totalUser: response.data.total});
+        //     console.log("User data: ", response.data);
+        // }
+        // ).catch((error) => {
+        //     console.log("User error: ", error);
+        // });
+    }
+    ,[])
+
   return (
     <div id="layoutSidenav_content">
     <main>
-        <div class="container-fluid px-4">
-            <h1 class="mt-4">Dashboard</h1>
-            <ol class="breadcrumb mb-4">
-                <li class="breadcrumb-item active">Dashboard</li>
+        <div className="container-fluid px-4">
+            <h1 className="mt-4">Dashboard</h1>
+            <ol className="breadcrumb mb-4">
+                <li className="breadcrumb-item active">Dashboard</li>
             </ol>
-            <div class="row">
-                <div class="col-xl-3 col-md-6">
-                    <div class="card bg-primary text-white mb-4">
-                        <div class="card-body">Primary Card</div>
-                        <div class="card-footer d-flex align-items-center justify-content-between">
-                            <a class="small text-white stretched-link" href="#">View Details</a>
-                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+            <div className="row">
+                <div className="col-xl-3 col-md-6">
+                    <div className="card bg-primary text-white mb-4">
+                        <div className="card-body">Total user</div>
+                        
+                            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {dashboardData.totalUser}
+                                <span className="visually-hidden">unread messages</span>
+                            </span>
+                        
+                        <div className="card-footer d-flex align-items-center justify-content-between">
+                            <Link className="small text-white stretched-link" to="/user">View Details</Link>
+                            <div className="small text-white"><i className="fas fa-angle-right"></i></div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="card bg-warning text-white mb-4">
-                        <div class="card-body">Warning Card</div>
-                        <div class="card-footer d-flex align-items-center justify-content-between">
-                            <a class="small text-white stretched-link" href="#">View Details</a>
-                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                {/* <div className="col-xl-3 col-md-6">
+                    <div className="card bg-warning text-white mb-4">
+                        <div className="card-body">Warning Card</div>
+                        <div className="card-footer d-flex align-items-center justify-content-between">
+                            <a className="small text-white stretched-link" href="#">View Details</a>
+                            <div className="small text-white"><i className="fas fa-angle-right"></i></div>
+                        </div>
+                    </div>
+                </div> */}
+                <div className="col-xl-3 col-md-6">
+                    <div className="card bg-success text-white mb-4">
+                        <div className="card-body">Total Post</div>
+                         <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {dashboardData.totalPost}
+                                <span className="visually-hidden">unread messages</span>
+                            </span>
+                        <div className="card-footer d-flex align-items-center justify-content-between">
+                            <a className="small text-white stretched-link" href="#">View Details</a>
+                            <div className="small text-white"><i className="fas fa-angle-right"></i></div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="card bg-success text-white mb-4">
-                        <div class="card-body">Success Card</div>
-                        <div class="card-footer d-flex align-items-center justify-content-between">
-                            <a class="small text-white stretched-link" href="#">View Details</a>
-                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                {/* <div className="col-xl-3 col-md-6">
+                    <div className="card bg-danger text-white mb-4">
+                        <div className="card-body">Danger Card</div>
+                        <div className="card-footer d-flex align-items-center justify-content-between">
+                            <a className="small text-white stretched-link" href="#">View Details</a>
+                            <div className="small text-white"><i className="fas fa-angle-right"></i></div>
                         </div>
                     </div>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="card bg-danger text-white mb-4">
-                        <div class="card-body">Danger Card</div>
-                        <div class="card-footer d-flex align-items-center justify-content-between">
-                            <a class="small text-white stretched-link" href="#">View Details</a>
-                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                        </div>
-                    </div>
-                </div>
+                </div> */}
             </div>
-            <div class="row">
-                <div class="col-xl-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <i class="fas fa-chart-area me-1"></i>
+            <div className="row">
+                <div className="col-xl-6">
+                    <div className="card mb-4">
+                        <div className="card-header">
+                            <i className="fas fa-chart-area me-1"></i>
                             Area Chart Example
                         </div>
-                        <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
+                        <div className="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
                     </div>
                 </div>
-                <div class="col-xl-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <i class="fas fa-chart-bar me-1"></i>
+                <div className="col-xl-6">
+                    <div className="card mb-4">
+                        <div className="card-header">
+                            <i className="fas fa-chart-bar me-1"></i>
                             Bar Chart Example
                         </div>
-                        <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
+                        <div className="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
                     </div>
                 </div>
             </div>
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-table me-1"></i>
+            <div className="card mb-4">
+                <div className="card-header">
+                    <i className="fas fa-table me-1"></i>
                     DataTable Example
                 </div>
-                <div class="card-body">
+                <div className="card-body">
                     <table id="datatablesSimple">
                         <thead>
                             <tr>
@@ -557,10 +602,10 @@ const Dashboard = () => {
             </div>
         </div>
     </main>
-    <footer class="py-4 bg-light mt-auto">
-        <div class="container-fluid px-4">
-            <div class="d-flex align-items-center justify-content-between small">
-                <div class="text-muted">Copyright &copy; Your Website 2023</div>
+    <footer className="py-4 bg-light mt-auto">
+        <div className="container-fluid px-4">
+            <div className="d-flex align-items-center justify-content-between small">
+                <div className="text-muted">Copyright &copy; Your Website 2023</div>
                 <div>
                     <a href="#">Privacy Policy</a>
                     &middot;

@@ -1,10 +1,21 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        // Xóa token khỏi localStorage
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+
+        // Điều hướng về trang đăng nhập
+        navigate('/login');
+    };
   return (
     <nav className="sb-topnav navbar navbar-expand navbar-dark bg-dark">
            
-            <a className="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
+            <a className="navbar-brand ps-3" href="/">Admin</a>
          
             <button className="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i className="fas fa-bars"></i></button>
           
@@ -22,7 +33,7 @@ const Header = () => {
                         <li><a className="dropdown-item" href="#!">Settings</a></li>
                         <li><a className="dropdown-item" href="#!">Activity Log</a></li>
                         <li><hr className="dropdown-divider" /></li>
-                        <li><a className="dropdown-item" href="#!">Logout</a></li>
+                        <li><a className="dropdown-item" onClick={handleLogout} href='#!'>Logout</a></li>
                     </ul>
                 </li>
             </ul>
