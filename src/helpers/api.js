@@ -37,32 +37,32 @@ export default function requestApi(endpoint, method, body=[], responseType= 'jso
         },
         async(error) => {
             // Thêm cơ chế ngăn chặn vòng lặp vô tận khi request sai
-            if(error.response && error.response.status === 419) {
-                try {
-                    const configOriginal = error.config;
-                    console.log('call refresh token api');
-                    const refreshToken = localStorage.getItem('refresh_token');
-                      const refreshResponse = await instance.post(`${baseURL}/auth/refresh-token`, {'refresh_token': refreshToken});
+            // if(error.response && error.response.status === 419) {
+            //     try {
+            //         const configOriginal = error.config;
+            //         console.log('call refresh token api');
+            //         const refreshToken = localStorage.getItem('refresh_token');
+            //           const refreshResponse = await instance.post(`${baseURL}/auth/refresh-token`, {'refresh_token': refreshToken});
                    
-                      const {access_token, refresh_token} = refreshResponse.data;
+            //           const {access_token, refresh_token} = refreshResponse.data;
     
 
-                      localStorage.setItem('access_token', access_token); // Lưu token vào localStorage   
-                      localStorage.setItem('refresh_token', refresh_token); // Lưu token vào localStorage
-                      // Retry the original request with the new access token
-                      configOriginal.headers['Authorization'] = `Bearer ${access_token}`;
+            //           localStorage.setItem('access_token', access_token); // Lưu token vào localStorage   
+            //           localStorage.setItem('refresh_token', refresh_token); // Lưu token vào localStorage
+            //           // Retry the original request with the new access token
+            //           configOriginal.headers['Authorization'] = `Bearer ${access_token}`;
                     
-                      console.log('call refresh token api success');
-                      return instance(configOriginal);
-                } catch (error) {
-                    if(error.response && error.response.status === 400) {
-                        localStorage.removeItem('access_token');
-                        localStorage.removeItem('refresh_token');
-                        window.location.href = '/login'; 
-                    }
-                    return Promise.reject(error);
-                }
-            }
+            //           console.log('call refresh token api success');
+            //           return instance(configOriginal);
+            //     } catch (error) {
+            //         if(error.response && error.response.status === 400) {
+            //             localStorage.removeItem('access_token');
+            //             localStorage.removeItem('refresh_token');
+            //             window.location.href = '/login'; 
+            //         }
+            //         return Promise.reject(error);
+            //     }
+            // }
             return Promise.reject(error);
         }
     );

@@ -26,9 +26,10 @@ const Login = () => {
         if(isValid) {
             // Call API to login user
             dispatch(actions.controlLoading(true)); // Bắt đầu loading
-            requestApi('/auth/login', 'POST', loginData).then((response) => {
+            requestApi('api/login', 'POST', loginData).then((response) => {
+                console.log("Login response: ", response);
                 localStorage.setItem('access_token', response.data.access_token); // Lưu token vào localStorage
-                localStorage.setItem('refresh_token', response.data.refresh_token);
+                // localStorage.setItem('refresh_token', response.data.refresh_token);
                  // Lưu token vào localStorage
                  console.log("Login success: ");
                 dispatch(actions.controlLoading(false)); 
@@ -55,12 +56,12 @@ const Login = () => {
     const validateForm = () => {
         let isValid = true;
         let objErrors = {};
-        if(loginData.email === undefined || loginData.email === "") {
-            objErrors.email = "Please enter email address";
+        if(loginData.login === undefined || loginData.login === "") {
+            objErrors.login = "Please enter email address";
         }else{
             const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!regex.test(loginData.email)) {
-                objErrors.email = "Please enter valid email address";
+            if (!regex.test(loginData.login)) {
+                objErrors.login = "Please enter valid email address";
             }
         }
         if(loginData.password === undefined || loginData.password === "") {
@@ -88,9 +89,9 @@ const Login = () => {
                             <div className="card-body">
                                 <form>
                                     <div className="form-floating mb-3">
-                                        <input className="form-control" id="inputEmail" type="email" placeholder="name@example.com" name="email" onChange={onChange}/>
+                                        <input className="form-control" id="inputEmail" type="email" placeholder="name@example.com" name="login" onChange={onChange}/>
                                         <label>Email address</label>
-                                        {errors.email && <div className="text-danger">{errors.email}</div>}
+                                        {errors.login && <div className="text-danger">{errors.login}</div>}
                                     </div>
                                     <div className="form-floating mb-3">
                                         <input className="form-control" id="inputPassword" type="password" placeholder="Password" name="password" onChange={onChange}/>
