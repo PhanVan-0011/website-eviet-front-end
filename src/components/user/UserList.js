@@ -21,17 +21,24 @@ const UserList = () => {
     const [refresh, setRefresh] = useState(Date.now());
 
     const columns = [
-        {title: "ID", element: row => row.id},
-        {title: "First Name", element: row => row.firstName},
-        {title: "Last Name", element: row => row.lastName},
-        {title: "Email", element: row => row.email},
-        {title: "CreatedAt", element: row => row.createdAt},
-        {title: "UpdatedAt", element: row => row.updatedAt},
-        {title: "Action", element: row => (<>
-            
-            <Link className="btn btn-primary btn-sm me-1" to={`/user/${row.id}`}><i className="fas fa-edit"></i></Link>
-            <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>
-        </>)}
+        { title: "ID", element: row => row.id },
+        { title: "Tên", element: row => row.name },
+        { title: "Email", element: row => row.email },
+        { title: "Số điện thoại", element: row => row.phone },
+        { title: "Giới tính", element: row => row.gender === "male" ? "Nam" : row.gender === "female" ? "Nữ" : "Khác" },
+        { title: "Ngày sinh", element: row => row.date_of_birth ? row.date_of_birth : "" },
+        // { title: "Kích hoạt", element: row => row.is_active ? "Đã kích hoạt" : "Chưa kích hoạt" },
+        // { title: "Xác thực", element: row => row.is_verified ? "Đã xác thực" : "Chưa xác thực" },
+        { title: "Ngày tạo", element: row => row.created_at },
+        { title: "Ngày cập nhật", element: row => row.updated_at },
+        {
+            title: "Action", element: row => (
+                <>
+                    <Link className="btn btn-primary btn-sm me-1" to={`/user/${row.id}`}><i className="fas fa-edit"></i></Link>
+                    <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>
+                </>
+            )
+        }
     ];
     // Handle single Delete
     const handleDelete = (id) => {
@@ -48,7 +55,7 @@ const UserList = () => {
     const requestApiDelete = () => {
         dispatch(actions.controlLoading(true)); // Bắt đầu loading
         if(typeDelete === 'single'){
-            requestApi(`/users/delete/${itemDelete}`, 'DELETE', []).then((response) => {
+            requestApi(`api/users/${itemDelete}`, 'DELETE', []).then((response) => {
                 console.log("Delete user response: ", response.data);
                 setShowModal(false);
                 dispatch(actions.controlLoading(false));
@@ -61,7 +68,7 @@ const UserList = () => {
             )
         
         }else{
-            requestApi(`/users/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
+            requestApi(`api/users/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
                 console.log("Delete user response: ", response.data);
                 setShowModal(false);
                 dispatch(actions.controlLoading(false));
@@ -79,7 +86,7 @@ const UserList = () => {
     useEffect(() => {
         const query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
         dispatch(actions.controlLoading(true)); // Bắt đầu loading
-        requestApi(`/users${query}`, 'GET', []).then((response) => {
+        requestApi(`api/users${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false)); 
             setUsers(response.data.data);
             setNumOfPages(response.data.last_page);

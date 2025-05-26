@@ -17,7 +17,7 @@ const UserAdd = () => {
     const handleSubmitForm = async (data) => {
        try {
          dispatch(actions.controlLoading(true));
-        const response = await requestApi('/users/create', 'POST', data);
+        const response = await requestApi('api/users/create', 'POST', data);
         dispatch(actions.controlLoading(false));
         
         toast.success("Create user success", { position: "top-right" , autoClose: 1000});
@@ -56,42 +56,153 @@ const UserAdd = () => {
                     <div className='card-body'>
                         <div className='mb-3 row'>
                             <form onSubmit={handleSubmit(handleSubmitForm)}>
-                                <div className="col-md-6">
-                                    <div className="mb-3 mt-3">
-                                        <label htmlFor="firstName" className="form-label">Firstname</label>
-                                        <input {...register('firstName', {required: 'Firstname is required'})} type="text" className="form-control" id="firstName" placeholder="Enter firstname" />
-                                        {errors.firstName && <p style={{color: 'red'}}>{errors.firstName.message}</p>}
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="lastName" className="form-label">Lastname</label>
-                                        <input {...register('lastName', {required: 'Lastname is required'})} type="text" className="form-control" id="lastName" placeholder="Enter lastname" />
-                                         {errors.lastName && <p style={{color: 'red'}}>{errors.lastName.message}</p>}
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="email" className="form-label">Email</label>
-                                        <input {...register('email', { required: 'Email is required'}, {
-                                
-                                        })} type="email" className="form-control" id="email" placeholder="Enter email" />
-                                        {errors.email && <p style={{color: 'red'}}>{errors.email.message}</p>}
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="passWord" className="form-label">Password</label>
-                                        <input {...register('passWord', { required: 'Password is required' })} type="passWord" className="form-control" id="passWord" placeholder="Enter password" />
-                                         {errors.passWord && <p style={{color: 'red'}}>{errors.passWord.message}</p>}
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="status" className="form-label">Status</label>
-                                        <select className="form-select" id="status" {...register('status')}>
-                                            <option value="1">Active</option>
-                                            <option value="0">Inactive</option>
-                                        </select>
-                                        
-                                    </div>
-                                    <button type="submit" className="btn btn-primary mt-3" disabled={isSubmitting}>{isSubmitting ? "Submitting..." : "Submit"}</button>
-                                </div>
-                                
+    <div className="row mb-3">
+        <div className="col-md-6">
+            <div className="form-floating mb-3 mb-md-0">
+                <input
+                    className="form-control"
+                    id="inputName"
+                    {...register('name', { required: 'Tên người dùng là bắt buộc' })}
+                    placeholder="Nhập tên người dùng"
+                />
+                <label htmlFor="inputName">
+                    Tên người dùng <span style={{color: 'red'}}>*</span>
+                </label>
+                {errors.name && <div className="text-danger">{errors.name.message}</div>}
+            </div>
+        </div>
+        <div className="col-md-6">
+            <div className="form-floating">
+                <input
+                    className="form-control"
+                    id="inputAddress"
+                    {...register('address')}
+                    placeholder="Nhập địa chỉ"
+                />
+                <label htmlFor="inputAddress">Địa chỉ</label>
+            </div>
+        </div>
+    </div>
 
-                            </form>
+    <div className="row mb-3">
+        <div className="col-md-6">
+            <div className="form-floating mb-3 mb-md-0">
+                <input
+                    className="form-control"
+                    id="inputPhone"
+                    {...register('phone', { required: 'Số điện thoại là bắt buộc' })}
+                    placeholder="Nhập số điện thoại"
+                />
+                <label htmlFor="inputPhone">
+                    Số điện thoại <span style={{color: 'red'}}>*</span>
+                </label>
+                {errors.phone && <div className="text-danger">{errors.phone.message}</div>}
+            </div>
+        </div>
+        <div className="col-md-6">
+            <div className="form-floating">
+                <input
+                    className="form-control"
+                    id="inputEmail"
+                    type="email"
+                    {...register('email', { required: 'Email là bắt buộc' })}
+                    placeholder="Nhập email"
+                />
+                <label htmlFor="inputEmail">
+                    Email <span style={{color: 'red'}}>*</span>
+                </label>
+                {errors.email && <div className="text-danger">{errors.email.message}</div>}
+            </div>
+        </div>
+    </div>
+
+    <div className="row mb-3">
+        <div className="col-md-6">
+            <div className="form-floating mb-3 mb-md-0">
+                <input
+                    className="form-control"
+                    id="inputPassword"
+                    type="password"
+                    {...register('password', { required: 'Mật khẩu là bắt buộc' })}
+                    placeholder="Nhập mật khẩu"
+                />
+                <label htmlFor="inputPassword">
+                    Mật khẩu <span style={{color: 'red'}}>*</span>
+                </label>
+                {errors.password && <div className="text-danger">{errors.password.message}</div>}
+            </div>
+        </div>
+        <div className="col-md-6">
+            <div className="form-floating mb-3 mb-md-0">
+                <input
+                    className="form-control"
+                    id="inputPasswordConfirm"
+                    type="password"
+                    {...register('password_confirmation', { required: 'Vui lòng xác nhận mật khẩu' })}
+                    placeholder="Xác nhận mật khẩu"
+                />
+                <label htmlFor="inputPasswordConfirm">
+                    Xác nhận mật khẩu <span style={{color: 'red'}}>*</span>
+                </label>
+                {errors.password_confirmation && <div className="text-danger">{errors.password_confirmation.message}</div>}
+            </div>
+        </div>
+    </div>
+
+    <div className="row mb-3">
+        <div className="col-md-6">
+            <div className="form-floating mb-3 mb-md-0">
+                <select
+                    className="form-select"
+                    id="inputGender"
+                    {...register('gender')}
+                    defaultValue=""
+                >
+                    <option value="" disabled>Chọn giới tính</option>
+                    <option value="male">Nam</option>
+                    <option value="female">Nữ</option>
+                    <option value="other">Khác</option>
+                </select>
+                <label htmlFor="inputGender">Giới tính</label>
+            </div>
+        </div>
+        <div className="col-md-6">
+            <div className="form-floating">
+                <input
+                    className="form-control"
+                    id="inputDob"
+                    type="date"
+                    {...register('date_of_birth')}
+                    placeholder="Ngày sinh"
+                />
+                <label htmlFor="inputDob">Ngày sinh</label>
+            </div>
+        </div>
+    </div>
+
+    <div className="row mb-3">
+        <div className="col-md-6">
+            <div className="form-floating mb-3 mb-md-0">
+                <select className="form-select" id="is_active" {...register('is_active', { required: true })}>
+                    <option value="1">Hoạt động</option>
+                    <option value="0">Chưa Hoạt động</option>
+                </select>
+                <label htmlFor="is_active">Hoạt động</label>
+            </div>
+        </div>
+       
+    </div>
+
+   
+
+    <div className="mt-4 mb-0">
+        <div className="d-grid">
+            <button className="btn btn-primary btn-block" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Đang gửi..." : "Thêm mới"}
+            </button>
+        </div>
+    </div>
+</form>
                         </div>
                     </div>
                         

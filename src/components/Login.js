@@ -28,7 +28,8 @@ const Login = () => {
             dispatch(actions.controlLoading(true)); // Bắt đầu loading
             requestApi('api/login', 'POST', loginData).then((response) => {
                 console.log("Login response: ", response);
-                localStorage.setItem('access_token', response.data.access_token); // Lưu token vào localStorage
+                localStorage.setItem('access_token', response.data.data.access_token); // Lưu token vào localStorage
+                console.log(localStorage.getItem('access_token'));
                 // localStorage.setItem('refresh_token', response.data.refresh_token);
                  // Lưu token vào localStorage
                  console.log("Login success: ");

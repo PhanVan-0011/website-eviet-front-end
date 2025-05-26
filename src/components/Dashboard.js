@@ -11,14 +11,14 @@ const Dashboard = () => {
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(actions.controlLoading(true)); // Bắt đầu loading
-        Promise.all([requestApi('/users', 'GET'), requestApi('/posts', 'GET')]).then((response) => {
+        Promise.all([requestApi('api/users', 'GET')]).then((response) => {
             setDashboardData({...dashboardData,  
                 totalUser: response[0].data.total,
-                totalPost: response[1].data.total
+                // totalPost: response[1].data.total
             });
             dispatch(actions.controlLoading(false));
             console.log("User data: ", response[0].data);
-            console.log("Product data: ", response[1].data);
+            // console.log("Product data: ", response[1].data);
         }
         ).catch((error) => {
             dispatch(actions.controlLoading(false));
