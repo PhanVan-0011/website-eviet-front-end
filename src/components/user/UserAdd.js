@@ -15,12 +15,13 @@ const UserAdd = () => {
      const dispatch = useDispatch();
      const [isSubmitting, setIsSubmitting] = useState(false); // Thêm trạng thái isSubmitting
     const handleSubmitForm = async (data) => {
+        setIsSubmitting(true); 
        try {
          dispatch(actions.controlLoading(true));
-        const response = await requestApi('api/users/create', 'POST', data);
+        const response = await requestApi('api/users', 'POST', data);
         dispatch(actions.controlLoading(false));
         
-        toast.success("Create user success", { position: "top-right" , autoClose: 1000});
+        toast.success(response.data.message, { position: "top-right" , autoClose: 1000});
         // Chuyển hướng về trang danh sách người dùng
         setTimeout(() => {
             navigation('/user');
@@ -35,7 +36,7 @@ const UserAdd = () => {
             toast.error("Server error", { position: "top-right" , autoClose: 1000});
         }
     }finally{
-        setIsSubmitting(true); // Đặt lại trạng thái isSubmitting
+        setIsSubmitting(false); // Đặt lại trạng thái isSubmitting
     }
 }
 
@@ -187,7 +188,7 @@ const UserAdd = () => {
                     <option value="1">Hoạt động</option>
                     <option value="0">Chưa Hoạt động</option>
                 </select>
-                <label htmlFor="is_active">Hoạt động</label>
+                <label htmlFor="is_active">Trạng thái</label>
             </div>
         </div>
        
@@ -196,8 +197,12 @@ const UserAdd = () => {
    
 
     <div className="mt-4 mb-0">
-        <div className="d-grid">
-            <button className="btn btn-primary btn-block" type="submit" disabled={isSubmitting}>
+        <div className="d-flex justify-content-center">
+            <button
+                className="btn btn-primary w-50"
+                type="submit"
+                disabled={isSubmitting}
+            >
                 {isSubmitting ? "Đang gửi..." : "Thêm mới"}
             </button>
         </div>

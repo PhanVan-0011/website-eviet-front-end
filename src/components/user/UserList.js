@@ -5,6 +5,7 @@ import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
+import { formatDate } from '../../tools/formatData';
 const UserList = () => {
     const [users, setUsers] = useState([]);
     const [numOfPages, setNumOfPages] = useState(1);
@@ -26,11 +27,11 @@ const UserList = () => {
         { title: "Email", element: row => row.email },
         { title: "Số điện thoại", element: row => row.phone },
         { title: "Giới tính", element: row => row.gender === "male" ? "Nam" : row.gender === "female" ? "Nữ" : "Khác" },
-        { title: "Ngày sinh", element: row => row.date_of_birth ? row.date_of_birth : "" },
+        { title: "Ngày sinh", element: row => row.date_of_birth ? formatDate(row.date_of_birth) : "" },
         // { title: "Kích hoạt", element: row => row.is_active ? "Đã kích hoạt" : "Chưa kích hoạt" },
         // { title: "Xác thực", element: row => row.is_verified ? "Đã xác thực" : "Chưa xác thực" },
-        { title: "Ngày tạo", element: row => row.created_at },
-        { title: "Ngày cập nhật", element: row => row.updated_at },
+        { title: "Ngày tạo", element: row => formatDate(row.created_at) },
+        { title: "Ngày cập nhật", element: row => formatDate(row.updated_at) },
         {
             title: "Action", element: row => (
                 <>
