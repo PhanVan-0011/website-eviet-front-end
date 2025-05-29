@@ -1,4 +1,3 @@
-
 import { Link,useNavigate } from 'react-router-dom'
 import { useState } from 'react';
 import { useEffect } from 'react';
@@ -24,28 +23,30 @@ const Login = () => {
     const onSubmit = (e) => { 
         let isValid = validateForm();
         if(isValid) {
-            // Call API to login user
-            dispatch(actions.controlLoading(true)); // Bắt đầu loading
+            dispatch(actions.controlLoading(true));
             requestApi('api/login', 'POST', loginData).then((response) => {
-                console.log("Login response: ", response);
-                localStorage.setItem('access_token', response.data.data.access_token); // Lưu token vào localStorage
-                console.log(localStorage.getItem('access_token'));
-                // localStorage.setItem('refresh_token', response.data.refresh_token);
-                 // Lưu token vào localStorage
-                 console.log("Login success: ");
-                dispatch(actions.controlLoading(false)); 
-                navigation('/'); // Chuyển hướng về trang chủ
+                dispatch(actions.controlLoading(false));
+                if (response.data && response.data.success) {
+                    // Nếu có access_token thì lưu vào localStorage
+                    if (response.data.data && response.data.data.access_token) {
+                        localStorage.setItem('access_token', response.data.data.access_token);
+                    }
+                    // toast.success(response.data.message || "Đăng nhập thành công", { autoClose: 2000 });
+                    navigation('/'); // Chuyển hướng về trang chủ
+                } else {
+                    toast.error(response.data.message || "Đăng nhập thất bại", toastErrorConfig);
+                }
             }).catch((error) => {
-                dispatch(actions.controlLoading(false)); 
+                dispatch(actions.controlLoading(false));
                 console.log("Login error: ", error);
-                if(typeof error.response.data.message !== "undefined"){
+                if(error.response && error.response.data && error.response.data.message){
                     toast.error(error.response.data.message, toastErrorConfig);
                 }else{
                     toast.error("Server error", toastErrorConfig);
                 }
             });
         }
-        setIsSubmit(true); // Đánh dấu là đã submit
+        setIsSubmit(true);
     }
 
     useEffect(() => {

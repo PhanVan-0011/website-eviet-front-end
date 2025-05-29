@@ -32,6 +32,7 @@ const Register = () => {
     console.log( formData.password_confirmation);
  
     if (!formData.userName) objErrors.userName = "Vui lòng nhập tên đăng nhập";
+    if (!formData.address) objErrors.address = "Vui lòng nhập địa chỉ"; // Thêm dòng này
     if (!formData.phone) objErrors.phone = "Vui lòng nhập số điện thoại";
     if (!formData.email) objErrors.email = "Vui lòng nhập email";
     else {
@@ -73,9 +74,16 @@ const Register = () => {
       requestApi('api/register', 'POST', payload)
         .then((response) => {
           dispatch(actions.controlLoading(false));
-          toast.success("Đăng ký thành công!", { autoClose: 2000 });
-            localStorage.setItem('access_token', response.data.access_token); 
-          navigate('/');
+          if (response.data && response.data.success) {
+            toast.success(response.data.message || "Đăng ký thành công!", { autoClose: 2000 });
+            // Nếu có access_token thì lưu vào localStorage
+            if (response.data.data && response.data.data.access_token) {
+              localStorage.setItem('access_token', response.data.data.access_token);
+            }
+            navigate('/');
+          } else {
+            toast.error(response.data.message || "Đăng ký thất bại", toastErrorConfig);
+          }
         })
         .catch((error) => {
           dispatch(actions.controlLoading(false));
@@ -128,10 +136,14 @@ const Register = () => {
                               name="address"
                               type="text"
                               placeholder="Enter your address"
+                              required
                               value={formData.address}
                               onChange={onChange}
                             />
-                            <label htmlFor="inputAddress">Địa chỉ</label>
+                            <label htmlFor="inputAddress">
+                              Địa chỉ <span style={{color: 'red'}}>*</span>
+                            </label>
+                            {errors.address && <div className="text-danger">{errors.address}</div>}
                           </div>
                         </div>
                       </div>
