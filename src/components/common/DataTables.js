@@ -4,7 +4,7 @@ import LiveSearch from './LiveSearch';
 
 const DataTables = (props) => {
     console.log("DataTables props: ", props);
-   const { name, columns, data, numOfPages, currentPage,setCurrentPage,setItemOfPage, changeKeyword, onSelectedRows } = props;
+   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, filterHeader } = props;
    const [selectedRows, setSelectedRows] = useState([]);
 
    useEffect(() => {
@@ -36,19 +36,53 @@ const DataTables = (props) => {
     };
 
    const renderTableHeader = () => {
-         return columns.map((col, index) => {
-              return (
-                <th key={index} scope="col">{col.title}</th>
-              )
-         })
-    }
+        return columns.map((col, index) => (
+            <th
+                key={index}
+                scope="col"
+                style={col.width ? { width: col.width } : {}}
+                className={col.thClass || ""}
+            >
+                {typeof col.title === "function" ? col.title() : col.title}
+            </th>
+        ));
+    };
+
+    const renderFilterHeader = () => {
+        if (!filterHeader) return null;
+        return (
+            <tr>
+                <td></td>
+                {filterHeader.map((filter, idx) => (
+                    <th key={idx} style={columns[idx] && columns[idx].width ? { width: columns[idx].width } : {}}>
+                        {filter}
+                    </th>
+                ))}
+            </tr>
+        );
+    };
+
     const renderTableData = () => {
         return (
             data.map((row, index) => (
                 <tr key={index}>
-                    <td><input type="checkbox" checked={selectedRows.includes(String(row.id)) ? true : false} className="form-check-input" onChange={handleCheckboxChange} value={row.id}/></td>
+                    <td>
+                        <input
+                            type="checkbox"
+                            checked={selectedRows.includes(String(row.id))}
+                            className="form-check-input"
+                            onChange={handleCheckboxChange}
+                            value={row.id}
+                        />
+                    </td>
                     {columns.map((col, colIndex) => (
-                        <td key={colIndex}>{col.element(row)}</td>
+                        <td
+                            key={colIndex}
+                            style={col.width ? { width: col.width } : {}}
+                            className={col.tdClass || ""}
+                        >
+                            {col.element(row)}
+                        </td>
                     ))}
                 </tr>
             ))
@@ -112,30 +146,32 @@ const DataTables = (props) => {
                 <LiveSearch changeKeyword={changeKeyword}/>
             </div>
         </div>
-        <table className="table table-striped table-bordered" id="datatablesSimple" width="100%" cellspacing="0">
-        <thead>
-            <tr>
-                <td><input type="checkbox" checked={data.length === selectedRows.length && data.length > 0 ? true : false} className="form-check-input" onChange={handleCheckedAll}/></td>
-                {renderTableHeader()}
-            </tr>
-        </thead>
-        <tfoot>
-            <tr>
-            <td></td>
-            {renderTableHeader()}
-            </tr>
-        </tfoot>
-        <tbody>
-            {renderTableData()}
-        
-        </tbody>
-    </table>
+        <table className="table table-striped table-bordered" id="datatablesSimple" width="100%" cellSpacing="0">
+            <thead>
+                {renderFilterHeader()}
+                <tr>
+                    <td>
+                        <input type="checkbox" checked={data.length === selectedRows.length && data.length > 0 ? true : false} className="form-check-input" onChange={handleCheckedAll}/>
+                    </td>
+                    {renderTableHeader()}
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td></td>
+                    {renderTableHeader()}
+                </tr>
+            </tfoot>
+            <tbody>
+                {renderTableData()}
+            </tbody>
+        </table>
     </div>
     {numOfPages > 1 && 
         <div className="row">
             <div className="col-12 d-flex justify-content-center">
                 <ul className="pagination">
-                {renderPagination()}
+                    {renderPagination()}
                 </ul>
             </div>
         </div>

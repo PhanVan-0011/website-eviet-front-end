@@ -14,6 +14,10 @@ import UserAdd from './components/user/UserAdd';
 import UserUpdate from './components/user/UserUpdate';
 import "./css/styles.css";
 import PageNotFound from './components/PageNotFound';
+import CategoriesList from './components/category/CategoriesList';
+import CategoryAdd from './components/category/CategoryAdd';
+import CategoryUpdate from './components/category/CategoryUpdate';
+import ProductList from './components/product/ProductList';
 function App() {
   return (
     <Routes>
@@ -24,6 +28,12 @@ function App() {
             <Route path="/user" element={<UserList />} />
             <Route path="/user/add" element={<UserAdd />} />
             <Route path="/user/:id" element={<UserUpdate />} />
+            <Route path="/category" element={<CategoriesList />} />
+            <Route path="/category/add" element={<CategoryAdd />} />
+            <Route path="/category/:id" element={<CategoryUpdate />} />
+            <Route path="/product" element={<ProductList />} />
+            {/* <Route path="/category/add" element={<CategoryAdd />} />
+            <Route path="/category/:id" element={<CategoryUpdate />} /> */}
           </Route>
         </Route>
         <Route element={<PublicRoutes />}>
