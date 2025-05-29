@@ -210,6 +210,13 @@ const ProductList = () => {
         <input
             type="text"
             className="form-control form-control-sm"
+            placeholder="Lọc số lượng"
+            value={filterStock}
+            onChange={e => setFilterStock(e.target.value)}
+        />,
+        <input
+            type="text"
+            className="form-control form-control-sm"
             placeholder="Lọc giá gốc"
             value={filterOriginalPrice}
             onChange={e => setFilterOriginalPrice(e.target.value)}
@@ -221,13 +228,7 @@ const ProductList = () => {
             value={filterSalePrice}
             onChange={e => setFilterSalePrice(e.target.value)}
         />,
-        <input
-            type="text"
-            className="form-control form-control-sm"
-            placeholder="Lọc số lượng"
-            value={filterStock}
-            onChange={e => setFilterStock(e.target.value)}
-        />,
+        
         <select
             className="form-select form-select-sm"
             value={filterStatus}
