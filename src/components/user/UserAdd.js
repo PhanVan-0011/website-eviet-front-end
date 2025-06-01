@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import requestApi from '../../helpers/api';
 import { toast } from 'react-toastify';
-import { toastErrorConfig } from '../../tools/toastConfig'
+import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig'
 const UserAdd = () => {
     const navigation = useNavigate();
     const {
@@ -16,13 +16,14 @@ const UserAdd = () => {
      const dispatch = useDispatch();
      const [isSubmitting, setIsSubmitting] = useState(false); // Thêm trạng thái isSubmitting
     const handleSubmitForm = async (data) => {
+        console.log("Form data: ", data);
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
             const response = await requestApi('api/users', 'POST', data);
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
-                toast.success(response.data.message || "Thêm người dùng thành công!", { position: "top-right", autoClose: 1000 });
+                toast.success(response.data.message || "Thêm người dùng thành công!", toastSuccessConfig);
                 // Nếu có access_token thì lưu vào localStorage
                 if (response.data.data && response.data.data.access_token) {
                     localStorage.setItem('access_token', response.data.data.access_token);
@@ -50,15 +51,15 @@ const UserAdd = () => {
     <div id="layoutSidenav_content">
         <main>
             <div className="container-fluid px-4">
-                <h1 className="mt-4">User Add</h1>
+                <h1 className="mt-4">Thêm người dùng</h1>
                 <ol className="breadcrumb mb-4">
-                    <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
-                    <li className="breadcrumb-item active">User Add</li>
+                    <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
+                    <li className="breadcrumb-item active">Thêm người dùng</li>
                 </ol>
                 <div className='card mb-3'>
                     <div className='card-header'>
                         <i className="fas fa-table me-1"></i>
-                        Add
+                        Dữ liệu người dùng
                     </div>
                     <div className='card-body'>
                         <div className='mb-3 row'>
@@ -131,7 +132,13 @@ const UserAdd = () => {
                                                 className="form-control"
                                                 id="inputPassword"
                                                 type="password"
-                                                {...register('password', { required: 'Mật khẩu là bắt buộc' })}
+                                                {...register('password', {
+                                                    required: 'Mật khẩu là bắt buộc',
+                                                    minLength: {
+                                                        value: 6,
+                                                        message: 'Mật khẩu phải có ít nhất 6 ký tự'
+                                                    }
+                                                })}
                                                 placeholder="Nhập mật khẩu"
                                             />
                                             <label htmlFor="inputPassword">
@@ -193,7 +200,7 @@ const UserAdd = () => {
                                         <div className="form-floating mb-3 mb-md-0">
                                             <select className="form-select" id="is_active" {...register('is_active', { required: true })}>
                                                 <option value="1">Hoạt động</option>
-                                                <option value="0">Chưa Hoạt động</option>
+                                                <option value="0">Không Hoạt động</option>
                                             </select>
                                             <label htmlFor="is_active">Trạng thái</label>
                                         </div>
@@ -204,14 +211,23 @@ const UserAdd = () => {
                             
 
                                 <div className="mt-4 mb-0">
-                                    <div className="d-flex justify-content-center">
+                                    <div className="d-flex justify-content-center gap-2">
                                         <button
-                                            className="btn btn-primary w-50"
+                                            type="button"
+                                            className="btn btn-secondary w-25"
+                                            onClick={() => navigation('/user')}
+                                            disabled={isSubmitting}
+                                        >
+                                            Hủy bỏ
+                                        </button>
+                                        <button
+                                            className="btn btn-primary w-25"
                                             type="submit"
                                             disabled={isSubmitting}
                                         >
                                             {isSubmitting ? "Đang gửi..." : "Thêm mới"}
                                         </button>
+                                        
                                     </div>
                                 </div>
                             </form>

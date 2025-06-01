@@ -23,7 +23,7 @@ const LiveSearch = ({changeKeyword}) => {
         type="search"
         id="searchBox"
         className="form-control form-control-sm ms-1 w-auto"
-        placeholder="Type to search..."
+        placeholder="Gõ để tìm..."
     />
   )
 }

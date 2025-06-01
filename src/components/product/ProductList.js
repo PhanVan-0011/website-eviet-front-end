@@ -6,6 +6,8 @@ import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
+import { toast } from 'react-toastify';
+import { toastErrorConfig } from '../../tools/toastConfig';
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
@@ -257,21 +259,41 @@ const ProductList = () => {
         dispatch(actions.controlLoading(true));
         if(typeDelete === 'single'){
             requestApi(`api/products/${itemDelete}`, 'DELETE', []).then((response) => {
-                setShowModal(false);
                 dispatch(actions.controlLoading(false));
-                setRefresh(Date.now());
+                setShowModal(false);
+                if (response.data && response.data.success) {
+                    toast.success(response.data.message || "Xóa sản phẩm thành công!", { position: "top-right", autoClose: 1000 });
+                    setRefresh(Date.now());
+                } else {
+                    toast.error(response.data.message || "Xóa sản phẩm thất bại", toastErrorConfig);
+                }
             }).catch((e) => {
-                setShowModal(false);
                 dispatch(actions.controlLoading(false));
+                setShowModal(false);
+                if (e.response && e.response.data && e.response.data.message) {
+                    toast.error(e.response.data.message, toastErrorConfig);
+                } else {
+                    toast.error("Server error", toastErrorConfig);
+                }
             });
         } else {
             requestApi(`api/products/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
-                setShowModal(false);
                 dispatch(actions.controlLoading(false));
-                setRefresh(Date.now());
+                setShowModal(false);
+                if (response.data && response.data.success) {
+                    toast.success(response.data.message || "Xóa sản phẩm thành công!", { position: "top-right", autoClose: 1000 });
+                    setRefresh(Date.now());
+                } else {
+                    toast.error(response.data.message || "Xóa sản phẩm thất bại", toastErrorConfig);
+                }
             }).catch((e) => {
-                setShowModal(false);
                 dispatch(actions.controlLoading(false));
+                setShowModal(false);
+                if (e.response && e.response.data && e.response.data.message) {
+                    toast.error(e.response.data.message, toastErrorConfig);
+                } else {
+                    toast.error("Server error", toastErrorConfig);
+                }
             });
         }
     }

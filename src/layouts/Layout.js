@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 const Layout = () => {
     const loading = useSelector((state) => state.globalLoading.status); // Lấy trạng thái loading từ Redux
     const override = {
-        position: "absolute", // Đặt lớp phủ ở vị trí tuyệt đối
+        position: "fixed", // Đặt lớp phủ ở vị trí tuyệt đối
         top: 0,
         left: 0,
         right: 0,

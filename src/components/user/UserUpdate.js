@@ -6,7 +6,9 @@ import * as actions from '../../redux/actions/index';
 import requestApi from '../../helpers/api';
 import { toast } from 'react-toastify';
 import moment from 'moment';
-import { toastErrorConfig } from '../../tools/toastConfig'
+import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig'
+import { Modal, Button } from 'react-bootstrap';
+
 const UserUpdate = () => {
     const params = useParams();
     const navigation = useNavigate();
@@ -18,6 +20,7 @@ const UserUpdate = () => {
     } = useForm();
      const dispatch = useDispatch();
      const [isSubmitting, setIsSubmitting] = useState(false);
+     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         // Lấy thông tin người dùng từ API
@@ -76,15 +79,15 @@ const UserUpdate = () => {
     <div id="layoutSidenav_content">
         <main>
             <div className="container-fluid px-4">
-                <h1 className="mt-4">User Update</h1>
+                <h1 className="mt-4">Chỉnh sửa người dùng</h1>
                 <ol className="breadcrumb mb-4">
-                    <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
-                    <li className="breadcrumb-item active">User Update</li>
+                    <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
+                    <li className="breadcrumb-item active">Chỉnh sửa người dùng</li>
                 </ol>
                 <div className='card mb-3'>
                     <div className='card-header'>
                         <i className="fas fa-table me-1"></i>
-                        Update
+                        Dữ liệu người dùng
                     </div>
                     <div className='card-body'>
                         <div className='mb-3 row'>
@@ -186,7 +189,7 @@ const UserUpdate = () => {
                                         <div className="form-floating mb-3 mb-md-0">
                                             <select className="form-select" id="is_active" {...register('is_active', { required: true })}>
                                                 <option value="1">Hoạt động</option>
-                                                <option value="0">Chưa Hoạt động</option>
+                                                <option value="0">Không Hoạt động</option>
                                             </select>
                                             <label htmlFor="is_active">Trạng thái</label>
                                         </div>
@@ -197,14 +200,32 @@ const UserUpdate = () => {
                             
 
                                 <div className="mt-4 mb-0">
-                                    <div className="d-flex justify-content-center">
+                                    <div className="d-flex justify-content-center gap-2">
+                                             <button
+                                            type="button"
+                                            className="btn btn-danger w-25 font-weight-bold"
+                                            onClick={() => setShowModal(true)}
+                                            disabled={isSubmitting}
+                                        >
+                                            Xóa
+                                        </button>
+                                          <button
+                                            type="button"
+                                            className="btn btn-secondary w-25 font-weight-bold"
+                                            onClick={() => navigation('/user')}
+                                            disabled={isSubmitting}
+                                        >
+                                            Hủy bỏ
+                                        </button>
                                         <button
-                                            className="btn btn-primary w-50"
+                                            className="btn btn-primary w-25 font-weight-bold"
                                             type="submit"
                                             disabled={isSubmitting}
                                         >
                                             {isSubmitting ? "Đang gửi..." : "Cập nhật"}
                                         </button>
+                                      
+                                       
                                     </div>
                                 </div>
                             </form>
@@ -213,6 +234,51 @@ const UserUpdate = () => {
                 </div>
             </div>
         </main>
+
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>Xác nhận xóa</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p>Bạn chắc chắn muốn xóa người dùng này?</p>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                    Hủy
+                </Button>
+                <Button
+                    variant="danger"
+                    onClick={async () => {
+                        setShowModal(false);
+                        if (window.confirm("Bạn chắc chắn muốn xóa người dùng này?")) {
+                            try {
+                                dispatch(actions.controlLoading(true));
+                                const response = await requestApi(`api/users/${params.id}`, 'DELETE', []);
+                                dispatch(actions.controlLoading(false));
+                                if (response.data && response.data.success) {
+                                    toast.success(response.data.message || "Xóa người dùng thành công!", toastSuccessConfig);
+                                    setTimeout(() => {
+                                        navigation('/user');
+                                    }, 1200);
+                                } else {
+                                    toast.error(response.data.message || "Xóa người dùng thất bại", toastErrorConfig);
+                                }
+                            } catch (e) {
+                                dispatch(actions.controlLoading(false));
+                                if (e.response && e.response.data && e.response.data.message) {
+                                    toast.error(e.response.data.message, toastErrorConfig);
+                                } else {
+                                    toast.error("Server error", toastErrorConfig);
+                                }
+                            }
+                        }
+                    }}
+                    disabled={isSubmitting}
+                >
+                    Xóa
+                </Button>
+            </Modal.Footer>
+        </Modal>
     </div>
   )
 }

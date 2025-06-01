@@ -131,7 +131,7 @@ const DataTables = (props) => {
     <div className="card-body">
         <div className="row mb-3">
             <div className="col-md-6 d-flex align-items-center">
-                <label className="me-2 mb-0" htmlFor="entriesSelect">Show</label>
+                <label className="me-2 mb-0" htmlFor="entriesSelect">Hiển thị</label>
                 <select id="entriesSelect" className="htmlFor-select w-auto" onChange={(e) => setItemOfPage(e.target.value)}>
                 <option value="5">5</option>
                 <option value="10" selected>10</option>
@@ -139,10 +139,10 @@ const DataTables = (props) => {
                 <option value="50">50</option>
                 <option value="100">100</option>
                 </select>
-                <span className="ms-2">entries</span>
+                <span className="ms-2">mục</span>
             </div>
             <div className="col-md-6 d-flex justify-content-end">
-                <label className="me-2 mb-0" htmlFor="searchBox">Search:</label>
+                <label className="me-2 mb-0" htmlFor="searchBox">Tìm kiếm:</label>
                 <LiveSearch changeKeyword={changeKeyword}/>
             </div>
         </div>
@@ -159,7 +159,7 @@ const DataTables = (props) => {
             <tfoot>
                 <tr>
                     <td></td>
-                    {renderTableHeader()}
+                    {/* {renderTableHeader()} */}
                 </tr>
             </tfoot>
             <tbody>

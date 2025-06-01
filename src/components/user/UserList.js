@@ -6,12 +6,15 @@ import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
+import { toast } from 'react-toastify';
+import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+
 const UserList = () => {
     const [users, setUsers] = useState([]);
     const [numOfPages, setNumOfPages] = useState(1);
     // Cần truyển url vào để lấy dữ liệu
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemOfPage, setItemOfPage] = useState(5);
+    const [itemOfPage, setItemOfPage] = useState(10);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('')
     // Delete
@@ -22,18 +25,24 @@ const UserList = () => {
     const [refresh, setRefresh] = useState(Date.now());
 
     const columns = [
-        { title: "ID", element: row => row.id },
+        // { title: "ID", element: row => row.id },
         { title: "Tên", element: row => row.name },
         { title: "Email", element: row => row.email },
         { title: "Số điện thoại", element: row => row.phone },
         { title: "Giới tính", element: row => row.gender === "male" ? "Nam" : row.gender === "female" ? "Nữ" : "Khác" },
         { title: "Ngày sinh", element: row => row.date_of_birth ? formatDate(row.date_of_birth) : "" },
-        // { title: "Kích hoạt", element: row => row.is_active ? "Đã kích hoạt" : "Chưa kích hoạt" },
         // { title: "Xác thực", element: row => row.is_verified ? "Đã xác thực" : "Chưa xác thực" },
         { title: "Ngày tạo", element: row => formatDate(row.created_at) },
         { title: "Ngày cập nhật", element: row => formatDate(row.updated_at) },
         {
-            title: "Action", element: row => (
+            title: "Trạng thái",
+            element: row =>
+                row.is_active
+                    ? <span className="badge bg-success">Hoạt động</span>
+                    : <span className="badge bg-secondary">Không hoạt động</span>
+        },
+        {
+            title: "Hành động", element: row => (
                 <>
                     <Link className="btn btn-primary btn-sm me-1" to={`/user/${row.id}`}><i className="fas fa-edit"></i></Link>
                     <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>
@@ -54,32 +63,45 @@ const UserList = () => {
     }
     // Delete
     const requestApiDelete = () => {
-        dispatch(actions.controlLoading(true)); // Bắt đầu loading
+        dispatch(actions.controlLoading(true));
         if(typeDelete === 'single'){
             requestApi(`api/users/${itemDelete}`, 'DELETE', []).then((response) => {
-                console.log("Delete user response: ", response.data);
-                setShowModal(false);
                 dispatch(actions.controlLoading(false));
-                setRefresh(Date.now());
+                setShowModal(false);
+                if (response.data && response.data.success) {
+                    toast.success(response.data.message || "Xóa người dùng thành công!", toastSuccessConfig);
+                    setRefresh(Date.now());
+                } else {
+                    toast.error(response.data.message || "Xóa người dùng thất bại", toastErrorConfig);
+                }
             }).catch((e) => {
-                console.log("Error deleting user: ", e);
-                setShowModal(false);
                 dispatch(actions.controlLoading(false));
-            }
-            )
-        
-        }else{
+                setShowModal(false);
+                if (e.response && e.response.data && e.response.data.message) {
+                    toast.error(e.response.data.message, toastErrorConfig);
+                } else {
+                    toast.error("Server error", toastErrorConfig);
+                }
+            });
+        } else {
             requestApi(`api/users/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
-                console.log("Delete user response: ", response.data);
-                setShowModal(false);
                 dispatch(actions.controlLoading(false));
-                setRefresh(Date.now());
+                setShowModal(false);
+                if (response.data && response.data.success) {
+                    toast.success(response.data.message || "Xóa người dùng thành công!", { position: "top-right", autoClose: 1000 });
+                    setRefresh(Date.now());
+                } else {
+                    toast.error(response.data.message || "Xóa người dùng thất bại", toastErrorConfig);
+                }
             }).catch((e) => {
-                console.log("Error deleting user: ", e);
-                setShowModal(false);
                 dispatch(actions.controlLoading(false));
-            }
-            )
+                setShowModal(false);
+                if (e.response && e.response.data && e.response.data.message) {
+                    toast.error(e.response.data.message, toastErrorConfig);
+                } else {
+                    toast.error("Server error", toastErrorConfig);
+                }
+            });
         }
     }
 
@@ -105,18 +127,18 @@ const UserList = () => {
     <div id="layoutSidenav_content">
         <main>
             <div className="container-fluid px-4">
-                <h1 className="mt-4">User List</h1>
+                <h1 className="mt-4">Danh sách người dùng</h1>
                 <ol className="breadcrumb mb-4">
-                    <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
-                    <li className="breadcrumb-item active">User List</li>
+                    <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
+                    <li className="breadcrumb-item active">Danh sách người dùng</li>
 
                 </ol>
                 <div className='mb-3'>
-                    <Link className="btn btn-primary me-2" to="/user/add"><i className="fas fa-plus"></i> Add User</Link>
+                    <Link className="btn btn-primary me-2" to="/user/add"><i className="fas fa-plus"></i> Thêm người dùng</Link>
                     {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Delete</button>}
                 </div>
                 <DataTables 
-                    name="User List"
+                    name="Dữ liệu người dùng"
                     columns={columns}
                     data={users}
                     numOfPages={numOfPages}
@@ -130,21 +152,21 @@ const UserList = () => {
         </main>
         <Modal show={showModal} onHide={() => {setShowModal(false); setItemDelete(null); setTypeDelete(null)}}>
             <Modal.Header closeButton>
-                <Modal.Title>Confirm Delete</Modal.Title>
+                <Modal.Title>Xác nhận xóa</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {typeDelete === 'single' ? (
-                    <p>Are you sure you want to delete this user?</p>
+                    <p>Bạn chắc chắn muốn xóa người dùng này?</p>
                 ) : (
-                    <p>Are you sure you want to delete these users?</p>
+                    <p>Bạn chắc chắn muốn xóa các người dùng này?</p>
                 )}
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={() => {setShowModal(false)}}>
-                    Cancel
+                    Hủy
                 </Button>
                 <Button variant="danger" onClick={() => {requestApiDelete()}}>
-                    Delete
+                    Xóa
                 </Button>
             </Modal.Footer>
         </Modal>

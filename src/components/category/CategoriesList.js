@@ -22,13 +22,35 @@ const CategoriesList = () => {
     const [refresh, setRefresh] = useState(Date.now());
 
     const columns = [
-        { title: "ID", element: row => row.id },
+        // { title: "ID", element: row => row.id },
         { title: "Tên danh mục", element: row => row.name },
         { title: "Mô tả", element: row => row.description },
-        { title: "Trạng thái", element: row => row.status === 1 ? "Hiển thị" : "Ẩn" },
-        { title: "Danh mục cha", element: row => row.parent ? row.parent.name : "" },
+        // { title: "Danh mục cha", element: row => row.parent ? row.parent.name : "" },
         { title: "Ngày tạo", element: row => formatDate(row.created_at) },
         { title: "Ngày cập nhật", element: row => formatDate(row.updated_at) },
+        {
+            title: () => (
+                <span style={{ cursor: 'pointer' }}>
+                    Sản phẩm
+                </span>
+            ),
+            element: row => (
+                <Link
+                    to={`/product?category_id=${row.id}`}
+                    className="text-decoration-underline text-primary"
+                    title="Xem danh sách sản phẩm"
+                    style={{ cursor: 'pointer' }}
+                >
+                    {row.products_count} sản phẩm
+                </Link>
+            )
+        },
+        {
+            title: "Trạng thái",
+            element: row => row.status === 1
+                ? <span className="badge bg-success">Hiển thị</span>
+                : <span className="badge bg-secondary">Ẩn</span>
+        },
         {
             title: "Action", element: row => (
                 <>
@@ -110,17 +132,17 @@ const CategoriesList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Categories List</h1>
+                    <h1 className="mt-4">Danh sách danh mục</h1>
                     <ol className="breadcrumb mb-4">
-                        <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
-                        <li className="breadcrumb-item active">Categories List</li>
+                        <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
+                        <li className="breadcrumb-item active">Danh sách danh mục</li>
                     </ol>
                     <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/category/add"><i className="fas fa-plus"></i> Add Category</Link>
-                        {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Delete</button>}
+                        <Link className="btn btn-primary me-2" to="/category/add"><i className="fas fa-plus"></i> Thêm danh mục</Link>
+                        {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa</button>}
                     </div>
                     <DataTables 
-                        name="Categories List"
+                        name="Dữ liệu danh mục"
                         columns={columns}
                         data={categories}
                         numOfPages={numOfPages}
@@ -134,7 +156,7 @@ const CategoriesList = () => {
             </main>
             <Modal show={showModal} onHide={() => {setShowModal(false); setItemDelete(null); setTypeDelete(null)}}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Confirm Delete</Modal.Title>
+                    <Modal.Title>Xác nhận xóa</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {typeDelete === 'single' ? (
@@ -145,10 +167,10 @@ const CategoriesList = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => {setShowModal(false)}}>
-                        Cancel
+                        Hủy
                     </Button>
                     <Button variant="danger" onClick={() => {requestApiDelete()}}>
-                        Delete
+                        Xóa
                     </Button>
                 </Modal.Footer>
             </Modal>
