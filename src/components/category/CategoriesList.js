@@ -52,7 +52,7 @@ const CategoriesList = () => {
                 : <span className="badge bg-secondary">Ẩn</span>
         },
         {
-            title: "Action", element: row => (
+            title: "Hành động", element: row => (
                 <>
                     <Link className="btn btn-primary btn-sm me-1" to={`/category/${row.id}`}><i className="fas fa-edit"></i></Link>
                     <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>

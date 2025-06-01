@@ -13,7 +13,7 @@ const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [numOfPages, setNumOfPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemOfPage, setItemOfPage] = useState(5);
+    const [itemOfPage, setItemOfPage] = useState(10);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
@@ -107,15 +107,15 @@ const ProductList = () => {
 
     // 6. Columns với header có sort và width %
     const columns = [
-        { 
-            title: () => (
-                <span style={{cursor: 'pointer'}} onClick={() => handleSort('id')}>
-                    ID {renderSortIcon('id')}
-                </span>
-            ),
-            element: row => row.id,
-            width: "6%"
-        },
+        // { 
+        //     title: () => (
+        //         <span style={{cursor: 'pointer'}} onClick={() => handleSort('id')}>
+        //             ID {renderSortIcon('id')}
+        //         </span>
+        //     ),
+        //     element: row => row.id,
+        //     width: "6%"
+        // },
         { 
             title: () => (
                 <span style={{cursor: 'pointer'}} onClick={() => handleSort('name')}>
@@ -128,7 +128,7 @@ const ProductList = () => {
         { 
             title: "Hình ảnh", 
             element: row => <img src={row.image_url} alt={row.name} style={{width: 60, height: 40, objectFit: 'cover'}} />,
-            width: "13%"
+            width: "15%"
         },
         { 
             title: () => (
@@ -146,7 +146,7 @@ const ProductList = () => {
                 </span>
             ),
             element: row => row.stock_quantity,
-            width: "7%"
+            width: "9%"
         },
         { 
             title: () => (
@@ -155,7 +155,7 @@ const ProductList = () => {
                 </span>
             ),
             element: row => row.original_price,
-            width: "10%"
+            width: "11%"
         },
         { 
             title: () => (
@@ -164,7 +164,7 @@ const ProductList = () => {
                 </span>
             ),
             element: row => row.sale_price,
-            width: "10%"
+            width: "11%"
         },
         { 
             title: () => (
@@ -302,17 +302,17 @@ const ProductList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Product List</h1>
+                    <h1 className="mt-4">Danh sách sản phẩm</h1>
                     <ol className="breadcrumb mb-4">
-                        <li className="breadcrumb-item"><Link to="/">Dashboard</Link></li>
-                        <li className="breadcrumb-item active">Product List</li>
+                        <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
+                        <li className="breadcrumb-item active">Danh sách sản phẩm</li>
                     </ol>
                     <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/product/add"><i className="fas fa-plus"></i> Add Product</Link>
-                        {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Delete</button>}
+                        <Link className="btn btn-primary me-2" to="/product/add"><i className="fas fa-plus"></i>Thêm sản phẩm</Link>
+                        {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa</button>}
                     </div>
                     <DataTables
-                        name="Product List"
+                        name="Thông tin sản phẩm"
                         columns={columns}
                         data={sortedProducts}
                         numOfPages={numOfPages}

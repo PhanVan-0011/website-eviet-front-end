@@ -18,6 +18,7 @@ import CategoriesList from './components/category/CategoriesList';
 import CategoryAdd from './components/category/CategoryAdd';
 import CategoryUpdate from './components/category/CategoryUpdate';
 import ProductList from './components/product/ProductList';
+import ProductAdd from './components/product/ProductAdd';
 function App() {
   return (
     <Routes>
@@ -32,6 +33,7 @@ function App() {
             <Route path="/category/add" element={<CategoryAdd />} />
             <Route path="/category/:id" element={<CategoryUpdate />} />
             <Route path="/product" element={<ProductList />} />
+            <Route path="/product/add" element={<ProductAdd />} />
             {/* <Route path="/category/add" element={<CategoryAdd />} />
             <Route path="/category/:id" element={<CategoryUpdate />} /> */}
           </Route>
