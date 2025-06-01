@@ -87,31 +87,31 @@ const Login = () => {
                 <div className="row justify-content-center">
                     <div className="col-lg-5">
                         <div className="card shadow-lg border-0 rounded-lg mt-5">
-                            <div className="card-header"><h3 className="text-center font-weight-light my-4">Login</h3></div>
+                            <div className="card-header"><h3 className="text-center font-weight-light my-4">Đăng nhập</h3></div>
                             <div className="card-body">
                                 <form>
                                     <div className="form-floating mb-3">
-                                        <input className="form-control" id="inputEmail" type="email" placeholder="name@example.com" name="login" onChange={onChange}/>
+                                        <input className="form-control" id="inputEmail" type="email" placeholder="ten@gmail.com" name="login" onChange={onChange}/>
                                         <label>Email address</label>
                                         {errors.login && <div className="text-danger">{errors.login}</div>}
                                     </div>
                                     <div className="form-floating mb-3">
-                                        <input className="form-control" id="inputPassword" type="password" placeholder="Password" name="password" onChange={onChange}/>
+                                        <input className="form-control" id="inputPassword" type="password" placeholder="Mật khẩu" name="password" onChange={onChange}/>
                                         <label>Password</label>
                                         {errors.password && <div className="text-danger">{errors.password}</div>}
                                     </div>
                                     <div className="form-check mb-3">
                                         <input className="form-check-input" id="inputRememberPassword" type="checkbox" value="" />
-                                        <label className="form-check-label" >Remember Password</label>
+                                        <label className="form-check-label" >Ghi nhớ đăng nhập</label>
                                     </div>
                                     <div className="d-flex align-items-center justify-content-between mt-4 mb-0">
-                                        <Link className="small" to="#">Forgot Password?</Link>
-                                        <button className="btn btn-primary" type="button" onClick={onSubmit}>Login</button>
+                                        <Link className="small" to="#">Quên mật khẩu?</Link>
+                                        <button className="btn btn-primary" type="button" onClick={onSubmit}>Đăng nhập</button>
                                     </div>
                                 </form>
                             </div>
                             <div className="card-footer text-center py-3">
-                            <Link className="small" to="#">Forgot Password?</Link>
+                            
                             </div>
                         </div>
                     </div>
@@ -123,7 +123,7 @@ const Login = () => {
         <footer className="py-4 bg-light mt-auto">
             <div className="container-fluid px-4">
                 <div className="d-flex align-items-center justify-content-between small">
-                    <div className="text-muted">Copyright &copy; Your Website 2023</div>
+                    <div className="text-muted">Copyright &copy; EVIET SOLUTION 2025</div>
                     <div>
                         <a href="#">Privacy Policy</a>
                         &middot;

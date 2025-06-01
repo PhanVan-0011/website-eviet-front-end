@@ -250,7 +250,7 @@ const UserUpdate = () => {
                     variant="danger"
                     onClick={async () => {
                         setShowModal(false);
-                        if (window.confirm("Bạn chắc chắn muốn xóa người dùng này?")) {
+                       
                             try {
                                 dispatch(actions.controlLoading(true));
                                 const response = await requestApi(`api/users/${params.id}`, 'DELETE', []);
@@ -271,7 +271,7 @@ const UserUpdate = () => {
                                     toast.error("Server error", toastErrorConfig);
                                 }
                             }
-                        }
+                       
                     }}
                     disabled={isSubmitting}
                 >
