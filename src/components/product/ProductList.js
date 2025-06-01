@@ -304,15 +304,15 @@ const ProductList = () => {
                 <div className="container-fluid px-4">
                     <h1 className="mt-4">Danh sách sản phẩm</h1>
                     <ol className="breadcrumb mb-4">
-                        <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
+                        <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item active">Danh sách sản phẩm</li>
                     </ol>
                     <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/product/add"><i className="fas fa-plus"></i>Thêm sản phẩm</Link>
-                        {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa</button>}
+                        <Link className="btn btn-primary me-2" to="/product/add"><i className="fas fa-plus"></i> Thêm sản phẩm</Link>
+                        {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Delete</button>}
                     </div>
                     <DataTables
-                        name="Thông tin sản phẩm"
+                        name="Dữ liệu sản phẩm"
                         columns={columns}
                         data={sortedProducts}
                         numOfPages={numOfPages}
@@ -327,7 +327,7 @@ const ProductList = () => {
             </main>
             <Modal show={showModal} onHide={() => {setShowModal(false); setItemDelete(null); setTypeDelete(null)}}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Confirm Delete</Modal.Title>
+                    <Modal.Title>Xác nhận xóa</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {typeDelete === 'single' ? (
@@ -338,10 +338,10 @@ const ProductList = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => {setShowModal(false)}}>
-                        Cancel
+                        Hủy
                     </Button>
                     <Button variant="danger" onClick={() => {requestApiDelete()}}>
-                        Delete
+                        Xóa
                     </Button>
                 </Modal.Footer>
             </Modal>
