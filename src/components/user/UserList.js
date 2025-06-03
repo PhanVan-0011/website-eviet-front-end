@@ -88,7 +88,7 @@ const UserList = () => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa người dùng thành công!", { position: "top-right", autoClose: 1000 });
+                    toast.success(response.data.message || "Xóa người dùng thành công!", toastSuccessConfig);
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa người dùng thất bại", toastErrorConfig);

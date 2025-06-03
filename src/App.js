@@ -19,6 +19,8 @@ import CategoryAdd from './components/category/CategoryAdd';
 import CategoryUpdate from './components/category/CategoryUpdate';
 import ProductList from './components/product/ProductList';
 import ProductAdd from './components/product/ProductAdd';
+import ProductUpdate from './components/product/ProductUpdate';
+import CustomEditor from './components/common/CustomEditor';
 function App() {
   return (
     <Routes>
@@ -26,6 +28,7 @@ function App() {
         <Route path="/" element={<Main />}>
           <Route element={<PrivateRoutes />}>
             <Route index element={<Dashboard />} />
+            <Route path="/test" element={<CustomEditor />} />
             <Route path="/user" element={<UserList />} />
             <Route path="/user/add" element={<UserAdd />} />
             <Route path="/user/:id" element={<UserUpdate />} />
@@ -34,6 +37,7 @@ function App() {
             <Route path="/category/:id" element={<CategoryUpdate />} />
             <Route path="/product" element={<ProductList />} />
             <Route path="/product/add" element={<ProductAdd />} />
+            <Route path="/product/:id" element={<ProductUpdate />} />
             {/* <Route path="/category/add" element={<CategoryAdd />} />
             <Route path="/category/:id" element={<CategoryUpdate />} /> */}
           </Route>

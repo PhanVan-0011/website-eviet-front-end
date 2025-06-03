@@ -54,7 +54,7 @@ const UserUpdate = () => {
             const response = await requestApi(`api/users/${params.id}`, 'PUT', data);
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
-                toast.success(response.data.message || "Cập nhật thông tin thành công", { position: "top-right", autoClose: 1000 });
+                toast.success(response.data.message || "Cập nhật thông tin thành công", toastSuccessConfig);
                 setTimeout(() => {
                     navigation('/user');
                 }, 1500);

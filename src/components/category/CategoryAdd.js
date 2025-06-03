@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import requestApi from '../../helpers/api';
 import { toast } from 'react-toastify';
-import { toastErrorConfig } from '../../tools/toastConfig'
+import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig'
 
 const CategoryAdd = () => {
     const navigation = useNavigate();
@@ -39,7 +39,7 @@ const CategoryAdd = () => {
             const response = await requestApi('api/categories', 'POST', data);
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
-                toast.success(response.data.message || "Thêm danh mục thành công!", { position: "top-right", autoClose: 1000 });
+                toast.success(response.data.message || "Thêm danh mục thành công!",toastSuccessConfig);
                 setTimeout(() => {
                     navigation('/category');
                 }, 1500);
@@ -118,7 +118,7 @@ const CategoryAdd = () => {
                                                 {errors.status && <div className="text-danger">{errors.status.message}</div>}
                                             </div>
                                         </div>
-                                        <div className="col-md-6">
+                                        {/* <div className="col-md-6">
                                             <div className="form-floating">
                                                 <select
                                                     className="form-select"
@@ -133,7 +133,7 @@ const CategoryAdd = () => {
                                                 </select>
                                                 <label htmlFor="inputParentId">Danh mục cha</label>
                                             </div>
-                                        </div>
+                                        </div> */}
                                     </div>
                                     <div className="mt-4 mb-0">
                                         <div className="d-flex justify-content-center">

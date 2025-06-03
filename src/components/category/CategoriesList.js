@@ -7,7 +7,7 @@ import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
-import { toastErrorConfig } from '../../tools/toastConfig'
+import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig'
 const CategoriesList = () => {
     const [categories, setCategories] = useState([]);
     const [numOfPages, setNumOfPages] = useState(1);
@@ -80,7 +80,7 @@ const CategoriesList = () => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa danh mục thành công!", { position: "top-right", autoClose: 1000 });
+                    toast.success(response.data.message || "Xóa danh mục thành công!", toastSuccessConfig);
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa danh mục thất bại", toastErrorConfig);
@@ -99,7 +99,7 @@ const CategoriesList = () => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa danh mục thành công!", { position: "top-right", autoClose: 1000 });
+                    toast.success(response.data.message || "Xóa danh mục thành công!", toastSuccessConfig);
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa danh mục thất bại", toastErrorConfig);

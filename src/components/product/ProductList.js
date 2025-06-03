@@ -7,7 +7,15 @@ import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
-import { toastErrorConfig } from '../../tools/toastConfig';
+import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
+
+const formatVND = (value) => {
+    if (typeof value !== 'number' && typeof value !== 'string') return '';
+    value = value.toString().replace(/\D/g, '');
+    if (!value) return '';
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
@@ -127,8 +135,21 @@ const ProductList = () => {
         },
         { 
             title: "Hình ảnh", 
-            element: row => <img src={row.image_url} alt={row.name} style={{width: 60, height: 40, objectFit: 'cover'}} />,
-            width: "15%"
+            element: row => (
+                <img
+                    src={urlImage + row.image_url}
+                    alt={row.name}
+                    style={{
+                        width: '100px',
+                        height: '80px',
+                        objectFit: 'cover',
+                        borderRadius: '6px',
+                        border: '1px solid #eee',
+                        background: '#fafafa'
+                    }}
+                />
+            ),
+            width: "12%"
         },
         { 
             title: () => (
@@ -148,22 +169,30 @@ const ProductList = () => {
             element: row => row.stock_quantity,
             width: "9%"
         },
-        { 
+        {
             title: () => (
                 <span style={{cursor: 'pointer'}} onClick={() => handleSort('original_price')}>
                     Giá gốc {renderSortIcon('original_price')}
                 </span>
             ),
-            element: row => row.original_price,
+            element: row => (
+                <div>
+                    {formatVND(parseInt(row.original_price))} ₫
+                </div>
+            ),
             width: "11%"
         },
-        { 
+        {
             title: () => (
                 <span style={{cursor: 'pointer'}} onClick={() => handleSort('sale_price')}>
                     Giá bán {renderSortIcon('sale_price')}
                 </span>
             ),
-            element: row => row.sale_price,
+            element: row => (
+                <div>
+                    {formatVND(parseInt(row.sale_price))} ₫
+                </div>
+            ),
             width: "11%"
         },
         { 
@@ -262,7 +291,7 @@ const ProductList = () => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa sản phẩm thành công!", { position: "top-right", autoClose: 1000 });
+                    toast.success(response.data.message || "Xóa sản phẩm thành công!", toastSuccessConfig);
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa sản phẩm thất bại", toastErrorConfig);
@@ -281,7 +310,7 @@ const ProductList = () => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa sản phẩm thành công!", { position: "top-right", autoClose: 1000 });
+                    toast.success(response.data.message || "Xóa sản phẩm thành công!", toastSuccessConfig);
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa sản phẩm thất bại", toastErrorConfig);

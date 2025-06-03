@@ -1,14 +1,13 @@
 import axios from 'axios';
 
-export default function requestApi(endpoint, method, body=[], responseType= 'json'){
+export default function requestApi(endpoint, method, body=[], responseType= 'json', contentType) {
     const baseURL = process.env.REACT_APP_API_URL;
- 
+
     const headers = {
+        'Content-Type': contentType || 'application/json',
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        // 'Access-Control-Allow-Origin': '*',
-    
     };
+   
     const instance = axios.create({
         headers: headers,
     });

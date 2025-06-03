@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
@@ -7,20 +7,20 @@ import requestApi from '../../helpers/api';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import CustomEditor from '../common/CustomEditor';
-
-
-
-const ProductAdd = () => {
+const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
+const ProductUpdate = () => {
+    const params = useParams();
     const navigation = useNavigate();
-    const { register, handleSubmit, setValue,trigger, formState: { errors } } = useForm();
     const dispatch = useDispatch();
+    const { register, handleSubmit, setValue, trigger, formState: { errors } } = useForm();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categories, setCategories] = useState([]);
     const [originalPrice, setOriginalPrice] = useState('');
     const [salePrice, setSalePrice] = useState('');
     const [imageFile, setImageFile] = useState(null);
+    const [oldImage, setOldImage] = useState(null);
 
-
+    const [description, setDescription] = useState('');
     // Lấy danh sách danh mục
     useEffect(() => {
         requestApi('api/categories?limit=1000', 'GET', []).then((response) => {
@@ -30,32 +30,63 @@ const ProductAdd = () => {
         });
     }, []);
 
-    // Hàm xử lý khi chọn ảnh
+    // Lấy thông tin sản phẩm cần sửa
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const response = await requestApi(`api/products/${params.id}`, 'GET');
+                const data = response.data.data;
+                setValue('name', data.name);
+                setValue('description', data.description);
+                setValue('original_price', data.original_price);
+                setValue('sale_price', data.sale_price);
+                setValue('stock_quantity', data.stock_quantity);
+                setValue('size', data.size || '');
+                setValue('category_id', data.category_id);
+                setValue('status', String(data.status));
+                setOriginalPrice(formatVND(parseInt(data.original_price, 10)));
+                setSalePrice(formatVND(parseInt(data.sale_price, 10)));
+                setValue('original_price', formatVND(parseInt(data.original_price, 10)));
+                setValue('sale_price', formatVND(parseInt(data.sale_price, 10)));
+                setOldImage(data.image_url);
+                setDescription(data.description || '');
+            } catch (error) {
+                toast.error("Không lấy được dữ liệu sản phẩm", toastErrorConfig);
+            }
+        };
+        fetchProduct();
+    }, [params.id, setValue]);
+
+    // Hàm xử lý khi chọn ảnh mới
     const onChangeImage = (e) => {
         const file = e.target.files[0];
         if (file) {
-           
             const reader = new FileReader();
-            reader.onload = (e) => {
-                setImageFile(reader.result);
-            };
+            reader.onload = (ev) => setImageFile(ev.target.result);
             reader.readAsDataURL(file);
         } else {
             setImageFile(null);
         }
     };
 
-    // Thêm hàm format chỉ dấu chấm ngăn cách hàng nghìn
+        // Hàm format giá tiền
     const formatVND = (value) => {
-        value = value.replace(/\D/g, ''); // chỉ lấy số
+        if (value === null || value === undefined) return '';
+        // Nếu là số thì chuyển sang chuỗi
+        value = value.toString();
+        // Loại bỏ mọi ký tự không phải số
+        value = value.replace(/\D/g, '');
+        // Nếu rỗng thì trả về rỗng
         if (!value) return '';
+        // Format theo từng nhóm 3 số, không thêm số 0 nào
         return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
     
 
+    // Submit form
     const handleSubmitForm = async (data) => {
+        console.log(data);
         setIsSubmitting(true);
-        console.log('Submitted data:', data);
         try {
             dispatch(actions.controlLoading(true));
             const formData = new FormData();
@@ -67,46 +98,49 @@ const ProductAdd = () => {
             formData.append('size', data.size || '');
             formData.append('category_id', data.category_id);
             formData.append('status', data.status);
-            formData.append('image_url', data.imageFile ? data.imageFile[0] : null);
-            
+            // Nếu chọn ảnh mới thì gửi lên, không thì bỏ qua
+            if (data.imageFile && data.imageFile[0]) {
+                formData.append('image_url', data.imageFile[0]);
+            }
+            // Nếu không chọn ảnh mới, backend sẽ giữ ảnh cũ
+            console.log('Submitting form data:', formData);
             const response = await requestApi(
-                'api/products',
-                'POST',
+                `api/products/${params.id}`,
+                'POST', // hoặc 'PUT' nếu backend hỗ trợ
                 formData,
-                'json', // responseType
-                'multipart/form-data' // headers
+                'json',
+                'multipart/form-data'
             );
+            
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
-                toast.success(response.data.message || "Thêm sản phẩm thành công!", toastSuccessConfig);
+                toast.success(response.data.message || "Cập nhật sản phẩm thành công!", toastSuccessConfig);
                 setTimeout(() => {
                     navigation('/product');
                 }, 1500);
             } else {
-                toast.error(response.data.message || "Thêm sản phẩm thất bại", toastErrorConfig);
+                toast.error(response.data.message || "Cập nhật sản phẩm thất bại", toastErrorConfig);
             }
         } catch (e) {
-                console.error("Error adding product:", e);
             dispatch(actions.controlLoading(false));
-             if (e.response && e.response.data && e.response.data.message) {
+            if (e.response && e.response.data && e.response.data.message) {
                 toast.error(e.response.data.message, toastErrorConfig);
             } else {
-                toast.error("Lỗi khi thêm sản phẩm", toastErrorConfig);
+                toast.error("Lỗi khi cập nhật sản phẩm", toastErrorConfig);
             }
         } finally {
             setIsSubmitting(false);
         }
     };
-  
- 
+
     return (
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Thêm sản phẩm</h1>
+                    <h1 className="mt-4">Cập nhật sản phẩm</h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
-                        <li className="breadcrumb-item active">Thêm sản phẩm</li>
+                        <li className="breadcrumb-item active">Cập nhật sản phẩm</li>
                     </ol>
                     <div className='card mb-3'>
                         <div className='card-header'>
@@ -131,7 +165,6 @@ const ProductAdd = () => {
                                                 {errors.name && <div className="text-danger">{errors.name.message}</div>}
                                             </div>
                                         </div>
-                                      
                                         <div className="col-md-6">
                                             <div className="form-floating mb-3 mb-md-0">
                                                 <input
@@ -146,9 +179,7 @@ const ProductAdd = () => {
                                                 </label>
                                                 {errors.stock_quantity && <div className="text-danger">{errors.stock_quantity.message}</div>}
                                             </div>
-                                     
-                                        
-                                    </div>
+                                        </div>
                                     </div>
                                     <div className="row mb-3">
                                         <div className="col-md-6">
@@ -196,7 +227,6 @@ const ProductAdd = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    
                                     <div className="row mb-4">
                                         <div className="col-md-6">
                                             <div className="form-floating mb-3 mb-md-0">
@@ -216,7 +246,6 @@ const ProductAdd = () => {
                                             </div>
                                         </div>
                                         <div className="col-md-6">
-                                           
                                             <div className="form-floating mb-3 mb-md-0">
                                                 <select
                                                     className="form-select"
@@ -230,22 +259,20 @@ const ProductAdd = () => {
                                                 <label htmlFor="inputStatus">Trạng thái <span style={{color: 'red'}}>*</span></label>
                                                 {errors.status && <div className="text-danger">{errors.status.message}</div>}
                                             </div>
-                                        
                                         </div>
                                     </div>
-                                    
                                     <div className="row mb-3">
                                         <div className="col-md-6">
-                                                <div className="form-floating mb-3 mb-md-0">
-                                                    <input
-                                                        className="form-control"
-                                                        id="inputSize"
-                                                        {...register('size')}
-                                                        placeholder="Nhập kích thước (nếu có)"
-                                                    />
-                                                    <label htmlFor="inputSize">Kích thước</label>
-                                                </div>
-                                        </div>    
+                                            <div className="form-floating mb-3 mb-md-0">
+                                                <input
+                                                    className="form-control"
+                                                    id="inputSize"
+                                                    {...register('size')}
+                                                    placeholder="Nhập kích thước (nếu có)"
+                                                />
+                                                <label htmlFor="inputSize">Kích thước</label>
+                                            </div>
+                                        </div>
                                         <div className="col-md-6 input-file">
                                             <div className="mb-3">
                                                 <label htmlFor="inputImage" className="form-label btn btn-secondary">
@@ -257,7 +284,6 @@ const ProductAdd = () => {
                                                     type="file"
                                                     accept="image/*"
                                                     {...register('imageFile', {
-                                                        required: 'Ảnh sản phẩm là bắt buộc',
                                                         onChange: onChangeImage,
                                                         validate: {
                                                             checkType: (files) =>
@@ -276,29 +302,29 @@ const ProductAdd = () => {
                                                     })}
                                                 />
                                                 <small className="text-muted"> Chỉ chọn 1 ảnh, định dạng: jpg, png...</small>
-                                                 {errors.imageFile && <div className="text-danger">{errors.imageFile.message}</div>}
-                                                {/* Ảnh luôn hiển thị bên dưới input nếu đã chọn */}
-                                                {imageFile && (
+                                                {errors.imageFile && <div className="text-danger">{errors.imageFile.message}</div>}
+                                                {/* Hiển thị ảnh cũ hoặc ảnh mới preview */}
+                                                {(imageFile || oldImage) && (
                                                     <div className="mt-2">
                                                         <img
-                                                            src={imageFile}
-                                                            alt="Preview"
+                                                            src={imageFile ? imageFile : (urlImage + oldImage)}
+                                                            alt="ảnh sản phẩm"
                                                             className="img-thumbnail"
                                                             style={{ maxWidth: '200px' }}
                                                         />
                                                     </div>
                                                 )}
                                             </div>
-                                        </div>       
-                                        
+                                        </div>
                                     </div>
                                     <div className="row mb-3">
                                         <div className="col-md-12">
                                             <label htmlFor="description">Mô tả sản phẩm</label>
                                             <CustomEditor
-                                                onReady={() => register('description', {'required': "Mô tả sản phẩm là bắt buộc"})} // hoặc truyền state nếu muốn hiển thị lại khi sửa
+                                                data={description}
+                                                onReady={() => register('description', {'required': "Mô tả sản phẩm là bắt buộc"})}
                                                 onChange={data => setValue('description', data)}
-                                                trigger={() => trigger('description')} // Gọi trigger để kiểm tra validation
+                                                trigger={() => trigger('description')}
                                             />
                                             {errors.description && <div className="text-danger">{errors.description.message}</div>}
                                         </div>
@@ -310,7 +336,7 @@ const ProductAdd = () => {
                                                 type="submit"
                                                 disabled={isSubmitting}
                                             >
-                                                {isSubmitting ? "Đang gửi..." : "Thêm mới"}
+                                                {isSubmitting ? "Đang gửi..." : "Cập nhật"}
                                             </button>
                                         </div>
                                     </div>
@@ -324,4 +350,4 @@ const ProductAdd = () => {
     );
 };
 
-export default ProductAdd;
+export default ProductUpdate;
