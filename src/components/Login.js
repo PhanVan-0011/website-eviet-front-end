@@ -8,6 +8,7 @@ import { toastErrorConfig } from '../tools/toastConfig';
 import { useDispatch } from 'react-redux';
 import * as actions from '../redux/actions/index';
 
+
 const Login = () => {
     const dispatch = useDispatch();
     const navigation = useNavigate();
@@ -92,21 +93,30 @@ const Login = () => {
                                 <form>
                                     <div className="form-floating mb-3">
                                         <input className="form-control" id="inputEmail" type="email" placeholder="ten@gmail.com" name="login" onChange={onChange}/>
-                                        <label>Email address</label>
+                                        <label>Email</label>
                                         {errors.login && <div className="text-danger">{errors.login}</div>}
                                     </div>
                                     <div className="form-floating mb-3">
                                         <input className="form-control" id="inputPassword" type="password" placeholder="Mật khẩu" name="password" onChange={onChange}/>
-                                        <label>Password</label>
+                                        <label>Mật khẩu</label>
                                         {errors.password && <div className="text-danger">{errors.password}</div>}
                                     </div>
-                                    <div className="form-check mb-3">
-                                        <input className="form-check-input" id="inputRememberPassword" type="checkbox" value="" />
-                                        <label className="form-check-label" >Ghi nhớ đăng nhập</label>
+                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <div className="form-check">
+                                        <input className="form-check-input" id="inputRememberPassword" type="checkbox" />
+                                        <label className="form-check-label" htmlFor="inputRememberPassword">
+                                        Ghi nhớ đăng nhập
+                                        </label>
                                     </div>
-                                    <div className="d-flex align-items-center justify-content-between mt-4 mb-0">
-                                        <Link className="small" to="#">Quên mật khẩu?</Link>
-                                        <button className="btn btn-primary" type="button" onClick={onSubmit}>Đăng nhập</button>
+                                    <Link className="small text-primary text-decoration-none" to="#">
+                                        Quên mật khẩu?
+                                    </Link>
+                                    </div>
+
+                                    <div className="d-flex mt-3">
+                                    <button className="btn btn-primary w-100 rounded fw-bold py-2" type="button" onClick={onSubmit}>
+                                        Đăng nhập
+                                    </button>
                                     </div>
                                 </form>
                             </div>

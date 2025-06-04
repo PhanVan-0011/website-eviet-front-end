@@ -303,17 +303,29 @@ const ProductAdd = () => {
                                             {errors.description && <div className="text-danger">{errors.description.message}</div>}
                                         </div>
                                     </div>
+                                
                                     <div className="mt-4 mb-0">
-                                        <div className="d-flex justify-content-center">
+                                        <div className="d-flex justify-content-center gap-2">
                                             <button
-                                                className="btn btn-primary w-50"
+                                                type="button"
+                                                className="btn btn-secondary w-25"
+                                                onClick={() => navigation('/product')}
+                                                disabled={isSubmitting}
+                                            >
+                                                Hủy bỏ
+                                            </button>
+                                            <button
+                                                className="btn btn-primary w-25"
                                                 type="submit"
                                                 disabled={isSubmitting}
                                             >
                                                 {isSubmitting ? "Đang gửi..." : "Thêm mới"}
                                             </button>
+                                            
                                         </div>
-                                    </div>
+                                     </div>
+
+
                                 </form>
                             </div>
                         </div>

@@ -7,6 +7,7 @@ import requestApi from '../../helpers/api';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import CustomEditor from '../common/CustomEditor';
+import { Modal, Button } from 'react-bootstrap';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 const ProductUpdate = () => {
     const params = useParams();
@@ -19,6 +20,7 @@ const ProductUpdate = () => {
     const [salePrice, setSalePrice] = useState('');
     const [imageFile, setImageFile] = useState(null);
     const [oldImage, setOldImage] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
     const [description, setDescription] = useState('');
     // Lấy danh sách danh mục
@@ -330,13 +332,29 @@ const ProductUpdate = () => {
                                         </div>
                                     </div>
                                     <div className="mt-4 mb-0">
-                                        <div className="d-flex justify-content-center">
+                                        <div className="d-flex justify-content-center gap-2">
                                             <button
-                                                className="btn btn-primary w-50"
-                                                type="submit"
+                                                type="button"
+                                                className="btn btn-danger w-25 font-weight-bold"
+                                                onClick={() => setShowModal(true)}
                                                 disabled={isSubmitting}
                                             >
-                                                {isSubmitting ? "Đang gửi..." : "Cập nhật"}
+                                                Xóa
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary w-25 font-weight-bold"
+                                                onClick={() => navigation('/product')}
+                                                disabled={isSubmitting}
+                                            >
+                                                Hủy bỏ
+                                            </button>
+                                                <button
+                                                    className="btn btn-primary w-25"
+                                                    type="submit"
+                                                    disabled={isSubmitting}
+                                                >
+                                                    {isSubmitting ? "Đang gửi..." : "Cập nhật"}
                                             </button>
                                         </div>
                                     </div>
@@ -346,6 +364,50 @@ const ProductUpdate = () => {
                     </div>
                 </div>
             </main>
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>Xác nhận xóa</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p>Bạn chắc chắn muốn xóa sản phẩm này?</p>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                    Hủy
+                </Button>
+                <Button
+                    variant="danger"
+                    onClick={async () => {
+                        setShowModal(false);
+                       
+                            try {
+                                dispatch(actions.controlLoading(true));
+                                const response = await requestApi(`api/products/${params.id}`, 'DELETE', []);
+                                dispatch(actions.controlLoading(false));
+                                if (response.data && response.data.success) {
+                                    toast.success(response.data.message || "Xóa sản phẩm thành công!", toastSuccessConfig);
+                                    setTimeout(() => {
+                                        navigation('/product');
+                                    }, 1200);
+                                } else {
+                                    toast.error(response.data.message || "Xóa sản phẩm thất bại", toastErrorConfig);
+                                }
+                            } catch (e) {
+                                dispatch(actions.controlLoading(false));
+                                if (e.response && e.response.data && e.response.data.message) {
+                                    toast.error(e.response.data.message, toastErrorConfig);
+                                } else {
+                                    toast.error("Server error", toastErrorConfig);
+                                }
+                            }
+                       
+                    }}
+                    disabled={isSubmitting}
+                >
+                    Xóa
+                </Button>
+            </Modal.Footer>
+        </Modal>
         </div>
     );
 };
