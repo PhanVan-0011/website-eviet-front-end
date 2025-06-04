@@ -6,6 +6,9 @@ const Sidebar = () => {
     user: false,
     category: false,
     product: false,
+    order: false,
+    post: false,
+    slider: false,
   });
 
   const toggle = (menu) => {
@@ -78,6 +81,63 @@ const Sidebar = () => {
               <nav className="sb-sidenav-menu-nested nav">
                 <Link className="nav-link" to="/product">Danh sách sản phẩm</Link>
                 <Link className="nav-link" to="/product/add">Tạo sản phẩm</Link>
+              </nav>
+            </div>
+            <a
+              className={`nav-link${open.order ? '' : ' collapsed'}`}
+              href="#"
+              onClick={e => { e.preventDefault(); toggle('order'); }}
+              aria-expanded={open.order}
+              aria-controls="collapseOrder"
+            >
+              <div className="sb-nav-link-icon"><i className="fas fa-shopping-cart"></i></div>
+              Quản lý đơn hàng
+              <div className="sb-sidenav-collapse-arrow">
+                <i className={`fas fa-angle-${open.order ? 'up' : 'down'}`}></i>
+              </div>
+            </a>
+            <div className={`collapse${open.order ? ' show' : ''}`} id="collapseOrder">
+              <nav className="sb-sidenav-menu-nested nav">
+                <Link className="nav-link" to="/order">Danh sách đơn hàng</Link>
+                {/* <Link className="nav-link" to="/order/add">Tạo đơn hàng</Link> */}
+              </nav>
+            </div>
+            <a
+              className={`nav-link${open.post ? '' : ' collapsed'}`}
+              href="#"
+              onClick={e => { e.preventDefault(); toggle('post'); }}
+              aria-expanded={open.post}
+              aria-controls="collapsePost"
+            >
+              <div className="sb-nav-link-icon"><i className="fas fa-newspaper"></i></div>
+              Quản lý bài viết
+              <div className="sb-sidenav-collapse-arrow">
+                <i className={`fas fa-angle-${open.post ? 'up' : 'down'}`}></i>
+              </div>
+            </a>
+            <div className={`collapse${open.post ? ' show' : ''}`} id="collapsePost">
+              <nav className="sb-sidenav-menu-nested nav">
+                <Link className="nav-link" to="/post">Danh sách bài viết</Link>
+                <Link className="nav-link" to="/post/add">Tạo bài viết</Link>
+              </nav>
+            </div>
+            <a
+              className={`nav-link${open.slider ? '' : ' collapsed'}`}
+              href="#"
+              onClick={e => { e.preventDefault(); toggle('slider'); }}
+              aria-expanded={open.slider}
+              aria-controls="collapseSlider"
+            >
+              <div className="sb-nav-link-icon"><i className="fas fa-images"></i></div>
+              Quản lý slider
+              <div className="sb-sidenav-collapse-arrow">
+                <i className={`fas fa-angle-${open.slider ? 'up' : 'down'}`}></i>
+              </div>
+            </a>
+            <div className={`collapse${open.slider ? ' show' : ''}`} id="collapseSlider">
+              <nav className="sb-sidenav-menu-nested nav">
+                <Link className="nav-link" to="/slider">Danh sách slider</Link>
+                <Link className="nav-link" to="/slider/add">Tạo slider</Link>
               </nav>
             </div>
           </div>

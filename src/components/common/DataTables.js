@@ -134,8 +134,8 @@ const DataTables = (props) => {
                 <label className="me-2 mb-0" htmlFor="entriesSelect">Hiển thị</label>
                 <select id="entriesSelect" className="htmlFor-select w-auto" onChange={(e) => setItemOfPage(e.target.value)}>
                 <option value="5">5</option>
-                <option value="10" selected>10</option>
-                <option value="25">25</option>
+                <option value="10">10</option>
+                <option value="25" selected>25</option>
                 <option value="50">50</option>
                 <option value="100">100</option>
                 </select>

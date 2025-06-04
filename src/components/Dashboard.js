@@ -11,30 +11,25 @@ const Dashboard = () => {
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(actions.controlLoading(true)); // Bắt đầu loading
-        Promise.all([requestApi('api/users', 'GET')]).then((response) => {
-            setDashboardData({...dashboardData,  
+        Promise.all([
+            requestApi('api/users', 'GET'),
+            requestApi('api/orders', 'GET'),
+            requestApi('api/products', 'GET'),
+            requestApi('api/posts', 'GET')
+        ]).then((response) => {
+            setDashboardData({
                 totalUser: response[0].data.total,
-                // totalPost: response[1].data.total
+                totalOrder: response[1].data.total,
+                totalProduct: response[2].data.total,
+                totalPost: response[3].data.total
             });
             dispatch(actions.controlLoading(false));
-            console.log("User data: ", response[0].data);
-            // console.log("Product data: ", response[1].data);
         }
         ).catch((error) => {
             dispatch(actions.controlLoading(false));
-            console.log("User error: ", error);
+            console.log("Dashboard error: ", error);
         });
-        // requestApi('/products', 'GET', []).then((response) => {
-        //     setDashboardData({...dashboardData, totalProduct: response.data.total});
-        // requestApi('/users', 'GET', []).then((response) => {
-        //     setDashboardData({...dashboardData, totalUser: response.data.total});
-        //     console.log("User data: ", response.data);
-        // }
-        // ).catch((error) => {
-        //     console.log("User error: ", error);
-        // });
-    }
-    ,[])
+    }, [dispatch])
 
   return (
     <div id="layoutSidenav_content">
@@ -46,51 +41,57 @@ const Dashboard = () => {
             </ol>
             <div className="row">
                 <div className="col-xl-3 col-md-6">
-                    <div className="card bg-primary text-white mb-4">
+                    <div className="card bg-primary text-white mb-4 position-relative">
                         <div className="card-body">Tổng người dùng</div>
-                        
-                            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {dashboardData.totalUser}
-                                <span className="visually-hidden">unread messages</span>
-                            </span>
-                        
+                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {dashboardData.totalUser}
+                            <span className="visually-hidden">unread messages</span>
+                        </span>
                         <div className="card-footer d-flex align-items-center justify-content-between">
                             <Link className="small text-white stretched-link" to="/user">Xem chi tiết</Link>
                             <div className="small text-white"><i className="fas fa-angle-right"></i></div>
                         </div>
                     </div>
                 </div>
-                {/* <div className="col-xl-3 col-md-6">
-                    <div className="card bg-warning text-white mb-4">
-                        <div className="card-body">Warning Card</div>
-                        <div className="card-footer d-flex align-items-center justify-content-between">
-                            <a className="small text-white stretched-link" href="#">View Details</a>
-                            <div className="small text-white"><i className="fas fa-angle-right"></i></div>
-                        </div>
-                    </div>
-                </div> */}
                 <div className="col-xl-3 col-md-6">
-                    <div className="card bg-success text-white mb-4">
+                    <div className="card bg-success text-white mb-4 position-relative">
                         <div className="card-body">Tổng bài viết</div>
-                         <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {dashboardData.totalPost}
-                                <span className="visually-hidden">unread messages</span>
-                            </span>
+                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {dashboardData.totalPost}
+                            <span className="visually-hidden">unread messages</span>
+                        </span>
                         <div className="card-footer d-flex align-items-center justify-content-between">
-                            <a className="small text-white stretched-link" href="#">Xem chi tiết</a>
+                            <Link className="small text-white stretched-link" to="/post">Xem chi tiết</Link>
                             <div className="small text-white"><i className="fas fa-angle-right"></i></div>
                         </div>
                     </div>
                 </div>
-                {/* <div className="col-xl-3 col-md-6">
-                    <div className="card bg-danger text-white mb-4">
-                        <div className="card-body">Danger Card</div>
+                <div className="col-xl-3 col-md-6">
+                    <div className="card bg-warning text-white mb-4 position-relative">
+                        <div className="card-body">Tổng sản phẩm</div>
+                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {dashboardData.totalProduct}
+                            <span className="visually-hidden">unread messages</span>
+                        </span>
                         <div className="card-footer d-flex align-items-center justify-content-between">
-                            <a className="small text-white stretched-link" href="#">View Details</a>
+                            <Link className="small text-white stretched-link" to="/product">Xem chi tiết</Link>
                             <div className="small text-white"><i className="fas fa-angle-right"></i></div>
                         </div>
                     </div>
-                </div> */}
+                </div>
+                <div className="col-xl-3 col-md-6">
+                    <div className="card bg-danger text-white mb-4 position-relative">
+                        <div className="card-body">Tổng đơn hàng</div>
+                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
+                            {dashboardData.totalOrder}
+                            <span className="visually-hidden">unread messages</span>
+                        </span>
+                        <div className="card-footer d-flex align-items-center justify-content-between">
+                            <Link className="small text-white stretched-link" to="/order">Xem chi tiết</Link>
+                            <div className="small text-white"><i className="fas fa-angle-right"></i></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div className="row">
                 <div className="col-xl-6">

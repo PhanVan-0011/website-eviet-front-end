@@ -21,7 +21,7 @@ const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [numOfPages, setNumOfPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemOfPage, setItemOfPage] = useState(10);
+    const [itemOfPage, setItemOfPage] = useState(25);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
@@ -49,9 +49,38 @@ const ProductList = () => {
         });
     }, []);
 
-    // Lấy danh sách sản phẩm
+    // // Lấy danh sách sản phẩm
+    // useEffect(() => {
+    //     const query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
+    //     dispatch(actions.controlLoading(true));
+    //     requestApi(`api/products${query}`, 'GET', []).then((response) => {
+    //         dispatch(actions.controlLoading(false));
+    //         setProducts(response.data.data);
+    //         setNumOfPages(response.data.pagination.last_page);
+    //     }).catch((error) => {
+    //         dispatch(actions.controlLoading(false));
+    //     });
+    // }, [currentPage, itemOfPage, searchText, refresh]);
+
+
+    // 3. Gọi lại API khi filter thay đổi
     useEffect(() => {
-        const query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
+        // Tạo query string cho filter
+        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
+        if (filterCategory) query += `&category_id=${filterCategory}`;
+        if (filterOriginalPrice) {
+            const [min, max] = filterOriginalPrice.split('-');
+            if (min) query += `&original_price_from=${min}`;
+            if (max) query += `&original_price_to=${max}`;
+        }
+        if (filterSalePrice) {
+            const [min, max] = filterSalePrice.split('-');
+            if (min) query += `&sale_price_from=${min}`;
+            if (max) query += `&sale_price_to=${max}`;
+        }
+        if (filterStock) query += `&stock_quantity=${filterStock}`;
+        if (filterStatus !== '') query += `&status=${filterStatus}`;
+
         dispatch(actions.controlLoading(true));
         requestApi(`api/products${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
@@ -60,19 +89,20 @@ const ProductList = () => {
         }).catch((error) => {
             dispatch(actions.controlLoading(false));
         });
-    }, [currentPage, itemOfPage, searchText, refresh]);
+    }, [
+        currentPage,
+        itemOfPage,
+        searchText,
+        filterCategory,
+        filterOriginalPrice,
+        filterSalePrice,
+        filterStock,
+        filterStatus,
+        refresh
+    ]);
 
-    // 2. Lọc dữ liệu theo filter
-    const filteredProducts = products.filter(row =>
-        (filterCategory === '' || (row.category && String(row.category.id) === filterCategory)) &&
-        (filterOriginalPrice === '' || row.original_price.toString().includes(filterOriginalPrice)) &&
-        (filterSalePrice === '' || row.sale_price.toString().includes(filterSalePrice)) &&
-        (filterStock === '' || row.stock_quantity.toString().includes(filterStock)) &&
-        (filterStatus === '' || String(row.status) === filterStatus)
-    );
-
-    // 3. Sắp xếp dữ liệu
-    const sortedProducts = [...filteredProducts].sort((a, b) => {
+    // 4. Không cần filteredProducts, dùng trực tiếp products cho sortedProducts
+    const sortedProducts = [...products].sort((a, b) => {
         if (!sortField) return 0;
         let aValue = a[sortField];
         let bValue = b[sortField];
@@ -87,8 +117,14 @@ const ProductList = () => {
             bValue = b.status;
         }
 
-        if (typeof aValue === 'string') aValue = aValue.toLowerCase();
-        if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+        // Sửa tại đây: Nếu là trường giá thì ép kiểu số để sort đúng
+        if (sortField === 'original_price' || sortField === 'sale_price' || sortField === 'stock_quantity') {
+            aValue = Number(aValue);
+            bValue = Number(bValue);
+        } else {
+            if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+            if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+        }
 
         if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
         if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
@@ -140,12 +176,13 @@ const ProductList = () => {
                     src={urlImage + row.image_url}
                     alt={row.name}
                     style={{
-                        width: '100px',
+                        width: '120px',
                         height: '80px',
-                        objectFit: 'cover',
+                        objectFit: 'contain', // Sửa từ 'cover' thành 'contain'
+                        background: '#fafafa',
                         borderRadius: '6px',
                         border: '1px solid #eee',
-                        background: '#fafafa'
+                        padding: '4px' // Thêm padding để ảnh không dính sát viền
                     }}
                 />
             ),
@@ -196,12 +233,12 @@ const ProductList = () => {
             width: "11%"
         },
         { 
-            title: () => (
-                <span style={{cursor: 'pointer'}} onClick={() => handleSort('status')}>
-                    Trạng thái {renderSortIcon('status')}
-                </span>
-            ),
-            element: row => row.status === 1 ? "Hiển thị" : "Ẩn",
+            
+            title: "Trạng thái",
+            element: row => row.status === 1
+                ? <span className="badge bg-success">Hiển thị</span>
+                : <span className="badge bg-secondary">Ẩn</span>
+            ,
             width: "10%"
         },
         {
@@ -223,54 +260,54 @@ const ProductList = () => {
         }
     ];
 
-    // 7. Filter header
-    const filterHeader = [
-        null, // ID
-        null, // Tên sản phẩm
-        null, // Hình ảnh
-        <select
-            className="form-select form-select-sm"
-            value={filterCategory}
-            onChange={e => setFilterCategory(e.target.value)}
-        >
-            <option value="">Tất cả danh mục</option>
-            {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-        </select>,
-        <input
-            type="text"
-            className="form-control form-control-sm"
-            placeholder="Lọc số lượng"
-            value={filterStock}
-            onChange={e => setFilterStock(e.target.value)}
-        />,
-        <input
-            type="text"
-            className="form-control form-control-sm"
-            placeholder="Lọc giá gốc"
-            value={filterOriginalPrice}
-            onChange={e => setFilterOriginalPrice(e.target.value)}
-        />,
-        <input
-            type="text"
-            className="form-control form-control-sm"
-            placeholder="Lọc giá bán"
-            value={filterSalePrice}
-            onChange={e => setFilterSalePrice(e.target.value)}
-        />,
+    // // 7. Filter header
+    // const filterHeader = [
+    //     null, // ID
+    //     null, // Tên sản phẩm
+    //     null, // Hình ảnh
+    //     <select
+    //         className="form-select form-select-sm"
+    //         value={filterCategory}
+    //         onChange={e => setFilterCategory(e.target.value)}
+    //     >
+    //         <option value="">Tất cả danh mục</option>
+    //         {categories.map(cat => (
+    //             <option key={cat.id} value={cat.id}>{cat.name}</option>
+    //         ))}
+    //     </select>,
+    //     <input
+    //         type="text"
+    //         className="form-control form-control-sm"
+    //         placeholder="Lọc số lượng"
+    //         value={filterStock}
+    //         onChange={e => setFilterStock(e.target.value)}
+    //     />,
+    //     <input
+    //         type="text"
+    //         className="form-control form-control-sm"
+    //         placeholder="Lọc giá gốc"
+    //         value={filterOriginalPrice}
+    //         onChange={e => setFilterOriginalPrice(e.target.value)}
+    //     />,
+    //     <input
+    //         type="text"
+    //         className="form-control form-control-sm"
+    //         placeholder="Lọc giá bán"
+    //         value={filterSalePrice}
+    //         onChange={e => setFilterSalePrice(e.target.value)}
+    //     />,
         
-        <select
-            className="form-select form-select-sm"
-            value={filterStatus}
-            onChange={e => setFilterStatus(e.target.value)}
-        >
-            <option value="">Tất cả</option>
-            <option value="1">Hiển thị</option>
-            <option value="0">Ẩn</option>
-        </select>,
-        null // Action
-    ];
+    //     <select
+    //         className="form-select form-select-sm"
+    //         value={filterStatus}
+    //         onChange={e => setFilterStatus(e.target.value)}
+    //     >
+    //         <option value="">Tất cả</option>
+    //         <option value="1">Hiển thị</option>
+    //         <option value="0">Ẩn</option>
+    //     </select>,
+    //     null // Action
+    // ];
 
     // Handle single Delete
     const handleDelete = (id) => {
@@ -337,9 +374,99 @@ const ProductList = () => {
                         <li className="breadcrumb-item active">Danh sách sản phẩm</li>
                     </ol>
                     <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/product/add"><i className="fas fa-plus"></i> Thêm sản phẩm</Link>
-                        {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Delete</button>}
+                        <Link className="btn btn-primary me-2" to="/product/add">
+                            <i className="fas fa-plus"></i> Thêm sản phẩm
+                        </Link>
+                        {selectedRows.length > 0 && (
+                            <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
+                                <i className="fas fa-trash"></i> Delete
+                            </button>
+                        )}
                     </div>
+
+                    {/* Bộ lọc */}
+                    <div className="row mb-3 g-2 align-items-end">
+                        {/* Danh mục */}
+                        <div className="col-md-3">
+                            <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterCategory">
+                                <i className="fas fa-list me-1"></i>Danh mục
+                            </label>
+                            <select
+                                id="filterCategory"
+                                className="form-select form-select-sm border-primary shadow-sm"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                value={filterCategory}
+                                onChange={e => setFilterCategory(e.target.value)}
+                            >
+                                <option value="">Tất cả danh mục</option>
+                                {categories.map(cat => (
+                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        {/* Giá gốc */}
+                        <div className="col-md-2">
+                            <label className="form-label fw-semibold text-success mb-1" htmlFor="filterOriginalPrice">
+                                <i className="fas fa-money-bill-wave me-1"></i>Giá gốc
+                            </label>
+                            <select
+                                id="filterOriginalPrice"
+                                className="form-select form-select-sm border-success shadow-sm"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                value={filterOriginalPrice}
+                                onChange={e => setFilterOriginalPrice(e.target.value)}
+                            >
+                                <option value="">Tất cả</option>
+                                <option value="0-10000">Dưới 10.000 ₫</option>
+                                <option value="10000-20000">10.000 ₫ - 20.000 ₫</option>
+                                <option value="20000-40000">20.000 ₫ - 40.000 ₫</option>
+                                <option value="40000-70000">40.000 ₫ - 70.000 ₫</option>
+                                <option value="70000-100000">70.000 ₫ - 100.000 ₫</option>
+                                <option value="100000-200000">100.000 ₫ - 200.000 ₫</option>
+                                <option value="200000-">Trên 200.000 ₫</option>
+                            </select>
+                        </div>
+                        {/* Giá bán */}
+                        <div className="col-md-2">
+                            <label className="form-label fw-semibold text-warning mb-1" htmlFor="filterSalePrice">
+                                <i className="fas fa-coins me-1"></i>Giá bán
+                            </label>
+                            <select
+                                id="filterSalePrice"
+                                className="form-select form-select-sm border-warning shadow-sm"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                value={filterSalePrice}
+                                onChange={e => setFilterSalePrice(e.target.value)}
+                            >
+                                <option value="">Tất cả</option>
+                                <option value="0-10000">Dưới 10.000 ₫</option>
+                                <option value="10000-20000">10.000 ₫ - 20.000 ₫</option>
+                                <option value="20000-40000">20.000 ₫ - 40.000 ₫</option>
+                                <option value="40000-70000">40.000 ₫ - 70.000 ₫</option>
+                                <option value="70000-100000">70.000 ₫ - 100.000 ₫</option>
+                                <option value="100000-200000">100.000 ₫ - 200.000 ₫</option>
+                                <option value="200000-">Trên 200.000 ₫</option>
+                            </select>
+                        </div>
+                        {/* Trạng thái */}
+                        <div className="col-md-2">
+                            <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
+                                <i className="fas fa-toggle-on me-1"></i>Trạng thái
+                            </label>
+                            <select
+                                id="filterStatus"
+                                className="form-select form-select-sm border-info shadow-sm"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                value={filterStatus}
+                                onChange={e => setFilterStatus(e.target.value)}
+                            >
+                                <option value="">Tất cả</option>
+                                <option value="1">Hiển thị</option>
+                                <option value="0">Ẩn</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <DataTables
                         name="Dữ liệu sản phẩm"
                         columns={columns}
@@ -350,7 +477,7 @@ const ProductList = () => {
                         setItemOfPage={setItemOfPage}
                         changeKeyword={(keyword) => setSearchText(keyword)}
                         onSelectedRows={selectedRows => setSelectedRows(selectedRows)}
-                        filterHeader={filterHeader}
+                     
                     />
                 </div>
             </main>

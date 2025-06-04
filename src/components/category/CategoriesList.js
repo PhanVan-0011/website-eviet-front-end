@@ -12,7 +12,7 @@ const CategoriesList = () => {
     const [categories, setCategories] = useState([]);
     const [numOfPages, setNumOfPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemOfPage, setItemOfPage] = useState(5);
+    const [itemOfPage, setItemOfPage] = useState(25);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);

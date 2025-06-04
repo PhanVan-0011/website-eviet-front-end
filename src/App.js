@@ -21,6 +21,7 @@ import ProductList from './components/product/ProductList';
 import ProductAdd from './components/product/ProductAdd';
 import ProductUpdate from './components/product/ProductUpdate';
 import CustomEditor from './components/common/CustomEditor';
+import ProductDetail from './components/product/ProductDetail';
 function App() {
   return (
     <Routes>
@@ -38,6 +39,7 @@ function App() {
             <Route path="/product" element={<ProductList />} />
             <Route path="/product/add" element={<ProductAdd />} />
             <Route path="/product/:id" element={<ProductUpdate />} />
+            <Route path="/product/detail/:id" element={<ProductDetail />} />
             {/* <Route path="/category/add" element={<CategoryAdd />} />
             <Route path="/category/:id" element={<CategoryUpdate />} /> */}
           </Route>

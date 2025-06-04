@@ -14,7 +14,7 @@ const UserList = () => {
     const [numOfPages, setNumOfPages] = useState(1);
     // Cần truyển url vào để lấy dữ liệu
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemOfPage, setItemOfPage] = useState(10);
+    const [itemOfPage, setItemOfPage] = useState(25);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('')
     // Delete
