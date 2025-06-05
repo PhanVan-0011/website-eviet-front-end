@@ -242,7 +242,7 @@ const ProductList = () => {
             width: "10%"
         },
         {
-            title: "Action", 
+            title: "Hành động", 
             element: row => (
                 <div className="d-flex align-items-center">
                     <Link className="btn btn-info btn-sm me-1" to={`/product/detail/${row.id}`}>

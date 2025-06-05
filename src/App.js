@@ -22,6 +22,10 @@ import ProductAdd from './components/product/ProductAdd';
 import ProductUpdate from './components/product/ProductUpdate';
 import CustomEditor from './components/common/CustomEditor';
 import ProductDetail from './components/product/ProductDetail';
+import PostList from './components/post/PostList';
+import PostAdd from './components/post/PostAdd';
+import PostUpdate from './components/post/PostUpdate';
+import PostDetail from './components/post/PostDetail';
 function App() {
   return (
     <Routes>
@@ -29,7 +33,7 @@ function App() {
         <Route path="/" element={<Main />}>
           <Route element={<PrivateRoutes />}>
             <Route index element={<Dashboard />} />
-            <Route path="/test" element={<CustomEditor />} />
+            {/* <Route path="/test" element={<CustomEditor />} /> */}
             <Route path="/user" element={<UserList />} />
             <Route path="/user/add" element={<UserAdd />} />
             <Route path="/user/:id" element={<UserUpdate />} />
@@ -40,8 +44,10 @@ function App() {
             <Route path="/product/add" element={<ProductAdd />} />
             <Route path="/product/:id" element={<ProductUpdate />} />
             <Route path="/product/detail/:id" element={<ProductDetail />} />
-            {/* <Route path="/category/add" element={<CategoryAdd />} />
-            <Route path="/category/:id" element={<CategoryUpdate />} /> */}
+            <Route path="/post" element={<PostList />} />
+            <Route path="/post/add" element={<PostAdd />} />
+            <Route path="/post/:id" element={<PostUpdate />} />
+            <Route path="/post/detail/:id" element={<PostDetail />} />
           </Route>
         </Route>
         <Route element={<PublicRoutes />}>
