@@ -128,8 +128,8 @@ const ProductDetail = () => {
                                     <h4 className="card-title mb-2">{product.name}</h4>
                                     <div className="mb-2">
                                         {product.status === 1
-                                            ? <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Hiển thị</span>
-                                            : <span className="badge bg-secondary"><i className="fas fa-ban me-1"></i>Ẩn</span>
+                                            ? <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Đang bán</span>
+                                            : <span className="badge bg-secondary"><i className="fas fa-ban me-1"></i>Ngừng bán</span>
                                         }
                                     </div>
                                     <div className="mb-2">

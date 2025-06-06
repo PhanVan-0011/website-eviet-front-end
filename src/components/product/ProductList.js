@@ -236,8 +236,8 @@ const ProductList = () => {
             
             title: "Trạng thái",
             element: row => row.status === 1
-                ? <span className="badge bg-success">Hiển thị</span>
-                : <span className="badge bg-secondary">Ẩn</span>
+                ? <span className="badge bg-success">Đang bán</span>
+                : <span className="badge bg-secondary">Ngừng bán</span>
             ,
             width: "10%"
         },
@@ -461,8 +461,8 @@ const ProductList = () => {
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
                                 <option value="">Tất cả</option>
-                                <option value="1">Hiển thị</option>
-                                <option value="0">Ẩn</option>
+                                <option value="1">Đan bán</option>
+                                <option value="0">Ngừng bán</option>
                             </select>
                         </div>
                     </div>

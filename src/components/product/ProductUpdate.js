@@ -255,8 +255,8 @@ const ProductUpdate = () => {
                                                     {...register('status', { required: 'Trạng thái là bắt buộc' })}
                                                     defaultValue="1"
                                                 >
-                                                    <option value="1">Hiển thị</option>
-                                                    <option value="0">Ẩn</option>
+                                                    <option value="1">Đang bán</option>
+                                                    <option value="0">Ngừng bán</option>
                                                 </select>
                                                 <label htmlFor="inputStatus">Trạng thái <span style={{color: 'red'}}>*</span></label>
                                                 {errors.status && <div className="text-danger">{errors.status.message}</div>}

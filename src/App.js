@@ -26,6 +26,8 @@ import PostList from './components/post/PostList';
 import PostAdd from './components/post/PostAdd';
 import PostUpdate from './components/post/PostUpdate';
 import PostDetail from './components/post/PostDetail';
+import OrderList from './components/order/OrderList';
+import OrderDetail from './components/order/OrderDetail';
 function App() {
   return (
     <Routes>
@@ -48,6 +50,12 @@ function App() {
             <Route path="/post/add" element={<PostAdd />} />
             <Route path="/post/:id" element={<PostUpdate />} />
             <Route path="/post/detail/:id" element={<PostDetail />} />
+
+            <Route path="/order" element={<OrderList />} />
+               <Route path="/order/detail/:id" element={<OrderDetail />} />
+            {/* <Route path="/post/add" element={<PostAdd />} />
+            <Route path="/post/:id" element={<PostUpdate />} />
+            <Route path="/post/detail/:id" element={<PostDetail />} /> */}
           </Route>
         </Route>
         <Route element={<PublicRoutes />}>

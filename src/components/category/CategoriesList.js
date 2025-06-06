@@ -23,11 +23,27 @@ const CategoriesList = () => {
 
     const columns = [
         // { title: "ID", element: row => row.id },
-        { title: "Tên danh mục", element: row => row.name },
-        { title: "Mô tả", element: row => row.description },
+        { 
+            title: "Tên danh mục", 
+            element: row => row.name,
+            width: "18%"
+        },
+        { 
+            title: "Mô tả", 
+            element: row => row.description,
+            width: "20%"
+        },
         // { title: "Danh mục cha", element: row => row.parent ? row.parent.name : "" },
-        { title: "Ngày tạo", element: row => formatDate(row.created_at) },
-        { title: "Ngày cập nhật", element: row => formatDate(row.updated_at) },
+        { 
+            title: "Ngày tạo", 
+            element: row => formatDate(row.created_at),
+            width: "13%"
+        },
+        { 
+            title: "Ngày cập nhật", 
+            element: row => formatDate(row.updated_at),
+            width: "13%"
+        },
         {
             title: () => (
                 <span style={{ cursor: 'pointer' }}>
@@ -43,21 +59,25 @@ const CategoriesList = () => {
                 >
                     {row.products_count} sản phẩm
                 </Link>
-            )
+            ),
+            width: "14%"
         },
         {
             title: "Trạng thái",
             element: row => row.status === 1
                 ? <span className="badge bg-success">Hiển thị</span>
-                : <span className="badge bg-secondary">Ẩn</span>
+                : <span className="badge bg-secondary">Ẩn</span>,
+            width: "10%"
         },
         {
-            title: "Hành động", element: row => (
+            title: "Hành động", 
+            element: row => (
                 <>
                     <Link className="btn btn-primary btn-sm me-1" to={`/category/${row.id}`}><i className="fas fa-edit"></i></Link>
                     <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>
                 </>
-            )
+            ),
+            width: "12%"
         }
     ];
 

@@ -70,6 +70,7 @@ const PostUpdate = () => {
                
                 formData.append('image_url', data.imageFile[0]);
             }
+            console.log('Form data prepared:', formData);
             const response = await requestApi(
                 `api/posts/${id}`,
                 'POST',
