@@ -29,6 +29,9 @@ const OrderList = () => {
     // Bộ lọc mới
     const [filterStatus, setFilterStatus] = useState('');
     const [filterPayment, setFilterPayment] = useState('');
+    // Thêm state cho filter ngày đặt hàng
+    const [filterOrderDateFrom, setFilterOrderDateFrom] = useState('');
+    const [filterOrderDateTo, setFilterOrderDateTo] = useState('');
 
     // Sort states
     const [sortField, setSortField] = useState('');
@@ -39,6 +42,8 @@ const OrderList = () => {
         let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
         if (filterStatus) query += `&status=${filterStatus}`;
         if (filterPayment) query += `&payment_method=${filterPayment}`;
+        if (filterOrderDateFrom) query += `&start_date=${filterOrderDateFrom}`;
+        if (filterOrderDateTo) query += `&end_date=${filterOrderDateTo}`;
         dispatch(actions.controlLoading(true));
         requestApi(`api/orders${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
@@ -47,7 +52,7 @@ const OrderList = () => {
         }).catch(() => {
             dispatch(actions.controlLoading(false));
         });
-    }, [currentPage, itemOfPage, searchText, filterStatus, filterPayment, refresh]);
+    }, [currentPage, itemOfPage, searchText, filterStatus, filterPayment, filterOrderDateFrom, filterOrderDateTo, refresh]);
 
     // Sort logic
     const sortedOrders = [...orders].sort((a, b) => {
@@ -138,7 +143,7 @@ const OrderList = () => {
             width: "12%"
         },
                 {
-            title: "Người tạo",
+            title: "Người đặt hàng",
             element: row => row.user ? row.user.name : "",
             width: "11%"
         },
@@ -180,14 +185,74 @@ const OrderList = () => {
         {
             title: "Hành động",
             element: row => (
-                <div className="d-flex align-items-center justify-content-center">
-                    <Link className="btn btn-info btn-sm me-1" to={`/order/detail/${row.id}`}>
+                <div className="d-flex align-items-center flex-wrap gap-2">
+                    <Link
+                        className="btn btn-primary btn-sm px-2 py-1"
+                        to={`/order/detail/${row.id}`}
+                        title="Xem chi tiết"
+                    >
                         <i className="fas fa-eye"></i>
                     </Link>
-           
+                    {/* Duyệt đơn (pending -> processing) */}
+                    {row.status === 'pending' && (
+                        <>
+                            <button
+                                className="btn btn-success btn-sm px-2 py-1"
+                                onClick={() => handleUpdateStatus(row.id, 'processing')}
+                                title="Duyệt đơn hàng"
+                            >
+                                <i className="fas fa-check me-1"></i> Duyệt
+                            </button>
+                            <button
+                                className="btn btn-danger btn-sm px-2 py-1"
+                                onClick={() => handleUpdateStatus(row.id, 'cancelled')}
+                                title="Hủy đơn hàng"
+                            >
+                                <i className="fas fa-times me-1"></i> Hủy
+                            </button>
+                        </>
+                    )}
+                    {/* Xác nhận giao hàng (processing -> shipped) */}
+                    {row.status === 'processing' && (
+                        <>
+                            <button
+                                className="btn btn-warning btn-sm px-2 py-1"
+                                onClick={() => handleUpdateStatus(row.id, 'shipped')}
+                                title="Xác nhận đã gửi hàng"
+                            >
+                                <i className="fas fa-truck me-1"></i> Gửi hàng
+                            </button>
+                            <button
+                                className="btn btn-danger btn-sm px-2 py-1"
+                                onClick={() => handleUpdateStatus(row.id, 'cancelled')}
+                                title="Hủy đơn hàng"
+                            >
+                                <i className="fas fa-times me-1"></i> Hủy
+                            </button>
+                        </>
+                    )}
+                    {/* Xác nhận giao thành công (shipped -> delivered) */}
+                    {row.status === 'shipped' && (
+                        <>
+                            <button
+                                className="btn btn-info btn-sm px-2 py-1"
+                                onClick={() => handleUpdateStatus(row.id, 'delivered')}
+                                title="Xác nhận đã giao"
+                            >
+                                <i className="fas fa-box-open me-1"></i> Đã giao
+                            </button>
+                            <button
+                                className="btn btn-danger btn-sm px-2 py-1"
+                                onClick={() => handleUpdateStatus(row.id, 'cancelled')}
+                                title="Hủy đơn hàng"
+                            >
+                                <i className="fas fa-times me-1"></i> Hủy
+                            </button>
+                        </>
+                    )}
                 </div>
             ),
-            width: "9%"
+            width: "20%"
         }
     ];
 
@@ -244,6 +309,42 @@ const OrderList = () => {
     //     }
     // };
 
+    // Thêm hàm xử lý duyệt đơn hàng
+    const handleApproveOrder = async (orderId) => {
+        try {
+            dispatch(actions.controlLoading(true));
+            const res = await requestApi(`api/orders/${orderId}/approve`, 'POST', {});
+            dispatch(actions.controlLoading(false));
+            if (res.data && res.data.success) {
+                toast.success(res.data.message || "Duyệt đơn hàng thành công!");
+                setRefresh(Date.now());
+            } else {
+                toast.error(res.data.message || "Duyệt đơn hàng thất bại!");
+            }
+        } catch (e) {
+            dispatch(actions.controlLoading(false));
+            toast.error("Lỗi khi duyệt đơn hàng!");
+        }
+    };
+
+    // Hàm cập nhật trạng thái đơn hàng
+    const handleUpdateStatus = async (orderId, newStatus) => {
+        try {
+            dispatch(actions.controlLoading(true));
+            const res = await requestApi(`api/orders/${orderId}/status`, 'PUT', { status: newStatus });
+            dispatch(actions.controlLoading(false));
+            if (res.data && res.data.success) {
+                toast.success(res.data.message || "Cập nhật trạng thái thành công!",  toastSuccessConfig);
+                setRefresh(Date.now());
+            } else {
+                toast.error(res.data.message || "Cập nhật trạng thái thất bại!", toastErrorConfig);
+            }
+        } catch (e) {
+            dispatch(actions.controlLoading(false));
+            toast.error("Lỗi khi cập nhật trạng thái!", toastErrorConfig);
+        }
+    };
+
     return (
         <div id="layoutSidenav_content">
             <main>
@@ -292,6 +393,34 @@ const OrderList = () => {
                                 <option value="MoMo">MoMo</option>
                                 <option value="VnPay">VnPay</option>
                             </select>
+                        </div>
+                        {/* Bộ lọc ngày đặt hàng */}
+                        <div className="col-md-3">
+                            <label className="form-label fw-semibold text-secondary mb-1">
+                                <i className="fas fa-calendar me-1"></i>Ngày đặt hàng
+                            </label>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="text-secondary small" style={{ minWidth: 32 }}>Từ</span>
+                                <input
+                                    id="filterOrderDateFrom"
+                                    type="date"
+                                    className="form-control form-control-sm border-secondary shadow-sm flex-grow-1"
+                                    style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                    value={filterOrderDateFrom}
+                                    onChange={e => setFilterOrderDateFrom(e.target.value)}
+                                />
+                            </div>
+                            <div className="d-flex align-items-center gap-2 mt-1">
+                                <span className="text-secondary small" style={{ minWidth: 32 }}>Đến</span>
+                                <input
+                                    id="filterOrderDateTo"
+                                    type="date"
+                                    className="form-control form-control-sm border-secondary shadow-sm flex-grow-1"
+                                    style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                    value={filterOrderDateTo}
+                                    onChange={e => setFilterOrderDateTo(e.target.value)}
+                                />
+                            </div>
                         </div>
                     </div>
                     {/* ...actions, DataTables... */}

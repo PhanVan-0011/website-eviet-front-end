@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import requestApi from '../../helpers/api';
 import moment from 'moment';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
+import { toast } from 'react-toastify';
+import requestApi from '../../helpers/api';
 
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
@@ -26,6 +27,7 @@ const OrderDetail = () => {
     const dispatch = useDispatch();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [refresh, setRefresh] = useState(Date.now());
 
     useEffect(() => {
         setLoading(true);
@@ -41,7 +43,26 @@ const OrderDetail = () => {
                 setLoading(false);
                 dispatch(actions.controlLoading(false));
             });
-    }, [id, dispatch]);
+    }, [id, dispatch, refresh]);
+
+    // Hàm cập nhật trạng thái đơn hàng
+    const handleUpdateStatus = async (orderId, newStatus) => {
+        try {
+            dispatch(actions.controlLoading(true));
+            const res = await requestApi(`api/orders/${orderId}/status`, 'PUT', { status: newStatus });
+            dispatch(actions.controlLoading(false));
+            if (res.data && res.data.success) {
+                toast.success(res.data.message || "Cập nhật trạng thái thành công!");
+                setRefresh(Date.now());
+                // Có thể gọi lại API lấy chi tiết đơn hàng nếu muốn cập nhật giao diện ngay
+            } else {
+                toast.error(res.data.message || "Cập nhật trạng thái thất bại!");
+            }
+        } catch (e) {
+            dispatch(actions.controlLoading(false));
+            toast.error("Lỗi khi cập nhật trạng thái!");
+        }
+    };
 
     if (loading) {
         return (
@@ -250,6 +271,66 @@ const OrderDetail = () => {
                                 <i className="fas fa-arrow-left"></i> Quay lại
                             </button>
                         </div>
+                    </div>
+
+                    <div className="d-flex align-items-center flex-wrap gap-2 mt-3 mb-4">
+                        {/* Duyệt đơn (pending -> processing) */}
+                        {order.status === 'pending' && (
+                            <>
+                                <button
+                                    className="btn btn-success btn-lg px-2 py-1"
+                                    onClick={() => handleUpdateStatus(order.id, 'processing')}
+                                    title="Duyệt đơn hàng"
+                                >
+                                    <i className="fas fa-check me-1"></i> Duyệt
+                                </button>
+                                <button
+                                    className="btn btn-danger btn-lg px-2 py-1"
+                                    onClick={() => handleUpdateStatus(order.id, 'cancelled')}
+                                    title="Hủy đơn hàng"
+                                >
+                                    <i className="fas fa-times me-1"></i> Hủy
+                                </button>
+                            </>
+                        )}
+                        {/* Xác nhận giao hàng (processing -> shipped) */}
+                        {order.status === 'processing' && (
+                            <>
+                                <button
+                                    className="btn btn-warning btn-lg px-2 py-1"
+                                    onClick={() => handleUpdateStatus(order.id, 'shipped')}
+                                    title="Xác nhận đã gửi hàng"
+                                >
+                                    <i className="fas fa-truck me-1"></i> Gửi hàng
+                                </button>
+                                <button
+                                    className="btn btn-danger btn-lg px-2 py-1"
+                                    onClick={() => handleUpdateStatus(order.id, 'cancelled')}
+                                    title="Hủy đơn hàng"
+                                >
+                                    <i className="fas fa-times me-1"></i> Hủy
+                                </button>
+                            </>
+                        )}
+                        {/* Xác nhận giao thành công (shipped -> delivered) */}
+                        {order.status === 'shipped' && (
+                            <>
+                                <button
+                                    className="btn btn-info btn-lg px-2 py-1"
+                                    onClick={() => handleUpdateStatus(order.id, 'delivered')}
+                                    title="Xác nhận đã giao"
+                                >
+                                    <i className="fas fa-box-open me-1"></i> Đã giao
+                                </button>
+                                <button
+                                    className="btn btn-danger btn-lg px-2 py-1"
+                                    onClick={() => handleUpdateStatus(order.id, 'cancelled')}
+                                    title="Hủy đơn hàng"
+                                >
+                                    <i className="fas fa-times me-1"></i> Hủy
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </main>

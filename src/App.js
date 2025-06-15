@@ -28,6 +28,13 @@ import PostUpdate from './components/post/PostUpdate';
 import PostDetail from './components/post/PostDetail';
 import OrderList from './components/order/OrderList';
 import OrderDetail from './components/order/OrderDetail';
+import SliderList from './components/slider/SliderList';
+import SliderAdd from './components/slider/SliderAdd';
+import ComboList from './components/combo/ComboList';
+import ComboDetail from './components/combo/ComboDetail';
+import ComboAdd from './components/combo/ComboAdd';
+import ComboUpdate from './components/combo/ComboUpdate';
+import SliderUpdate from './components/slider/SliderUpdate';
 function App() {
   return (
     <Routes>
@@ -52,10 +59,14 @@ function App() {
             <Route path="/post/detail/:id" element={<PostDetail />} />
 
             <Route path="/order" element={<OrderList />} />
-               <Route path="/order/detail/:id" element={<OrderDetail />} />
-            {/* <Route path="/post/add" element={<PostAdd />} />
-            <Route path="/post/:id" element={<PostUpdate />} />
-            <Route path="/post/detail/:id" element={<PostDetail />} /> */}
+            <Route path="/order/detail/:id" element={<OrderDetail />} />
+            <Route path="/slider" element={<SliderList />} />
+            <Route path="/slider/add" element={<SliderAdd />} />
+            <Route path="/slider/:id" element={<SliderUpdate />} />
+            <Route path="/combo" element={<ComboList />} />
+            <Route path="/combo/detail/:id" element={<ComboDetail />} />
+            <Route path="/combo/add" element={<ComboAdd />} />  
+            <Route path="/combo/:id" element={<ComboUpdate />} />
           </Route>
         </Route>
         <Route element={<PublicRoutes />}>

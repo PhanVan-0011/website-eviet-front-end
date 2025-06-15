@@ -9,6 +9,7 @@ const Sidebar = () => {
     order: false,
     post: false,
     slider: false,
+    combo: false,
   });
 
   const toggle = (menu) => {
@@ -138,6 +139,25 @@ const Sidebar = () => {
               <nav className="sb-sidenav-menu-nested nav">
                 <Link className="nav-link" to="/slider">Danh sách slider</Link>
                 <Link className="nav-link" to="/slider/add">Tạo slider</Link>
+              </nav>
+            </div>
+            <a
+              className={`nav-link${open.combo ? '' : ' collapsed'}`}
+              href="#"
+              onClick={e => { e.preventDefault(); toggle('combo'); }}
+              aria-expanded={open.combo}
+              aria-controls="collapseCombo"
+            >
+              <div className="sb-nav-link-icon"><i className="fas fa-gift"></i></div>
+              Quản lý combo
+              <div className="sb-sidenav-collapse-arrow">
+                <i className={`fas fa-angle-${open.combo ? 'up' : 'down'}`}></i>
+              </div>
+            </a>
+            <div className={`collapse${open.combo ? ' show' : ''}`} id="collapseCombo">
+              <nav className="sb-sidenav-menu-nested nav">
+                <Link className="nav-link" to="/combo">Danh sách combo</Link>
+                <Link className="nav-link" to="/combo/add">Tạo combo</Link>
               </nav>
             </div>
           </div>
