@@ -35,6 +35,10 @@ import ComboDetail from './components/combo/ComboDetail';
 import ComboAdd from './components/combo/ComboAdd';
 import ComboUpdate from './components/combo/ComboUpdate';
 import SliderUpdate from './components/slider/SliderUpdate';
+import PromotionList from './components/promotion/PromotionList';
+import PromotionDetail from './components/promotion/PromotionDetail';
+import PromotionAdd from './components/promotion/PromotionAdd';
+import PromotionUpdate from './components/promotion/PromotionUpdate';
 function App() {
   return (
     <Routes>
@@ -67,6 +71,12 @@ function App() {
             <Route path="/combo/detail/:id" element={<ComboDetail />} />
             <Route path="/combo/add" element={<ComboAdd />} />  
             <Route path="/combo/:id" element={<ComboUpdate />} />
+
+            <Route path="/promotion" element={<PromotionList />} />
+            <Route path="/promotion/detail/:id" element={<PromotionDetail />} />
+            <Route path="/promotion/add" element={<PromotionAdd />} />  
+            <Route path="/promotion/:id" element={<PromotionUpdate />} />
+
           </Route>
         </Route>
         <Route element={<PublicRoutes />}>

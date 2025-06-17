@@ -10,6 +10,7 @@ const Sidebar = () => {
     post: false,
     slider: false,
     combo: false,
+    promotion: false,
   });
 
   const toggle = (menu) => {
@@ -158,6 +159,25 @@ const Sidebar = () => {
               <nav className="sb-sidenav-menu-nested nav">
                 <Link className="nav-link" to="/combo">Danh sách combo</Link>
                 <Link className="nav-link" to="/combo/add">Tạo combo</Link>
+              </nav>
+            </div>
+            <a
+              className="nav-link"
+              href="#"
+              onClick={e => { e.preventDefault(); toggle('promotion'); }}
+              aria-expanded={open.promotion}
+              aria-controls="collapsePromotion"
+            >
+              <div className="sb-nav-link-icon"><i className="fas fa-tags"></i></div>
+              Quản lý khuyến mãi
+              <div className="sb-sidenav-collapse-arrow">
+                <i className={`fas fa-angle-${open.promotion ? 'up' : 'down'}`}></i>
+              </div>
+            </a>
+            <div className={`collapse${open.promotion ? ' show' : ''}`} id="collapsePromotion">
+              <nav className="sb-sidenav-menu-nested nav">
+                <Link className="nav-link" to="/promotion">Danh sách khuyến mãi</Link>
+                <Link className="nav-link" to="/promotion/add">Tạo khuyến mãi</Link>
               </nav>
             </div>
           </div>
