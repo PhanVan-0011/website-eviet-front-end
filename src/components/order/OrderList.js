@@ -40,8 +40,9 @@ const OrderList = () => {
     // Lấy danh sách đơn hàng với filter
     useEffect(() => {
         let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
+        // console.log('Fetching orders with query:', query);
         if (filterStatus) query += `&status=${filterStatus}`;
-        if (filterPayment) query += `&payment_method=${filterPayment}`;
+        if (filterPayment) query += `&payment_method_code=${filterPayment}`;
         if (filterOrderDateFrom) query += `&start_date=${filterOrderDateFrom}`;
         if (filterOrderDateTo) query += `&end_date=${filterOrderDateTo}`;
         dispatch(actions.controlLoading(true));
@@ -93,11 +94,11 @@ const OrderList = () => {
     const columns = [
         {
             title: () => (
-                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('id')}>
-                    Mã đơn hàng{renderSortIcon('id')}
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('order_code')}>
+                    Mã đơn hàng{renderSortIcon('order_code')}
                 </span>
             ),
-            element: row => row.id,
+            element: row => row.order_code,
             width: "8%"
         },
         
@@ -394,33 +395,37 @@ const OrderList = () => {
                                 <option value="VnPay">VnPay</option>
                             </select>
                         </div>
-                        {/* Bộ lọc ngày đặt hàng */}
+                        {/* Bộ lọc ngày đặt hàng - Gộp thành 1 nhóm, hiển thị đẹp hơn */}
                         <div className="col-md-3">
-                            <label className="form-label fw-semibold text-secondary mb-1">
-                                <i className="fas fa-calendar me-1"></i>Ngày đặt hàng
+                            <label className="form-label fw-semibold text-secondary mb-1" htmlFor="filterOrderDateFrom">
+                                <i className="fas fa-calendar-alt me-1"></i>Đặt hàng từ
                             </label>
-                            <div className="d-flex align-items-center gap-2">
-                                <span className="text-secondary small" style={{ minWidth: 32 }}>Từ</span>
-                                <input
-                                    id="filterOrderDateFrom"
-                                    type="date"
-                                    className="form-control form-control-sm border-secondary shadow-sm flex-grow-1"
-                                    style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
-                                    value={filterOrderDateFrom}
-                                    onChange={e => setFilterOrderDateFrom(e.target.value)}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center gap-2 mt-1">
-                                <span className="text-secondary small" style={{ minWidth: 32 }}>Đến</span>
+                        
+                            <input
+                                id="filterOrderDateFrom"
+                                type="date"
+                                className="form-control form-control-sm border-secondary shadow-sm"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, minWidth: 0 }}
+                                value={filterOrderDateFrom}
+                                onChange={e => setFilterOrderDateFrom(e.target.value)}
+                            />           
+                       
+                        </div>
+                        <div className="col-md-3">
+                            <label className="form-label fw-semibold text-secondary mb-1" htmlFor="filterOrderDateFrom">
+                                <i className="fas fa-calendar-check me-1"></i>Đặt hàng đến
+                            </label>
+                            
+                               
                                 <input
                                     id="filterOrderDateTo"
                                     type="date"
-                                    className="form-control form-control-sm border-secondary shadow-sm flex-grow-1"
-                                    style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                    className="form-control form-control-sm border-secondary shadow-sm"
+                                    style={{ backgroundColor: '#f8f9fa', fontWeight: 500, minWidth: 0 }}
                                     value={filterOrderDateTo}
                                     onChange={e => setFilterOrderDateTo(e.target.value)}
                                 />
-                            </div>
+                      
                         </div>
                     </div>
                     {/* ...actions, DataTables... */}

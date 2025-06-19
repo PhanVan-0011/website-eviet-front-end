@@ -313,8 +313,8 @@ const ComboUpdate = () => {
                                     <div className="col-md-12">
                                         <label className="fw-bold mb-2">Sản phẩm trong combo <span style={{ color: 'red' }}>*</span></label>
                                         {comboItems.map((item, idx) => (
-                                            <div className="row align-items-center mb-2" key={idx}>
-                                                <div className="col-md-7">
+                                            <div className="row align-items-center mb-2" key={idx} style={{ minHeight: 70 }}>
+                                                <div className="col-6 d-flex align-items-center">
                                                     <select
                                                         className="form-select"
                                                         value={item.product_id}
@@ -341,28 +341,26 @@ const ComboUpdate = () => {
                                                             );
                                                         })}
                                                     </select>
-                                                    {/* Hiển thị hình ảnh và mô tả sản phẩm đã chọn */}
-                                                    {item.product_id && (
-                                                        <div className="mt-1 d-flex align-items-center gap-2">
-                                                            <img
-                                                                src={
-                                                                    products.find(p => p.id === item.product_id)?.image_url
-                                                                        ? products.find(p => p.id === item.product_id).image_url.startsWith('http')
-                                                                            ? products.find(p => p.id === item.product_id).image_url
-                                                                            : process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => p.id === item.product_id).image_url
-                                                                        : '/no-image.png'
-                                                                }
-                                                                alt=""
-                                                                style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }}
-                                                            />
-                                                            {!products.find(p => p.id === item.product_id)?.image_url && (
-                                                                <span className="ms-2 small text-muted">Sản phẩm được chọn chưa có hình ảnh</span>
-                                                            )}
-                                                            
-                                                        </div>
-                                                    )}
                                                 </div>
-                                                <div className="col-md-3">
+                                                <div className="col-2 d-flex align-items-center">
+                                                    <img
+                                                        src={
+                                                            products.find(p => String(p.id) === String(item.product_id))?.image_url
+                                                                ? process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).image_url
+                                                                : '/no-image.png'
+                                                        }
+                                                        alt=""
+                                                        style={{
+                                                            width: 110,
+                                                            height: 80,
+                                                            objectFit: 'contain',
+                                                            borderRadius: 4,
+                                                            border: '1px solid #eee',
+                                                            background: '#fff'
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="col-2">
                                                     <input
                                                         type="number"
                                                         className="form-control"
@@ -373,7 +371,7 @@ const ComboUpdate = () => {
                                                         required
                                                     />
                                                 </div>
-                                                <div className="col-md-2">
+                                                <div className="col-2 d-flex align-items-center">
                                                     <button
                                                         type="button"
                                                         className="btn btn-danger"

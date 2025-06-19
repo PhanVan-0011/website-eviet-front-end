@@ -7,7 +7,7 @@ import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
-
+import ImageList from '../common/ImageList';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const ComboList = () => {
@@ -118,28 +118,28 @@ const ComboList = () => {
             element: row => row.name,
             width: "18%"
         },
-        {
-            title: "Hình ảnh",
-            element: row => (
-                <img
-                    src={row.image_url?.startsWith('http') ? row.image_url : urlImage + row.image_url}
-                    alt={row.name}
-                    style={{
-                        width: '100px',
-                        height: '60px',
-                        objectFit: 'cover',
-                        background: '#fafafa',
-                        borderRadius: '6px',
-                        border: '1px solid #eee',
-                        padding: '4px'
-                    }}
-                />
-            ),
-            width: "12%"
+    
+         {
+          title: "Hình ảnh",
+          element: row => (
+            <ImageList src={row.image_url?.startsWith('http') ? row.image_url : urlImage + row.image_url} alt={row.name} />
+          ),
+          width: '12%'
         },
         {
             title: "Mô tả",
-            element: row => row.description,
+            element: row => (
+                <div
+                    style={{
+                        maxWidth: 320,
+                        maxHeight: 120,
+                        overflow: 'auto',
+                        whiteSpace: 'pre-line',
+                        textOverflow: 'ellipsis'
+                    }}
+                    dangerouslySetInnerHTML={{ __html: row.description }}
+                />
+            ),
             width: "20%"
         },
         {
@@ -305,61 +305,58 @@ const ComboList = () => {
                                 <option value="200000-">Trên 200.000 ₫</option>
                             </select>
                         </div>
-                        {/* Khoảng ngày bắt đầu */}
+                        {/* Khoảng ngày bắt đầu và kết thúc chia làm 4 cột riêng biệt */}
                         <div className="col-md-2">
                             <label className="form-label fw-semibold text-primary mb-1">
-                                <i className="fas fa-calendar-alt me-1"></i>Bắt đầu
+                                <i className="fas fa-calendar-alt me-1"></i>Bắt đầu từ
                             </label>
-                            <div className="d-flex align-items-center gap-2">
-                                <span className="text-secondary small" style={{ minWidth: 32 }}>Từ</span>
-                                <input
-                                    id="filterStartDateFrom"
-                                    type="date"
-                                    className="form-control form-control-sm border-primary shadow-sm flex-grow-1"
-                                    style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
-                                    value={filterStartDateFrom}
-                                    onChange={e => setFilterStartDateFrom(e.target.value)}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center gap-2 mt-1">
-                                <span className="text-secondary small" style={{ minWidth: 32 }}>Đến</span>
-                                <input
-                                    id="filterStartDateTo"
-                                    type="date"
-                                    className="form-control form-control-sm border-primary shadow-sm flex-grow-1"
-                                    style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
-                                    value={filterStartDateTo}
-                                    onChange={e => setFilterStartDateTo(e.target.value)}
-                                />
-                            </div>
+                            <input
+                                id="filterStartDateFrom"
+                                type="date"
+                                className="form-control form-control-sm border-primary shadow-sm"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                value={filterStartDateFrom}
+                                onChange={e => setFilterStartDateFrom(e.target.value)}
+                            />
                         </div>
-                        {/* Khoảng ngày kết thúc */}
+                        <div className="col-md-2">
+                            <label className="form-label fw-semibold text-primary mb-1">
+                                <i className="fas fa-calendar-alt me-1"></i>Bắt đầu đến
+                            </label>
+                            <input
+                                id="filterStartDateTo"
+                                type="date"
+                                className="form-control form-control-sm border-primary shadow-sm"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                value={filterStartDateTo}
+                                onChange={e => setFilterStartDateTo(e.target.value)}
+                            />
+                        </div>
                         <div className="col-md-2">
                             <label className="form-label fw-semibold text-danger mb-1">
-                                <i className="fas fa-calendar-check me-1"></i>Kết thúc
+                                <i className="fas fa-calendar-check me-1"></i>Kết thúc từ
                             </label>
-                            <div className="d-flex align-items-center gap-2">
-                                <span className="text-secondary small" style={{ minWidth: 32 }}>Từ</span>
-                                <input
-                                    id="filterEndDateFrom"
-                                    type="date"
-                                    className="form-control form-control-sm border-danger shadow-sm flex-grow-1"
-                                    style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
-                                    value={filterEndDateFrom}
-                                    onChange={e => setFilterEndDateFrom(e.target.value)}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center gap-2 mt-1">
-                                <span className="text-secondary small" style={{ minWidth: 32 }}>Đến</span>
-                                <input
-                                    id="filterEndDateTo"
-                                    type="date"
-                                    className="form-control form-control-sm border-danger shadow-sm flex-grow-1"
-                                    style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
-                                    value={filterEndDateTo}
-                                    onChange={e => setFilterEndDateTo(e.target.value)}
-                                />
-                            </div>
+                            <input
+                                id="filterEndDateFrom"
+                                type="date"
+                                className="form-control form-control-sm border-danger shadow-sm"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                value={filterEndDateFrom}
+                                onChange={e => setFilterEndDateFrom(e.target.value)}
+                            />
+                        </div>
+                        <div className="col-md-2">
+                            <label className="form-label fw-semibold text-danger mb-1">
+                                <i className="fas fa-calendar-check me-1"></i>Kết thúc đến
+                            </label>
+                            <input
+                                id="filterEndDateTo"
+                                type="date"
+                                className="form-control form-control-sm border-danger shadow-sm"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                value={filterEndDateTo}
+                                onChange={e => setFilterEndDateTo(e.target.value)}
+                            />
                         </div>
                     </div>
                     <DataTables

@@ -7,7 +7,7 @@ import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
-
+import ImageList from '../common/ImageList';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const SliderList = () => {
@@ -103,21 +103,7 @@ const SliderList = () => {
             title: "Hình ảnh",
             element: row => (
                 <>
-                    <img
-                        src={row.image_url?.startsWith('http') ? row.image_url : urlImage + row.image_url}
-                        alt={row.name || row.title}
-                        style={{
-                            width: '100px',
-                            height: '60px',
-                            objectFit: 'cover',
-                            background: '#fafafa',
-                            borderRadius: '6px',
-                            border: '1px solid #eee',
-                            padding: '4px',
-                            cursor: 'pointer'
-                        }}
-                        onClick={() => setPreviewImage(row.image_url?.startsWith('http') ? row.image_url : urlImage + row.image_url)}
-                    />
+                    <ImageList src={row.image_url?.startsWith('http') ? row.image_url : urlImage + row.image_url} alt={row.name || row.title}  onClick={() => setPreviewImage(row.image_url?.startsWith('http') ? row.image_url : urlImage + row.image_url)} />
                     {/* Modal xem ảnh lớn */}
                     {previewImage && (
                         <div

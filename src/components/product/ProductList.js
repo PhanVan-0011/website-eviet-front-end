@@ -6,9 +6,11 @@ import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
+import ImageList from '../common/ImageList';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
+
 
 const formatVND = (value) => {
     if (typeof value !== 'number' && typeof value !== 'string') return '';
@@ -172,20 +174,9 @@ const ProductList = () => {
         { 
             title: "Hình ảnh", 
             element: row => (
-                <img
-                    src={urlImage + row.image_url}
-                    alt={row.name}
-                    style={{
-                        width: '120px',
-                        height: '80px',
-                        objectFit: 'contain', // Sửa từ 'cover' thành 'contain'
-                        background: '#fafafa',
-                        borderRadius: '6px',
-                        border: '1px solid #eee',
-                        padding: '4px' // Thêm padding để ảnh không dính sát viền
-                    }}
-                />
-            ),
+            <ImageList  src={urlImage + row.image_url}
+                    alt={row.name} /> 
+            ),  
             width: "12%"
         },
         { 
