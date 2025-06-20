@@ -39,6 +39,7 @@ import PromotionList from './components/promotion/PromotionList';
 import PromotionDetail from './components/promotion/PromotionDetail';
 import PromotionAdd from './components/promotion/PromotionAdd';
 import PromotionUpdate from './components/promotion/PromotionUpdate';
+import OrderAdd from './components/order/OrderAdd';
 function App() {
   return (
     <Routes>
@@ -63,6 +64,7 @@ function App() {
             <Route path="/post/detail/:id" element={<PostDetail />} />
 
             <Route path="/order" element={<OrderList />} />
+            <Route path="/order/add" element={<OrderAdd />} />
             <Route path="/order/detail/:id" element={<OrderDetail />} />
             <Route path="/slider" element={<SliderList />} />
             <Route path="/slider/add" element={<SliderAdd />} />

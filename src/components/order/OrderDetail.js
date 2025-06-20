@@ -16,9 +16,17 @@ const statusMap = {
     cancelled: { color: 'danger', text: 'Đã hủy' }
 };
 
+// Hàm format tiền (nếu chưa có)
 const formatVND = (value) => {
-    if (!value) return '0';
-    return Number(value).toLocaleString('vi-VN');
+    if (value === null || value === undefined) return '';
+    // Xử lý chuỗi kiểu "72,300.00" => 72300
+    let number = value;
+    if (typeof value === 'string') {
+        number = value.replace(/,/g, '').replace(/\.00$/, '');
+    }
+    number = Number(number);
+    if (isNaN(number) || number === 0) return '0';
+    return number.toLocaleString('vi-VN');
 };
 
 const OrderDetail = () => {
@@ -121,48 +129,77 @@ const OrderDetail = () => {
                     </ol>
 
                     <div className="row g-4">
-                        {/* Thông tin đơn hàng */}
+                        {/* Thông tin đơn hàng + thanh toán chung 1 khối bên trái */}
                         <div className="col-lg-4">
-                            <div className="card shadow-sm border-0 mb-3">
+                            <div className="card shadow-sm border-0 mb-3 h-100">
                                 <div className="card-header bg-white border-bottom-0 pb-0">
                                     <h5 className="mb-0 fw-bold text-primary">
-                                        <i className="fas fa-file-invoice me-2"></i>Thông tin đơn hàng
+                                        <i className="fas fa-file-invoice me-2"></i>Thông tin đơn hàng & thanh toán
                                     </h5>
                                 </div>
                                 <div className="card-body">
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">Mã đơn:</span> #{order.id}
+                                    {/* Thông tin đơn hàng */}
+                                    <div className="mb-3">
+                                        <div className="mb-2">
+                                            <span className="fw-semibold">Mã đơn:</span> #{order.id}
+                                        </div>
+                                        <div className="mb-2">
+                                            <span className="fw-semibold">Ngày đặt:</span> {moment(order.order_date).format('HH:mm DD/MM/YYYY')}
+                                        </div>
+                                        <div className="mb-2">
+                                            <span className="fw-semibold">Trạng thái:</span>{' '}
+                                            <span className={`badge bg-${status.color}`}>{status.text}</span>
+                                        </div>
+                                        <div className="mb-2">
+                                            <span className="fw-semibold">Tổng tiền:</span>{' '}
+                                            <span className="fw-bold text-danger">{formatVND(order.total_amount)} ₫</span>
+                                        </div>
+                                        <div className="mb-2">
+                                            <span className="fw-semibold">Phí giao hàng:</span> {formatVND(order.shipping_fee)} ₫
+                                        </div>
+                                        <div className="mb-2">
+                                            <span className="fw-semibold">Địa chỉ giao:</span> {order.shipping_address}
+                                        </div>
+                                        <div className="mb-2">
+                                            <span className="fw-semibold">Khách hàng:</span> {order.client_name}
+                                        </div>
+                                        <div className="mb-2">
+                                            <span className="fw-semibold">SĐT khách:</span> {order.client_phone}
+                                        </div>
+                                        <div className="mb-2">
+                                            <span className="fw-semibold">Người tạo:</span> {order.user ? order.user.name : ''}
+                                        </div>
                                     </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">Ngày đặt:</span> {moment(order.order_date).format('HH:mm DD/MM/YYYY')}
-                                    </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">Trạng thái:</span>{' '}
-                                        <span className={`badge bg-${status.color}`}>{status.text}</span>
-                                    </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">Tổng tiền:</span>{' '}
-                                        <span className="fw-bold text-danger">{formatVND(order.total_amount)} ₫</span>
-                                    </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">Phí giao hàng:</span> {formatVND(order.shipping_fee)} ₫
-                                    </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">Địa chỉ giao:</span> {order.shipping_address}
-                                    </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">Khách hàng:</span> {order.client_name}
-                                    </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">SĐT khách:</span> {order.client_phone}
-                                    </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">Người tạo:</span> {order.user ? order.user.name : ''}
+                                    {/* Thông tin thanh toán */}
+                                    <div className="border-top pt-3 mt-2">
+                                        <h6 className="fw-bold text-info mb-3">
+                                            <i className="fas fa-credit-card me-2"></i>Thanh toán
+                                        </h6>
+                                        {order.payment ? (
+                                            <>
+                                                <div className="mb-2">
+                                                    <span className="fw-semibold">Phương thức:</span> {order.payment.method.name}
+                                                </div>
+                                                <div className="mb-2">
+                                                    <span className="fw-semibold">Trạng thái:</span> {order.payment.status}
+                                                </div>
+                                                <div className="mb-2">
+                                                    <span className="fw-semibold">Số tiền:</span> {formatVND(order.payment.amount)} ₫
+                                                </div>
+                                                <div className="mb-2">
+                                                    <span className="fw-semibold">Mã giao dịch:</span> {order.payment.transaction_id || 'Chưa có thông tin giao dịch'}
+                                                </div>
+                                                <div className="mb-2">
+                                                    <span className="fw-semibold">Thanh toán lúc:</span> {order.payment.paid_at || 'Chưa có thời gian thanh toán'}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="text-muted">Chưa có thông tin thanh toán</div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         {/* Danh sách sản phẩm */}
                         <div className="col-lg-8">
                             <div className="card shadow-sm border-0 mb-3">
@@ -182,80 +219,100 @@ const OrderDetail = () => {
                                                     <th className="text-center" style={{ width: 100 }}>Đơn giá</th>
                                                     <th className="text-center" style={{ width: 80 }}>SL</th>
                                                     <th className="text-end" style={{ width: 120 }}>Thành tiền</th>
+                                                    <th className="text-center" style={{ width: 160 }}>Loại</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {order.order_details && order.order_details.length > 0 ? (
-                                                    order.order_details.map((item, idx) => (
-                                                        <tr key={item.id}>
-                                                            <td>{idx + 1}</td>
-                                                            <td>
-                                                                <img
-                                                                    src={item.product && item.product.image_url ? urlImage + item.product.image_url : '/no-image.png'}
-                                                                    alt={item.product ? item.product.name : ''}
-                                                                    className="img-thumbnail"
-                                                                    style={{ width: 56, height: 56, objectFit: 'cover' }}
-                                                                />
-                                                            </td>
-                                                            <td>
-                                                                <div className="fw-semibold">{item.product ? item.product.name : ''}</div>
-                                                                <div className="text-muted small" dangerouslySetInnerHTML={{ __html: item.product ? item.product.description : '' }} />
-                                                            </td>
-                                                            <td className="text-center">{formatVND(item.unit_price)} ₫</td>
-                                                            <td className="text-center">{item.quantity}</td>
-                                                            <td className="text-end fw-bold">{formatVND(item.unit_price * item.quantity)} ₫</td>
-                                                        </tr>
-                                                    ))
+                                                    order.order_details.map((item, idx) => {
+                                                        // Xác định loại sản phẩm và màu viền
+                                                        let borderStyle = '';
+                                                        let typeLabel = '';
+                                                        let badgeColor = '';
+                                                        if (item.combo_id) {
+                                                            borderStyle = '2px solid #0d6efd'; // xanh dương cho combo
+                                                            typeLabel = 'Sản phẩm thuộc combo';
+                                                            badgeColor = '#0d6efd';
+                                                        } else {
+                                                            borderStyle = '2px solid #198754'; // xanh lá cho thường
+                                                            typeLabel = 'Sản phẩm thường';
+                                                            badgeColor = '#198754';
+                                                        }
+                                                        return (
+                                                            <tr key={item.id} style={{ borderLeft: borderStyle }}>
+                                                                <td>{idx + 1}</td>
+                                                                <td>
+                                                                    <img
+                                                                        src={item.product && item.product.image_url
+                                                                            ? (item.product.image_url.startsWith('http')
+                                                                                ? item.product.image_url
+                                                                                : urlImage + item.product.image_url)
+                                                                            : '/no-image.png'}
+                                                                        alt={item.product ? item.product.name : ''}
+                                                                        className="img-thumbnail"
+                                                                        style={{
+                                                                            width: 56,
+                                                                            height: 56,
+                                                                            objectFit: 'cover',
+                                                                            borderRadius: 8,
+                                                                            border: '1px solid #eee'
+                                                                        }}
+                                                                    />
+                                                                </td>
+                                                                <td>
+                                                                    <div className="fw-semibold">{item.product ? item.product.name : ''}</div>
+                                                                    {item.product?.size && (
+                                                                        <span className="badge bg-secondary me-1">{item.product.size}</span>
+                                                                    )}
+                                                                    <div className="text-muted small" dangerouslySetInnerHTML={{ __html: item.product ? item.product.description : '' }} />
+                                                                </td>
+                                                                <td className="text-center">
+                                                                    <span className="fw-bold text-primary">{formatVND(item.unit_price)} ₫</span>
+                                                                </td>
+                                                                <td className="text-center">
+                                                                    <span className="fw-bold">{item.quantity}</span>
+                                                                </td>
+                                                                <td className="text-end fw-bold">
+                                                                    <span className="text-danger">{formatVND(item.unit_price * item.quantity)} ₫</span>
+                                                                </td>
+                                                                <td className="text-center">
+                                                                    <span
+                                                                        className={`badge bg-white border`}
+                                                                        style={{
+                                                                            borderColor: item.combo_id ? '#0d6efd' : '#198754',
+                                                                            color: item.combo_id ? '#0d6efd' : '#198754',
+                                                                            fontWeight: 500,
+                                                                            fontSize: 12,
+                                                                            padding: '4px 10px'
+                                                                        }}
+                                                                    >
+                                                                        {item.combo_id ? 'Sản phẩm thuộc combo' : 'Sản phẩm thường'}
+                                                                    </span>
+                                                                    {/* Hiển thị tên combo nếu có */}
+                                                                    {item.combo_id && item.combo && (
+                                                                        <div className="small mt-1 text-primary" style={{ fontSize: 12 }}>
+                                                                            <i className="fas fa-cubes me-1"></i>
+                                                                            {item.combo.name}
+                                                                        </div>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })
                                                 ) : (
                                                     <tr>
-                                                        <td colSpan={6} className="text-center text-muted">Không có sản phẩm</td>
+                                                        <td colSpan={7} className="text-center text-muted">Không có sản phẩm</td>
                                                     </tr>
                                                 )}
                                             </tbody>
                                             <tfoot>
                                                 <tr>
-                                                    <td colSpan={5} className="text-end fw-bold">Tổng cộng:</td>
+                                                    <td colSpan={6} className="text-end fw-bold">Tổng cộng:</td>
                                                     <td className="text-end fw-bold text-danger">{formatVND(order.total_amount)} ₫</td>
                                                 </tr>
                                             </tfoot>
                                         </table>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Thông tin thanh toán */}
-                    <div className="row mb-4">
-                        <div className="col-lg-4">
-                            <div className="card shadow-sm border-0">
-                                <div className="card-header bg-white border-bottom-0 pb-0">
-                                    <h5 className="mb-0 fw-bold text-info">
-                                        <i className="fas fa-credit-card me-2"></i>Thanh toán
-                                    </h5>
-                                </div>
-                                <div className="card-body">
-                                    {order.payment ? (
-                                        <>
-                                            <div className="mb-2">
-                                                <span className="fw-semibold">Phương thức:</span> {order.payment.gateway}
-                                            </div>
-                                            <div className="mb-2">
-                                                <span className="fw-semibold">Trạng thái:</span> {order.payment.status}
-                                            </div>
-                                            <div className="mb-2">
-                                                <span className="fw-semibold">Số tiền:</span> {order.payment.amount}
-                                            </div>
-                                            <div className="mb-2">
-                                                <span className="fw-semibold">Mã giao dịch:</span> {order.payment.transaction_id}
-                                            </div>
-                                            <div className="mb-2">
-                                                <span className="fw-semibold">Thanh toán lúc:</span> {order.payment.paid_at || 'Chưa thanh toán'}
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="text-muted">Chưa có thông tin thanh toán</div>
-                                    )}
                                 </div>
                             </div>
                         </div>
@@ -268,7 +325,7 @@ const OrderDetail = () => {
                                 <i className="fas fa-edit"></i> Sửa đơn hàng
                             </Link> */}
                             <button className="btn btn-outline-secondary px-4" onClick={() => navigate(-1)}>
-                                <i className="fas fa-arrow-left"></i> Quay lại
+                                <i className="fas fa-arrow-left me-2"></i>Quay lại
                             </button>
                         </div>
                     </div>

@@ -37,6 +37,9 @@ const OrderList = () => {
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
 
+    // Thêm state cho phương thức thanh toán động
+    const [paymentMethods, setPaymentMethods] = useState([]);
+
     // Lấy danh sách đơn hàng với filter
     useEffect(() => {
         let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
@@ -346,6 +349,16 @@ const OrderList = () => {
         }
     };
 
+    // Lấy danh sách phương thức thanh toán từ API khi load trang
+    useEffect(() => {
+        requestApi('api/payment-methods', 'GET', []).then((response) => {
+            if (response.data && response.data.data) {
+                const activeMethods = response.data.data.filter(m => m.is_active);
+                setPaymentMethods(activeMethods);
+            }
+        });
+    }, []);
+
     return (
         <div id="layoutSidenav_content">
             <main>
@@ -355,6 +368,12 @@ const OrderList = () => {
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item active">Đơn hàng</li>
                     </ol>
+                    <div className='mb-3'>
+                            <Link className="btn btn-primary me-2" to="/order/add">
+                                <i className="fas fa-plus"></i> Thêm đơn hàng
+                            </Link>
+                        
+                    </div>
                     {/* Bộ lọc */}
                     <div className="row mb-3 g-2 align-items-end">
                         {/* Trạng thái */}
@@ -377,7 +396,7 @@ const OrderList = () => {
                                 <option value="cancelled">Đã hủy</option>
                             </select>
                         </div>
-                        {/* Phương thức thanh toán */}
+                        {/* Phương thức thanh toán động */}
                         <div className="col-md-3">
                             <label className="form-label fw-semibold text-success mb-1" htmlFor="filterPayment">
                                 <i className="fas fa-credit-card me-1"></i>Phương thức thanh toán
@@ -390,17 +409,18 @@ const OrderList = () => {
                                 onChange={e => setFilterPayment(e.target.value)}
                             >
                                 <option value="">Tất cả</option>
-                                <option value="COD">COD</option>
-                                <option value="MoMo">MoMo</option>
-                                <option value="VnPay">VnPay</option>
+                                {paymentMethods.map(method => (
+                                    <option key={method.code} value={method.code}>
+                                        {method.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
-                        {/* Bộ lọc ngày đặt hàng - Gộp thành 1 nhóm, hiển thị đẹp hơn */}
+                        {/* Bộ lọc ngày đặt hàng */}
                         <div className="col-md-3">
                             <label className="form-label fw-semibold text-secondary mb-1" htmlFor="filterOrderDateFrom">
                                 <i className="fas fa-calendar-alt me-1"></i>Đặt hàng từ
                             </label>
-                        
                             <input
                                 id="filterOrderDateFrom"
                                 type="date"
@@ -408,24 +428,20 @@ const OrderList = () => {
                                 style={{ backgroundColor: '#f8f9fa', fontWeight: 500, minWidth: 0 }}
                                 value={filterOrderDateFrom}
                                 onChange={e => setFilterOrderDateFrom(e.target.value)}
-                            />           
-                       
+                            />
                         </div>
                         <div className="col-md-3">
-                            <label className="form-label fw-semibold text-secondary mb-1" htmlFor="filterOrderDateFrom">
+                            <label className="form-label fw-semibold text-secondary mb-1" htmlFor="filterOrderDateTo">
                                 <i className="fas fa-calendar-check me-1"></i>Đặt hàng đến
                             </label>
-                            
-                               
-                                <input
-                                    id="filterOrderDateTo"
-                                    type="date"
-                                    className="form-control form-control-sm border-secondary shadow-sm"
-                                    style={{ backgroundColor: '#f8f9fa', fontWeight: 500, minWidth: 0 }}
-                                    value={filterOrderDateTo}
-                                    onChange={e => setFilterOrderDateTo(e.target.value)}
-                                />
-                      
+                            <input
+                                id="filterOrderDateTo"
+                                type="date"
+                                className="form-control form-control-sm border-secondary shadow-sm"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, minWidth: 0 }}
+                                value={filterOrderDateTo}
+                                onChange={e => setFilterOrderDateTo(e.target.value)}
+                            />
                         </div>
                     </div>
                     {/* ...actions, DataTables... */}
