@@ -44,7 +44,7 @@ const SliderList = () => {
         if (filterType) query += `&linkable_type=${filterType}`;
 
         dispatch(actions.controlLoading(true));
-        requestApi(`api/sliders${query}`, 'GET', []).then((response) => {
+        requestApi(`api/admin/sliders${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
             setSliders(response.data.data);
             setNumOfPages(response.data.pagination ? response.data.pagination.last_page : 1);
@@ -204,7 +204,7 @@ const SliderList = () => {
     const requestApiDelete = () => {
         dispatch(actions.controlLoading(true));
         if (typeDelete === 'single') {
-            requestApi(`api/sliders/${itemDelete}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/sliders/${itemDelete}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
@@ -223,7 +223,7 @@ const SliderList = () => {
                 }
             });
         } else {
-            requestApi(`api/sliders/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/sliders/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {

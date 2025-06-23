@@ -50,7 +50,7 @@ const ComboList = () => {
         }
 
         dispatch(actions.controlLoading(true));
-        requestApi(`api/combos${query}`, 'GET', []).then((response) => {
+        requestApi(`api/admin/combos${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
             setCombos(response.data.data);
             setNumOfPages(response.data.pagination ? response.data.pagination.last_page : 1);
@@ -205,7 +205,7 @@ const ComboList = () => {
     const requestApiDelete = () => {
         dispatch(actions.controlLoading(true));
         if (typeDelete === 'single') {
-            requestApi(`api/combos/${itemDelete}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/combos/${itemDelete}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
@@ -224,7 +224,7 @@ const ComboList = () => {
                 }
             });
         } else {
-            requestApi(`api/combos/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/combos/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {

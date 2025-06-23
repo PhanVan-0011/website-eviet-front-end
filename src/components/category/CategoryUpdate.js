@@ -24,7 +24,7 @@ const CategoryUpdate = () => {
 
     // Lấy danh sách danh mục cha
     useEffect(() => {
-        requestApi('api/categories?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) {
                 setCategories(response.data.data);
             }
@@ -35,7 +35,7 @@ const CategoryUpdate = () => {
     useEffect(() => {
         const fetchCategoryData = async () => {
             try {
-                const response = await requestApi(`api/categories/${params.id}`, 'GET');
+                const response = await requestApi(`api/admin/categories/${params.id}`, 'GET');
                 const data = response.data.data;
                 setValue('name', data.name);
                 setValue('description', data.description);
@@ -56,7 +56,7 @@ const CategoryUpdate = () => {
         }
         try {
             dispatch(actions.controlLoading(true));
-            const response = await requestApi(`api/categories/${params.id}`, 'PUT', data);
+            const response = await requestApi(`api/admin/categories/${params.id}`, 'PUT', data);
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật danh mục thành công!", toastSuccessConfig);
@@ -211,7 +211,7 @@ const CategoryUpdate = () => {
                        
                             try {
                                 dispatch(actions.controlLoading(true));
-                                const response = await requestApi(`api/categories/${params.id}`, 'DELETE', []);
+                                const response = await requestApi(`api/admin/categories/${params.id}`, 'DELETE', []);
                                 dispatch(actions.controlLoading(false));
                                 if (response.data && response.data.success) {
                                     toast.success(response.data.message || "Xóa người dùng thành công!", toastSuccessConfig);

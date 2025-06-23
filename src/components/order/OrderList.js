@@ -49,7 +49,7 @@ const OrderList = () => {
         if (filterOrderDateFrom) query += `&start_date=${filterOrderDateFrom}`;
         if (filterOrderDateTo) query += `&end_date=${filterOrderDateTo}`;
         dispatch(actions.controlLoading(true));
-        requestApi(`api/orders${query}`, 'GET', []).then((response) => {
+        requestApi(`api/admin/orders${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
             setOrders(response.data.data);
             setNumOfPages(response.data.last_page || 1);
@@ -317,7 +317,7 @@ const OrderList = () => {
     const handleApproveOrder = async (orderId) => {
         try {
             dispatch(actions.controlLoading(true));
-            const res = await requestApi(`api/orders/${orderId}/approve`, 'POST', {});
+            const res = await requestApi(`api/admin/orders/${orderId}/approve`, 'POST', {});
             dispatch(actions.controlLoading(false));
             if (res.data && res.data.success) {
                 toast.success(res.data.message || "Duyệt đơn hàng thành công!");
@@ -335,7 +335,7 @@ const OrderList = () => {
     const handleUpdateStatus = async (orderId, newStatus) => {
         try {
             dispatch(actions.controlLoading(true));
-            const res = await requestApi(`api/orders/${orderId}/status`, 'PUT', { status: newStatus });
+            const res = await requestApi(`api/admin/orders/${orderId}/status`, 'PUT', { status: newStatus });
             dispatch(actions.controlLoading(false));
             if (res.data && res.data.success) {
                 toast.success(res.data.message || "Cập nhật trạng thái thành công!",  toastSuccessConfig);

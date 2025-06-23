@@ -34,7 +34,7 @@ const UserAdd = () => {
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
-            const response = await requestApi('api/users', 'POST', data);
+            const response = await requestApi('api/admin/users', 'POST', data);
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm người dùng thành công!", toastSuccessConfig);

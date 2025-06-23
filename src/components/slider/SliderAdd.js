@@ -24,13 +24,13 @@ const SliderAdd = () => {
 
     // Lấy danh sách sản phẩm, combo, post để chọn liên kết
     useEffect(() => {
-        requestApi('api/products?limit=1000', 'GET', []).then((res) => {
+        requestApi('api/admin/products?limit=1000', 'GET', []).then((res) => {
             if (res.data && res.data.data) setProducts(res.data.data);
         });
-        requestApi('api/combos?limit=1000', 'GET', []).then((res) => {
+        requestApi('api/admin/combos?limit=1000', 'GET', []).then((res) => {
             if (res.data && res.data.data) setCombos(res.data.data);
         });
-        requestApi('api/posts?limit=1000', 'GET', []).then((res) => {
+        requestApi('api/admin/posts?limit=1000', 'GET', []).then((res) => {
             if (res.data && res.data.data) setPosts(res.data.data);
         });
     }, []);
@@ -75,7 +75,7 @@ const SliderAdd = () => {
                 formData.append('linkable_id', data.link_id);
             }
             const response = await requestApi(
-                'api/sliders',
+                'api/admin/sliders',
                 'POST',
                 formData,
                 'json',

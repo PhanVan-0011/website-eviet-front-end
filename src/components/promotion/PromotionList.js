@@ -41,7 +41,7 @@ const PromotionList = () => {
         if (filterEndDate) query += `&end_date=${filterEndDate}`;
 
         dispatch(actions.controlLoading(true));
-        requestApi(`api/promotions${query}`, 'GET', []).then((response) => {
+        requestApi(`api/admin/promotions${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
             setPromotions(response.data.data);
             setNumOfPages(response.data.pagination ? response.data.pagination.last_page : 1);
@@ -190,7 +190,7 @@ const PromotionList = () => {
     const requestApiDelete = () => {
         dispatch(actions.controlLoading(true));
         if (typeDelete === 'single') {
-            requestApi(`api/promotions/${itemDelete}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/promotions/${itemDelete}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
@@ -209,7 +209,7 @@ const PromotionList = () => {
                 }
             });
         } else {
-            requestApi(`api/promotions/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/promotions/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {

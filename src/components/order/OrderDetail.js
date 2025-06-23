@@ -40,7 +40,7 @@ const OrderDetail = () => {
     useEffect(() => {
         setLoading(true);
         dispatch(actions.controlLoading(true));
-        requestApi(`api/orders/${id}`, 'GET', [])
+        requestApi(`api/admin/orders/${id}`, 'GET', [])
             .then(res => {
                 setOrder(res.data.data);
                 setLoading(false);
@@ -57,7 +57,7 @@ const OrderDetail = () => {
     const handleUpdateStatus = async (orderId, newStatus) => {
         try {
             dispatch(actions.controlLoading(true));
-            const res = await requestApi(`api/orders/${orderId}/status`, 'PUT', { status: newStatus });
+            const res = await requestApi(`api/admin/orders/${orderId}/status`, 'PUT', { status: newStatus });
             dispatch(actions.controlLoading(false));
             if (res.data && res.data.success) {
                 toast.success(res.data.message || "Cập nhật trạng thái thành công!");

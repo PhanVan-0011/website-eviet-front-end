@@ -22,11 +22,11 @@ const PostUpdate = () => {
     const [description, setDescription] = useState('');
 
     useEffect(() => {
-        requestApi('api/categories?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) setCategories(response.data.data);
         });
         // Lấy dữ liệu bài viết
-        requestApi(`api/posts/${id}`, 'GET', []).then((response) => {
+        requestApi(`api/admin/posts/${id}`, 'GET', []).then((response) => {
             const data = response.data.data;
             setValue('title', data.title);
             setValue('content', data.content);
@@ -72,7 +72,7 @@ const PostUpdate = () => {
             }
             console.log('Form data prepared:', formData);
             const response = await requestApi(
-                `api/posts/${id}`,
+                `api/admin/posts/${id}`,
                 'POST',
                 formData,
                 'json',

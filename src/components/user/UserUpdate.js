@@ -26,7 +26,7 @@ const UserUpdate = () => {
         // Lấy thông tin người dùng từ API
         const fetchUserData = async () => {
             try {
-                const response = await requestApi(`api/users/${params.id}`, 'GET');
+                const response = await requestApi(`api/admin/users/${params.id}`, 'GET');
                 const data = response.data.data;
                 setValue('name', data.name);
                 setValue('address', data.address);
@@ -51,7 +51,7 @@ const UserUpdate = () => {
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
-            const response = await requestApi(`api/users/${params.id}`, 'PUT', data);
+            const response = await requestApi(`api/admin/users/${params.id}`, 'PUT', data);
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật thông tin thành công", toastSuccessConfig);
@@ -253,7 +253,7 @@ const UserUpdate = () => {
                        
                             try {
                                 dispatch(actions.controlLoading(true));
-                                const response = await requestApi(`api/users/${params.id}`, 'DELETE', []);
+                                const response = await requestApi(`api/admin/users/${params.id}`, 'DELETE', []);
                                 dispatch(actions.controlLoading(false));
                                 if (response.data && response.data.success) {
                                     toast.success(response.data.message || "Xóa người dùng thành công!", toastSuccessConfig);

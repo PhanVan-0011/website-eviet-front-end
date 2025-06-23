@@ -25,7 +25,7 @@ const ProductUpdate = () => {
     const [description, setDescription] = useState('');
     // Lấy danh sách danh mục
     useEffect(() => {
-        requestApi('api/categories?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) {
                 setCategories(response.data.data);
             }
@@ -36,7 +36,7 @@ const ProductUpdate = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await requestApi(`api/products/${params.id}`, 'GET');
+                const response = await requestApi(`api/admin/products/${params.id}`, 'GET');
                 const data = response.data.data;
                 setValue('name', data.name);
                 setValue('description', data.description);
@@ -107,7 +107,7 @@ const ProductUpdate = () => {
             // Nếu không chọn ảnh mới, backend sẽ giữ ảnh cũ
             console.log('Submitting form data:', formData);
             const response = await requestApi(
-                `api/products/${params.id}`,
+                `api/admin/products/${params.id}`,
                 'POST', // hoặc 'PUT' nếu backend hỗ trợ
                 formData,
                 'json',
@@ -382,7 +382,7 @@ const ProductUpdate = () => {
                        
                             try {
                                 dispatch(actions.controlLoading(true));
-                                const response = await requestApi(`api/products/${params.id}`, 'DELETE', []);
+                                const response = await requestApi(`api/admin/products/${params.id}`, 'DELETE', []);
                                 dispatch(actions.controlLoading(false));
                                 if (response.data && response.data.success) {
                                     toast.success(response.data.message || "Xóa sản phẩm thành công!", toastSuccessConfig);

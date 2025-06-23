@@ -40,6 +40,8 @@ import PromotionDetail from './components/promotion/PromotionDetail';
 import PromotionAdd from './components/promotion/PromotionAdd';
 import PromotionUpdate from './components/promotion/PromotionUpdate';
 import OrderAdd from './components/order/OrderAdd';
+import RuleList from './components/rule/RuleList';
+
 function App() {
   return (
     <Routes>
@@ -78,6 +80,7 @@ function App() {
             <Route path="/promotion/detail/:id" element={<PromotionDetail />} />
             <Route path="/promotion/add" element={<PromotionAdd />} />  
             <Route path="/promotion/:id" element={<PromotionUpdate />} />
+            <Route path="/rule" element={<RuleList />} />
 
           </Route>
         </Route>

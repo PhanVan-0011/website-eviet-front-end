@@ -17,7 +17,7 @@ const PostAdd = () => {
     const [imageFile, setImageFile] = useState(null);
 
     useEffect(() => {
-        requestApi('api/categories?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) setCategories(response.data.data);
         });
     }, []);
@@ -53,7 +53,7 @@ const PostAdd = () => {
                 formData.append('image_url', data.imageFile[0]);
             }
             const response = await requestApi(
-                'api/posts',
+                'api/admin/posts',
                 'POST',
                 formData,
                 'json',

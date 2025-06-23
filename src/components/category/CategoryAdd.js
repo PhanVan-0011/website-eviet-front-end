@@ -21,7 +21,7 @@ const CategoryAdd = () => {
 
     // Lấy danh sách danh mục cha
     useEffect(() => {
-        requestApi('api/categories?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) {
                 setCategories(response.data.data);
             }
@@ -36,7 +36,7 @@ const CategoryAdd = () => {
         }
         try {
             dispatch(actions.controlLoading(true));
-            const response = await requestApi('api/categories', 'POST', data);
+            const response = await requestApi('api/admin/categories', 'POST', data);
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm danh mục thành công!",toastSuccessConfig);

@@ -27,7 +27,7 @@ const ProductDetail = () => {
     useEffect(() => {
         setLoading(true);
         dispatch(actions.controlLoading(true));
-        requestApi(`api/products/${id}`, 'GET')
+        requestApi(`api/admin/products/${id}`, 'GET')
             .then(res => {
                 setProduct(res.data.data);
                 setLoading(false);
@@ -45,7 +45,7 @@ const ProductDetail = () => {
         if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
             dispatch(actions.controlLoading(true));
             try {
-                const res = await requestApi(`api/products/${id}`, 'DELETE');
+                const res = await requestApi(`api/admin/products/${id}`, 'DELETE');
                 dispatch(actions.controlLoading(false));
                 toast.success(res.data?.message || 'Xóa sản phẩm thành công!');
                 navigate('/product');

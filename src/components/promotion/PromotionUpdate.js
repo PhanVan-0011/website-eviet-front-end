@@ -43,13 +43,13 @@ const PromotionUpdate = () => {
 
     // Lấy danh sách sản phẩm, danh mục, combo
     useEffect(() => {
-        requestApi('api/products?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/products?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) setProducts(response.data.data);
         });
-        requestApi('api/categories?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) setCategories(response.data.data);
         });
-        requestApi('api/combos?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/combos?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) setCombos(response.data.data);
         });
     }, []);
@@ -59,7 +59,7 @@ const PromotionUpdate = () => {
         const fetchData = async () => {
             try {
                 dispatch(actions.controlLoading(true));
-                const res = await requestApi(`api/promotions/${params.id}`, 'GET');
+                const res = await requestApi(`api/admin/promotions/${params.id}`, 'GET');
                 if (res.data && res.data.data) {
                     const data = res.data.data;
                     setValue('name', data.name);
@@ -146,7 +146,7 @@ const PromotionUpdate = () => {
             if (applicationType === 'combos') payload.combo_ids = selectedCombos.map(Number);
 
             const response = await requestApi(
-                `api/promotions/${params.id}`,
+                `api/admin/promotions/${params.id}`,
                 'PUT', // hoặc 'PUT' nếu backend hỗ trợ
                 payload,
                 'json'

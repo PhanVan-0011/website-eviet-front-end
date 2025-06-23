@@ -22,7 +22,7 @@ const ComboAdd = () => {
 
     // Lấy danh sách sản phẩm
     useEffect(() => {
-        requestApi('api/products?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/products?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) {
                 setProducts(response.data.data);
             }
@@ -90,7 +90,7 @@ const ComboAdd = () => {
             });
 
             const response = await requestApi(
-                'api/combos',
+                'api/admin/combos',
                 'POST',
                 formData,
                 'json',

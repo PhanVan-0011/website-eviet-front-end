@@ -27,8 +27,8 @@ const OrderAdd = () => {
             try {
                 dispatch(actions.controlLoading(true));
                 const [productRes, comboRes, paymentRes] = await Promise.all([
-                    requestApi('api/products?limit=1000', 'GET', []),
-                    requestApi('api/combos?limit=1000', 'GET', []),
+                    requestApi('api/admin/products?limit=1000', 'GET', []),
+                    requestApi('api/admin/combos?limit=1000', 'GET', []),
                     requestApi('api/payment-methods', 'GET', [])
                 ]);
                 if (productRes.data && productRes.data.data) setProducts(productRes.data.data);
@@ -112,7 +112,7 @@ const OrderAdd = () => {
                 }))
             };
             const response = await requestApi(
-                'api/orders',
+                'api/admin/orders',
                 'POST',
                 payload,
                 'json'

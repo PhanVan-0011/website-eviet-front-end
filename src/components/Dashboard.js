@@ -12,10 +12,10 @@ const Dashboard = () => {
     useEffect(() => {
         dispatch(actions.controlLoading(true)); // Bắt đầu loading
         Promise.all([
-            requestApi('api/users', 'GET'),
-            requestApi('api/orders', 'GET'),
-            requestApi('api/products', 'GET'),
-            requestApi('api/posts', 'GET')
+            requestApi('api/admin/users', 'GET'),
+            requestApi('api/admin/orders', 'GET'),
+            requestApi('api/admin/products', 'GET'),
+            requestApi('api/admin/posts', 'GET')
         ]).then((response) => {
             setDashboardData({
                 totalUser: response[0].data.total,

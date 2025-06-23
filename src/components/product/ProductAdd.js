@@ -23,7 +23,7 @@ const ProductAdd = () => {
 
     // Lấy danh sách danh mục
     useEffect(() => {
-        requestApi('api/categories?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) {
                 setCategories(response.data.data);
             }
@@ -70,7 +70,7 @@ const ProductAdd = () => {
             formData.append('image_url', data.imageFile ? data.imageFile[0] : null);
             
             const response = await requestApi(
-                'api/products',
+                'api/admin/products',
                 'POST',
                 formData,
                 'json', // responseType

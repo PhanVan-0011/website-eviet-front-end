@@ -27,7 +27,7 @@ const ComboDetail = () => {
     useEffect(() => {
         setLoading(true);
         dispatch(actions.controlLoading(true));
-        requestApi(`api/combos/${id}`, 'GET')
+        requestApi(`api/admin/combos/${id}`, 'GET')
             .then(res => {
                 setCombo(res.data.data);
                 setLoading(false);
@@ -45,7 +45,7 @@ const ComboDetail = () => {
         if (window.confirm('Bạn có chắc chắn muốn xóa combo này?')) {
             dispatch(actions.controlLoading(true));
             try {
-                const res = await requestApi(`api/combos/${id}`, 'DELETE');
+                const res = await requestApi(`api/admin/combos/${id}`, 'DELETE');
                 dispatch(actions.controlLoading(false));
                 toast.success(res.data?.message || 'Xóa combo thành công!');
                 navigate('/combo');

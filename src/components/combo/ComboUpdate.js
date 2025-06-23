@@ -34,8 +34,8 @@ const ComboUpdate = () => {
             try {
                 dispatch(actions.controlLoading(true));
                 const [productsRes, comboRes] = await Promise.all([
-                    requestApi('api/products?limit=1000', 'GET', []),
-                    requestApi(`api/combos/${params.id}`, 'GET')
+                    requestApi('api/admin/products?limit=1000', 'GET', []),
+                    requestApi(`api/admin/combos/${params.id}`, 'GET')
                 ]);
                 
                 // Xử lý danh sách sản phẩm
@@ -134,7 +134,7 @@ const ComboUpdate = () => {
             });
 
             const response = await requestApi(
-                `api/combos/${params.id}`,
+                `api/admin/combos/${params.id}`,
                 'POST', // hoặc 'PUT' nếu backend hỗ trợ
                 formData,
                 'json',

@@ -40,13 +40,13 @@ const SliderUpdate = () => {
 
     // Lấy danh sách sản phẩm, combo, post để chọn liên kết
     useEffect(() => {
-        requestApi('api/products?limit=1000', 'GET', []).then((res) => {
+        requestApi('api/admin/products?limit=1000', 'GET', []).then((res) => {
             if (res.data && res.data.data) setProducts(res.data.data);
         });
-        requestApi('api/combos?limit=1000', 'GET', []).then((res) => {
+        requestApi('api/admin/combos?limit=1000', 'GET', []).then((res) => {
             if (res.data && res.data.data) setCombos(res.data.data);
         });
-        requestApi('api/posts?limit=1000', 'GET', []).then((res) => {
+        requestApi('api/admin/posts?limit=1000', 'GET', []).then((res) => {
             if (res.data && res.data.data) setPosts(res.data.data);
         });
     }, []);
@@ -56,7 +56,7 @@ const SliderUpdate = () => {
          dispatch(actions.controlLoading(true));
         const fetchSlider = async () => {
             try {
-                const response = await requestApi(`api/sliders/${params.id}`, 'GET');
+                const response = await requestApi(`api/admin/sliders/${params.id}`, 'GET');
                 const data = response.data.data;
                 setValue('title', data.title);
                 setValue('description', data.description);
@@ -120,7 +120,7 @@ const SliderUpdate = () => {
                 formData.append('linkable_id', data.link_id);
             }
             const response = await requestApi(
-                `api/sliders/${params.id}`,
+                `api/admin/sliders/${params.id}`,
                 'POST', // hoặc 'PUT' nếu backend hỗ trợ
                 formData,
                 'json',
@@ -153,7 +153,7 @@ const SliderUpdate = () => {
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
-            const response = await requestApi(`api/sliders/${params.id}`, 'DELETE', []);
+            const response = await requestApi(`api/admin/sliders/${params.id}`, 'DELETE', []);
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Xóa slider thành công!", toastSuccessConfig);

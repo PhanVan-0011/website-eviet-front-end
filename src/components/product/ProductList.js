@@ -46,7 +46,7 @@ const ProductList = () => {
 
     // Lấy danh mục cho filter
     useEffect(() => {
-        requestApi('api/categories?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) setCategories(response.data.data);
         });
     }, []);
@@ -84,7 +84,7 @@ const ProductList = () => {
         if (filterStatus !== '') query += `&status=${filterStatus}`;
 
         dispatch(actions.controlLoading(true));
-        requestApi(`api/products${query}`, 'GET', []).then((response) => {
+        requestApi(`api/admin/products${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
             setProducts(response.data.data);
             setNumOfPages(response.data.pagination.last_page);
@@ -315,7 +315,7 @@ const ProductList = () => {
     const requestApiDelete = () => {
         dispatch(actions.controlLoading(true));
         if(typeDelete === 'single'){
-            requestApi(`api/products/${itemDelete}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/products/${itemDelete}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
@@ -334,7 +334,7 @@ const ProductList = () => {
                 }
             });
         } else {
-            requestApi(`api/products/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/products/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {

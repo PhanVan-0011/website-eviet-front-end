@@ -18,7 +18,7 @@ const PromotionDetail = () => {
     useEffect(() => {
         setLoading(true);
         dispatch(actions.controlLoading(true));
-        requestApi(`api/promotions/${id}`, 'GET')
+        requestApi(`api/admin/promotions/${id}`, 'GET')
             .then(res => {
                 setPromotion(res.data.data);
                 setLoading(false);
@@ -39,7 +39,7 @@ const PromotionDetail = () => {
     const requestApiDelete = async () => {
         dispatch(actions.controlLoading(true));
         try {
-            const res = await requestApi(`api/promotions/${id}`, 'DELETE');
+            const res = await requestApi(`api/admin/promotions/${id}`, 'DELETE');
             dispatch(actions.controlLoading(false));
             setShowModal(false);
             toast.success(res.data?.message || 'Xóa khuyến mãi thành công!', toastSuccessConfig);

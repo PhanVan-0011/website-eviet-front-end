@@ -65,7 +65,7 @@ const UserList = () => {
     const requestApiDelete = () => {
         dispatch(actions.controlLoading(true));
         if(typeDelete === 'single'){
-            requestApi(`api/users/${itemDelete}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/users/${itemDelete}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
@@ -84,7 +84,7 @@ const UserList = () => {
                 }
             });
         } else {
-            requestApi(`api/users/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/users/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
@@ -109,7 +109,7 @@ const UserList = () => {
     useEffect(() => {
         const query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
         dispatch(actions.controlLoading(true)); // Bắt đầu loading
-        requestApi(`api/users${query}`, 'GET', []).then((response) => {
+        requestApi(`api/admin/users${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false)); 
             setUsers(response.data.data);
             setNumOfPages(response.data.last_page);

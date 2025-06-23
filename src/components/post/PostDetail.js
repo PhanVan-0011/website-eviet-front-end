@@ -16,7 +16,7 @@ const PostDetail = () => {
     useEffect(() => {
         setLoading(true);
         dispatch(actions.controlLoading(true));
-        requestApi(`api/posts/${id}`, 'GET')
+        requestApi(`api/admin/posts/${id}`, 'GET')
             .then(res => {
                 setPost(res.data.data);
                 setLoading(false);
