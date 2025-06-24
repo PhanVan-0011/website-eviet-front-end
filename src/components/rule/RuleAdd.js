@@ -35,6 +35,7 @@ const RuleAdd = () => {
             dispatch(actions.controlLoading(true));
             const formData = {
                 name: data.name,
+                display_name: data.display_name,
                 permissions: (data.permission_ids || []).map(Number)
             };
             const response = await requestApi(
@@ -90,7 +91,6 @@ const RuleAdd = () => {
                                                 id="inputName"
                                                 {...register('name', { 
                                                     required: 'Tên vai trò là bắt buộc',
-                                                    
                                                 })}
                                                 placeholder="Nhập tên vai trò"
                                             />
@@ -99,6 +99,21 @@ const RuleAdd = () => {
                                             </label>
                                             {errors.name && <div className="text-danger">{errors.name.message}</div>}
                                             <small className="text-muted">Ví dụ: admin, content-editor, sales-manager</small>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6 h-100 d-flex flex-column">
+                                        <div className="form-floating mb-3 mb-md-0 h-100">
+                                            <input
+                                                className="form-control"
+                                                id="inputDisplayName"
+                                                {...register('display_name', { required: 'Tên hiển thị là bắt buộc' })}
+                                                placeholder="Nhập tên hiển thị"
+                                            />
+                                            <label htmlFor="inputDisplayName">
+                                                Tên hiển thị <span className="text-danger">*</span>
+                                            </label>
+                                            {errors.display_name && <div className="text-danger">{errors.display_name.message}</div>}
+                                            <small className="text-muted">Ví dụ: Kế toán, Quản trị viên...</small>
                                         </div>
                                     </div>
                                 </div>
@@ -128,8 +143,7 @@ const RuleAdd = () => {
                                                                             })}
                                                                         />
                                                                         <label className="form-check-label mb-0 me-2" htmlFor={`perm_${permission.id}`}> 
-                                                                            <span className="fw-semibold">{permission.action}</span>
-                                                                            <span className="text-muted ms-2">{permission.name}</span>
+                                                                            <span className="fw-semibold">{permission.display_name || permission.name}</span>
                                                                         </label>
                                                                     </div>
                                                                 </div>

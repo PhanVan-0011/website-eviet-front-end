@@ -9,6 +9,95 @@ import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 
+const AssignRoleModal = ({ show, onHide, userId, onSuccess }) => {
+    const dispatch = useDispatch();
+    const [roles, setRoles] = useState([]);
+    const [selectedRoles, setSelectedRoles] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (show) {
+            dispatch(actions.controlLoading(true));
+            Promise.all([
+                requestApi('api/admin/roles?limit=1000', 'GET', []),
+                requestApi(`api/admin/users/${userId}`, 'GET', [])
+            ]).then(([rolesRes, userRes]) => {
+                if (rolesRes.data && rolesRes.data.data) setRoles(rolesRes.data.data);
+                if (userRes.data && userRes.data.data && userRes.data.data.roles) {
+                    setSelectedRoles(userRes.data.data.roles.map(r => r.name));
+                }
+            }).finally(() => {
+                dispatch(actions.controlLoading(false));
+            });
+        }
+    }, [show, userId]);
+
+    const handleChange = (roleName) => {
+        setSelectedRoles(prev =>
+            prev.includes(roleName)
+                ? prev.filter(r => r !== roleName)
+                : [...prev, roleName]
+        );
+    };
+
+    const handleSubmit = async () => {
+        dispatch(actions.controlLoading(true));
+        setLoading(true);
+        try {
+            const res = await requestApi(
+                `api/admin/assign-role/${userId}`,
+                'POST',
+                { roles: selectedRoles },
+                'json',
+                'application/json'
+            );
+            if (res.data && res.data.success) {
+                dispatch(actions.controlLoading(false));
+                toast.success(res.data.message || 'Gán vai trò thành công!', toastSuccessConfig);
+                onSuccess && onSuccess();
+                onHide();
+            } else {
+                dispatch(actions.controlLoading(false));
+                toast.error(res.data.message || 'Gán vai trò thất bại!', toastErrorConfig);
+            }
+        } catch (e) {
+            dispatch(actions.controlLoading(true));
+            toast.error('Lỗi server!', toastErrorConfig);
+        }
+        setLoading(false);
+    };
+
+    return (
+        <Modal show={show} onHide={onHide}>
+            <Modal.Header closeButton>
+                <Modal.Title>Gán vai trò cho người dùng</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {roles.map(role => (
+                    <div className="form-check" key={role.name}>
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id={`role_${role.name}`}
+                            checked={selectedRoles.includes(role.name)}
+                            onChange={() => handleChange(role.name)}
+                        />
+                        <label className="form-check-label" htmlFor={`role_${role.name}`}>
+                            {role.display_name || role.name}
+                        </label>
+                    </div>
+                ))}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={onHide}>Hủy</Button>
+                <Button variant="primary" onClick={handleSubmit} disabled={loading}>
+                    {loading ? 'Đang lưu...' : 'Lưu'}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
+};
+
 const UserList = () => {
     const [users, setUsers] = useState([]);
     const [numOfPages, setNumOfPages] = useState(1);
@@ -23,6 +112,8 @@ const UserList = () => {
     const [typeDelete, setTypeDelete] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [refresh, setRefresh] = useState(Date.now());
+    const [showAssignRole, setShowAssignRole] = useState(false);
+    const [assignUserId, setAssignUserId] = useState(null);
 
     const columns = [
         // { title: "ID", element: row => row.id },
@@ -46,6 +137,7 @@ const UserList = () => {
                 <>
                     <Link className="btn btn-primary btn-sm me-1" to={`/user/${row.id}`}><i className="fas fa-edit"></i></Link>
                     <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>
+                    <button className="btn btn-warning btn-sm me-1" onClick={() => { setAssignUserId(row.id); setShowAssignRole(true); }}><i className="fas fa-user-tag"></i> Gán vai trò</button>
                 </>
             )
         }
@@ -150,6 +242,12 @@ const UserList = () => {
                 />
             </div>
         </main>
+        <AssignRoleModal
+            show={showAssignRole}
+            onHide={() => setShowAssignRole(false)}
+            userId={assignUserId}
+            onSuccess={() => setRefresh(Date.now())}
+        />
         <Modal show={showModal} onHide={() => {setShowModal(false); setItemDelete(null); setTypeDelete(null)}}>
             <Modal.Header closeButton>
                 <Modal.Title>Xác nhận xóa</Modal.Title>

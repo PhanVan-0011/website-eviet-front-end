@@ -23,12 +23,23 @@ const RuleList = () => {
     const [refresh, setRefresh] = useState(Date.now());
 
     const columns = [
-        { title: "Tên vai trò", element: row => row.name, width: '20%'},
-
+        { title: "Tên vai trò", element: row => row.display_name ? `${row.display_name} (${row.name})` : row.name, width: '20%'},
         { 
             title: "Danh sách quyền", 
             element: row => row.permissions && row.permissions.length > 0
-                ? row.permissions.map(p => `${p.group}:${p.action}`).join(', ')
+                ? row.permissions.map(p => {
+                    let color = 'secondary';
+                    if (p.action === 'delete') color = 'danger';
+                    else if (p.action === 'manage') color = 'primary';
+                    else if (p.action === 'update') color = 'warning';
+                    else if (p.action === 'create') color = 'success';
+                    else if (p.action === 'view') color = 'info';
+                    return (
+                        <span key={p.id} className={`badge bg-${color} me-1 mb-1`}>
+                            {p.display_name || p.name}
+                        </span>
+                    );
+                })
                 : '',
             width: '50%'
         },
@@ -40,7 +51,6 @@ const RuleList = () => {
                     <Link className="btn btn-primary btn-sm me-1" to={`/rule/${row.id}`}><i className="fas fa-edit"></i></Link>
                     <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>
                 </>
-                
             ),
             width: '10%'
         }

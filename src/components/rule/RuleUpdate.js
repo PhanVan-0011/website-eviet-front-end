@@ -10,12 +10,13 @@ import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 const RuleUpdate = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-    const { register, handleSubmit, setValue, formState: { errors } } = useForm();
+    const { register, handleSubmit, setValue, formState: { errors }, watch } = useForm();
     const dispatch = useDispatch();
     const [permissions, setPermissions] = useState([]);
     const [role, setRole] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [rolePermissions, setRolePermissions] = useState([]);
+    const watchedPermissions = watch('permissions', []);
 
     useEffect(() => {
         dispatch(actions.controlLoading(true));
@@ -30,6 +31,8 @@ const RuleUpdate = () => {
             if (response.data && response.data.data) {
                 setRole(response.data.data);
                 setValue('name', response.data.data.name);
+                setValue('display_name', response.data.data.display_name);
+                setValue('permissions', response.data.data.permissions.map(p => p.id));
                 setRolePermissions(response.data.data.permissions.map(p => p.id));
             }
             dispatch(actions.controlLoading(false));
@@ -43,7 +46,9 @@ const RuleUpdate = () => {
         try {
             dispatch(actions.controlLoading(true));
             const formData = {
-                name: data.name
+                name: data.name,
+                display_name: data.display_name,
+                permissions: (data.permissions || []).map(Number)
             };
             const response = await requestApi(
                 `api/admin/roles/${id}`,
@@ -106,11 +111,26 @@ const RuleUpdate = () => {
                                             <small className="text-muted">Ví dụ: admin, content-editor, sales-manager</small>
                                         </div>
                                     </div>
+                                    <div className="col-md-6 h-100 d-flex flex-column">
+                                        <div className="form-floating mb-3 mb-md-0 h-100">
+                                            <input
+                                                className="form-control"
+                                                id="inputDisplayName"
+                                                {...register('display_name', { required: 'Tên hiển thị là bắt buộc' })}
+                                                placeholder="Nhập tên hiển thị"
+                                            />
+                                            <label htmlFor="inputDisplayName">
+                                                Tên hiển thị <span className="text-danger">*</span>
+                                            </label>
+                                            {errors.display_name && <div className="text-danger">{errors.display_name.message}</div>}
+                                            <small className="text-muted">Ví dụ: Kế toán, Quản trị viên...</small>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="row mb-3">
                                     <div className="col-12 h-100 d-flex flex-column">
                                         <label className="form-label fw-semibold mb-2">
-                                            Danh sách quyền (chỉ xem)
+                                            Chọn quyền <span className="text-danger">*</span>
                                         </label>
                                         <div className="border rounded p-2 bg-light overflow-auto h-100" style={{maxHeight: '400px', minHeight: '120px'}}>
                                             {permissions && Object.keys(permissions).length > 0 ? (
@@ -128,13 +148,21 @@ const RuleUpdate = () => {
                                                                             type="checkbox"
                                                                             id={`perm_${permission.id}`}
                                                                             value={permission.id}
-                                                                            checked={rolePermissions.includes(permission.id)}
-                                                                            disabled
-                                                                            readOnly
+                                                                            {...register('permissions', { required: 'Vui lòng chọn ít nhất một quyền' })}
+                                                                            checked={watchedPermissions.includes(permission.id.toString()) || watchedPermissions.includes(permission.id)}
+                                                                            onChange={e => {
+                                                                                const checked = e.target.checked;
+                                                                                let newPermissions = [...watchedPermissions];
+                                                                                if (checked) {
+                                                                                    if (!newPermissions.includes(permission.id.toString())) newPermissions.push(permission.id.toString());
+                                                                                } else {
+                                                                                    newPermissions = newPermissions.filter(pid => pid !== permission.id.toString() && pid !== permission.id);
+                                                                                }
+                                                                                setValue('permissions', newPermissions);
+                                                                            }}
                                                                         />
                                                                         <label className="form-check-label mb-0 me-2" htmlFor={`perm_${permission.id}`}> 
-                                                                            <span className="fw-semibold">{permission.action}</span>
-                                                                            <span className="text-muted ms-2">{permission.name}</span>
+                                                                            <span className="fw-semibold">{permission.display_name || permission.name}</span>
                                                                         </label>
                                                                     </div>
                                                                 </div>
@@ -143,9 +171,10 @@ const RuleUpdate = () => {
                                                     </div>
                                                 ))
                                             ) : (
-                                                <div className="col-12 text-center text-muted">Hệ thống chưa tồn tại quyền nào...</div>
+                                                <div className="col-12 text-center text-muted">Đang tải dữ liệu...</div>
                                             )}
                                         </div>
+                                        {errors.permissions && <div className="text-danger">{errors.permissions.message}</div>}
                                     </div>
                                 </div>
                                 <div className="mt-auto py-3 bg-white d-flex justify-content-center gap-2">
