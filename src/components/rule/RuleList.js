@@ -23,22 +23,26 @@ const RuleList = () => {
     const [refresh, setRefresh] = useState(Date.now());
 
     const columns = [
-        { title: "Tên vai trò", element: row => row.name },
+        { title: "Tên vai trò", element: row => row.name, width: '20%'},
+
         { 
             title: "Danh sách quyền", 
             element: row => row.permissions && row.permissions.length > 0
                 ? row.permissions.map(p => `${p.group}:${p.action}`).join(', ')
-                : ''
+                : '',
+            width: '50%'
         },
-        { title: "Ngày tạo", element: row => formatDate(row.created_at) },
-        { title: "Ngày cập nhật", element: row => formatDate(row.updated_at) },
+        { title: "Ngày tạo", element: row => formatDate(row.created_at), width: '10%' },
+        { title: "Ngày cập nhật", element: row => formatDate(row.updated_at), width: '10%' },
         {
             title: "Hành động", element: row => (
                 <>
-                    <Link className="btn btn-primary btn-sm me-1" to={`/permision/${row.id}`}><i className="fas fa-edit"></i></Link>
+                    <Link className="btn btn-primary btn-sm me-1" to={`/rule/${row.id}`}><i className="fas fa-edit"></i></Link>
                     <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>
                 </>
-            )
+                
+            ),
+            width: '10%'
         }
     ];
 
@@ -122,7 +126,7 @@ const RuleList = () => {
                         <li className="breadcrumb-item active">Danh sách vai trò</li>
                     </ol>
                     <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/permision/add"><i className="fas fa-plus"></i> Thêm vai trò</Link>
+                        <Link className="btn btn-primary me-2" to="/rule/add"><i className="fas fa-plus"></i> Thêm vai trò</Link>
                         {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa</button>}
                     </div>
                     <DataTables

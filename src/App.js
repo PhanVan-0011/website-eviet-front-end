@@ -41,7 +41,8 @@ import PromotionAdd from './components/promotion/PromotionAdd';
 import PromotionUpdate from './components/promotion/PromotionUpdate';
 import OrderAdd from './components/order/OrderAdd';
 import RuleList from './components/rule/RuleList';
-
+import RuleAdd from './components/rule/RuleAdd';
+import RuleUpdate from './components/rule/RuleUpdate';
 function App() {
   return (
     <Routes>
@@ -81,7 +82,8 @@ function App() {
             <Route path="/promotion/add" element={<PromotionAdd />} />  
             <Route path="/promotion/:id" element={<PromotionUpdate />} />
             <Route path="/rule" element={<RuleList />} />
-
+            <Route path="/rule/add" element={<RuleAdd />} />
+            <Route path="/rule/:id" element={<RuleUpdate />} />
           </Route>
         </Route>
         <Route element={<PublicRoutes />}>
