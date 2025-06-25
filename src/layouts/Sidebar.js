@@ -12,15 +12,17 @@ const Sidebar = () => {
               <div className="sb-nav-link-icon"><i className="fas fa-tachometer-alt"></i></div>
               Tổng quan
             </Link>
-            <div className="sb-sidenav-menu-heading">Quản lý</div>
-            <Link className="nav-link" to="/user">
-              <div className="sb-nav-link-icon"><i className="fas fa-user"></i></div>
-              Quản lý người dùng
+            <div className="sb-sidenav-menu-heading">Quản lý bán hàng</div>
+            <Link className="nav-link" to="/order">
+              <div className="sb-nav-link-icon"><i className="fas fa-shopping-cart"></i></div>
+              Quản lý đơn hàng
             </Link>
-            <Link className="nav-link" to="/rule">
-              <div className="sb-nav-link-icon"><i className="fas fa-user-shield"></i></div>
-              Quản lý phân quyền
+            <Link className="nav-link" to="/promotion">
+              <div className="sb-nav-link-icon"><i className="fas fa-tag"></i></div>
+              Quản lý khuyến mãi
             </Link>
+            <div className="sb-sidenav-menu-heading">Quản lý nội dung</div>
+
             <Link className="nav-link" to="/category">
               <div className="sb-nav-link-icon"><i className="fas fa-list"></i></div>
               Quản lý danh mục
@@ -29,10 +31,7 @@ const Sidebar = () => {
               <div className="sb-nav-link-icon"><i className="fas fa-box"></i></div>
               Quản lý sản phẩm
             </Link>
-            <Link className="nav-link" to="/order">
-              <div className="sb-nav-link-icon"><i className="fas fa-shopping-cart"></i></div>
-              Quản lý đơn hàng
-            </Link>
+
             <Link className="nav-link" to="/post">
               <div className="sb-nav-link-icon"><i className="fas fa-newspaper"></i></div>
               Quản lý bài viết
@@ -45,16 +44,20 @@ const Sidebar = () => {
               <div className="sb-nav-link-icon"><i className="fas fa-gift"></i></div>
               Quản lý combo
             </Link>
-            <Link className="nav-link" to="/promotion">
-              <div className="sb-nav-link-icon"><i className="fas fa-tag"></i></div>
-              Quản lý khuyến mãi
+            <div className="sb-sidenav-menu-heading">Hệ thống</div>
+              <Link className="nav-link" to="/user">
+              <div className="sb-nav-link-icon"><i className="fas fa-users"></i></div>
+              Quản lý khách hàng
+            </Link>
+            <Link className="nav-link" to="/admin">
+              <div className="sb-nav-link-icon"><i className="fas fa-user"></i></div>
+              Tài khoản quản trị
+            </Link>
+            <Link className="nav-link" to="/rule">
+              <div className="sb-nav-link-icon"><i className="fas fa-user-shield"></i></div>
+              Phân quyền (vai trò)
             </Link>
 
-            {/* <div className="sb-sidenav-menu-heading">Cài đặt</div>
-            <Link className="nav-link" to="/settings">
-              <div className="sb-nav-link-icon"><i className="fas fa-cog"></i></div>
-              Cài đặt hệ thống
-            </Link> */}
           </div>
         </div>
       </nav>

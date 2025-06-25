@@ -43,6 +43,9 @@ import OrderAdd from './components/order/OrderAdd';
 import RuleList from './components/rule/RuleList';
 import RuleAdd from './components/rule/RuleAdd';
 import RuleUpdate from './components/rule/RuleUpdate';
+import AdminList from './components/admin/AdminList';
+import AdminAdd from './components/admin/AdminAdd';
+import AdminUpdate from './components/admin/AdminUpdate';
 function App() {
   return (
     <Routes>
@@ -54,6 +57,9 @@ function App() {
             <Route path="/user" element={<UserList />} />
             <Route path="/user/add" element={<UserAdd />} />
             <Route path="/user/:id" element={<UserUpdate />} />
+            <Route path="/admin" element={<AdminList />} />
+            <Route path="/admin/add" element={<AdminAdd />} />
+            <Route path="/admin/:id" element={<AdminUpdate />} />
             <Route path="/category" element={<CategoriesList />} />
             <Route path="/category/add" element={<CategoryAdd />} />
             <Route path="/category/:id" element={<CategoryUpdate />} />

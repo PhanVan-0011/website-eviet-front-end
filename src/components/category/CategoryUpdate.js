@@ -198,7 +198,7 @@ const CategoryUpdate = () => {
                 <Modal.Title>Xác nhận xóa</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <p>Bạn chắc chắn muốn xóa người dùng này?</p>
+                <p>Bạn chắc chắn muốn xóa danh mục này?</p>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={() => setShowModal(false)}>
@@ -214,12 +214,12 @@ const CategoryUpdate = () => {
                                 const response = await requestApi(`api/admin/categories/${params.id}`, 'DELETE', []);
                                 dispatch(actions.controlLoading(false));
                                 if (response.data && response.data.success) {
-                                    toast.success(response.data.message || "Xóa người dùng thành công!", toastSuccessConfig);
+                                    toast.success(response.data.message || "Xóa danh mục thành công!", toastSuccessConfig);
                                     setTimeout(() => {
                                         navigation('/category');
                                     }, 1200);
                                 } else {
-                                    toast.error(response.data.message || "Xóa người dùng thất bại", toastErrorConfig);
+                                    toast.error(response.data.message || "Xóa danh mục thất bại", toastErrorConfig);
                                 }
                             } catch (e) {
                                 dispatch(actions.controlLoading(false));

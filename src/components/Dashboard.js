@@ -1,164 +1,274 @@
-import React from 'react'
-import requestApi from '../helpers/api'
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom';
-
+import React, { useEffect, useState } from 'react';
+import requestApi from '../helpers/api';
 import { useDispatch } from 'react-redux';
 import * as actions from '../redux/actions/index';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    ArcElement,
+    LineElement,
+    PointElement,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+import { Link } from 'react-router-dom';
 
+// Đăng ký các thành phần cần thiết cho Chart.js
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    ArcElement,
+    LineElement,
+    PointElement,
+    Tooltip,
+    Legend
+);
+
+const formatVND = (value) => {
+    if (typeof value !== 'number' && typeof value !== 'string') return '';
+    value = value.toString().replace(/\D/g, '');
+    if (!value) return '';
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
 const Dashboard = () => {
-    const [dashboardData, setDashboardData] = useState({});
+    const [dashboardData, setDashboardData] = useState(null);
     const dispatch = useDispatch();
+
     useEffect(() => {
-        dispatch(actions.controlLoading(true)); // Bắt đầu loading
-        Promise.all([
-            requestApi('api/admin/users', 'GET'),
-            requestApi('api/admin/orders', 'GET'),
-            requestApi('api/admin/products', 'GET'),
-            requestApi('api/admin/posts', 'GET')
-        ]).then((response) => {
-            setDashboardData({
-                totalUser: response[0].data.total,
-                totalOrder: response[1].data.total,
-                totalProduct: response[2].data.total,
-                totalPost: response[3].data.total
+        dispatch(actions.controlLoading(true));
+        requestApi('api/admin/dashboard', 'GET')
+            .then((res) => {
+                setDashboardData(res.data);
+                dispatch(actions.controlLoading(false));
+            })
+            .catch((error) => {
+                dispatch(actions.controlLoading(false));
+                console.log('Dashboard error: ', error);
             });
-            dispatch(actions.controlLoading(false));
-        }
-        ).catch((error) => {
-            dispatch(actions.controlLoading(false));
-            console.log("Dashboard error: ", error);
-        });
-    }, [dispatch])
+    }, [dispatch]);
 
-  return (
-    <div id="layoutSidenav_content">
-    <main>
+    // Dữ liệu biểu đồ area (line fill) doanh thu 6 tháng
+    const revenueAreaChartData = dashboardData?.data?.revenue_chart?.labels ? {
+        labels: dashboardData.data.revenue_chart.labels,
+        datasets: [
+            {
+                label: 'Doanh thu (VNĐ)',
+                data: dashboardData.data.revenue_chart.data,
+                fill: true,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                tension: 0.4,
+            },
+        ],
+    } : null;
+
+    // Dữ liệu biểu đồ tròn trạng thái đơn hàng
+    const orderStatusChartData = dashboardData?.data?.order_status_chart?.labels ? {
+        labels: dashboardData.data.order_status_chart.labels,
+        datasets: [
+            {
+                data: dashboardData.data.order_status_chart.data,
+                backgroundColor: [
+                    '#28a745', '#ffc107', '#17a2b8', '#dc3545', '#6c757d'
+                ],
+            },
+        ],
+    } : null;
+
+    return (
         <div className="container-fluid px-4">
-            <h1 className="mt-4">Tổng quan</h1>
-            <ol className="breadcrumb mb-4">
-                <li className="breadcrumb-item active">Tổng quan</li>
-            </ol>
-            <div className="row">
-                <div className="col-xl-3 col-md-6">
-                    <div className="card bg-primary text-white mb-4 position-relative">
-                        <div className="card-body">Tổng người dùng</div>
-                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            {dashboardData.totalUser}
-                            <span className="visually-hidden">unread messages</span>
-                        </span>
-                        <div className="card-footer d-flex align-items-center justify-content-between">
-                            <Link className="small text-white stretched-link" to="/user">Xem chi tiết</Link>
-                            <div className="small text-white"><i className="fas fa-angle-right"></i></div>
+            <h1 className="mt-4 mb-4">Tổng quan</h1>
+            <div className="row mb-4">
+                <div className="col-md-3">
+                    <div className="card text-white bg-primary mb-3 position-relative">
+                        <div className="card-body">
+                            <h5 className="card-title">
+                                <i className="fas fa-money-bill-wave me-2"></i> Tổng doanh thu
+                            </h5>
+                            <p className="card-text fs-3">
+                                {dashboardData?.data?.kpis?.total_revenue !== undefined
+                                    ? formatVND(dashboardData.data.kpis.total_revenue) + ' ₫'
+                                    : 'Đang tải...'}
+                            </p>
+                            <div className="d-flex justify-content-end">
+                                <Link
+                                    className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
+                                    to="/order"
+                                    style={{ borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
+                                >
+                                    Xem chi tiết <i className="fas fa-arrow-right"></i>
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="col-xl-3 col-md-6">
-                    <div className="card bg-success text-white mb-4 position-relative">
-                        <div className="card-body">Tổng bài viết</div>
-                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            {dashboardData.totalPost}
-                            <span className="visually-hidden">unread messages</span>
-                        </span>
-                        <div className="card-footer d-flex align-items-center justify-content-between">
-                            <Link className="small text-white stretched-link" to="/post">Xem chi tiết</Link>
-                            <div className="small text-white"><i className="fas fa-angle-right"></i></div>
+                <div className="col-md-3">
+                    <div className="card text-white bg-success mb-3 position-relative">
+                        <div className="card-body">
+                            <h5 className="card-title">
+                                <i className="fas fa-shopping-cart me-2"></i> Tổng đơn hàng
+                            </h5>
+                            <p className="card-text fs-3">
+                                {dashboardData?.data?.kpis?.total_orders !== undefined
+                                    ? dashboardData.data.kpis.total_orders
+                                    : 'Đang tải...'}
+                            </p>
+                            <div className="d-flex justify-content-end">
+                                <Link
+                                    className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
+                                    to="/order"
+                                    style={{ borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
+                                >
+                                    Xem chi tiết <i className="fas fa-arrow-right"></i>
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="col-xl-3 col-md-6">
-                    <div className="card bg-warning text-white mb-4 position-relative">
-                        <div className="card-body">Tổng sản phẩm</div>
-                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            {dashboardData.totalProduct}
-                            <span className="visually-hidden">unread messages</span>
-                        </span>
-                        <div className="card-footer d-flex align-items-center justify-content-between">
-                            <Link className="small text-white stretched-link" to="/product">Xem chi tiết</Link>
-                            <div className="small text-white"><i className="fas fa-angle-right"></i></div>
+                <div className="col-md-3">
+                    <div className="card text-white bg-info mb-3 position-relative">
+                        <div className="card-body">
+                            <h5 className="card-title">
+                                <i className="fas fa-users me-2"></i> Tổng người dùng
+                            </h5>
+                            <p className="card-text fs-3">
+                                {dashboardData?.data?.kpis?.total_users !== undefined
+                                    ? dashboardData.data.kpis.total_users
+                                    : 'Đang tải...'}
+                            </p>
+                            <div className="d-flex justify-content-end">
+                                <Link
+                                    className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
+                                    to="/user"
+                                    style={{ borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
+                                >
+                                    Xem chi tiết <i className="fas fa-arrow-right"></i>
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="col-xl-3 col-md-6">
-                    <div className="card bg-danger text-white mb-4 position-relative">
-                        <div className="card-body">Tổng đơn hàng</div>
-                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
-                            {dashboardData.totalOrder}
-                            <span className="visually-hidden">unread messages</span>
-                        </span>
-                        <div className="card-footer d-flex align-items-center justify-content-between">
-                            <Link className="small text-white stretched-link" to="/order">Xem chi tiết</Link>
-                            <div className="small text-white"><i className="fas fa-angle-right"></i></div>
+                <div className="col-md-3">
+                    <div className="card text-white bg-warning mb-3 position-relative">
+                        <div className="card-body">
+                            <h5 className="card-title">
+                                <i className="fas fa-box-open me-2"></i> Tổng sản phẩm
+                            </h5>
+                            <p className="card-text fs-3">
+                                {dashboardData?.data?.kpis?.total_products !== undefined
+                                    ? dashboardData.data.kpis.total_products
+                                    : 'Đang tải...'}
+                            </p>
+                            <div className="d-flex justify-content-end">
+                                <Link
+                                    className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
+                                    to="/product"
+                                    style={{ borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
+                                >
+                                    Xem chi tiết <i className="fas fa-arrow-right"></i>
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div className="row">
-                <div className="col-xl-6">
-                    <div className="card mb-4">
-                        <div className="card-header">
-                            <i className="fas fa-chart-area me-1"></i>
-                            Biểu đồ cột
+
+            <div className="row mb-4">
+                <div className="col-md-6">
+                    <div className="card mb-3">
+                        <div className="card-header"><i className="fas fa-chart-area me-2"></i> Doanh thu 6 tháng gần nhất</div>
+                        <div className="card-body d-flex align-items-center justify-content-center" style={{ height: 300 }}>
+                            {revenueAreaChartData ? (
+                                <Line data={revenueAreaChartData} options={{ maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }} />
+                            ) : (
+                                <div>Đang tải biểu đồ...</div>
+                            )}
                         </div>
-                        <div className="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
                     </div>
                 </div>
-                <div className="col-xl-6">
-                    <div className="card mb-4">
-                        <div className="card-header">
-                            <i className="fas fa-chart-bar me-1"></i>
-                            Biểu đồ tròn
+                <div className="col-md-6">
+                    <div className="card mb-3">
+                        <div className="card-header"><i className="fas fa-chart-pie me-2"></i> Trạng thái đơn hàng</div>
+                        <div className="card-body d-flex align-items-center justify-content-center" style={{ height: 300 }}>
+                            {orderStatusChartData ? (
+                                <Doughnut data={orderStatusChartData} options={{ maintainAspectRatio: false, plugins: { legend: { display: true } } }} />
+                            ) : (
+                                <div>Đang tải biểu đồ...</div>
+                            )}
                         </div>
-                        <div className="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
                     </div>
                 </div>
             </div>
-            <div className="card mb-4">
-                <div className="card-header">
-                    <i className="fas fa-table me-1"></i>
-                    QUẢN LÝ ĐƠN ĐẶT HÀNG
+
+            <div className="row">
+                <div className="col-md-6">
+                    <div className="card mb-3">
+                        <div className="card-header"><i className="fas fa-fire me-2"></i> Top sản phẩm bán chạy</div>
+                        <div className="card-body p-0">
+                            <table className="table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th>Đã bán</th>
+                                        <th>Doanh thu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {dashboardData?.data?.top_selling_products?.length > 0 ? (
+                                        dashboardData.data.top_selling_products.map((item, idx) => (
+                                            <tr key={idx}>
+                                                <td>{item.product_name}</td>
+                                                <td>{item.total_sold}</td>
+                                                <td>{formatVND(item.total_revenue) + ' ₫'}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr><td colSpan="3" className="text-center">Không có dữ liệu</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div className="card-body">
-                    <table id="datatablesSimple">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tfoot>
-                            <tr>
-                                <th></th>
-                                
-                            </tr>
-                        </tfoot>
-                        <tbody>
-                            <tr>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div className="col-md-6">
+                    <div className="card mb-3">
+                        <div className="card-header"><i className="fas fa-tasks me-2"></i> Đơn hàng cần xử lý</div>
+                        <div className="card-body p-0">
+                            <table className="table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Khách hàng</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {dashboardData?.data?.pending_orders?.length > 0 ? (
+                                        dashboardData.data.pending_orders.map((order, idx) => (
+                                            <tr key={idx}>
+                                                <td>{order.order_code}</td>
+                                                <td>{order.client_name}</td>
+                                                <td>
+                                                    <span className="badge bg-warning text-dark">Chờ xử lý</span>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr><td colSpan="3" className="text-center">Không có dữ liệu</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </main>
-    <footer className="py-4 bg-light mt-auto">
-        <div className="container-fluid px-4">
-            <div className="d-flex align-items-center justify-content-between small">
-                <div className="text-muted">Copyright &copy; EVIET SOLUTION 2025</div>
-                <div>
-                    <a href="#"></a>
-                    <a href="#"></a>
-                </div>
-            </div>
-        </div>
-    </footer>
-</div>
-  )
-}
+    );
+};
 
-export default Dashboard
+export default Dashboard;

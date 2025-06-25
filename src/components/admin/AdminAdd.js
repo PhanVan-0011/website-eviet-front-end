@@ -12,7 +12,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import {vi} from 'date-fns/locale';
 
-const UserAdd = () => {
+const AdminAdd = () => {
     const navigation = useNavigate();
     const {
         register,
@@ -37,16 +37,16 @@ const UserAdd = () => {
             const response = await requestApi('api/admin/users', 'POST', data);
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
-                toast.success(response.data.message || "Thêm khách hàng thành công!", toastSuccessConfig);
+                toast.success(response.data.message || "Thêm người dùng thành công!", toastSuccessConfig);
                 // Nếu có access_token thì lưu vào localStorage
                 if (response.data.data && response.data.data.access_token) {
                     localStorage.setItem('access_token', response.data.data.access_token);
                 }
                 setTimeout(() => {
-                    navigation('/user');
+                    navigation('/admin');
                 }, 1500);
             } else {
-                toast.error(response.data.message || "Thêm khách hàng thất bại", toastErrorConfig);
+                toast.error(response.data.message || "Thêm người dùng thất bại", toastErrorConfig);
             }
         } catch (e) {
             dispatch(actions.controlLoading(false));
@@ -65,15 +65,15 @@ const UserAdd = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Thêm khách hàng</h1>
+                    <h1 className="mt-4">Thêm người dùng</h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
-                        <li className="breadcrumb-item active">Thêm khách hàng</li>
+                        <li className="breadcrumb-item active">Thêm người dùng</li>
                     </ol>
                     <div className='card mb-3'>
                         <div className='card-header'>
                             <i className="fas fa-table me-1"></i>
-                            Dữ liệu khách hàng
+                            Dữ liệu người dùng
                         </div>
                         <div className='card-body'>
                             <div className='mb-3 row'>
@@ -84,11 +84,11 @@ const UserAdd = () => {
                                                 <input
                                                     className="form-control"
                                                     id="inputName"
-                                                    {...register('name', { required: 'Tên khách hàng là bắt buộc' })}
-                                                    placeholder="Nhập tên khách hàng"
+                                                    {...register('name', { required: 'Tên người dùng là bắt buộc' })}
+                                                    placeholder="Nhập tên người dùng"
                                                 />
                                                 <label htmlFor="inputName">
-                                                    Tên khách hàng <span style={{color: 'red'}}>*</span>
+                                                    Tên người dùng <span style={{color: 'red'}}>*</span>
                                                 </label>
                                                 {errors.name && <div className="text-danger">{errors.name.message}</div>}
                                             </div>
@@ -247,7 +247,7 @@ const UserAdd = () => {
                                             <button
                                                 type="button"
                                                 className="btn btn-secondary w-25"
-                                                onClick={() => navigation('/user')}
+                                                onClick={() => navigation('/admin')}
                                                 disabled={isSubmitting}
                                             >
                                                 Hủy bỏ
@@ -271,4 +271,4 @@ const UserAdd = () => {
     )
 }
 
-export default UserAdd
+export default AdminAdd

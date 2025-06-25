@@ -9,7 +9,7 @@ import moment from 'moment';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig'
 import { Modal, Button } from 'react-bootstrap';
 
-const UserUpdate = () => {
+const AdminUpdate = () => {
     const params = useParams();
     const navigation = useNavigate();
     const {
@@ -23,7 +23,7 @@ const UserUpdate = () => {
      const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
-        // Lấy thông tin khách hàng từ API
+        // Lấy thông tin người dùng từ API
         const fetchUserData = async () => {
             try {
                 const response = await requestApi(`api/admin/users/${params.id}`, 'GET');
@@ -56,7 +56,7 @@ const UserUpdate = () => {
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật thông tin thành công", toastSuccessConfig);
                 setTimeout(() => {
-                    navigation('/user');
+                    navigation('/admin');
                 }, 1500);
             } else {
                 toast.error(response.data.message || "Cập nhật thất bại", toastErrorConfig);
@@ -79,15 +79,15 @@ const UserUpdate = () => {
     <div id="layoutSidenav_content">
         <main>
             <div className="container-fluid px-4">
-                <h1 className="mt-4">Chỉnh sửa khách hàng</h1>
+                <h1 className="mt-4">Chỉnh sửa người dùng</h1>
                 <ol className="breadcrumb mb-4">
                     <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
-                    <li className="breadcrumb-item active">Chỉnh sửa khách hàng</li>
+                    <li className="breadcrumb-item active">Chỉnh sửa người dùng</li>
                 </ol>
                 <div className='card mb-3'>
                     <div className='card-header'>
                         <i className="fas fa-table me-1"></i>
-                        Dữ liệu khách hàng
+                        Dữ liệu người dùng
                     </div>
                     <div className='card-body'>
                         <div className='mb-3 row'>
@@ -98,11 +98,11 @@ const UserUpdate = () => {
                                             <input
                                                 className="form-control"
                                                 id="inputName"
-                                                {...register('name', { required: 'Tên khách hàng là bắt buộc' })}
-                                                placeholder="Nhập tên khách hàng"
+                                                {...register('name', { required: 'Tên người dùng là bắt buộc' })}
+                                                placeholder="Nhập tên người dùng"
                                             />
                                             <label htmlFor="inputName">
-                                                Tên khách hàng <span style={{color: 'red'}}>*</span>
+                                                Tên người dùng <span style={{color: 'red'}}>*</span>
                                             </label>
                                             {errors.name && <div className="text-danger">{errors.name.message}</div>}
                                         </div>
@@ -212,7 +212,7 @@ const UserUpdate = () => {
                                           <button
                                             type="button"
                                             className="btn btn-secondary w-25 font-weight-bold"
-                                            onClick={() => navigation('/user')}
+                                            onClick={() => navigation('-1')}
                                             disabled={isSubmitting}
                                         >
                                             Hủy bỏ
@@ -240,7 +240,7 @@ const UserUpdate = () => {
                 <Modal.Title>Xác nhận xóa</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <p>Bạn chắc chắn muốn xóa khách hàng này?</p>
+                <p>Bạn chắc chắn muốn xóa người dùng này?</p>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={() => setShowModal(false)}>
@@ -256,12 +256,12 @@ const UserUpdate = () => {
                                 const response = await requestApi(`api/admin/users/${params.id}`, 'DELETE', []);
                                 dispatch(actions.controlLoading(false));
                                 if (response.data && response.data.success) {
-                                    toast.success(response.data.message || "Xóa khách hàng thành công!", toastSuccessConfig);
+                                    toast.success(response.data.message || "Xóa người dùng thành công!", toastSuccessConfig);
                                     setTimeout(() => {
-                                        navigation('/user');
+                                        navigation('/admin');
                                     }, 1200);
                                 } else {
-                                    toast.error(response.data.message || "Xóa khách hàng thất bại", toastErrorConfig);
+                                    toast.error(response.data.message || "Xóa người dùng thất bại", toastErrorConfig);
                                 }
                             } catch (e) {
                                 dispatch(actions.controlLoading(false));
@@ -283,4 +283,4 @@ const UserUpdate = () => {
   )
 }
 
-export default UserUpdate
+export default AdminUpdate
