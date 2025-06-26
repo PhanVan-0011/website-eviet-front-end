@@ -384,7 +384,7 @@ const OrderList = () => {
                             <select
                                 id="filterStatus"
                                 className="form-select form-select-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
@@ -404,7 +404,7 @@ const OrderList = () => {
                             <select
                                 id="filterPayment"
                                 className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterPayment}
                                 onChange={e => setFilterPayment(e.target.value)}
                             >
@@ -425,7 +425,7 @@ const OrderList = () => {
                                 id="filterOrderDateFrom"
                                 type="date"
                                 className="form-control form-control-sm border-secondary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, minWidth: 0 }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, minWidth: 0 }}
                                 value={filterOrderDateFrom}
                                 onChange={e => setFilterOrderDateFrom(e.target.value)}
                             />
@@ -438,7 +438,7 @@ const OrderList = () => {
                                 id="filterOrderDateTo"
                                 type="date"
                                 className="form-control form-control-sm border-secondary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, minWidth: 0 }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, minWidth: 0 }}
                                 value={filterOrderDateTo}
                                 onChange={e => setFilterOrderDateTo(e.target.value)}
                             />

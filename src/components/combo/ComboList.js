@@ -274,7 +274,7 @@ const ComboList = () => {
                             <select
                                 id="filterStatus"
                                 className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
@@ -291,7 +291,7 @@ const ComboList = () => {
                             <select
                                 id="filterPriceRange"
                                 className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterPriceRange}
                                 onChange={e => setFilterPriceRange(e.target.value)}
                             >
@@ -314,7 +314,7 @@ const ComboList = () => {
                                 id="filterStartDateFrom"
                                 type="date"
                                 className="form-control form-control-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
                                 value={filterStartDateFrom}
                                 onChange={e => setFilterStartDateFrom(e.target.value)}
                             />
@@ -327,7 +327,7 @@ const ComboList = () => {
                                 id="filterStartDateTo"
                                 type="date"
                                 className="form-control form-control-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
                                 value={filterStartDateTo}
                                 onChange={e => setFilterStartDateTo(e.target.value)}
                             />
@@ -340,7 +340,7 @@ const ComboList = () => {
                                 id="filterEndDateFrom"
                                 type="date"
                                 className="form-control form-control-sm border-danger shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
                                 value={filterEndDateFrom}
                                 onChange={e => setFilterEndDateFrom(e.target.value)}
                             />
@@ -353,7 +353,7 @@ const ComboList = () => {
                                 id="filterEndDateTo"
                                 type="date"
                                 className="form-control form-control-sm border-danger shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
                                 value={filterEndDateTo}
                                 onChange={e => setFilterEndDateTo(e.target.value)}
                             />

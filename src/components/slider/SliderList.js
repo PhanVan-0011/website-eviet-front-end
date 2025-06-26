@@ -272,7 +272,7 @@ const SliderList = () => {
                             <select
                                 id="filterStatus"
                                 className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
@@ -288,7 +288,7 @@ const SliderList = () => {
                             <select
                                 id="filterType"
                                 className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterType}
                                 onChange={e => setFilterType(e.target.value)}
                             >

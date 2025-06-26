@@ -385,7 +385,7 @@ const ProductList = () => {
                             <select
                                 id="filterCategory"
                                 className="form-select form-select-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterCategory}
                                 onChange={e => setFilterCategory(e.target.value)}
                             >
@@ -403,7 +403,7 @@ const ProductList = () => {
                             <select
                                 id="filterOriginalPrice"
                                 className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterOriginalPrice}
                                 onChange={e => setFilterOriginalPrice(e.target.value)}
                             >
@@ -425,7 +425,7 @@ const ProductList = () => {
                             <select
                                 id="filterSalePrice"
                                 className="form-select form-select-sm border-warning shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterSalePrice}
                                 onChange={e => setFilterSalePrice(e.target.value)}
                             >
@@ -447,7 +447,7 @@ const ProductList = () => {
                             <select
                                 id="filterStatus"
                                 className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >

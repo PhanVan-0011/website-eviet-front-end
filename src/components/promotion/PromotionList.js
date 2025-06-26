@@ -259,7 +259,7 @@ const PromotionList = () => {
                             <select
                                 id="filterStatus"
                                 className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
@@ -276,7 +276,7 @@ const PromotionList = () => {
                             <select
                                 id="filterType"
                                 className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
                                 value={filterType}
                                 onChange={e => setFilterType(e.target.value)}
                             >
@@ -294,7 +294,7 @@ const PromotionList = () => {
                                 id="filterStartDate"
                                 type="date"
                                 className="form-control form-control-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
                                 value={filterStartDate}
                                 onChange={e => setFilterStartDate(e.target.value)}
                             />
@@ -308,7 +308,7 @@ const PromotionList = () => {
                                 id="filterEndDate"
                                 type="date"
                                 className="form-control form-control-sm border-danger shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500 }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
                                 value={filterEndDate}
                                 onChange={e => setFilterEndDate(e.target.value)}
                             />
