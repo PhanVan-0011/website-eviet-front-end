@@ -147,7 +147,7 @@ const OrderList = () => {
             width: "12%"
         },
                 {
-            title: "Người đặt hàng",
+            title: "Người tạo đơn",
             element: row => row.user ? row.user.name : "",
             width: "11%"
         },
