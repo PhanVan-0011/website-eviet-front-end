@@ -29,10 +29,13 @@ ChartJS.register(
 );
 
 const formatVND = (value) => {
-    if (typeof value !== 'number' && typeof value !== 'string') return '';
-    value = value.toString().replace(/\D/g, '');
-    if (!value) return '';
-    return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const number = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(number)) return '';
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+        minimumFractionDigits: 0,
+    }).format(number);
 };
 const Dashboard = () => {
     const [dashboardData, setDashboardData] = useState(null);
@@ -92,7 +95,7 @@ const Dashboard = () => {
                             </h5>
                             <p className="card-text fs-3">
                                 {dashboardData?.data?.kpis?.total_revenue !== undefined
-                                    ? formatVND(dashboardData.data.kpis.total_revenue) + ' ₫'
+                                    ? formatVND(dashboardData.data.kpis.total_revenue)
                                     : 'Đang tải...'}
                             </p>
                             <div className="d-flex justify-content-end">
@@ -184,7 +187,7 @@ const Dashboard = () => {
                         <div className="card-header"><i className="fas fa-chart-area me-2"></i> Doanh thu 6 tháng gần nhất</div>
                         <div className="card-body d-flex align-items-center justify-content-center" style={{ height: 300 }}>
                             {revenueAreaChartData ? (
-                                <Line data={revenueAreaChartData} options={{ maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }} />
+                                <Bar data={revenueAreaChartData} options={{ maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }} />
                             ) : (
                                 <div>Đang tải biểu đồ...</div>
                             )}
@@ -224,7 +227,7 @@ const Dashboard = () => {
                                             <tr key={idx}>
                                                 <td>{item.product_name}</td>
                                                 <td>{item.total_sold}</td>
-                                                <td>{formatVND(item.total_revenue) + ' ₫'}</td>
+                                                <td>{formatVND(item.total_revenue)}</td>
                                             </tr>
                                         ))
                                     ) : (
