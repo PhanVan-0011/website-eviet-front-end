@@ -141,7 +141,7 @@ const OrderDetail = () => {
                                     {/* Thông tin đơn hàng */}
                                     <div className="mb-3">
                                         <div className="mb-2">
-                                            <span className="fw-semibold">Mã đơn:</span> #{order.id}
+                                            <span className="fw-semibold">Mã đơn:</span> #{order.order_code}
                                         </div>
                                         <div className="mb-2">
                                             <span className="fw-semibold">Ngày đặt:</span> {moment(order.order_date).format('HH:mm DD/MM/YYYY')}
@@ -264,7 +264,7 @@ const OrderDetail = () => {
                                                                     {item.product?.size && (
                                                                         <span className="badge bg-secondary me-1">{item.product.size}</span>
                                                                     )}
-                                                                    <div className="text-muted small" dangerouslySetInnerHTML={{ __html: item.product ? item.product.description : '' }} />
+                                                                    <div className="text-muted small" dangerouslySetInnerHTML={{ __html: item.product ? item.product.name : '' }} />
                                                                 </td>
                                                                 <td className="text-center">
                                                                     <span className="fw-bold text-primary">{formatVND(item.unit_price)} ₫</span>
