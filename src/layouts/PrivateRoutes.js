@@ -20,6 +20,18 @@ function matchRoutePermission(pathname) {
   return null;
 }
 
+// Hàm tìm route đầu tiên mà user có quyền
+function findFirstAccessibleRoute(userPermissions) {
+    // Duyệt qua các route, tìm route đầu tiên mà user có quyền
+    for (const [route, permission] of Object.entries(ROUTE_PERMISSIONS)) {
+      if (userPermissions.includes(permission)) {
+        return route;
+      }
+    }
+    // Nếu không có route nào, trả về /not-found
+    return '/not-found';
+  }
+
 const PrivateRoutes = () => {
   const accessToken = localStorage.getItem('access_token') || false;
 //   const permissions = useSelector(state => state.auth?.permissions || []);
@@ -35,6 +47,12 @@ const permissions = useSelector(state =>
   // Tự động kiểm tra quyền theo route
   const requiredPermission = matchRoutePermission(location.pathname);
   if (requiredPermission && !hasPermission(permissions, requiredPermission)) {
+     // Nếu là trang dashboard ("/") và không có quyền, chuyển đến route đầu tiên có quyền
+    if (location.pathname === '/') {
+        const firstRoute = findFirstAccessibleRoute(permissions);
+        return <Navigate to={firstRoute} replace />;
+    }
+    // Các route khác vẫn chuyển về not-found như cũ
     return <Navigate to="/not-found" />;
   }
 
