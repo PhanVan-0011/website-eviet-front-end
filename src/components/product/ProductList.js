@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import DataTables from '../common/DataTables'
 import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
@@ -36,7 +36,7 @@ const ProductList = () => {
 
     // Filter states
     const [categories, setCategories] = useState([]);
-    const [filterCategory, setFilterCategory] = useState('');
+   
     const [filterOriginalPrice, setFilterOriginalPrice] = useState('');
     const [filterSalePrice, setFilterSalePrice] = useState('');
     const [filterStock, setFilterStock] = useState('');
@@ -46,26 +46,18 @@ const ProductList = () => {
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
 
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
+    const categoryIdParam = params.get('category_id') || '';
+    const [filterCategory, setFilterCategory] = useState(categoryIdParam);
+
+
     // Lấy danh mục cho filter
     useEffect(() => {
         requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) setCategories(response.data.data);
         });
     }, []);
-
-    // // Lấy danh sách sản phẩm
-    // useEffect(() => {
-    //     const query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
-    //     dispatch(actions.controlLoading(true));
-    //     requestApi(`api/products${query}`, 'GET', []).then((response) => {
-    //         dispatch(actions.controlLoading(false));
-    //         setProducts(response.data.data);
-    //         setNumOfPages(response.data.pagination.last_page);
-    //     }).catch((error) => {
-    //         dispatch(actions.controlLoading(false));
-    //     });
-    // }, [currentPage, itemOfPage, searchText, refresh]);
-
 
     // 3. Gọi lại API khi filter thay đổi
     useEffect(() => {
