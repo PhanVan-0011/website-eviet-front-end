@@ -76,6 +76,15 @@ const Register = () => {
           dispatch(actions.controlLoading(false));
           if (response.data && response.data.success) {
             toast.success(response.data.message || "Đăng ký thành công!", { autoClose: 2000 });
+            // // Lưu vào redux
+            // dispatch({
+            //   type: 'SET_AUTH',
+            //   payload: {
+            //     user: response.data.user,
+            //     roles: response.data.user.roles.map(r => r.name),
+            //     accessToken: response.data.access_token
+            //   }
+            // });
             // Nếu có access_token thì lưu vào localStorage
             if (response.data.data && response.data.data.access_token) {
               localStorage.setItem('access_token', response.data.data.access_token);

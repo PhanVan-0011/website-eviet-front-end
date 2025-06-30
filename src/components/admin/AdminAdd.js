@@ -49,10 +49,10 @@ const AdminAdd = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm nhân viên thành công!", toastSuccessConfig);
-                // Nếu có access_token thì lưu vào localStorage
-                if (response.data.data && response.data.data.access_token) {
-                    localStorage.setItem('access_token', response.data.data.access_token);
-                }
+                // // Nếu có access_token thì lưu vào localStorage
+                // if (response.data.data && response.data.data.access_token) {
+                //     localStorage.setItem('access_token', response.data.data.access_token);
+                // }
                 setTimeout(() => {
                     navigation('/admin');
                 }, 1500);

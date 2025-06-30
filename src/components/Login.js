@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig } from '../tools/toastConfig';
 import { useDispatch } from 'react-redux';
 import * as actions from '../redux/actions/index';
+import { ALL_PERMISSIONS } from '../constants/permissions';
 
 
 const Login = () => {
@@ -30,6 +31,18 @@ const Login = () => {
                 if (response.data && response.data.success) {
                     // Nếu có access_token thì lưu vào localStorage
                     if (response.data.data && response.data.data.access_token) {
+                        // Lưu vào redux
+                        const permissionsFromApi = ALL_PERMISSIONS;
+                        dispatch({
+                            type: 'SET_AUTH',
+                            payload: {
+                              user: response.data.user,
+                            //   roles: response.data.user.roles.map(r => r.name),
+                              permissions: permissionsFromApi,
+                              accessToken: response.data.access_token
+                            }
+                          });
+                        
                         localStorage.setItem('access_token', response.data.data.access_token);
                     }
                     // toast.success(response.data.message || "Đăng nhập thành công", { autoClose: 2000 });

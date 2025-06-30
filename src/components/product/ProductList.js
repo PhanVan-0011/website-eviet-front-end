@@ -9,6 +9,8 @@ import { formatDate } from '../../tools/formatData';
 import ImageList from '../common/ImageList';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 
@@ -236,15 +238,21 @@ const ProductList = () => {
             title: "Hành động", 
             element: row => (
                 <div className="d-flex align-items-center">
-                    <Link className="btn btn-info btn-sm me-1" to={`/product/detail/${row.id}`}>
-                        <i className="fas fa-eye"></i>
-                    </Link>
-                    <Link className="btn btn-primary btn-sm me-1" to={`/product/${row.id}`}>
-                        <i className="fas fa-edit"></i>
-                    </Link>
-                    <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}>
-                        <i className="fas fa-trash"></i>
-                    </button>
+                    <Permission permission={PERMISSIONS.PRODUCTS_VIEW}>
+                        <Link className="btn btn-info btn-sm me-1" to={`/product/detail/${row.id}`}>
+                            <i className="fas fa-eye"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.PRODUCTS_UPDATE}>
+                        <Link className="btn btn-primary btn-sm me-1" to={`/product/${row.id}`}>
+                            <i className="fas fa-edit"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.PRODUCTS_DELETE}>
+                        <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}>
+                            <i className="fas fa-trash"></i>
+                        </button>
+                    </Permission>
                 </div>
             ),
             width: "10%"
@@ -365,14 +373,18 @@ const ProductList = () => {
                         <li className="breadcrumb-item active">Danh sách sản phẩm</li>
                     </ol>
                     <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/product/add">
-                            <i className="fas fa-plus"></i> Thêm sản phẩm
-                        </Link>
-                        {selectedRows.length > 0 && (
-                            <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
-                                <i className="fas fa-trash"></i> Delete
-                            </button>
-                        )}
+                        <Permission permission={PERMISSIONS.PRODUCTS_CREATE}>
+                            <Link className="btn btn-primary me-2" to="/product/add">
+                                <i className="fas fa-plus"></i> Thêm sản phẩm
+                            </Link>
+                        </Permission>
+                        <Permission permission={PERMISSIONS.PRODUCTS_DELETE}>
+                            {selectedRows.length > 0 && (
+                                <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
+                                    <i className="fas fa-trash"></i> Xóa
+                                </button>
+                            )}
+                        </Permission>
                     </div>
 
                     {/* Bộ lọc */}

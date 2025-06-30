@@ -7,6 +7,8 @@ import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 
 const PromotionList = () => {
     const [promotions, setPromotions] = useState([]);
@@ -162,15 +164,21 @@ const PromotionList = () => {
             title: "Hành động",
             element: row => (
                 <div className="d-flex align-items-center">
-                    <Link className="btn btn-info btn-sm me-1" to={`/promotion/detail/${row.id}`}>
-                        <i className="fas fa-eye"></i>
-                    </Link>
-                    <Link className="btn btn-primary btn-sm me-1" to={`/promotion/${row.id}`}>
-                        <i className="fas fa-edit"></i>
-                    </Link>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
-                        <i className="fas fa-trash"></i>
-                    </button>
+                    <Permission permission={PERMISSIONS.PROMOTIONS_VIEW}>
+                        <Link className="btn btn-info btn-sm me-1" to={`/promotion/detail/${row.id}`}>
+                            <i className="fas fa-eye"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.PROMOTIONS_UPDATE}>
+                        <Link className="btn btn-primary btn-sm me-1" to={`/promotion/${row.id}`}>
+                            <i className="fas fa-edit"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.PROMOTIONS_DELETE}>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
+                            <i className="fas fa-trash"></i>
+                        </button>
+                    </Permission>
                 </div>
             ),
             width: "12%"
@@ -240,14 +248,18 @@ const PromotionList = () => {
                         <li className="breadcrumb-item active">Khuyến mãi</li>
                     </ol>
                     <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/promotion/add">
-                            <i className="fas fa-plus"></i> Thêm khuyến mãi
-                        </Link>
-                        {selectedRows.length > 0 && (
-                            <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
-                                <i className="fas fa-trash"></i> Xóa
-                            </button>
-                        )}
+                        <Permission permission={PERMISSIONS.PROMOTIONS_CREATE}>
+                            <Link className="btn btn-primary me-2" to="/promotion/add">
+                                <i className="fas fa-plus"></i> Thêm khuyến mãi
+                            </Link>
+                        </Permission>
+                        <Permission permission={PERMISSIONS.PROMOTIONS_DELETE}>
+                            {selectedRows.length > 0 && (
+                                <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
+                                    <i className="fas fa-trash"></i> Xóa
+                                </button>
+                            )}
+                        </Permission>
                     </div>
                     {/* Bộ lọc */}
                     <div className="row mb-3 g-2 align-items-end">
