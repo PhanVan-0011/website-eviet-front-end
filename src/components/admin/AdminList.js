@@ -14,13 +14,12 @@ const AssignRoleModal = ({ show, onHide, userId, onSuccess }) => {
     const [roles, setRoles] = useState([]);
     const [selectedRoles, setSelectedRoles] = useState([]);
     const [loading, setLoading] = useState(false);
-
     useEffect(() => {
         if (show) {
             dispatch(actions.controlLoading(true));
             Promise.all([
                 requestApi('api/admin/roles?limit=1000', 'GET', []),
-                requestApi(`api/admin/users/${userId}`, 'GET', [])
+                requestApi(`api/admin/admins/${userId}`, 'GET', [])
             ]).then(([rolesRes, userRes]) => {
                 if (rolesRes.data && rolesRes.data.data) setRoles(rolesRes.data.data);
                 if (userRes.data && userRes.data.data && userRes.data.data.roles) {
@@ -70,7 +69,7 @@ const AssignRoleModal = ({ show, onHide, userId, onSuccess }) => {
     return (
         <Modal show={show} onHide={onHide}>
             <Modal.Header closeButton>
-                <Modal.Title>Cập nhật vai trò cho người dùng</Modal.Title>
+                <Modal.Title>Cập nhật vai trò cho nhân viên</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {roles.map(role => (
@@ -114,7 +113,10 @@ const AdminList = () => {
     const [refresh, setRefresh] = useState(Date.now());
     const [showAssignRole, setShowAssignRole] = useState(false);
     const [assignUserId, setAssignUserId] = useState(null);
-
+    // filter
+    const [filterIsActive, setFilterIsActive] = useState('');
+    const [filterRoleName, setFilterRoleName] = useState('');
+    const [roles, setRoles] = useState([]);
     const columns = [
         // { title: "ID", element: row => row.id },
         { title: "Tên", element: row => row.name },
@@ -139,11 +141,13 @@ const AdminList = () => {
         },
         {
             title: "Hành động", element: row => (
-                <>
+                <>      <Link className="btn btn-info btn-sm me-1" to={`/admin/detail/${row.id}`}>
+                            <i className="fas fa-eye"></i>
+                        </Link>
                     <Link className="btn btn-primary btn-sm me-1" to={`/admin/${row.id}`}><i className="fas fa-edit"></i></Link>
                     <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>
                 </>
-            )
+            ), width: '11%'
         }
     ];
     // Handle single Delete
@@ -161,14 +165,14 @@ const AdminList = () => {
     const requestApiDelete = () => {
         dispatch(actions.controlLoading(true));
         if(typeDelete === 'single'){
-            requestApi(`api/admin/users/${itemDelete}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/admins/${itemDelete}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa người dùng thành công!", toastSuccessConfig);
+                    toast.success(response.data.message || "Xóa nhân viên thành công!", toastSuccessConfig);
                     setRefresh(Date.now());
                 } else {
-                    toast.error(response.data.message || "Xóa người dùng thất bại", toastErrorConfig);
+                    toast.error(response.data.message || "Xóa nhân viên thất bại", toastErrorConfig);
                 }
             }).catch((e) => {
                 dispatch(actions.controlLoading(false));
@@ -180,14 +184,14 @@ const AdminList = () => {
                 }
             });
         } else {
-            requestApi(`api/admin/users/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/admins/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa người dùng thành công!", toastSuccessConfig);
+                    toast.success(response.data.message || "Xóa nhân viên thành công!", toastSuccessConfig);
                     setRefresh(Date.now());
                 } else {
-                    toast.error(response.data.message || "Xóa người dùng thất bại", toastErrorConfig);
+                    toast.error(response.data.message || "Xóa nhân viên thất bại", toastErrorConfig);
                 }
             }).catch((e) => {
                 dispatch(actions.controlLoading(false));
@@ -201,11 +205,19 @@ const AdminList = () => {
         }
     }
 
+    useEffect(() => {
+        requestApi('api/admin/roles?limit=1000', 'GET', []).then((res) => {
+            if (res.data && res.data.data) setRoles(res.data.data);
+        });
+    }, []);
 
     useEffect(() => {
-        const query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
+        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
+        if (filterIsActive !== '') query += `&is_active=${filterIsActive}`;
+        if (filterRoleName) query += `&role_name=${filterRoleName}`;
         dispatch(actions.controlLoading(true)); // Bắt đầu loading
-        requestApi(`api/admin/users${query}`, 'GET', []).then((response) => {
+        console.log(query);
+        requestApi(`api/admin/admins${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false)); 
             setUsers(response.data.data);
             setNumOfPages(response.data.last_page);
@@ -218,19 +230,19 @@ const AdminList = () => {
         }   
     );
     }
-    , [currentPage, itemOfPage, searchText, refresh]);
+    , [currentPage, itemOfPage, searchText, filterIsActive, filterRoleName, refresh]);
   return (
     <div id="layoutSidenav_content">
         <main>
             <div className="container-fluid px-4">
-                <h1 className="mt-4">Danh sách người dùng</h1>
+                <h1 className="mt-4">Danh sách nhân viên</h1>
                 <ol className="breadcrumb mb-4">
                     <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
-                    <li className="breadcrumb-item active">Danh sách người dùng</li>
-
+                    <li className="breadcrumb-item active">Danh sách nhân viên</li>
                 </ol>
+  
                 <div className='mb-3'>
-                    <Link className="btn btn-primary me-2" to="/admin/add"><i className="fas fa-plus"></i> Thêm người dùng</Link>
+                    <Link className="btn btn-primary me-2" to="/admin/add"><i className="fas fa-plus"></i> Thêm nhân viên</Link>
                 
                     {selectedRows.length > 0 && <button
                         className="btn btn-warning me-2"
@@ -242,8 +254,46 @@ const AdminList = () => {
                     }
                     {selectedRows.length > 0 && <button className="btn btn-danger me-2" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Delete</button>}
                 </div>
+                              {/* Bộ lọc */}
+                              <div className="row mb-3 g-2 align-items-end">
+                    {/* Lọc trạng thái */}
+                    <div className="col-md-3">
+                        <label className="form-label fw-semibold text-info mb-1" htmlFor="filterIsActive">
+                            <i className="fas fa-toggle-on me-1"></i>Trạng thái tài khoản
+                        </label>
+                        <select
+                            id="filterIsActive"
+                            className="form-select form-select-sm border-info shadow-sm"
+                            style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height: 40, cursor: 'pointer' }}
+                            value={filterIsActive}
+                            onChange={e => setFilterIsActive(e.target.value)}
+                        >
+                            <option value="">Tất cả</option>
+                            <option value="true">Hoạt động</option>
+                            <option value="false">Không hoạt động</option>
+                        </select>
+                    </div>
+                    {/* Lọc vai trò */}
+                    <div className="col-md-3">
+                        <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterRoleName">
+                            <i className="fas fa-user-tag me-1"></i>Vai trò
+                        </label>
+                        <select
+                            id="filterRoleName"
+                            className="form-select form-select-sm border-primary shadow-sm"
+                            style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height: 40, cursor: 'pointer' }}
+                            value={filterRoleName}
+                            onChange={e => setFilterRoleName(e.target.value)}
+                        >
+                            <option value="">Tất cả vai trò</option>
+                            {roles.map(role => (
+                                <option key={role.name} value={role.name}>{role.display_name || role.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
                 <DataTables 
-                    name="Dữ liệu người dùng"
+                    name="Dữ liệu nhân viên"
                     columns={columns}
                     data={users}
                     numOfPages={numOfPages}
@@ -267,9 +317,9 @@ const AdminList = () => {
             </Modal.Header>
             <Modal.Body>
                 {typeDelete === 'single' ? (
-                    <p>Bạn chắc chắn muốn xóa người dùng này?</p>
+                    <p>Bạn chắc chắn muốn xóa nhân viên này?</p>
                 ) : (
-                    <p>Bạn chắc chắn muốn xóa các người dùng này?</p>
+                    <p>Bạn chắc chắn muốn xóa các nhân viên này?</p>
                 )}
             </Modal.Body>
             <Modal.Footer>

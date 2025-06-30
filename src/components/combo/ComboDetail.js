@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import { toast } from 'react-toastify';
 import moment from 'moment';
-
+import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const formatVND = (value) => {
@@ -47,12 +47,12 @@ const ComboDetail = () => {
             try {
                 const res = await requestApi(`api/admin/combos/${id}`, 'DELETE');
                 dispatch(actions.controlLoading(false));
-                toast.success(res.data?.message || 'Xóa combo thành công!');
+                toast.success(res.data?.message || 'Xóa combo thành công!', toastSuccessConfig);
                 navigate('/combo');
             } catch (e) {
                 dispatch(actions.controlLoading(false));
                 toast.error(
-                    e?.response?.data?.message || 'Xóa combo thất bại!'
+                    e?.response?.data?.message || 'Xóa combo thất bại!', toastErrorConfig
                 );
             }
         }
@@ -78,7 +78,7 @@ const ComboDetail = () => {
                         <li className="breadcrumb-item active">Chi tiết combo</li>
                     </ol>
                 </div>
-                <div className="d-flex flex-column justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+                <div className="d-flex flex-column justify-content-center align-items-center  bg-light" style={{ minHeight: '60vh' }}>
                     <img
                         src="https://cdn-icons-png.flaticon.com/512/6134/6134065.png"
                         alt="Không tìm thấy combo"

@@ -46,6 +46,7 @@ import RuleUpdate from './components/rule/RuleUpdate';
 import AdminList from './components/admin/AdminList';
 import AdminAdd from './components/admin/AdminAdd';
 import AdminUpdate from './components/admin/AdminUpdate';
+import AdminDetail from './components/admin/AdminDetail';
 function App() {
   return (
     <Routes>
@@ -60,6 +61,7 @@ function App() {
             <Route path="/admin" element={<AdminList />} />
             <Route path="/admin/add" element={<AdminAdd />} />
             <Route path="/admin/:id" element={<AdminUpdate />} />
+            <Route path="/admin/detail/:id" element={<AdminDetail />} />
             <Route path="/category" element={<CategoriesList />} />
             <Route path="/category/add" element={<CategoryAdd />} />
             <Route path="/category/:id" element={<CategoryUpdate />} />
