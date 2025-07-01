@@ -6,8 +6,11 @@ const Header = () => {
 
     const handleLogout = () => {
         // Xóa token khỏi localStorage
+        localStorage.removeItem('user');
+        localStorage.removeItem('roles');
+        localStorage.removeItem('permissions');
         localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        
 
         // Điều hướng về trang đăng nhập
         navigate('/login');

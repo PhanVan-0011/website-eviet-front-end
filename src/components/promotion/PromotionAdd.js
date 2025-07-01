@@ -41,15 +41,21 @@ const PromotionAdd = () => {
 
     // Lấy danh sách sản phẩm, danh mục, combo
     useEffect(() => {
-        requestApi('api/admin/products?limit=1000', 'GET', []).then((response) => {
-            if (response.data && response.data.data) setProducts(response.data.data);
-        });
-        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
-            if (response.data && response.data.data) setCategories(response.data.data);
-        });
-        requestApi('api/admin/combos?limit=1000', 'GET', []).then((response) => {
-            if (response.data && response.data.data) setCombos(response.data.data);
-        });
+        const fetchData = async () => {
+            try {
+                const resProducts = await requestApi('api/admin/products?limit=1000', 'GET', []);
+                if (resProducts.data && resProducts.data.data) setProducts(resProducts.data.data);
+
+                const resCategories = await requestApi('api/admin/categories?limit=1000', 'GET', []);
+                if (resCategories.data && resCategories.data.data) setCategories(resCategories.data.data);
+
+                const resCombos = await requestApi('api/admin/combos?limit=1000', 'GET', []);
+                if (resCombos.data && resCombos.data.data) setCombos(resCombos.data.data);
+            } catch (e) {
+                toast.error("Lỗi khi lấy dữ liệu sản phẩm, danh mục hoặc combo!", toastErrorConfig);
+            }
+        };
+        fetchData();
     }, []);
 
     // Xử lý chọn đối tượng áp dụng

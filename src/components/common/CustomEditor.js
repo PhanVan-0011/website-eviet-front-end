@@ -17,11 +17,13 @@ import {  ClassicEditor,
     ImageToolbar,
     ImageUpload,
     Table,
-    TableToolbar, MediaEmbed, Indent} from 'ckeditor5';
-
+    TableToolbar,
+    MediaEmbed,
+    Indent,
+    Alignment
+} from 'ckeditor5';
 
 import 'ckeditor5/ckeditor5.css';
-
 
 function CustomEditor({data, onReady, onChange, trigger}) {
     return (
@@ -51,7 +53,7 @@ function CustomEditor({data, onReady, onChange, trigger}) {
                     ImageToolbar,
                     ImageUpload,
                     Table,
-                    TableToolbar, MediaEmbed],
+                    TableToolbar, MediaEmbed, Alignment],
                 toolbar: ['undo',
                                 'redo','heading',
                                 '|',
@@ -60,6 +62,7 @@ function CustomEditor({data, onReady, onChange, trigger}) {
                                 'underline',
                                 'strikethrough',
                                 '|',
+                                'alignment',
                                 'bulletedList',
                                 'numberedList',
                                 'indent',

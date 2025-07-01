@@ -1,14 +1,15 @@
 const initialState = {
-    user: null,
-    roles: [],
-    permissions: [],
-    accessToken: null,
-    isAuthenticated: false
+    user: JSON.parse(localStorage.getItem('user')) || null,
+    roles: JSON.parse(localStorage.getItem('roles')) || [],
+    permissions: JSON.parse(localStorage.getItem('permissions')) || [],
+    accessToken: localStorage.getItem('access_token') || null,
+    isAuthenticated: !!localStorage.getItem('access_token')
   };
   
   const auth = (state = initialState, action) => {
     switch (action.type) {
       case 'SET_AUTH':
+        // console.log('SET_AUTH payload:', action.payload);
         return {
           ...state,
           user: action.payload.user,
@@ -23,3 +24,5 @@ const initialState = {
         return state;
     }
   };
+
+export default auth;

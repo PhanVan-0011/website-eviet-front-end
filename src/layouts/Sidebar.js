@@ -3,14 +3,13 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Permission from '../components/common/Permission';
 import { PERMISSIONS } from '../constants/permissions';
-import { selectPermissions } from '../redux/reducers/auth';
-import { ALL_PERMISSIONS } from '../constants/permissions';
+
 
 const Sidebar = () => {
   const userPermissions = useSelector(state =>
     state.auth?.permissions && state.auth.permissions.length > 0
       ? state.auth.permissions
-      : ALL_PERMISSIONS);
+      : []);
 
   const hasAnyPermission = (permissionList) =>
     permissionList.some((p) => userPermissions?.includes(p));
@@ -101,7 +100,7 @@ const Sidebar = () => {
               <>
                 <div className="sb-sidenav-menu-heading">Hệ thống</div>
                 <Permission permission={PERMISSIONS.USERS_MANAGE}>
-                  <Link className="nav-link" to="/admin">
+                  <Link className="nav-link" to="/user">
                     <div className="sb-nav-link-icon"><i className="fas fa-users"></i></div>
                     Quản lý khách hàng
                   </Link>

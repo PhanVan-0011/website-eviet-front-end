@@ -5,9 +5,9 @@ import React from 'react'
 import requestApi from '../helpers/api';
 import { toast } from 'react-toastify';
 import { toastErrorConfig } from '../tools/toastConfig';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import * as actions from '../redux/actions/index';
-import { ALL_PERMISSIONS } from '../constants/permissions';
+
 
 
 const Login = () => {
@@ -30,20 +30,26 @@ const Login = () => {
                 dispatch(actions.controlLoading(false));
                 if (response.data && response.data.success) {
                     // Nếu có access_token thì lưu vào localStorage
-                    if (response.data.data && response.data.data.access_token) {
-                        // Lưu vào redux
-                        const permissionsFromApi = ALL_PERMISSIONS;
+                    if (response.data.data) {
+                        // Lưu vào redux    
+                        const user = response.data.data.user;
+                        const roles = user.roles.map(r => r.name);
+                        const permissions = user.permissions.map(r => r.name);
+                        const accessToken = response.data.data.access_token;
                         dispatch({
                             type: 'SET_AUTH',
                             payload: {
-                              user: response.data.user,
-                            //   roles: response.data.user.roles.map(r => r.name),
-                              permissions: permissionsFromApi,
-                              accessToken: response.data.access_token
+                              user: user,
+                              roles: roles,
+                              permissions: permissions,
+                              accessToken: accessToken
                             }
                           });
                         
                         localStorage.setItem('access_token', response.data.data.access_token);
+                        localStorage.setItem('user', JSON.stringify(user));
+                        localStorage.setItem('roles', JSON.stringify(roles));
+                        localStorage.setItem('permissions', JSON.stringify(permissions));
                     }
                     // toast.success(response.data.message || "Đăng nhập thành công", { autoClose: 2000 });
                     navigation('/'); // Chuyển hướng về trang chủ
@@ -92,6 +98,8 @@ const Login = () => {
         }
         return isValid;
     }
+
+  
 
   return (
         <div id="layoutAuthentication" className="bg-primary">
