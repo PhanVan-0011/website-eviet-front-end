@@ -168,9 +168,15 @@ const ProductList = () => {
         { 
             title: "Hình ảnh", 
             element: row => (
-            <ImageList  src={urlImage + row.image_url}
-                    alt={row.name} /> 
-            ),  
+                row.featured_image && row.featured_image.thumb_url ? (
+                    <ImageList
+                        src={urlImage + row.featured_image.thumb_url}
+                        alt={row.name}
+                    />
+                ) : (
+                    <span className="text-muted">Không có ảnh</span>
+                )
+            ),
             width: "12%"
         },
         { 
@@ -179,7 +185,9 @@ const ProductList = () => {
                     Danh mục {renderSortIcon('category')}
                 </span>
             ),
-            element: row => row.category ? row.category.name : "",
+            element: row => Array.isArray(row.categories)
+                ? row.categories.map(cat => cat.name).join(', ')
+                : (row.categories && row.categories.name ? row.categories.name : ""),
             width: "12%"
         },
         { 
