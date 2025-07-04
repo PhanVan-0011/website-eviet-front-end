@@ -34,18 +34,28 @@ const ProductAdd = () => {
 
     // Hàm xử lý khi chọn nhiều ảnh
     const onChangeImages = (e) => {
-        const files = Array.from(e.target.files);
-        if (files.length > 4) {
+        const newFiles = Array.from(e.target.files);
+        let combinedFiles = [...imageFiles, ...newFiles];
+
+        // Loại bỏ các file trùng tên (nếu cần)
+        combinedFiles = combinedFiles.filter(
+            (file, idx, arr) => arr.findIndex(f => f.name === file.name && f.size === file.size) === idx
+        );
+
+        if (combinedFiles.length > 4) {
             toast.error('Chỉ được chọn tối đa 4 ảnh!', toastErrorConfig);
-            return;
+            combinedFiles = combinedFiles.slice(0, 4);
         }
-        setImageFiles(files);
-        setValue('imageFiles', files, { shouldValidate: true });
-        // Tạo preview
-        const previews = files.map(file => URL.createObjectURL(file));
+
+        setImageFiles(combinedFiles);
+        setValue('imageFiles', combinedFiles, { shouldValidate: true });
+
+        // Tạo preview mới
+        const previews = combinedFiles.map(file => URL.createObjectURL(file));
         setImagePreviews(previews);
+
         // Reset featured nếu ảnh đại diện vượt quá số lượng mới
-        if (featuredImageIndex >= files.length) setFeaturedImageIndex(0);
+        if (featuredImageIndex >= combinedFiles.length) setFeaturedImageIndex(0);
     };
 
     // Thêm hàm format chỉ dấu chấm ngăn cách hàng nghìn
@@ -259,7 +269,7 @@ const ProductAdd = () => {
                                                 </div>
                                                 {/* Nút chọn file rõ ràng hơn */}
                                                 <label htmlFor="inputImages" className="form-label btn btn-secondary">
-                                                    <i className="fas fa-upload"></i> Chọn tối đa 4 ảnh sản phẩm
+                                                    <i className="fas fa-upload"></i> Thêm ảnh sản phẩm
                                                 </label>
                                                 <input
                                                     className="form-control"
