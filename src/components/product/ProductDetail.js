@@ -5,6 +5,8 @@ import { formatDate } from '../../tools/formatData';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import { toast } from 'react-toastify';
+import { Modal, Button } from 'react-bootstrap';
+import { toastErrorConfig , toastSuccessConfig} from '../../tools/toastConfig';
 
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
@@ -14,6 +16,9 @@ const ProductDetail = () => {
     const dispatch = useDispatch();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
+    const [modalImg, setModalImg] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // Hàm format giá tiền
     const formatVND = (value) => {
@@ -41,21 +46,34 @@ const ProductDetail = () => {
     }, [id, dispatch]);
 
     // Hàm xóa sản phẩm
+    const handleOpenDeleteModal = () => {
+        setShowDeleteModal(true);
+    };
+
     const handleDelete = async () => {
-        if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-            dispatch(actions.controlLoading(true));
-            try {
-                const res = await requestApi(`api/admin/products/${id}`, 'DELETE');
-                dispatch(actions.controlLoading(false));
-                toast.success(res.data?.message || 'Xóa sản phẩm thành công!');
-                navigate('/product');
-            } catch (e) {
-                dispatch(actions.controlLoading(false));
-                toast.error(
-                    e?.response?.data?.message || 'Xóa sản phẩm thất bại!'
-                );
-            }
+        setShowDeleteModal(false);
+        dispatch(actions.controlLoading(true));
+        try {
+            const res = await requestApi(`api/admin/products/${id}`, 'DELETE');
+            dispatch(actions.controlLoading(false));
+            toast.success(res.data?.message || 'Xóa sản phẩm thành công!', toastSuccessConfig);
+            navigate('/product');
+        } catch (e) {
+            dispatch(actions.controlLoading(false));
+            toast.error(
+                e?.response?.data?.message || 'Xóa sản phẩm thất bại!', toastErrorConfig
+            );
         }
+    };
+
+    // Hàm xử lý khi click vào bất kỳ ảnh nào
+    const handleImgClick = (img) => {
+        setModalImg(img);
+        setShowModal(true);
+    };
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setModalImg(null);
     };
 
     // Chỉ hiển thị nội dung chính khi đã load xong
@@ -118,12 +136,131 @@ const ProductDetail = () => {
                     <div className="row g-4">
                         <div className="col-md-5">
                             <div className="card shadow-sm">
-                                <img
-                                    src={urlImage + product.image_url}
-                                    alt={product.name}
-                                    className="card-img-top"
-                                    style={{ objectFit: 'container', height: 320, borderRadius: '8px 8px 0 0', background: '#fafafa' }}
-                                />
+                                <div className="d-flex flex-column align-items-center p-3">
+                                    {/* Ảnh đại diện lớn */}
+                                    {product.image_urls && product.image_urls.length > 0 ? (
+                                        (() => {
+                                            const featuredImg = product.image_urls.find(img => img.is_featured === 1);
+                                            const otherImgs = product.image_urls.filter(img => img.is_featured !== 1);
+                                            return (
+                                                <>
+                                                    {featuredImg ? (
+                                                        <>
+                                                            <img
+                                                            key={featuredImg.id}
+                                                            src={process.env.REACT_APP_API_URL + 'api/images/' + (featuredImg.main_url || featuredImg.thumb_url)}
+                                                            alt={product.name + '-featured'}
+                                                            className="img-thumbnail mb-3"
+                                                            style={{
+                                                                width: 280,
+                                                                height: 260,
+                                                                objectFit: 'fill',
+                                                                // border: '3px solid #007bff',
+                                                                boxShadow: '0 0 12px #007bff55',
+                                                                cursor: 'pointer',
+                                                            }}
+                                                            title="Ảnh đại diện (bấm để xem lớn)"
+                                                            onClick={() => handleImgClick(featuredImg)}
+                                                        />
+                                                        {/* Modal xem ảnh full */}
+                                                        {showModal && modalImg && (
+                                                            <div
+                                                                style={{
+                                                                    position: 'fixed',
+                                                                    top: 0,
+                                                                    left: 0,
+                                                                    width: '100vw',
+                                                                    height: '100vh',
+                                                                    background: 'rgba(0,0,0,0.7)',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    zIndex: 9999
+                                                                }}
+                                                                onClick={handleCloseModal}
+                                                            >
+                                                                <div
+                                                                    style={{
+                                                                        position: 'relative',
+                                                                        borderRadius: 8,
+                                                                        padding: 0,
+                                                                        boxShadow: '0 2px 16px #0005',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                    }}
+                                                                    onClick={e => e.stopPropagation()}
+                                                                >
+                                                                    <img
+                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + (modalImg.main_url || modalImg.thumb_url)}
+                                                                        alt={product.name + '-modal-full'}
+                                                                        style={{
+                                                                            maxWidth: '80vw',
+                                                                            maxHeight: '80vh',
+                                                                            display: 'block',
+                                                                            margin: '0 auto',
+                                                                            borderRadius: 8
+                                                                        }}
+                                                                    />
+                                                                    <button
+                                                                        onClick={handleCloseModal}
+                                                                        style={{
+                                                                            position: 'absolute',
+                                                                            top: 8,
+                                                                            right: 8,
+                                                                            background: 'transparent',
+                                                                            color: '#888',
+                                                                            border: 'none',
+                                                                            borderRadius: '50%',
+                                                                            width: 36,
+                                                                            height: 36,
+                                                                            fontWeight: 700,
+                                                                            cursor: 'pointer',
+                                                                            fontSize: 28,
+                                                                            lineHeight: '28px',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
+                                                                            transition: 'background 0.2s',
+                                                                        }}
+                                                                        title="Đóng"
+                                                                    >
+                                                                        ×
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                    ) : null}
+                                                    {/* Các ảnh còn lại nhỏ hơn */}
+                                                    <div className="d-flex flex-wrap gap-2 justify-content-center align-items-center">
+                                                        {otherImgs.length > 0 ? otherImgs.map((img, idx) => (
+                                                            <img
+                                                                key={img.id}
+                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + (img.main_url || img.thumb_url)}
+                                                                alt={product.name + '-' + idx}
+                                                                style={{
+                                                                    width: 90,
+                                                                    height: 90,
+                                                                    objectFit: 'cover',
+                                                                    cursor: 'pointer',
+                                                                    marginBottom: 4,
+                                                                    marginRight: 8
+                                                                }}
+                                                                title="Ảnh sản phẩm (bấm để xem lớn)"
+                                                                onClick={() => handleImgClick(img)}
+                                                            />
+                                                        )) : (
+                                                            !featuredImg && <div className="text-muted">Chưa có ảnh sản phẩm</div>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            );
+                                        })()
+                                    ) : (
+                                        <div className="text-muted">Chưa có ảnh sản phẩm</div>
+                                    )}
+                                </div>
                                 <div className="card-body">
                                     <h4 className="card-title mb-2">{product.name}</h4>
                                     <div className="mb-2">
@@ -133,7 +270,9 @@ const ProductDetail = () => {
                                         }
                                     </div>
                                     <div className="mb-2">
-                                        <span className="fw-semibold text-primary">Danh mục:</span> {product.category?.name || <span className="text-muted">Chưa phân loại</span>}
+                                        <span className="fw-semibold text-primary">Danh mục:</span> {product.categories && product.categories.length > 0
+                                            ? product.categories.map(cat => cat.name).join(', ')
+                                            : <span className="text-muted">Chưa phân loại</span>}
                                     </div>
                                     <div className="mb-2">
                                         <span className="fw-semibold text-success">Giá gốc:</span> <span className="text-danger">{formatVND(product.original_price)} ₫</span>
@@ -173,7 +312,7 @@ const ProductDetail = () => {
                                     <Link className="btn btn-primary me-2" to={`/product/${product.id}`}>
                                         <i className="fas fa-edit"></i> Sửa sản phẩm
                                     </Link>
-                                    <button className="btn btn-danger me-2" onClick={handleDelete}>
+                                    <button className="btn btn-danger me-2" onClick={handleOpenDeleteModal}>
                                         <i className="fas fa-trash-alt"></i> Xóa sản phẩm
                                     </button>
                                     <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
@@ -185,6 +324,22 @@ const ProductDetail = () => {
                     </div>
                 </div>
             </main>
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Xác nhận xóa</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Hủy
+                    </Button>
+                    <Button variant="danger" onClick={handleDelete}>
+                        Xóa
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

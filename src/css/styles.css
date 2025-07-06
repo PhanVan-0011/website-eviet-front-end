@@ -11255,3 +11255,14 @@ body {
   min-height: 200px !important;
 }
 .table td, .table th {  vertical-align: middle; }
+
+.border-dashed {
+  border-style: dashed !important;
+}
+
+.no-hover.btn-outline-danger:hover, .no-hover.btn-outline-danger:focus {
+  color: #dc3545;
+  background-color: #fff;
+  border-color: #dc3545;
+  box-shadow: none;
+}
