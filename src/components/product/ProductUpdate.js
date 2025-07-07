@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import CustomEditor from '../common/CustomEditor';
 import { Modal, Button } from 'react-bootstrap';
-const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
+
 const ProductUpdate = () => {
     const params = useParams();
     const navigation = useNavigate();
@@ -18,76 +18,195 @@ const ProductUpdate = () => {
     const [categories, setCategories] = useState([]);
     const [originalPrice, setOriginalPrice] = useState('');
     const [salePrice, setSalePrice] = useState('');
-    const [imageFile, setImageFile] = useState(null);
-    const [oldImage, setOldImage] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-
+    const [oldImages, setOldImages] = useState([]); // ảnh cũ từ API
+    const [imagePreviews, setImagePreviews] = useState([]); // preview ảnh mới
+    const [removedOldImageIds, setRemovedOldImageIds] = useState([]); // id ảnh cũ bị xóa
+    const [featuredImageIndex, setFeaturedImageIndex] = useState(0);
+    const [selectedCategories, setSelectedCategories] = useState([]);
     const [description, setDescription] = useState('');
-    // Lấy danh sách danh mục
-    useEffect(() => {
-        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
-            if (response.data && response.data.data) {
-                setCategories(response.data.data);
-            }
-        });
-    }, []);
+    const [showModal, setShowModal] = useState(false);
+    const [imageFiles, setImageFiles] = useState([]);
 
-    // Lấy thông tin sản phẩm cần sửa
+    // Gộp lấy danh mục và lấy thông tin sản phẩm cần sửa
     useEffect(() => {
-        const fetchProduct = async () => {
+        const fetchData = async () => {
             try {
-                const response = await requestApi(`api/admin/products/${params.id}`, 'GET');
-                const data = response.data.data;
+                dispatch(actions.controlLoading(true));
+                const [catRes, prodRes] = await Promise.all([
+                    requestApi('api/admin/categories?limit=1000', 'GET', []),
+                    requestApi(`api/admin/products/${params.id}`, 'GET')
+                ]);
+                // Xử lý danh mục
+                if (catRes.data && catRes.data.data) {
+                    setCategories(catRes.data.data);
+                }
+                // Xử lý sản phẩm
+                const data = prodRes.data.data;
                 setValue('name', data.name);
                 setValue('description', data.description);
                 setValue('original_price', data.original_price);
                 setValue('sale_price', data.sale_price);
                 setValue('stock_quantity', data.stock_quantity);
                 setValue('size', data.size || '');
-                setValue('category_id', data.category_id);
                 setValue('status', String(data.status));
                 setOriginalPrice(formatVND(parseInt(data.original_price, 10)));
                 setSalePrice(formatVND(parseInt(data.sale_price, 10)));
                 setValue('original_price', formatVND(parseInt(data.original_price, 10)));
                 setValue('sale_price', formatVND(parseInt(data.sale_price, 10)));
-                setOldImage(data.image_url);
+                // Xử lý ảnh cũ
+                const imgs = data.image_urls || [];
+                setOldImages(imgs);
+                setImageFiles([]);
+                setImagePreviews(imgs.map(img => process.env.REACT_APP_API_URL + 'api/images/' + (img.thumb_url || img.main_url)));
+                // Xác định featuredImageIndex
+                let featuredIdx = 0;
+                if (data.featured_image && data.featured_image.id) {
+                    featuredIdx = imgs.findIndex(img => img.id === data.featured_image.id);
+                } else {
+                    featuredIdx = imgs.findIndex(img => img.is_featured === 1);
+                }
+                setFeaturedImageIndex(featuredIdx >= 0 ? featuredIdx : 0);
                 setDescription(data.description || '');
+                // Danh mục
+                const catIds = (data.categories || []).map(cat => cat.id);
+                setSelectedCategories(catIds);
+                setValue('category_ids', catIds);
+                dispatch(actions.controlLoading(false));
             } catch (error) {
-                toast.error("Không lấy được dữ liệu sản phẩm", toastErrorConfig);
+                dispatch(actions.controlLoading(false));
+                toast.error("Không lấy được dữ liệu sản phẩm hoặc danh mục", toastErrorConfig);
             }
         };
-        fetchProduct();
+        fetchData();
+        // eslint-disable-next-line
     }, [params.id, setValue]);
 
-    // Hàm xử lý khi chọn ảnh mới
-    const onChangeImage = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => setImageFile(ev.target.result);
-            reader.readAsDataURL(file);
-        } else {
-            setImageFile(null);
-        }
-    };
-
-        // Hàm format giá tiền
+    // Hàm format giá tiền
     const formatVND = (value) => {
         if (value === null || value === undefined) return '';
-        // Nếu là số thì chuyển sang chuỗi
         value = value.toString();
-        // Loại bỏ mọi ký tự không phải số
         value = value.replace(/\D/g, '');
-        // Nếu rỗng thì trả về rỗng
         if (!value) return '';
-        // Format theo từng nhóm 3 số, không thêm số 0 nào
         return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
     
 
-    // Submit form
+
+    // Hàm xử lý khi chọn nhiều ảnh mới
+    const onChangeImages = (e) => {
+        const newFiles = Array.from(e.target.files);
+        const validFiles = [];
+        let hasLargeFile = false;
+        newFiles.forEach(file => {
+            // if (!file.type.startsWith('image/')) {
+            //     hasInvalidType = true;
+            //     return;
+            // }
+            if (file.size > 2 * 1024 * 1024) {
+                hasLargeFile = true;
+            } else {
+                validFiles.push(file);
+            }
+        });
+        // if (hasInvalidType) {
+        //     toast.error('Mỗi file tải lên phải là hình ảnh.', toastErrorConfig);
+        // }
+        if (hasLargeFile) {
+            toast.error('Ảnh phải nhỏ hơn 2MB!', toastErrorConfig);
+        }
+        if (validFiles.length === 0) {
+            e.target.value = "";
+            return;
+        }
+        // Nối file mới vào sau ảnh cũ và ảnh mới đã có
+        let combinedFiles = [...imageFiles, ...validFiles];
+        // Loại bỏ file trùng tên và size
+        combinedFiles = combinedFiles.filter(
+            (file, idx, arr) => arr.findIndex(f => f.name === file.name && f.size === file.size) === idx
+        );
+        // Chỉ cho phép tối đa 4 ảnh (bao gồm cả ảnh cũ và mới)
+        const maxFiles = 4 - oldImages.length;
+        if (combinedFiles.length > maxFiles) {
+            toast.error('Chỉ được chọn tối đa 4 ảnh!', toastErrorConfig);
+            combinedFiles = combinedFiles.slice(0, maxFiles);
+        }
+        setImageFiles(combinedFiles);
+        setValue('imageFiles', combinedFiles, { shouldValidate: true });
+        // Tạo preview mới: ảnh cũ (link) + ảnh mới (file)
+        const previews = [
+            ...oldImages.map(img => process.env.REACT_APP_API_URL + 'api/images/' + (img.thumb_url || img.main_url)),
+            ...combinedFiles.map(file => URL.createObjectURL(file))
+        ];
+        setImagePreviews(previews);
+        if (featuredImageIndex >= previews.length) setFeaturedImageIndex(0);
+        e.target.value = "";
+    };
+
+    // Hàm xóa ảnh
+    const handleRemoveImage = (idx) => {
+        if (idx < oldImages.length) {
+            // Xóa ảnh cũ
+            const removed = oldImages[idx];
+            setRemovedOldImageIds([...removedOldImageIds, removed.id]);
+            const newOld = oldImages.filter((_, i) => i !== idx);
+            setOldImages(newOld);
+            // Cập nhật preview và files
+            const previews = [
+                ...newOld.map(img => process.env.REACT_APP_API_URL + 'api/images/' + (img.thumb_url || img.main_url)),
+                ...imageFiles.map(file => URL.createObjectURL(file))
+            ];
+            setImagePreviews(previews);
+            setValue('imageFiles', imageFiles, { shouldValidate: true });
+            if (featuredImageIndex === idx || featuredImageIndex >= previews.length) {
+                setFeaturedImageIndex(0);
+            } else if (featuredImageIndex > idx) {
+                setFeaturedImageIndex(featuredImageIndex - 1);
+            }
+        } else {
+            // Xóa ảnh mới
+            const newIdx = idx - oldImages.length;
+            const newFiles = imageFiles.filter((_, i) => i !== newIdx);
+            setImageFiles(newFiles);
+            // Cập nhật preview
+            const previews = [
+                ...oldImages.map(img => process.env.REACT_APP_API_URL + 'api/images/' + (img.thumb_url || img.main_url)),
+                ...newFiles.map(file => URL.createObjectURL(file))
+            ];
+            setImagePreviews(previews);
+            setValue('imageFiles', newFiles, { shouldValidate: true });
+            if (featuredImageIndex === idx || featuredImageIndex >= previews.length) {
+                setFeaturedImageIndex(0);
+            } else if (featuredImageIndex > idx) {
+                setFeaturedImageIndex(featuredImageIndex - 1);
+            }
+        }
+    };
+
+    // // Sửa lại chọn ảnh đại diện: lưu id ảnh cũ hoặc null nếu là ảnh mới
+    // const handleSetFeaturedImage = (idx) => {
+    //     if (idx < oldImages.length) {
+    //         setFeaturedImageId(oldImages[idx].id);
+    //     } else {
+    //         setFeaturedImageId(null); // Ảnh mới không có id
+    //     }
+    //     setFeaturedImageIndex(idx);
+    // };
+
+    // Chọn danh mục
+    const handleCategoryChange = (e) => {
+        const value = parseInt(e.target.value);
+        let newSelected = [...selectedCategories];
+        if (e.target.checked) {
+            if (!newSelected.includes(value)) newSelected.push(value);
+        } else {
+            newSelected = newSelected.filter(id => id !== value);
+        }
+        setSelectedCategories(newSelected);
+        setValue('category_ids', newSelected, { shouldValidate: true });
+    };
+
+    // Submit
     const handleSubmitForm = async (data) => {
-        console.log(data);
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
@@ -98,22 +217,25 @@ const ProductUpdate = () => {
             formData.append('sale_price', Number(data.sale_price.replace(/\./g, '')));
             formData.append('stock_quantity', data.stock_quantity);
             formData.append('size', data.size || '');
-            formData.append('category_id', data.category_id);
             formData.append('status', data.status);
-            // Nếu chọn ảnh mới thì gửi lên, không thì bỏ qua
-            if (data.imageFile && data.imageFile[0]) {
-                formData.append('image_url', data.imageFile[0]);
-            }
-            // Nếu không chọn ảnh mới, backend sẽ giữ ảnh cũ
-            console.log('Submitting form data:', formData);
+            (selectedCategories.length > 0 ? selectedCategories : []).forEach(id => formData.append('category_ids[]', id));
+
+            // Gửi file ảnh thật sự
+            imageFiles.forEach(file => formData.append('image_url[]', file));
+
+            // Gửi deleted_image_ids[]
+            removedOldImageIds.forEach(id => formData.append('deleted_image_ids[]', id));
+
+            // Gửi featured_image_index (luôn truyền lên, không cần điều kiện)
+            formData.append('featured_image_index', featuredImageIndex);
+
             const response = await requestApi(
                 `api/admin/products/${params.id}`,
-                'POST', // hoặc 'PUT' nếu backend hỗ trợ
+                'POST',
                 formData,
                 'json',
                 'multipart/form-data'
             );
-            
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật sản phẩm thành công!", toastSuccessConfig);
@@ -234,23 +356,6 @@ const ProductUpdate = () => {
                                             <div className="form-floating mb-3 mb-md-0">
                                                 <select
                                                     className="form-select"
-                                                    id="inputCategory"
-                                                    {...register('category_id', { required: 'Danh mục là bắt buộc' })}
-                                                    defaultValue=""
-                                                >
-                                                    <option value="" disabled>Chọn danh mục</option>
-                                                    {categories.map(cat => (
-                                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                                    ))}
-                                                </select>
-                                                <label htmlFor="inputCategory">Danh mục <span style={{color: 'red'}}>*</span></label>
-                                                {errors.category_id && <div className="text-danger">{errors.category_id.message}</div>}
-                                            </div>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
-                                                <select
-                                                    className="form-select"
                                                     id="inputStatus"
                                                     {...register('status', { required: 'Trạng thái là bắt buộc' })}
                                                     defaultValue="1"
@@ -262,8 +367,6 @@ const ProductUpdate = () => {
                                                 {errors.status && <div className="text-danger">{errors.status.message}</div>}
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="row mb-3">
                                         <div className="col-md-6">
                                             <div className="form-floating mb-3 mb-md-0">
                                                 <input
@@ -275,47 +378,124 @@ const ProductUpdate = () => {
                                                 <label htmlFor="inputSize">Kích thước</label>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div className="row mb-3">
                                         <div className="col-md-6 input-file">
                                             <div className="mb-3">
-                                                <label htmlFor="inputImage" className="form-label btn btn-secondary">
-                                                    Chọn ảnh sản phẩm
-                                                </label>
+                                                <div className="form-label fw-semibold">
+                                                    Hình ảnh sản phẩm <span style={{ color: 'red' }}>*</span>
+                                                </div>
+                                                <div className="row g-3">
+                                                    {[0, 1, 2, 3].map(idx => (
+                                                        <div key={idx} className="col-3 p-2 d-flex flex-column align-items-center">
+                                                            <div
+                                                                className="w-100 border border-2 border-secondary border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center"
+                                                                style={{ aspectRatio: '1/1', minHeight: 0, height: 'auto', maxWidth: '100%' }}
+                                                            >
+                                                                {imagePreviews[idx] ? (
+                                                                    <>
+                                                                        <img
+                                                                            src={imagePreviews[idx]}
+                                                                            alt={`Preview ${idx}`}
+                                                                            className="w-100 h-100 rounded position-absolute top-0 start-0"
+                                                                            style={{ objectFit: 'fill', aspectRatio: '1/1' }}
+                                                                            onClick={e => { e.stopPropagation(); setFeaturedImageIndex(idx); }}
+                                                                        />
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 m-1 d-flex align-items-center justify-content-center no-hover"
+                                                                            style={{ zIndex: 2, width: 24, height: 24, padding: 0, background: '#fff' }}
+                                                                            aria-label="Xóa ảnh"
+                                                                            onClick={e => { e.stopPropagation(); handleRemoveImage(idx); }}
+                                                                        >
+                                                                            <i className="fas fa-times"></i>
+                                                                        </button>
+                                                                    </>
+                                                                ) : (
+                                                                    <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                                                        <i className="fas fa-image fs-1 text-secondary"></i>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {/* Nút chọn ảnh đại diện nằm ngoài khung */}
+                                                            {imagePreviews[idx] && (
+                                                                <div className="form-check mt-2">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="featuredImage"
+                                                                        checked={featuredImageIndex === idx}
+                                                                        onChange={() => setFeaturedImageIndex(idx)}
+                                                                        className="form-check-input"
+                                                                        id={`featuredImage${idx}`}
+                                                                    />
+                                                                    <label className="form-check-label" htmlFor={`featuredImage${idx}`}>Ảnh đại diện</label>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
+                                                    <label htmlFor="inputImages" className="form-label btn btn-secondary mb-0">
+                                                        <i className="fas fa-upload"></i> Thêm ảnh sản phẩm
+                                                    </label>
+                                                    <div className="d-flex flex-column gap-1">
+                                                    <span className="text-muted small">
+                                                        Chọn tối đa 4 ảnh, định dạng: jpg, png...
+                                                    </span>
+                                                    <span className="text-muted small">
+                                                        <b>Giữ Ctrl hoặc Shift để chọn nhiều ảnh cùng lúc.</b>
+                                                    </span>
+                                                    </div>
+                                        
+                                                </div>
                                                 <input
                                                     className="form-control"
-                                                    id="inputImage"
+                                                    id="inputImages"
                                                     type="file"
                                                     accept="image/*"
-                                                    {...register('imageFile', {
-                                                        onChange: onChangeImage,
-                                                        validate: {
-                                                            checkType: (files) =>
-                                                                files && files[0]
-                                                                    ? (['image/jpeg', 'image/png', 'image/jpg', 'image/gif'].includes(files[0].type)
-                                                                        ? true
-                                                                        : 'Chỉ chấp nhận ảnh jpg, jpeg, png, gif')
-                                                                    : true,
-                                                            checkSize: (files) =>
-                                                                files && files[0]
-                                                                    ? (files[0].size <= 2 * 1024 * 1024
-                                                                        ? true
-                                                                        : 'Kích thước ảnh tối đa 2MB')
-                                                                    : true
-                                                        }
-                                                    })}
+                                                    multiple
+                                                    style={{ display: 'none' }}
+                                                    onChange={onChangeImages}
+                                                    ref={input => (window.imageInput = input)}
                                                 />
-                                                <small className="text-muted"> Chỉ chọn 1 ảnh, định dạng: jpg, png...</small>
-                                                {errors.imageFile && <div className="text-danger">{errors.imageFile.message}</div>}
-                                                {/* Hiển thị ảnh cũ hoặc ảnh mới preview */}
-                                                {(imageFile || oldImage) && (
-                                                    <div className="mt-2">
-                                                        <img
-                                                            src={imageFile ? imageFile : (urlImage + oldImage)}
-                                                            alt="ảnh sản phẩm"
-                                                            className="img-thumbnail"
-                                                            style={{ maxWidth: '200px' }}
-                                                        />
+                                                {errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label fw-semibold">
+                                                    Danh mục <span style={{ color: 'red' }}>*</span>
+                                                </label>
+                                                <div
+                                                    className="row"
+                                                    style={{
+                                                        maxHeight: 220,
+                                                        overflowY: 'auto',
+                                                        border: '1px solid #e0e0e0',
+                                                        borderRadius: 4,
+                                                        padding: 8,
+                                                        background: '#fafbfc'
+                                                    }}
+                                                >
+                                                    {categories.map(cat => (
+                                                        <div className="col-12" key={cat.id}>
+                                                            <div className="form-check">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="checkbox"
+                                                                    id={`cat_${cat.id}`}
+                                                                    value={cat.id}
+                                                                    checked={selectedCategories.includes(cat.id)}
+                                                                    onChange={handleCategoryChange}
+                                                                />
+                                                                <label className="form-check-label" htmlFor={`cat_${cat.id}`}>
+                                                                    {cat.name}
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                     </div>
-                                                )}
+                                                {errors.category_ids && <div className="text-danger">{errors.category_ids.message}</div>}
                                             </div>
                                         </div>
                                     </div>
@@ -379,7 +559,6 @@ const ProductUpdate = () => {
                     variant="danger"
                     onClick={async () => {
                         setShowModal(false);
-                       
                             try {
                                 dispatch(actions.controlLoading(true));
                                 const response = await requestApi(`api/admin/products/${params.id}`, 'DELETE', []);
@@ -400,7 +579,6 @@ const ProductUpdate = () => {
                                     toast.error("Server error", toastErrorConfig);
                                 }
                             }
-                       
                     }}
                     disabled={isSubmitting}
                 >
