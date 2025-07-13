@@ -147,15 +147,15 @@ const ProductList = () => {
 
     // 6. Columns với header có sort và width %
     const columns = [
-        // { 
-        //     title: () => (
-        //         <span style={{cursor: 'pointer'}} onClick={() => handleSort('id')}>
-        //             ID {renderSortIcon('id')}
-        //         </span>
-        //     ),
-        //     element: row => row.id,
-        //     width: "6%"
-        // },
+        { 
+            title: () => (
+                <span>
+                    Mã sản phẩm
+                </span>
+            ),
+            element: row => row.product_code,
+            width: "8%"
+        },
         { 
             title: () => (
                 <span style={{cursor: 'pointer'}} onClick={() => handleSort('name')}>

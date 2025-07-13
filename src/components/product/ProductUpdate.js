@@ -13,7 +13,7 @@ const ProductUpdate = () => {
     const params = useParams();
     const navigation = useNavigate();
     const dispatch = useDispatch();
-    const { register, handleSubmit, setValue, trigger, formState: { errors } } = useForm();
+    const { register, handleSubmit, setValue, trigger, formState: { errors, isSubmitted } } = useForm();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categories, setCategories] = useState([]);
     const [originalPrice, setOriginalPrice] = useState('');
@@ -81,6 +81,16 @@ const ProductUpdate = () => {
         // eslint-disable-next-line
     }, [params.id, setValue]);
 
+    // Validate ảnh: nếu không có ảnh cũ và không có ảnh mới thì báo lỗi
+    useEffect(() => {
+        if (oldImages.length + imageFiles.length === 0) {
+            setValue('imageFiles', undefined, { shouldValidate: true });
+        } else {
+            setValue('imageFiles', imageFiles, { shouldValidate: true });
+        }
+        // eslint-disable-next-line
+    }, [oldImages, imageFiles]);
+
     // Hàm format giá tiền
     const formatVND = (value) => {
         if (value === null || value === undefined) return '';
@@ -140,6 +150,7 @@ const ProductUpdate = () => {
         setImagePreviews(previews);
         if (featuredImageIndex >= previews.length) setFeaturedImageIndex(0);
         e.target.value = "";
+        trigger('imageFiles');
     };
 
     // Hàm xóa ảnh
@@ -162,6 +173,7 @@ const ProductUpdate = () => {
             } else if (featuredImageIndex > idx) {
                 setFeaturedImageIndex(featuredImageIndex - 1);
             }
+            trigger('imageFiles');
         } else {
             // Xóa ảnh mới
             const newIdx = idx - oldImages.length;
@@ -179,6 +191,7 @@ const ProductUpdate = () => {
             } else if (featuredImageIndex > idx) {
                 setFeaturedImageIndex(featuredImageIndex - 1);
             }
+            trigger('imageFiles');
         }
     };
 
@@ -207,6 +220,8 @@ const ProductUpdate = () => {
 
     // Submit
     const handleSubmitForm = async (data) => {
+        const valid = await trigger('imageFiles');
+        if (!valid) return;
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
@@ -458,7 +473,13 @@ const ProductUpdate = () => {
                                                     onChange={onChangeImages}
                                                     ref={input => (window.imageInput = input)}
                                                 />
-                                                {errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
+                                                <input
+                                                    type="hidden"
+                                                    {...register('imageFiles', {
+                                                        validate: () => (oldImages.length + imageFiles.length > 0) || 'Ảnh sản phẩm là bắt buộc',
+                                                    })}
+                                                />
+                                                {isSubmitted && errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">

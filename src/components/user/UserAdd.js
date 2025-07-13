@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
@@ -14,18 +14,47 @@ import {vi} from 'date-fns/locale';
 
 const UserAdd = () => {
     const navigation = useNavigate();
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        formState: { errors },
-    } = useForm();
+    const { register, handleSubmit, setValue, getValues, formState: { errors } } = useForm();
     const dispatch = useDispatch();
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // State cho ngày sinh
     const [dob, setDob] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [imageFile, setImageFile] = useState(null);
 
+    // Hàm xử lý chọn ảnh đại diện giống ProductAdd
+    const onChangeImage = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Kiểm tra kích thước
+            if (file.size > 2 * 1024 * 1024) {
+                toast.error('Ảnh phải nhỏ hơn 2MB!', toastErrorConfig);
+                e.target.value = ""; // reset input
+                return;
+            }
+            // Kiểm tra định dạng
+            if (!['image/jpeg', 'image/png', 'image/jpg', 'image/gif'].includes(file.type)) {
+                toast.error('Chỉ chấp nhận ảnh jpg, jpeg, png, gif', toastErrorConfig);
+                e.target.value = ""; // reset input
+                return;
+            }
+
+            // Đọc file và tạo preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+            
+            // Set giá trị cho form
+            setImageFile(file);
+        } else {
+            setImagePreview(null);
+            setImageFile(null);
+        }
+        e.target.value = ""; // reset input
+    };
+
+    // Khi submit, gửi imageFile.file lên API với field image_url
     const handleSubmitForm = async (data) => {
         // Đưa ngày sinh vào data nếu có chọn
         if (dob) {
@@ -34,14 +63,18 @@ const UserAdd = () => {
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
-            const response = await requestApi('api/admin/users', 'POST', data);
+            // Sử dụng FormData để gửi kèm ảnh
+            const formData = new FormData();
+            Object.keys(data).forEach(key => {
+                if (key !== 'imageFile') formData.append(key, data[key]);
+            });
+            if (imageFile) {
+                formData.append('image_url', imageFile);
+            }
+            const response = await requestApi('api/admin/users', 'POST', formData, 'json', 'multipart/form-data');
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm khách hàng thành công!", toastSuccessConfig);
-                // // Nếu có access_token thì lưu vào localStorage
-                // if (response.data.data && response.data.data.access_token) {
-                //     localStorage.setItem('access_token', response.data.data.access_token);
-                // }
                 setTimeout(() => {
                     navigation('/user');
                 }, 1500);
@@ -106,6 +139,8 @@ const UserAdd = () => {
                                             </div>
                                         </div>
                                     </div>
+                                {/* Avatar upload react-hook-form chuẩn */}
+                             
 
                                     <div className="row mb-3">
                                         <div className="col-md-6">
@@ -196,10 +231,73 @@ const UserAdd = () => {
                                             </div>
                                         </div>
                                         <div className="col-md-6">
+                                            <div className="form-floating mb-3 mb-md-0">
+                                                <select className="form-select" id="is_active" {...register('is_active', { required: true })}>
+                                                    <option value="1">Hoạt động</option>
+                                                    <option value="0">Không Hoạt động</option>
+                                                </select>
+                                                <label htmlFor="is_active">Trạng thái</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="row mb-3">
+                                        <div className="col-md-6">
                                             <div className="mb-3">
+                                                <label className="form-label fw-semibold">
+                                                    Ảnh đại diện
+                                                </label>
+                                                <div className="d-flex gap-3 align-items-start">
+                                                    <div 
+                                                        className="position-relative rounded-circle bg-light d-flex align-items-center justify-content-center border border-2 border-secondary border-dashed"
+                                                        style={{ width: 100, height: 100, overflow: 'hidden' }}
+                                                    >
+                                                        {imagePreview ? (
+                                                            <>
+                                                                <img
+                                                                    src={imagePreview}
+                                                                    alt="Avatar preview"
+                                                                    className="w-100 h-100"
+                                                                    style={{ objectFit: 'fill' }}
+                                                                />
+                                                             
+                                                            </>
+                                                        ) : (
+                                                            <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                                                <i className="fas fa-user fs-1 text-secondary"></i>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="d-flex flex-column gap-2">
+                                                        <div className="text-muted small">
+                                                            Chỉ chọn 1 ảnh, định dạng: jpg, png...<br/>
+                                                            Kích thước tối đa: 2MB
+                                                        </div>
+                                                        <label htmlFor="inputAvatar" className="btn btn-secondary mb-0">
+                                                            <i className="fas fa-upload me-2"></i>Chọn ảnh
+                                                        </label>
+                                                        <input
+                                                            id="inputAvatar"
+                                                            type="file"
+                                                            accept="image/*"
+                                                            style={{ display: 'none' }}
+                                                            onChange={onChangeImage}
+                                                        />
+                                                        {errors.imageFile && (
+                                                            <div className="text-danger">{errors.imageFile.message}</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label fw-semibold">
+                                                    Ngày sinh
+                                                </label>
                                                 <div className="d-flex align-items-center">
                                                     <label htmlFor="inputDob" className="form-label me-2" style={{
-                                                            color: '#0d6efd', // Màu cam đẹp, bạn có thể đổi sang #0d6efd (xanh dương) hoặc #20c997 (xanh ngọc)
+                                                            color: '#0d6efd',
                                                             fontSize: 20,
                                                             marginRight: 10,
                                                             minWidth: 24,
@@ -226,18 +324,6 @@ const UserAdd = () => {
                                                         isClearable
                                                     />
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="row mb-3">
-                                        <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
-                                                <select className="form-select" id="is_active" {...register('is_active', { required: true })}>
-                                                    <option value="1">Hoạt động</option>
-                                                    <option value="0">Không Hoạt động</option>
-                                                </select>
-                                                <label htmlFor="is_active">Trạng thái</label>
                                             </div>
                                         </div>
                                     </div>

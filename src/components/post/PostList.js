@@ -8,6 +8,7 @@ import { Modal, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import moment from 'moment';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import ImageList from '../common/ImageList';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const PostList = () => {
@@ -113,23 +114,17 @@ const PostList = () => {
         {
             title: "Hình ảnh",
             element: row => (
-                <img
-                    src={urlImage + row.image_url}
-                    alt={row.title}
-                    style={{
-                        width: '120px',
-                        height: '80px',
-                        objectFit: 'contain',
-                        background: '#fafafa',
-                        borderRadius: '6px',
-                        border: '1px solid #eee',
-                        padding: '4px'
-                    }}
-                />
+                row.featured_image && row.featured_image.thumb_url ? (
+                    <ImageList
+                        src={urlImage + row.featured_image.thumb_url}
+                        alt={row.title}
+                    />
+                ) : (
+                    <span className="text-muted">Không có ảnh</span>
+                )
             ),
             width: "16%"
         },
-     
         {
             title: () => (
                 <span style={{ cursor: 'pointer' }} onClick={() => handleSort('category')}>
@@ -262,14 +257,14 @@ const PostList = () => {
                         )}
                     </div>
                     <div className="row mb-3 g-2 align-items-end">
-                        {/* <div className="col-md-3">
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterCategory">
                                 <i className="fas fa-list me-1"></i>Danh mục
                             </label>
                             <select
                                 id="filterCategory"
                                 className="form-select form-select-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height: 40, cursor: 'pointer' }}
                                 value={filterCategory}
                                 onChange={e => setFilterCategory(e.target.value)}
                             >
@@ -278,7 +273,7 @@ const PostList = () => {
                                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                                 ))}
                             </select>
-                        </div> */}
+                        </div>
                         <div className="col-md-2">
                             <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
@@ -286,7 +281,7 @@ const PostList = () => {
                             <select
                                 id="filterStatus"
                                 className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height: 40, cursor: 'pointer' }}
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
