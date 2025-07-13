@@ -79,15 +79,15 @@ const Login = () => {
         let isValid = true;
         let objErrors = {};
         if(loginData.login === undefined || loginData.login === "") {
-            objErrors.login = "Please enter email address";
+            objErrors.login = "Vui lòng nhập email";
         }else{
             const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!regex.test(loginData.login)) {
-                objErrors.login = "Please enter valid email address";
+                objErrors.login = "Vui lòng nhập email hợp lệ";
             }
         }
         if(loginData.password === undefined || loginData.password === "") {
-            objErrors.password = "Please enter password";
+            objErrors.password = "Vui lòng nhập mật khẩu";
         }
 
         if(Object.keys(objErrors).length > 0) {
