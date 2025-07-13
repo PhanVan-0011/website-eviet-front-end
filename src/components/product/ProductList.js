@@ -480,7 +480,7 @@ const ProductList = () => {
                         setItemOfPage={setItemOfPage}
                         changeKeyword={(keyword) => setSearchText(keyword)}
                         onSelectedRows={selectedRows => setSelectedRows(selectedRows)}
-                     
+                      
                     />
                 </div>
             </main>
