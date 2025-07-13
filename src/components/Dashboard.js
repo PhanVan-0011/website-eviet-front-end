@@ -87,17 +87,25 @@ const Dashboard = () => {
         <div className="container-fluid px-4">
             <h1 className="mt-4 mb-4">Tổng quan</h1>
             <div className="row mb-4">
+                                {/* Doanh thu tháng */}
                 <div className="col-md-3">
                     <div className="card text-white bg-primary mb-3 position-relative">
                         <div className="card-body">
                             <h5 className="card-title">
-                                <i className="fas fa-money-bill-wave me-2"></i> Tổng doanh thu
+                                <i className="fas fa-money-bill-wave me-2"></i> Doanh thu tháng
                             </h5>
                             <p className="card-text fs-3">
-                                {dashboardData?.data?.kpis?.total_revenue !== undefined
-                                    ? formatVND(dashboardData.data.kpis.total_revenue)
+                                {dashboardData?.data?.kpis?.total_revenue?.value !== undefined
+                                    ? formatVND(dashboardData.data.kpis.total_revenue.value)
                                     : 'Đang tải...'}
                             </p>
+                            {dashboardData?.data?.kpis?.total_revenue?.change !== undefined && (
+                                <span className={`badge rounded-pill px-3 py-1 mt-2 border fw-normal fs-6 ${dashboardData.data.kpis.total_revenue.change < 0 ? 'bg-danger text-white border-danger' : 'bg-success text-white border-success'}`}
+                                    style={{fontSize: '0.95em', display: 'inline-flex', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.10)'}}>
+                                    <i className={`fas ${dashboardData.data.kpis.total_revenue.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
+                                    {`${dashboardData.data.kpis.total_revenue.change > 0 ? '+' : ''}${dashboardData.data.kpis.total_revenue.change}% so với tháng trước`}
+                                </span>
+                            )}
                             <div className="d-flex justify-content-end">
                                 <Link
                                     className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
@@ -110,17 +118,23 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-md-3">
-                    <div className="card text-white bg-success mb-3 position-relative">
+                               {/* Tổng đơn hàng */}
+                               <div className="col-md-3">
+                    <div className="card text-white bg-warning mb-3 position-relative">
                         <div className="card-body">
                             <h5 className="card-title">
                                 <i className="fas fa-shopping-cart me-2"></i> Tổng đơn hàng
                             </h5>
                             <p className="card-text fs-3">
-                                {dashboardData?.data?.kpis?.total_orders !== undefined
-                                    ? dashboardData.data.kpis.total_orders
-                                    : 'Đang tải...'}
+                                {dashboardData?.data?.kpis?.total_orders?.value ?? 'Đang tải...'}
                             </p>
+                            {dashboardData?.data?.kpis?.total_orders?.change !== undefined && (
+                                <span className={`badge rounded-pill px-3 py-1 mt-2 border fw-normal fs-6 ${dashboardData.data.kpis.total_orders.change < 0 ? 'bg-danger text-white border-danger' : 'bg-success text-white border-success'}`}
+                                    style={{fontSize: '0.95em', display: 'inline-flex', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.10)'}}>
+                                    <i className={`fas ${dashboardData.data.kpis.total_orders.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
+                                    {`${dashboardData.data.kpis.total_orders.change > 0 ? '+' : ''}${dashboardData.data.kpis.total_orders.change}% so với tháng trước`}
+                                </span>
+                            )}
                             <div className="d-flex justify-content-end">
                                 <Link
                                     className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
@@ -133,40 +147,23 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-md-3">
-                    <div className="card text-white bg-info mb-3 position-relative">
-                        <div className="card-body">
-                            <h5 className="card-title">
-                                <i className="fas fa-users me-2"></i> Tổng người dùng
-                            </h5>
-                            <p className="card-text fs-3">
-                                {dashboardData?.data?.kpis?.total_users !== undefined
-                                    ? dashboardData.data.kpis.total_users
-                                    : 'Đang tải...'}
-                            </p>
-                            <div className="d-flex justify-content-end">
-                                <Link
-                                    className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
-                                    to="/user"
-                                    style={{ borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
-                                >
-                                    Xem chi tiết <i className="fas fa-arrow-right"></i>
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card text-white bg-warning mb-3 position-relative">
+                                {/* Tổng sản phẩm */}
+                                <div className="col-md-3">
+                    <div className="card text-white bg-success mb-3 position-relative">
                         <div className="card-body">
                             <h5 className="card-title">
                                 <i className="fas fa-box-open me-2"></i> Tổng sản phẩm
                             </h5>
                             <p className="card-text fs-3">
-                                {dashboardData?.data?.kpis?.total_products !== undefined
-                                    ? dashboardData.data.kpis.total_products
-                                    : 'Đang tải...'}
+                                {dashboardData?.data?.kpis?.total_products?.value ?? 'Đang tải...'}
                             </p>
+                            {dashboardData?.data?.kpis?.total_products?.secondary_info?.text && (
+                                <span className="badge rounded-pill px-3 py-1 mt-2 border fw-normal fs-6 bg-warning text-dark border-warning"
+                                    style={{fontSize: '0.95em', display: 'inline-flex', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.10)'}}>
+                                    <i className="fas fa-exclamation-triangle me-1"></i>
+                                    {dashboardData.data.kpis.total_products.secondary_info.text}
+                                </span>
+                            )}
                             <div className="d-flex justify-content-end">
                                 <Link
                                     className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
@@ -179,6 +176,38 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
+                {/* Tổng người dùng */}
+                <div className="col-md-3">
+                    <div className="card text-white bg-info mb-3 position-relative">
+                        <div className="card-body">
+                            <h5 className="card-title">
+                                <i className="fas fa-users me-2"></i> Tổng người dùng
+                            </h5>
+                            <p className="card-text fs-3">
+                                {dashboardData?.data?.kpis?.total_users?.value ?? 'Đang tải...'}
+                            </p>
+                            {dashboardData?.data?.kpis?.total_users?.change !== undefined && (
+                                <span className={`badge rounded-pill px-3 py-1 mt-2 border fw-normal fs-6 ${dashboardData.data.kpis.total_users.change < 0 ? 'bg-danger text-white border-danger' : 'bg-success text-white border-success'}`}
+                                    style={{fontSize: '0.95em', display: 'inline-flex', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.10)'}}>
+                                    <i className={`fas ${dashboardData.data.kpis.total_users.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
+                                    {`${dashboardData.data.kpis.total_users.change > 0 ? '+' : ''}${dashboardData.data.kpis.total_users.change}% so với tháng trước`}
+                                </span>
+                            )}
+                            <div className="d-flex justify-content-end">
+                                <Link
+                                    className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
+                                    to="/user"
+                                    style={{ borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
+                                >
+                                    Xem chi tiết <i className="fas fa-arrow-right"></i>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+ 
+
             </div>
 
             <div className="row mb-4">

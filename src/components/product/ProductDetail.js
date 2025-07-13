@@ -135,9 +135,8 @@ const ProductDetail = () => {
                     </div>
                     <div className="row g-4">
                         <div className="col-md-5">
-                            <div className="card shadow-sm">
+                            <div className="card shadow-sm mb-4">
                                 <div className="d-flex flex-column align-items-center p-3">
-                                    {/* Ảnh đại diện lớn */}
                                     {product.image_urls && product.image_urls.length > 0 ? (
                                         (() => {
                                             const featuredImg = product.image_urls.find(img => img.is_featured === 1);
@@ -147,90 +146,43 @@ const ProductDetail = () => {
                                                     {featuredImg ? (
                                                         <>
                                                             <img
-                                                            key={featuredImg.id}
-                                                            src={process.env.REACT_APP_API_URL + 'api/images/' + (featuredImg.main_url || featuredImg.thumb_url)}
-                                                            alt={product.name + '-featured'}
-                                                            className="img-thumbnail mb-3"
-                                                            style={{
-                                                                width: 280,
-                                                                height: 260,
-                                                                objectFit: 'fill',
-                                                                // border: '3px solid #007bff',
-                                                                boxShadow: '0 0 12px #007bff55',
-                                                                cursor: 'pointer',
-                                                            }}
-                                                            title="Ảnh đại diện (bấm để xem lớn)"
-                                                            onClick={() => handleImgClick(featuredImg)}
-                                                        />
-                                                        {/* Modal xem ảnh full */}
-                                                        {showModal && modalImg && (
-                                                            <div
+                                                                key={featuredImg.id}
+                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + (featuredImg.main_url || featuredImg.thumb_url)}
+                                                                alt={product.name + '-featured'}
+                                                                className="img-thumbnail mb-3"
                                                                 style={{
-                                                                    position: 'fixed',
-                                                                    top: 0,
-                                                                    left: 0,
-                                                                    width: '100vw',
-                                                                    height: '100vh',
-                                                                    background: 'rgba(0,0,0,0.7)',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'center',
-                                                                    zIndex: 9999
+                                                                    objectFit: 'contain',
+                                                                    boxShadow: '0 0 12px #007bff55',
+                                                                    cursor: 'pointer',
+                                                                    
+                                                                    maxWidth: '80%',
+                                                                    maxHeight: 400,
                                                                 }}
-                                                                onClick={handleCloseModal}
-                                                            >
-                                                                <div
-                                                                    style={{
-                                                                        position: 'relative',
-                                                                        borderRadius: 8,
-                                                                        padding: 0,
-                                                                        boxShadow: '0 2px 16px #0005',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                    }}
-                                                                    onClick={e => e.stopPropagation()}
-                                                                >
-                                                                    <img
-                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + (modalImg.main_url || modalImg.thumb_url)}
-                                                                        alt={product.name + '-modal-full'}
-                                                                        style={{
-                                                                            maxWidth: '80vw',
-                                                                            maxHeight: '80vh',
-                                                                            display: 'block',
-                                                                            margin: '0 auto',
-                                                                            borderRadius: 8
-                                                                        }}
-                                                                    />
-                                                                    <button
-                                                                        onClick={handleCloseModal}
-                                                                        style={{
-                                                                            position: 'absolute',
-                                                                            top: 8,
-                                                                            right: 8,
-                                                                            background: 'transparent',
-                                                                            color: '#888',
-                                                                            border: 'none',
-                                                                            borderRadius: '50%',
-                                                                            width: 36,
-                                                                            height: 36,
-                                                                            fontWeight: 700,
-                                                                            cursor: 'pointer',
-                                                                            fontSize: 28,
-                                                                            lineHeight: '28px',
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            transition: 'background 0.2s',
-                                                                        }}
-                                                                        title="Đóng"
-                                                                    >
-                                                                        ×
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </>
+                                                                title="Ảnh đại diện (bấm để xem lớn)"
+                                                                onClick={() => handleImgClick(featuredImg)}
+                                                            />
+                                                            {/* Modal xem ảnh full */}
+                                                            {showModal && modalImg && (
+                                                                <Modal show={showModal} onHide={handleCloseModal} centered>
+                                                                    <Modal.Body style={{ position: 'relative', padding: 0, background: 'transparent', border: 0 }}>
+                                                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+                                                                            <img
+                                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + (modalImg.main_url || modalImg.thumb_url)}
+                                                                                alt={product.name + '-modal-full'}
+                                                                                style={{
+                                                                                    maxWidth: '80vw',
+                                                                                    maxHeight: '80vh',
+                                                                                    display: 'block',
+                                                                                    margin: '0 auto',
+                                                                                    borderRadius: 8
+                                                                                }}
+                                                                            />
+                                                                        </div>
+                                                                        {/* Không có nút X đóng */}
+                                                                    </Modal.Body>
+                                                                </Modal>
+                                                            )}
+                                                        </>
                                                     ) : null}
                                                     {/* Các ảnh còn lại nhỏ hơn */}
                                                     <div className="d-flex flex-wrap gap-2 justify-content-center align-items-center">
@@ -297,7 +249,7 @@ const ProductDetail = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-7">
+                        <div className="col-md-7 mb-4">
                             <div className="card shadow-sm h-100">
                                 <div className="card-header bg-light fw-bold">
                                     <i className="fas fa-info-circle me-2"></i>Mô tả sản phẩm

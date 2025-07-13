@@ -14,44 +14,84 @@ const PostAdd = () => {
     const dispatch = useDispatch();
     const [categories, setCategories] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [imageFile, setImageFile] = useState(null);
+    const [imageFiles, setImageFiles] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
+    const [featuredImageIndex, setFeaturedImageIndex] = useState(0);
 
     useEffect(() => {
+        dispatch(actions.controlLoading(true));
         requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) setCategories(response.data.data);
+            dispatch(actions.controlLoading(false));
         });
     }, []);
 
-    // Xử lý chọn ảnh
-    const onChangeImage = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setImageFile(reader.result);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setImageFile(null);
+    // Xử lý chọn nhiều ảnh
+    const onChangeImages = (e) => {
+        const newFiles = Array.from(e.target.files);
+        // Kiểm tra file vượt quá 2MB
+        const validFiles = [];
+        let hasLargeFile = false;
+        newFiles.forEach(file => {
+            if (file.size > 2 * 1024 * 1024) {
+                hasLargeFile = true;
+            } else {
+                validFiles.push(file);
+            }
+        });
+        if (hasLargeFile) {
+            toast.error('Ảnh phải nhỏ hơn 2MB!', toastErrorConfig);
+        }
+        if (validFiles.length === 0) {
+            e.target.value = "";
+            return;
+        }
+        let combinedFiles = [...imageFiles, ...validFiles];
+        // Loại bỏ file trùng tên
+        combinedFiles = combinedFiles.filter(
+            (file, idx, arr) => arr.findIndex(f => f.name === file.name && f.size === file.size) === idx
+        );
+        if (combinedFiles.length > 5) {
+            toast.error('Chỉ được chọn tối đa 5 ảnh!', toastErrorConfig);
+            combinedFiles = combinedFiles.slice(0, 5);
+        }
+        setImageFiles(combinedFiles);
+        setValue('imageFiles', combinedFiles, { shouldValidate: true });
+        // Preview
+        const previews = combinedFiles.map(file => URL.createObjectURL(file));
+        setImagePreviews(previews);
+        if (featuredImageIndex >= combinedFiles.length) setFeaturedImageIndex(0);
+        e.target.value = "";
+    };
+
+    const handleRemoveImage = (idx) => {
+        const newFiles = imageFiles.filter((_, i) => i !== idx);
+        const newPreviews = imagePreviews.filter((_, i) => i !== idx);
+        setImageFiles(newFiles);
+        setImagePreviews(newPreviews);
+        setValue('imageFiles', newFiles, { shouldValidate: true });
+        if (featuredImageIndex === idx || featuredImageIndex >= newFiles.length) {
+            setFeaturedImageIndex(0);
+        } else if (featuredImageIndex > idx) {
+            setFeaturedImageIndex(featuredImageIndex - 1);
         }
     };
 
     const handleSubmitForm = async (data) => {
         setIsSubmitting(true);
         try {
-            console.log("Submitted data:", data);
             dispatch(actions.controlLoading(true));
             const formData = new FormData();
             formData.append('title', data.title);
             formData.append('content', data.content || '');
             formData.append('status', data.status);
-            // Gửi nhiều danh mục (array)
             if (data.category_ids && data.category_ids.length > 0) {
-                data.category_ids.forEach(id => formData.append('category_ids[]', id));
+                (Array.isArray(data.category_ids) ? data.category_ids : [data.category_ids]).forEach(id => formData.append('category_ids[]', id));
             }
-            if (data.imageFile && data.imageFile[0]) {
-                formData.append('image_url', data.imageFile[0]);
-            }
+            imageFiles.forEach((file, idx) => {
+                formData.append('image_url[]', file);
+            });
+            formData.append('featured_image_index', featuredImageIndex);
             const response = await requestApi(
                 'api/admin/posts',
                 'POST',
@@ -97,7 +137,7 @@ const PostAdd = () => {
                         <div className='card-body'>
                             <div className='mb-3 row'>
                                 <form onSubmit={handleSubmit(handleSubmitForm)}>
-                                    <div className="row mb-3">
+                                    <div className="row mb-4">
                                         <div className="col-md-6">
                                             <div className="form-floating mb-3 mb-md-0">
                                                 <input
@@ -113,55 +153,6 @@ const PostAdd = () => {
                                             </div>
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold">
-                                                    Danh mục <span style={{ color: 'red' }}>*</span>
-                                                </label>
-                                                <div
-                                                    className="row"
-                                                    style={{
-                                                        maxHeight: 220,
-                                                        overflowY: 'auto',
-                                                        border: '1px solid #e0e0e0',
-                                                        borderRadius: 4,
-                                                        padding: 8,
-                                                        background: '#fafbfc'
-                                                    }}
-                                                >
-                                                    {categories.map(cat => (
-                                                        <div className="col-12" key={cat.id}>
-                                                            <div className="form-check">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    id={`cat_${cat.id}`}
-                                                                    value={cat.id}
-                                                                    {...register('category_ids', { required: 'Danh mục là bắt buộc' })}
-                                                                />
-                                                                <label className="form-check-label" htmlFor={`cat_${cat.id}`}>
-                                                                    {cat.name}
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                                {errors.category_ids && <div className="text-danger">{errors.category_ids.message}</div>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="row mb-3">
-                                        <div className="col-md-12">
-                                            <label className="form-label">Nội dung</label>
-                                            <CustomEditor
-                                                onReady={() => register('content', { required: "Nội dung là bắt buộc" })}
-                                                onChange={data => setValue('content', data)}
-                                                trigger={() => trigger('content')}
-                                            />
-                                            {errors.content && <div className="text-danger">{errors.content.message}</div>}
-                                        </div>
-                                    </div>
-                                    <div className="row mb-3">
-                                        <div className="col-md-6">
                                             <div className="form-floating mb-3 mb-md-0">
                                                 <select
                                                     className="form-select"
@@ -176,50 +167,144 @@ const PostAdd = () => {
                                                 {errors.status && <div className="text-danger">{errors.status.message}</div>}
                                             </div>
                                         </div>
-                                        <div className="col-md-6 input-file">
-                                            <div className="mb-3">
-                                                <label htmlFor="inputImage" className="form-label btn btn-secondary">
-                                                    Chọn ảnh bài viết 
-                                                </label>
+                                 
+                                    </div>
+                                    <div className="row mb-3">
+
+                                    <div className="col-md-6 px-3">
+                                    <div className="mb-3">
+                                        <div className="form-label fw-semibold">
+                                            Hình ảnh bài viết <span style={{ color: 'red' }}>*</span>
+                                        </div>
+                                        <div className="row g-3">
+                                            {[0, 1, 2, 3, 4].map(idx => (
+                                                <div key={idx} className="col-3 p-2 d-flex flex-column align-items-center">
+                                                    <div
+                                                        className={`w-100 border border-2 ${featuredImageIndex === idx && imagePreviews[idx] ? 'border-primary' : 'border-secondary'} border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center`}
+                                                        style={{ aspectRatio: '1/1', minHeight: 0, height: 'auto', maxWidth: '100%' }}
+                                                    >
+                                                        {imagePreviews[idx] ? (
+                                                            <>
+                                                                <img
+                                                                    src={imagePreviews[idx]}
+                                                                    alt={`Preview ${idx}`}
+                                                                    className="w-100 h-100 rounded position-absolute top-0 start-0"
+                                                                    style={{ objectFit: 'fill', aspectRatio: '1/1' }}
+                                                                    onClick={e => { e.stopPropagation(); setFeaturedImageIndex(idx); }}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 m-1 d-flex align-items-center justify-content-center no-hover"
+                                                                    style={{ zIndex: 2, width: 24, height: 24, padding: 0, background: '#fff' }}
+                                                                    aria-label="Xóa ảnh"
+                                                                    onClick={e => { e.stopPropagation(); handleRemoveImage(idx); }}
+                                                                >
+                                                                    <i className="fas fa-times"></i>
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                                                <i className="fas fa-image fs-1 text-secondary"></i>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {imagePreviews[idx] && (
+                                                        <div className="form-check mt-2">
+                                                            <input
+                                                                type="radio"
+                                                                name="featuredImage"
+                                                                checked={featuredImageIndex === idx}
+                                                                onChange={() => setFeaturedImageIndex(idx)}
+                                                                className="form-check-input"
+                                                                id={`featuredImage${idx}`}
+                                                            />
+                                                            <label className="form-check-label" htmlFor={`featuredImage${idx}`}>Ảnh đại diện</label>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                                <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
+                                                    <label htmlFor="inputImages" className="form-label btn btn-secondary mb-0">
+                                                        <i className="fas fa-upload"></i> Thêm ảnh bài viết
+                                                    </label>
+                                                    <div className="d-flex flex-column gap-1">
+                                                    <span className="text-muted small">
+                                                        Chọn tối đa 5 ảnh, định dạng: jpg, png...
+                                                    </span>
+                                                    <span className="text-muted small">
+                                                        <b>Giữ Ctrl hoặc Shift để chọn nhiều ảnh cùng lúc.</b>
+                                                    </span>
+                                                    </div>
+                                                </div>
                                                 <input
                                                     className="form-control"
-                                                    id="inputImage"
+                                                    id="inputImages"
                                                     type="file"
                                                     accept="image/*"
-                                                    {...register('imageFile', {
+                                                    multiple
+                                                    style={{ display: 'none' }}
+                                                    onChange={onChangeImages}
+                                                    ref={input => (window.imageInput = input)}
+                                                />
+                                                <input
+                                                    type="hidden"
+                                                    {...register('imageFiles', {
                                                         required: 'Ảnh bài viết là bắt buộc',
-                                                        onChange: onChangeImage,
-                                                        validate: {
-                                                            checkType: (files) =>
-                                                                files && files[0]
-                                                                    ? (['image/jpeg', 'image/png', 'image/jpg', 'image/gif'].includes(files[0].type)
-                                                                        ? true
-                                                                        : 'Chỉ chấp nhận ảnh jpg, jpeg, png, gif')
-                                                                    : true,
-                                                            checkSize: (files) =>
-                                                                files && files[0]
-                                                                    ? (files[0].size <= 2 * 1024 * 1024
-                                                                        ? true
-                                                                        : 'Kích thước ảnh tối đa 2MB')
-                                                                    : true
-                                                        }
                                                     })}
                                                 />
-                                                <small className="text-muted"> Chỉ chọn 1 ảnh, định dạng: jpg, png...</small>
-                                                {errors.imageFile && <div className="text-danger">{errors.imageFile.message}</div>}
-                                                {imageFile && (
-                                                    <div className="mt-2">
-                                                        <img
-                                                            src={imageFile}
-                                                            alt="Preview"
-                                                            className="img-thumbnail"
-                                                            style={{ maxWidth: '200px' }}
-                                                        />
-                                                    </div>
-                                                )}
+                                                {errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
                                             </div>
                                         </div>
+                                    <div className="col-md-6">
+                                        <div className="mb-3">
+                                            <label className="form-label fw-semibold">
+                                                Danh mục <span style={{ color: 'red' }}>*</span>
+                                            </label>
+                                            <div
+                                                className="row"
+                                                style={{
+                                                    maxHeight: 220,
+                                                    overflowY: 'auto',
+                                                    border: '1px solid #e0e0e0',
+                                                    borderRadius: 4,
+                                                    padding: 8,
+                                                    background: '#fafbfc'
+                                                }}
+                                            >
+                                                {categories.map(cat => (
+                                                    <div className="col-12" key={cat.id}>
+                                                        <div className="form-check">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                id={`cat_${cat.id}`}
+                                                                value={cat.id}
+                                                                {...register('category_ids', { required: 'Danh mục là bắt buộc' })}
+                                                            />
+                                                            <label className="form-check-label" htmlFor={`cat_${cat.id}`}>
+                                                                {cat.name}
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            {errors.category_ids && <div className="text-danger">{errors.category_ids.message}</div>}
+                                        </div>
                                     </div>
+                                    </div>
+                                    <div className="row mb-3">
+                                        <div className="col-md-12">
+                                            <label className="form-label">Nội dung</label>
+                                            <CustomEditor
+                                                onReady={() => register('content', { required: "Nội dung là bắt buộc" })}
+                                                onChange={data => setValue('content', data)}
+                                                trigger={() => trigger('content')}
+                                            />
+                                            {errors.content && <div className="text-danger">{errors.content.message}</div>}
+                                        </div>
+                                    </div>
+
                                     <div className="mt-4 mb-0">
                                         <div className="d-flex justify-content-center gap-2">
                                             <button

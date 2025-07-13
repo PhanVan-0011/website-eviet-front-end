@@ -3,7 +3,7 @@ const ImageList = ({ src, alt = "Không thấy ảnh", style = {}, ...props }) =
     <div
         style={{
             width: '90%',
-            height: '100px',
+            height: '120px',
             borderRadius: 10,
             overflow: 'hidden',
             background: '#f8f9fa',
