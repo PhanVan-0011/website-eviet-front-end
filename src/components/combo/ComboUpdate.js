@@ -8,6 +8,10 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import CustomEditor from '../common/CustomEditor';
 import moment from 'moment';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import vi from 'date-fns/locale/vi';
+import 'react-datepicker/dist/react-datepicker.css';
+registerLocale('vi', vi);
 
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
@@ -25,8 +29,8 @@ const ComboUpdate = () => {
     const [endDate, setEndDate] = useState('');
     const [comboItems, setComboItems] = useState([{ product_id: '', quantity: 1 }]);
     const [description, setDescription] = useState('');
-
- 
+    const [startDatePicker, setStartDatePicker] = useState(null);
+    const [endDatePicker, setEndDatePicker] = useState(null);
 
     // Lấy thông tin combo cần sửa
     useEffect(() => {
@@ -49,10 +53,24 @@ const ComboUpdate = () => {
                     setValue('description', data.description);
                     setValue('price', formatVND(parseInt(data.price, 10)));
                     setPrice(formatVND(parseInt(data.price, 10)));
-                    setStartDate(data.start_date ? moment(data.start_date).format('YYYY-MM-DDTHH:mm') : '');
-                    setEndDate(data.end_date ? moment(data.end_date).format('YYYY-MM-DDTHH:mm') : '');
+                    // DatePicker expects Date objects
+                    if (data.start_date) {
+                        const start = new Date(data.start_date.replace(' ', 'T'));
+                        setStartDatePicker(start);
+                        setStartDate(start);
+                        setValue('start_date', start, { shouldValidate: true });
+                    }
+                    if (data.end_date) {
+                        const end = new Date(data.end_date.replace(' ', 'T'));
+                        setEndDatePicker(end);
+                        setEndDate(end);
+                        setValue('end_date', end, { shouldValidate: true });
+                    }
                     setValue('is_active', data.is_active === true ? "1" : "0");
-                    setOldImage(data.image_url);
+                    // Use main_url for oldImage
+                    if (data.image_urls && data.image_urls.length > 0) {
+                        setOldImage(data.image_urls[0].main_url);
+                    }
                     setDescription(data.description || '');
                     if (data.items && data.items.length > 0) {
                         setComboItems(data.items.map(item => ({
@@ -73,13 +91,27 @@ const ComboUpdate = () => {
     // Hàm xử lý khi chọn ảnh mới
     const onChangeImage = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => setImageFile(ev.target.result);
-            reader.readAsDataURL(file);
-        } else {
+        if (!file) {
             setImageFile(null);
+            setValue('imageFile', null, { shouldValidate: true });
+            return;
         }
+        // Validate size
+        if (file && typeof file.size === 'number' && file.size > 2 * 1024 * 1024) {
+            setImageFile(null);
+            setValue('imageFile', null, { shouldValidate: true });
+            e.target.value = "";
+            toast.error('Kích thước ảnh tối đa 2MB', toastErrorConfig);
+            return;
+        }
+        setImageFile(file);
+        setValue('imageFile', file, { shouldValidate: true });
+        e.target.value = "";
+    };
+    const handleRemoveImage = () => {
+        setImageFile(null);
+        setOldImage(null);
+        setValue('imageFile', null, { shouldValidate: true });
     };
 
     // Hàm format giá tiền
@@ -123,9 +155,10 @@ const ComboUpdate = () => {
             formData.append('start_date', startDate ? new Date(startDate).toISOString() : '');
             formData.append('end_date', endDate ? new Date(endDate).toISOString() : '');
             formData.append('is_active', data.is_active);
-            // Nếu chọn ảnh mới thì gửi lên, không thì bỏ qua
-            if (data.imageFile && data.imageFile[0]) {
-                formData.append('image_url', data.imageFile[0]);
+            // Chỉ gửi file mới nếu có và là kiểu File
+            if (imageFile) {
+                console.log("test", imageFile);
+                formData.append('image_url', imageFile);
             }
             // Thêm sản phẩm vào combo
             comboItems.forEach((item, idx) => {
@@ -133,6 +166,13 @@ const ComboUpdate = () => {
                 formData.append(`items[${idx}][quantity]`, item.quantity);
             });
 
+            // Log dữ liệu gửi lên
+            // if (process.env.NODE_ENV !== 'production') {
+            //     // Log các key/value của formData
+            //     for (let pair of formData.entries()) {
+            //         console.log(pair[0], pair[1]);
+            //     }
+            // }
             const response = await requestApi(
                 `api/admin/combos/${params.id}`,
                 'POST', // hoặc 'PUT' nếu backend hỗ trợ
@@ -166,155 +206,233 @@ const ComboUpdate = () => {
             <main>
                 <div className="container-fluid px-4">
                     <h1 className="mt-4">Cập nhật combo</h1>
-                    <ol className="breadcrumb mb-4">
+                    <ol className="breadcrumb mb-4 p-2">
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
                         <li className="breadcrumb-item active">Cập nhật combo</li>
                     </ol>
-                    <div className='card mb-3'>
-                        <div className='card-header'>
-                            <i className="fas fa-table me-1"></i>
-                            Dữ liệu combo
-                        </div>
-                        <div className='card-body'>
-                            <form onSubmit={handleSubmit(handleSubmitForm)}>
-                                <div className="row mb-3">
-                                    <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
-                                            <input
-                                                className="form-control"
-                                                id="inputName"
-                                                {...register('name', { required: 'Tên combo là bắt buộc' })}
-                                                placeholder="Nhập tên combo"
-                                            />
-                                            <label htmlFor="inputName">
-                                                Tên combo <span style={{ color: 'red' }}>*</span>
-                                            </label>
-                                            {errors.name && <div className="text-danger">{errors.name.message}</div>}
-                                        </div>
+                    <form onSubmit={handleSubmit(handleSubmitForm)}>
+                        <div className="row g-4">
+                            {/* Thông tin cơ bản */}
+                            <div className="col-lg-6">
+                                <div className="card shadow-sm border-0 h-100">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-info-circle me-2"></i>Thông tin cơ bản</h5>
                                     </div>
-                                    <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
-                                            <input
-                                                className="form-control"
-                                                id="inputPrice"
-                                                type="text"
-                                                inputMode="numeric"
-                                                autoComplete="off"
-                                                value={price}
-                                                onChange={e => {
-                                                    const formatted = formatVND(e.target.value);
-                                                    setPrice(formatted);
-                                                    setValue('price', formatted);
-                                                }}
-                                                placeholder="Nhập giá Combo (VND)"
-                                            />
-                                            <label htmlFor="inputPrice">
-                                                Giá Combo (VNĐ) <span style={{ color: 'red' }}>*</span>
-                                            </label>
-                                            {errors.price && <div className="text-danger">{errors.price.message}</div>}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-6">
-                                        <label className="mb-1">Ngày bắt đầu <span style={{ color: 'red' }}>*</span></label>
-                                        <input
-                                            type="datetime-local"
-                                            className="form-control"
-                                            value={startDate}
-                                            onChange={e => setStartDate(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label className="mb-1">Ngày kết thúc <span style={{ color: 'red' }}>*</span></label>
-                                        <input
-                                            type="datetime-local"
-                                            className="form-control"
-                                            value={endDate}
-                                            onChange={e => setEndDate(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
-                                            <select
-                                                className="form-select"
-                                                id="inputStatus"
-                                                {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
-                                                defaultValue="1"
-                                            >
-                                                <option value="1">Hiển thị</option>
-                                                <option value="0">Ẩn</option>
-                                            </select>
-                                            <label htmlFor="inputStatus">Trạng thái <span style={{ color: 'red' }}>*</span></label>
-                                            {errors.is_active && <div className="text-danger">{errors.is_active.message}</div>}
-                                        </div>
-                                    </div>
-                                    <div className="col-md-6 input-file">
+                                    <div className="card-body pt-2">
                                         <div className="mb-3">
-                                            <label htmlFor="inputImage" className="form-label btn btn-secondary">
-                                                Chọn ảnh combo
+                                            <div className="form-floating">
+                                                <input
+                                                    className="form-control"
+                                                    id="inputName"
+                                                    {...register('name', { required: 'Tên combo là bắt buộc' })}
+                                                    placeholder="Nhập tên combo"
+                                                />
+                                                <label htmlFor="inputName">
+                                                    Tên combo <span className="text-danger">*</span>
+                                                </label>
+                                                {errors.name && <div className="text-danger mt-1 small">{errors.name.message}</div>}
+                                            </div>
+                                        </div>
+                                        <div className="mb-3">
+                                            <div className="form-floating">
+                                                <input
+                                                    className="form-control"
+                                                    id="inputPrice"
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    autoComplete="off"
+                                                    value={price}
+                                                    {...register('price', {
+                                                        required: 'Giá combo là bắt buộc',
+                                                        validate: {
+                                                            isNumber: v => v && !isNaN(Number(v.replace(/\./g, ''))) || 'Giá phải là số',
+                                                            min: v => Number(v.replace(/\./g, '')) > 0 || 'Giá phải lớn hơn 0'
+                                                        }
+                                                    })}
+                                                    onChange={e => {
+                                                        const formatted = formatVND(e.target.value);
+                                                        setPrice(formatted);
+                                                        setValue('price', formatted, { shouldValidate: true });
+                                                    }}
+                                                    placeholder="Nhập giá Combo (VND)"
+                                                />
+                                                <label htmlFor="inputPrice">
+                                                    Giá Combo (VNĐ) <span className="text-danger">*</span>
+                                                </label>
+                                                {errors.price && <div className="text-danger mt-1 small">{errors.price.message}</div>}
+                                            </div>
+                                        </div>
+                                        <div className="mb-3">
+                                            <div className="form-floating">
+                                                <select
+                                                    className="form-select"
+                                                    id="inputStatus"
+                                                    {...register('is_active', {
+                                                        required: 'Trạng thái là bắt buộc',
+                                                        validate: v => v === '1' || v === '0' || 'Trạng thái không hợp lệ'
+                                                    })}
+                                                    defaultValue="1"
+                                                >
+                                                    <option value="1">Hiển thị</option>
+                                                    <option value="0">Ẩn</option>
+                                                </select>
+                                                <label htmlFor="inputStatus">Trạng thái <span className="text-danger">*</span></label>
+                                                {errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
+                                            </div>
+                                        </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="inputStartDate" className="form-label fw-semibold">
+                                                Ngày bắt đầu <span className="text-danger">*</span>
                                             </label>
-                                            <input
-                                                className="form-control"
-                                                id="inputImage"
-                                                type="file"
-                                                accept="image/*"
-                                                {...register('imageFile', {
-                                                    onChange: onChangeImage,
-                                                    validate: {
-                                                        checkType: (files) =>
-                                                            files && files[0]
-                                                                ? (['image/jpeg', 'image/png', 'image/jpg', 'image/gif'].includes(files[0].type)
-                                                                    ? true
-                                                                    : 'Chỉ chấp nhận ảnh jpg, jpeg, png, gif')
-                                                                : true,
-                                                        checkSize: (files) =>
-                                                            files && files[0]
-                                                                ? (files[0].size <= 2 * 1024 * 1024
-                                                                    ? true
-                                                                    : 'Kích thước ảnh tối đa 2MB')
-                                                                : true
-                                                    }
-                                                })}
-                                            />
-                                            <small className="text-muted"> Chỉ chọn 1 ảnh, định dạng: jpg, png...</small>
-                                            {errors.imageFile && <div className="text-danger">{errors.imageFile.message}</div>}
-                                            {/* Hiển thị ảnh cũ hoặc ảnh mới preview */}
-                                            {(imageFile || oldImage) && (
-                                                <div className="mt-2">
-                                                    <img
-                                                        src={imageFile ? imageFile : (urlImage + oldImage)}
-                                                        alt="ảnh combo"
-                                                        className="img-thumbnail"
-                                                        style={{ maxWidth: '200px' }}
-                                                    />
-                                                </div>
-                                            )}
+                                            <div className="d-flex align-items-center" style={{gap: '4px'}}>
+                                                <DatePicker
+                                                    selected={startDatePicker}
+                                                    onChange={date => {
+                                                        setStartDatePicker(date);
+                                                        setStartDate(date);
+                                                        setValue('start_date', date, { shouldValidate: true });
+                                                    }}
+                                                    locale={vi}
+                                                    dateFormat="dd/MM/yyyy"
+                                                    className="form-control"
+                                                    placeholderText="Chọn ngày bắt đầu"
+                                                    id="inputStartDate"
+                                                    autoComplete="off"
+                                                />
+                                                <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{height: '38px'}} onClick={() => document.getElementById('inputStartDate')?.focus()}>
+                                                    <i className="fas fa-calendar-alt text-secondary"></i>
+                                                </button>
+                                                <input type="hidden" {...register('start_date', { required: 'Ngày bắt đầu là bắt buộc' })} />
+                                            </div>
+                                            {errors.start_date && <div className="text-danger mt-1 small">{errors.start_date.message}</div>}
+                                        </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="inputEndDate" className="form-label fw-semibold">
+                                                Ngày kết thúc <span className="text-danger">*</span>
+                                            </label>
+                                            <div className="d-flex align-items-center" style={{gap: '4px'}}>
+                                                <DatePicker
+                                                    selected={endDatePicker}
+                                                    onChange={date => {
+                                                        setEndDatePicker(date);
+                                                        setEndDate(date);
+                                                        setValue('end_date', date, { shouldValidate: true });
+                                                    }}
+                                                    locale={vi}
+                                                    dateFormat="dd/MM/yyyy"
+                                                    className="form-control"
+                                                    placeholderText="Chọn ngày kết thúc"
+                                                    id="inputEndDate"
+                                                    autoComplete="off"
+                                                />
+                                                <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{height: '38px'}} onClick={() => document.getElementById('inputEndDate')?.focus()}>
+                                                    <i className="fas fa-calendar-alt text-secondary"></i>
+                                                </button>
+                                                <input type="hidden" {...register('end_date', { required: 'Ngày kết thúc là bắt buộc' })} />
+                                            </div>
+                                            {errors.end_date && <div className="text-danger mt-1 small">{errors.end_date.message}</div>}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-12">
-                                        <label htmlFor="description">Mô tả combo</label>
+                            </div>
+                            {/* Hình ảnh combo */}
+                            <div className="col-lg-6">
+                                <div className="card shadow-sm border-0 h-100">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-image me-2"></i>Hình ảnh combo</h5>
+                                    </div>
+                                    <div className="card-body pt-2">
+                                        <div className="mb-3">
+                                            <div className="d-flex flex-column align-items-center">
+                                                <div className="border border-2 border-secondary border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center mb-2"
+                                                    style={{ aspectRatio: '3/2', width: '100%', maxWidth: 320 }}>
+                                                    {(imageFile || oldImage) ? (
+                                                        <>
+                                                            <img
+                                                                src={imageFile ? (typeof imageFile === 'string' ? imageFile : URL.createObjectURL(imageFile)) : (process.env.REACT_APP_API_URL + 'api/images/' + oldImage)}
+                                                                alt="ảnh combo"
+                                                                className="w-100 h-100 rounded position-absolute top-0 start-0"
+                                                                style={{ objectFit: 'fill', aspectRatio: '1/1' }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 m-1 d-flex align-items-center justify-content-center no-hover"
+                                                                style={{ zIndex: 2, width: 28, height: 28, padding: 0, background: '#fff' }}
+                                                                aria-label="Xóa ảnh"
+                                                                onClick={handleRemoveImage}
+                                                            >
+                                                                <i className="fas fa-times"></i>
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                                            <i className="fas fa-image fs-1 text-secondary"></i>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <label htmlFor="inputImage" className="form-label btn btn-secondary mb-0 mt-2">
+                                                    <i className="fas fa-upload"></i> Thêm ảnh combo
+                                                </label>
+                                                <div className="text-muted small">
+                                                            Chỉ chọn 1 ảnh, định dạng: jpg, png...<br/>
+                                                            Kích thước tối đa: 2MB
+                                                </div>
+                                                <input
+                                                    className="form-control"
+                                                    id="inputImage"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    style={{ display: 'none' }}
+                                                    onChange={onChangeImage}
+                                                />
+                                                <input
+                                                    type="hidden"
+                                                    {...register('imageFile', {
+                                                        validate: file => {
+                                                            // Nếu đã có ảnh cũ thì không bắt buộc
+                                                            if (oldImage && !imageFile) return true;
+                                                            if (!file && !oldImage) return 'Ảnh combo là bắt buộc';
+                                                            return true;
+                                                        }
+                                                    })}
+                                                />
+                                                {errors.imageFile && <div className="text-danger mt-1 small">{errors.imageFile.message}</div>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {/* Mô tả combo */}
+                        <div className="row mt-4">
+                            <div className="col-lg-12">
+                                <div className="card shadow-sm border-0">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-align-left me-2"></i>Mô tả combo</h5>
+                                    </div>
+                                    <div className="card-body pt-2">
                                         <CustomEditor
                                             data={description}
                                             onReady={() => register('description', { required: "Mô tả combo là bắt buộc" })}
                                             onChange={data => setValue('description', data)}
                                             trigger={() => trigger('description')}
                                         />
-                                        {errors.description && <div className="text-danger">{errors.description.message}</div>}
+                                        {errors.description && <div className="text-danger mt-1 small">{errors.description.message}</div>}
                                     </div>
                                 </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-12">
-                                        <label className="fw-bold mb-2">Sản phẩm trong combo <span style={{ color: 'red' }}>*</span></label>
+                            </div>
+                        </div>
+                        {/* Sản phẩm trong combo */}
+                        <div className="row mt-4">
+                            <div className="col-lg-12">
+                                <div className="card shadow-sm border-0">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-boxes me-2"></i>Sản phẩm trong combo <span className="text-danger">*</span></h5>
+                                    </div>
+                                    <div className="card-body pt-2">
                                         {comboItems.map((item, idx) => (
-                                            <div className="row align-items-center mb-2" key={idx} style={{ minHeight: 70 }}>
-                                                <div className="col-6 d-flex align-items-center">
+                                            <div className="row align-items-center mb-3" key={idx}>
+                                                <div className="col-md-5">
                                                     <select
                                                         className="form-select"
                                                         value={item.product_id}
@@ -342,7 +460,7 @@ const ComboUpdate = () => {
                                                         })}
                                                     </select>
                                                 </div>
-                                                <div className="col-2 d-flex align-items-center">
+                                                <div className="col-md-3 d-flex align-items-center">
                                                     <img
                                                         src={
                                                             products.find(p => String(p.id) === String(item.product_id))?.image_url
@@ -350,17 +468,10 @@ const ComboUpdate = () => {
                                                                 : '/no-image.png'
                                                         }
                                                         alt=""
-                                                        style={{
-                                                            width: 110,
-                                                            height: 80,
-                                                            objectFit: 'contain',
-                                                            borderRadius: 4,
-                                                            border: '1px solid #eee',
-                                                            background: '#fff'
-                                                        }}
+                                                        style={{ width: 90, height: 60, objectFit: 'contain', borderRadius: 4, border: '1px solid #eee', background: '#fff' }}
                                                     />
                                                 </div>
-                                                <div className="col-2">
+                                                <div className="col-md-2">
                                                     <input
                                                         type="number"
                                                         className="form-control"
@@ -371,7 +482,7 @@ const ComboUpdate = () => {
                                                         required
                                                     />
                                                 </div>
-                                                <div className="col-2 d-flex align-items-center">
+                                                <div className="col-md-2 d-flex align-items-center gap-2">
                                                     <button
                                                         type="button"
                                                         className="btn btn-danger"
@@ -383,7 +494,7 @@ const ComboUpdate = () => {
                                                     {idx === comboItems.length - 1 && (
                                                         <button
                                                             type="button"
-                                                            className="btn btn-success ms-2"
+                                                            className="btn btn-success"
                                                             onClick={handleAddItem}
                                                         >
                                                             <i className="fas fa-plus"></i>
@@ -394,28 +505,31 @@ const ComboUpdate = () => {
                                         ))}
                                     </div>
                                 </div>
-                                <div className="mt-4 mb-0">
-                                    <div className="d-flex justify-content-center gap-2">
-                                        <button
-                                            type="button"
-                                            className="btn btn-secondary w-25"
-                                            onClick={() => navigation('/combo')}
-                                            disabled={isSubmitting}
-                                        >
-                                            Hủy bỏ
-                                        </button>
-                                        <button
-                                            className="btn btn-primary w-25"
-                                            type="submit"
-                                            disabled={isSubmitting}
-                                        >
-                                            {isSubmitting ? "Đang gửi..." : "Cập nhật"}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
+                            </div>
                         </div>
-                    </div>
+                        {/* Nút hành động */}
+                        <div className="row mt-4 mb-4">
+                            <div className="col-lg-12">
+                                <div className="d-flex justify-content-center gap-2">
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary w-25"
+                                        onClick={() => navigation('/combo')}
+                                        disabled={isSubmitting}
+                                    >
+                                        Hủy bỏ
+                                    </button>
+                                    <button
+                                        className="btn btn-primary w-25"
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                    >
+                                        {isSubmitting ? "Đang gửi..." : "Cập nhật"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </main>
         </div>

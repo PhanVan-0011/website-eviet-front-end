@@ -8,7 +8,7 @@ import { Modal, Button } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
-
+import moment from 'moment';
 
 
 const UserList = () => {
@@ -27,14 +27,73 @@ const UserList = () => {
     const [refresh, setRefresh] = useState(Date.now());
     const [showAssignRole, setShowAssignRole] = useState(false);
     const [assignUserId, setAssignUserId] = useState(null);
+    const [hoveredUserId, setHoveredUserId] = useState(null);
 
     const columns = [
-        // { title: "ID", element: row => row.id },
-        { title: "Tên", element: row => row.name },
+        {
+            title: "Khách hàng",
+            element: row => (
+                <div style={{ display: 'flex', alignItems: 'center', minWidth: 120, position: 'relative' }}>
+                    <div
+                        onMouseEnter={() => row.image_url && row.image_url.thumb_url && setHoveredUserId(row.id)}
+                        onMouseLeave={() => setHoveredUserId(null)}
+                        style={{ display: 'flex', alignItems: 'center' }}
+                    >
+                        {row.image_url && row.image_url.thumb_url ? (
+                            <img
+                                src={process.env.REACT_APP_API_URL + 'api/images/' + row.image_url.thumb_url}
+                                alt="avatar"
+                                style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '1px solid #eee', background: '#fafbfc', marginRight: 10, cursor: 'pointer' }}
+                            />
+                        ) : (
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #eee', marginRight: 10 }}>
+                                <i className="fas fa-user fa-sm text-secondary"></i>
+                            </div>
+                        )}
+                        {/* Popup preview */}
+                        {hoveredUserId === row.id && row.image_url && row.image_url.main_url && (
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    bottom: -110,
+                                    left: 0,
+                                    zIndex: 100,
+                                    background: '#fff',
+                                    border: '1px solid #ddd',
+                                    borderRadius: 8,
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                                    padding: 6,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    minWidth: 100,
+                                    minHeight: 100
+                                }}
+                            >
+                                <img
+                                    src={process.env.REACT_APP_API_URL + 'api/images/' + row.image_url.main_url}
+                                    alt="avatar-large"
+                                    style={{ width: 96, height: 96, borderRadius: '12px', objectFit: 'cover', border: '1px solid #eee', background: '#fafbfc' }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                    <span style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.name}</span>
+                </div>
+            )
+        },
         { title: "Email", element: row => row.email },
         { title: "Số điện thoại", element: row => row.phone },
         { title: "Giới tính", element: row => row.gender === "male" ? "Nam" : row.gender === "female" ? "Nữ" : "Khác" },
-        { title: "Ngày sinh", element: row => row.date_of_birth ? formatDate(row.date_of_birth) : "" },
+        {
+            title: "Ngày sinh",
+            element: row => {
+                if (!row.date_of_birth) return "";
+                // Thử parse với nhiều định dạng
+                const m = moment(row.date_of_birth, ["DD/MM/YYYY", "YYYY-MM-DD", "YYYY/MM/DD"], true);
+                return m.isValid() ? m.format("DD/MM/YYYY") : "";
+            }
+        },
         // { title: "Xác thực", element: row => row.is_verified ? "Đã xác thực" : "Chưa xác thực" },
         { title: "Ngày tạo", element: row => formatDate(row.created_at) },
         { title: "Ngày cập nhật", element: row => formatDate(row.updated_at) },
@@ -52,7 +111,8 @@ const UserList = () => {
                     <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>
                     {/* <button className="btn btn-warning btn-sm me-1" onClick={() => { setAssignUserId(row.id); setShowAssignRole(true); }}><i className="fas fa-user-tag"></i> Gán vai trò</button> */}
                 </>
-            )
+                
+            ), width: '8%'
         }
     ];
     // Handle single Delete
@@ -115,16 +175,16 @@ const UserList = () => {
         const query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
         dispatch(actions.controlLoading(true)); // Bắt đầu loading
         requestApi(`api/admin/users${query}`, 'GET', []).then((response) => {
-            dispatch(actions.controlLoading(false)); 
+            dispatch(actions.controlLoading(false));
             setUsers(response.data.data);
             setNumOfPages(response.data.last_page);
             console.log("Users: ", response.data);
             console.log("Num of pages: ", response.data.last_page);
             console.log("Current page: ", response.data.page);
         }).catch((error) => {
-            dispatch(actions.controlLoading(false)); 
+            dispatch(actions.controlLoading(false));
             console.log("Error fetching users: ", error);
-        }   
+        }
     );
     }
     , [currentPage, itemOfPage, searchText, refresh]);
@@ -142,7 +202,7 @@ const UserList = () => {
                     <Link className="btn btn-primary me-2" to="/user/add"><i className="fas fa-plus"></i> Thêm khách hàng</Link>
                     {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Delete</button>}
                 </div>
-                <DataTables 
+                <DataTables
                     name="Dữ liệu khách hàng"
                     columns={columns}
                     data={users}

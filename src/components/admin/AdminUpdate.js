@@ -26,20 +26,28 @@ const AdminUpdate = () => {
      const [showModal, setShowModal] = useState(false);
      const [roles, setRoles] = useState([]);
      const [dob, setDob] = useState(null);
+     // Thêm các state cho avatar
+     const [imagePreview, setImagePreview] = useState(null);
+     const [imageFile, setImageFile] = useState(null);
+     const [oldAvatar, setOldAvatar] = useState(null);
 
     useEffect(() => {
-        // Lấy thông tin nhân viên từ API
-        const fetchUserData = async () => {
+        // Lấy dữ liệu user và roles song song
+        const fetchAll = async () => {
             try {
-                const response = await requestApi(`api/admin/admins/${params.id}`, 'GET');
-                const data = response.data.data;
+                dispatch(actions.controlLoading(true));
+                const [userRes, rolesRes] = await Promise.all([
+                    requestApi(`api/admin/admins/${params.id}`, 'GET'),
+                    requestApi('api/admin/roles?limit=1000', 'GET', [])
+                ]);
+                // Xử lý user
+                const data = userRes.data.data;
                 setValue('name', data.name);
                 setValue('address', data.address);
                 setValue('phone', data.phone);
                 setValue('email', data.email);
                 setValue('gender', data.gender);
                 setValue('is_active', data.is_active ? "1" : "0");
-                // set ngày sinh cho DatePicker
                 if (data.date_of_birth) {
                     const date = moment(data.date_of_birth, ['DD/MM/YYYY', 'YYYY-MM-DD']).toDate();
                     setDob(date);
@@ -48,31 +56,63 @@ const AdminUpdate = () => {
                     setDob(null);
                     setValue('date_of_birth', '');
                 }
-                console.log(data);
-                // set vai trò đã có
+                if (data.image_url && data.image_url.main_url) {
+                    setOldAvatar(data.image_url.main_url);
+                }
                 if (data.roles && Array.isArray(data.roles)) {
                     setTimeout(() => {
                         setValue('role_ids', data.roles.map(r => String(r.id)));
                     }, 0);
                 }
+                // Xử lý roles
+                if (rolesRes.data && rolesRes.data.data) setRoles(rolesRes.data.data);
+                dispatch(actions.controlLoading(false));
             } catch (error) {
-                console.error("Error fetching user data: ", error);
+                dispatch(actions.controlLoading(false));
+                console.error("Error fetching data: ", error);
             }
         };
-        fetchUserData();
-        // Lấy danh sách roles
-        dispatch(actions.controlLoading(true));
-        requestApi('api/admin/roles?limit=1000', 'GET', []).then((res) => {
-            if (res.data && res.data.data) setRoles(res.data.data);
-            dispatch(actions.controlLoading(false));
-        });
-    }, [params.id, setValue])
+        fetchAll();
+    }, [params.id, setValue]);
     const handleSubmitForm = async (data) => {
-        console.log("Submit data: ", data);
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
-            const response = await requestApi(`api/admin/admins/${params.id}`, 'PUT', data);
+            let response;
+            if (imageFile) {
+                // Nếu có ảnh mới, dùng FormData
+                const formData = new FormData();
+                Object.keys(data).forEach(key => {
+                    if (Array.isArray(data[key])) {
+                        data[key].forEach(val => formData.append(key + '[]', val));
+                    } else {
+                        formData.append(key, data[key]);
+                    }
+                });
+                // Gửi role_ids dạng array
+                if (Array.isArray(data.role_ids)) {
+                    data.role_ids.forEach(id => formData.append('role_ids[]', id));
+                }
+                formData.append('image_url', imageFile); // key là image_url
+
+                // // Log FormData entries
+                // console.log('FormData entries:');
+                // for (let pair of formData.entries()) {
+                //     console.log(pair[0], pair[1]);
+                // }
+                // Log image file details
+                // if (imageFile) {
+                //     console.log('Image file:', {
+                //         name: imageFile.name,
+                //         type: imageFile.type,
+                //         size: imageFile.size
+                //     });
+                // }
+
+                response = await requestApi(`api/admin/admins/${params.id}`, 'POST', formData,'json', 'multipart/form-data');
+            } else {
+                response = await requestApi(`api/admin/admins/${params.id}`, 'POST', data);
+            }
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật thông tin thành công", toastSuccessConfig);
@@ -85,15 +125,58 @@ const AdminUpdate = () => {
         } catch (e) {
             dispatch(actions.controlLoading(false));
             console.log("Error Update user: ", e);
-            if (e.response && e.response.data && e.response.data.message) {
-                toast.error(e.response.data.message, toastErrorConfig);
-            } else {
-                toast.error("Server error", toastErrorConfig);
+            let errorMsg = "Server error";
+            if (e.response && e.response.data) {
+                let data = e.response.data;
+                if (typeof data === 'string') {
+                    try {
+                        data = JSON.parse(data);
+                        console.log("Parsed error data: ", data);
+                    } catch {}
+                }
+                if (data.message) {
+                    errorMsg = data.message;
+                }
             }
+            toast.error(errorMsg, toastErrorConfig);
         } finally {
             setIsSubmitting(false);
         }
     }
+
+    // Hàm chọn ảnh mới
+    const onChangeImage = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                toast.error('Ảnh phải nhỏ hơn 2MB!', toastErrorConfig);
+                e.target.value = "";
+                return;
+            }
+            if (!['image/jpeg', 'image/png', 'image/jpg', 'image/gif'].includes(file.type)) {
+                toast.error('Chỉ chấp nhận ảnh jpg, jpeg, png, gif', toastErrorConfig);
+                e.target.value = "";
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+            setImageFile(file);
+        } else {
+            setImagePreview(null);
+            setImageFile(null);
+        }
+        e.target.value = "";
+    };
+
+    // Hàm xóa ảnh
+    const handleRemoveImage = () => {
+        setImagePreview(null);
+        setImageFile(null);
+        setOldAvatar(null);
+    };
 
 
   return (
@@ -202,7 +285,98 @@ const AdminUpdate = () => {
                                     </div>
                                 </div>
 
+                                {/* Avatar + Ngày sinh + Vai trò giống hệt AdminAdd */}
                                 <div className="row mb-3">
+                                    <div className="col-md-6">
+                                        <div className="row">
+                                            <div className="col-md-7">
+                                                <div className="mb-3">
+                                                    <label className="form-label fw-semibold">
+                                                        Ảnh đại diện
+                                                    </label>
+                                                    <div className="d-flex gap-2 align-items-start">
+                                                        <div 
+                                                            className="position-relative rounded-circle bg-light d-flex align-items-center justify-content-center border border-2 border-secondary border-dashed"
+                                                            style={{ width: 100, height: 100, overflow: 'hidden' }}
+                                                        >
+                                                            {imagePreview ? (
+                                                                <img
+                                                                    src={imagePreview}
+                                                                    alt="Avatar preview"
+                                                                    className="w-100 h-100"
+                                                                    style={{ objectFit: 'fill' }}
+                                                                />
+                                                            ) : oldAvatar ? (
+                                                                <img
+                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + oldAvatar}
+                                                                    alt=""
+                                                                    className="w-100 h-100"
+                                                                    style={{ objectFit: 'fill' }}
+                                                                />
+                                                            ) : (
+                                                                <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                                                    <i className="fas fa-user fs-1 text-secondary"></i>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="d-flex flex-column gap-2">
+                                                            <div className="text-muted small">
+                                                                Chỉ chọn 1 ảnh, định dạng: jpg, png...<br/>
+                                                                Kích thước tối đa: 2MB
+                                                            </div>
+                                                            <label htmlFor="inputAvatar" className="btn btn-secondary mb-0">
+                                                                <i className="fas fa-upload me-2"></i>Chọn ảnh
+                                                            </label>
+                                                            <input
+                                                                id="inputAvatar"
+                                                                type="file"
+                                                                accept="image/*"
+                                                                style={{ display: 'none' }}
+                                                                onChange={onChangeImage}
+                                                            />
+                                                            
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="col-md-5">
+                                                <div className="mb-3">
+                                                    <label className="form-label fw-semibold" htmlFor='inputDob'>
+                                                        Ngày sinh
+                                                    </label>
+                                                    <div className="d-flex align-items-center">
+                                                        <label htmlFor="inputDob" className="form-label me-2" style={{
+                                                                color: '#0d6efd',
+                                                                fontSize: 20,
+                                                                marginRight: 10,
+                                                                minWidth: 24,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}>            
+                                                            <i className="fas fa-calendar-alt"></i>
+                                                        </label>
+                                                        <DatePicker
+                                                            id="inputDob"
+                                                            selected={dob}
+                                                            onChange={date => {
+                                                                setDob(date);
+                                                                setValue('date_of_birth', date ? date.toISOString().split('T')[0] : '');
+                                                            }}
+                                                            dateFormat="dd/MM/yyyy"
+                                                            locale={vi}
+                                                            className="form-control"
+                                                            placeholderText="dd/mm/yyyy"
+                                                            showMonthDropdown
+                                                            showYearDropdown
+                                                            dropdownMode="select"
+                                                            isClearable
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div className="col-md-6">
                                         <div className="mb-3">
                                             <label className="form-label fw-semibold">
@@ -233,42 +407,6 @@ const AdminUpdate = () => {
                                             {errors.role_ids && <div className="text-danger">{errors.role_ids.message}</div>}
                                         </div>
                                     </div>
-                                    <div className="col-md-6">
-                                        <div className="mb-3">
-                                            <label className="form-label fw-semibold" htmlFor='inputDob'>
-                                                Ngày sinh
-                                            </label>
-                                            <div className="d-flex align-items-center">
-                                                <label htmlFor="inputDob" className="form-label me-2" style={{
-                                                        color: '#0d6efd',
-                                                        fontSize: 20,
-                                                        marginRight: 10,
-                                                        minWidth: 24,
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center'
-                                                    }}>
-                                                    <i className="fas fa-calendar-alt"></i>
-                                                </label>
-                                                <DatePicker
-                                                    id="inputDob"
-                                                    selected={dob}
-                                                    onChange={date => {
-                                                        setDob(date);
-                                                        setValue('date_of_birth', date ? date.toISOString().split('T')[0] : '');
-                                                    }}
-                                                    dateFormat="dd/MM/yyyy"
-                                                    locale={vi}
-                                                    className="form-control"
-                                                    placeholderText="dd/mm/yyyy"
-                                                    showMonthDropdown
-                                                    showYearDropdown
-                                                    dropdownMode="select"
-                                                    isClearable
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 <div className="mt-4 mb-0">
@@ -284,7 +422,7 @@ const AdminUpdate = () => {
                                           <button
                                             type="button"
                                             className="btn btn-secondary w-25 font-weight-bold"
-                                            onClick={() => navigation('-1')}
+                                            onClick={() => navigation('/admin')}
                                             disabled={isSubmitting}
                                         >
                                             Hủy bỏ

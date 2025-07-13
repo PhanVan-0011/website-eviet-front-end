@@ -29,7 +29,17 @@ const ComboDetail = () => {
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/combos/${id}`, 'GET')
             .then(res => {
-                setCombo(res.data.data);
+                // Xử lý dữ liệu trả về cho phù hợp
+                const data = res.data.data;
+                // Lấy ảnh chính
+                let mainImage = '';
+                if (data.image_urls && data.image_urls.length > 0) {
+                    mainImage = data.image_urls[0].main_url;
+                }
+                setCombo({
+                    ...data,
+                    mainImage,
+                });
                 setLoading(false);
                 dispatch(actions.controlLoading(false));
             })
@@ -114,15 +124,15 @@ const ComboDetail = () => {
                         <div className="col-md-5">
                             <div className="card shadow-sm">
                                 <img
-                                    src={combo.image_url ? urlImage + combo.image_url : "https://via.placeholder.com/400x320?text=No+Image"}
+                                    src={combo.mainImage ? urlImage + combo.mainImage : "https://via.placeholder.com/400x320?text=No+Image"}
                                     alt={combo.name}
                                     className="card-img-top"
-                                    style={{ objectFit: 'container', height: 320, borderRadius: '8px 8px 0 0', background: '#fafafa' }}
+                                    style={{ objectFit: 'cover', height: 320, borderRadius: '8px 8px 0 0', background: '#fafafa' }}
                                 />
                                 <div className="card-body">
                                     <h4 className="card-title mb-2">{combo.name}</h4>
                                     <div className="mb-2">
-                                        {combo.is_active
+                                        {combo.is_active === true
                                             ? <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Đang áp dụng</span>
                                             : <span className="badge bg-secondary"><i className="fas fa-ban me-1"></i>Ngừng áp dụng</span>
                                         }
@@ -131,7 +141,7 @@ const ComboDetail = () => {
                                         <span className="fw-semibold text-success">Giá combo:</span> <span className="text-danger">{formatVND(combo.price)} ₫</span>
                                     </div>
                                     <div className="mb-2">
-                                        <span className="fw-semibold">Số sản phẩm:</span> {combo.items_count}
+                                        <span className="fw-semibold">Số sản phẩm:</span> {combo.items ? combo.items.length : 0}
                                     </div>
                                     <div className="mb-2">
                                         <span className="fw-semibold">Thời gian áp dụng:</span>
@@ -195,7 +205,7 @@ const ComboDetail = () => {
                                                             </td>
                                                             <td>
                                                                 <div className="fw-semibold">{item.product ? item.product.name : ''}</div>
-                                                                <div className="text-muted small">{item.product ? item.product.description : ''}</div>
+                                                                <div className="text-muted small" dangerouslySetInnerHTML={{__html: item.product ? item.product.description : ''}} />
                                                             </td>
                                                             <td className="text-center">{item.product ? formatVND(item.product.sale_price) : ''} ₫</td>
                                                             <td className="text-center">{item.quantity}</td>

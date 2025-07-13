@@ -121,9 +121,17 @@ const ComboList = () => {
     
          {
           title: "Hình ảnh",
-          element: row => (
-            <ImageList src={row.image_url?.startsWith('http') ? row.image_url : urlImage + row.image_url} alt={row.name} />
-          ),
+          element: row => {
+            let featured = null;
+            if (Array.isArray(row.image_urls) && row.image_urls.length > 0) {
+              featured = row.image_urls.find(img => img.is_featured) || row.image_urls[0];
+            }
+            return featured && featured.thumb_url ? (
+              <ImageList src={urlImage + featured.thumb_url} alt={row.name} />
+            ) : (
+              <span className="text-muted">Không có ảnh</span>
+            );
+          },
           width: '12%'
         },
         {

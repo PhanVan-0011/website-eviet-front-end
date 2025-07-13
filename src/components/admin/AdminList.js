@@ -8,6 +8,7 @@ import { Modal, Button } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import moment from 'moment';
 
 const AssignRoleModal = ({ show, onHide, userId, onSuccess }) => {
     const dispatch = useDispatch();
@@ -117,9 +118,67 @@ const AdminList = () => {
     const [filterIsActive, setFilterIsActive] = useState('');
     const [filterRoleName, setFilterRoleName] = useState('');
     const [roles, setRoles] = useState([]);
+    const [hoveredUserId, setHoveredUserId] = useState(null);
     const columns = [
         // { title: "ID", element: row => row.id },
-        { title: "Tên", element: row => row.name },
+        {
+            title: "Tên",
+            element: row => (
+                <div style={{ display: 'flex', alignItems: 'center', minWidth: 120, position: 'relative' }}>
+                    <div
+                        onMouseEnter={() => setHoveredUserId(row.id)}
+                        onMouseLeave={() => setHoveredUserId(null)}
+                        style={{ display: 'flex', alignItems: 'center' }}
+                    >
+                        {row.image_url && row.image_url.thumb_url ? (
+                            <img
+                                src={process.env.REACT_APP_API_URL + 'api/images/' + row.image_url.thumb_url}
+                                alt=""
+                                style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '1px solid #eee', background: '#fafbfc', marginRight: 10, cursor: 'pointer' }}
+                            />
+                        ) : (
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #eee', marginRight: 10 }}>
+                                <i className="fas fa-user fa-sm text-secondary"></i>
+                            </div>
+                        )}
+                        {/* Popup preview */}
+                        {hoveredUserId === row.id && (
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    bottom: -110,
+                                    left: 0,
+                                    zIndex: 100,
+                                    background: '#fff',
+                                    border: '1px solid #ddd',
+                                    borderRadius: 8,
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                                    padding: 6,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    minWidth: 100,
+                                    minHeight: 100
+                                }}
+                            >
+                                {row.image_url && row.image_url.main_url ? (
+                                    <img
+                                        src={process.env.REACT_APP_API_URL + 'api/images/' + row.image_url.main_url}
+                                        alt="Hình ảnh lỗi"
+                                        style={{ width: 96, height: 96, borderRadius: '12px', objectFit: 'cover', border: '1px solid #eee', background: '#fafbfc' }}
+                                    />
+                                ) : (
+                                    <div style={{ width: 96, height: 96, borderRadius: 12, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #eee' }}>
+                                        <i className="fas fa-user fa-3x text-secondary"></i>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    <span style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.name}</span>
+                </div>
+            )
+        },
         { title: "Email", element: row => row.email },
         { title: "Số điện thoại", element: row => row.phone },
       
