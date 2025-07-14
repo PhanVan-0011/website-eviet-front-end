@@ -85,7 +85,7 @@ const Dashboard = () => {
 
     return (
         <div className="container-fluid px-4">
-            <h1 className="mt-4 mb-4">Tổng quan</h1>
+            <h3 className="mt-4 mb-4"></h3>
             <div className="row mb-4">
                                 {/* Doanh thu tháng */}
                 <div className="col-md-3">
@@ -100,9 +100,10 @@ const Dashboard = () => {
                                     : 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_revenue?.change !== undefined && (
-                                <span className={`badge rounded-pill px-3 py-1 mt-2 border fw-normal fs-6 ${dashboardData.data.kpis.total_revenue.change < 0 ? 'bg-danger text-white border-danger' : 'bg-success text-white border-success'}`}
-                                    style={{fontSize: '0.95em', display: 'inline-flex', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.10)'}}>
+                                <span className={` d-block mb-2 ${dashboardData.data.kpis.total_revenue.change < 0 ? 'text-danger' : 'text-success'}`}
+                                    >
                                     <i className={`fas ${dashboardData.data.kpis.total_revenue.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
+                                    
                                     {`${dashboardData.data.kpis.total_revenue.change > 0 ? '+' : ''}${dashboardData.data.kpis.total_revenue.change}% so với tháng trước`}
                                 </span>
                             )}
@@ -125,12 +126,11 @@ const Dashboard = () => {
                             <h5 className="card-title">
                                 <i className="fas fa-shopping-cart me-2"></i> Tổng đơn hàng
                             </h5>
-                            <p className="card-text fs-3">
+                            <p className="card-text fs-2">
                                 {dashboardData?.data?.kpis?.total_orders?.value ?? 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_orders?.change !== undefined && (
-                                <span className={`badge rounded-pill px-3 py-1 mt-2 border fw-normal fs-6 ${dashboardData.data.kpis.total_orders.change < 0 ? 'bg-danger text-white border-danger' : 'bg-success text-white border-success'}`}
-                                    style={{fontSize: '0.95em', display: 'inline-flex', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.10)'}}>
+                                <span className={`d-block mb-2 ${dashboardData.data.kpis.total_orders.change < 0 ?'text-danger' : 'text-success'}`}>
                                     <i className={`fas ${dashboardData.data.kpis.total_orders.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
                                     {`${dashboardData.data.kpis.total_orders.change > 0 ? '+' : ''}${dashboardData.data.kpis.total_orders.change}% so với tháng trước`}
                                 </span>
@@ -158,8 +158,7 @@ const Dashboard = () => {
                                 {dashboardData?.data?.kpis?.total_products?.value ?? 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_products?.secondary_info?.text && (
-                                <span className="badge rounded-pill px-3 py-1 mt-2 border fw-normal fs-6 bg-warning text-dark border-warning"
-                                    style={{fontSize: '0.95em', display: 'inline-flex', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.10)'}}>
+                                <span className="d-block mb-2 text-warning ">
                                     <i className="fas fa-exclamation-triangle me-1"></i>
                                     {dashboardData.data.kpis.total_products.secondary_info.text}
                                 </span>
@@ -187,8 +186,7 @@ const Dashboard = () => {
                                 {dashboardData?.data?.kpis?.total_users?.value ?? 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_users?.change !== undefined && (
-                                <span className={`badge rounded-pill px-3 py-1 mt-2 border fw-normal fs-6 ${dashboardData.data.kpis.total_users.change < 0 ? 'bg-danger text-white border-danger' : 'bg-success text-white border-success'}`}
-                                    style={{fontSize: '0.95em', display: 'inline-flex', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.10)'}}>
+                                <span className={`d-block mb-2 ${dashboardData.data.kpis.total_users.change < 0 ? 'text-danger' : 'text-sucess'}`}>
                                     <i className={`fas ${dashboardData.data.kpis.total_users.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
                                     {`${dashboardData.data.kpis.total_users.change > 0 ? '+' : ''}${dashboardData.data.kpis.total_users.change}% so với tháng trước`}
                                 </span>
