@@ -129,7 +129,7 @@ const ComboList = () => {
             return featured && featured.thumb_url ? (
               <ImageList src={urlImage + featured.thumb_url} alt={row.name} />
             ) : (
-              <span className="text-muted">Không có ảnh</span>
+              <ImageList icon alt="Không có ảnh" />
             );
           },
           width: '12%'

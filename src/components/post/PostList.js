@@ -120,7 +120,7 @@ const PostList = () => {
                         alt={row.title}
                     />
                 ) : (
-                    <span className="text-muted">Không có ảnh</span>
+                    <ImageList icon alt="Không có ảnh" />
                 )
             ),
             width: "16%"

@@ -154,9 +154,13 @@ const ProductDetail = () => {
                                                                     objectFit: 'contain',
                                                                     boxShadow: '0 0 12px #007bff55',
                                                                     cursor: 'pointer',
-                                                                    
                                                                     maxWidth: '80%',
                                                                     maxHeight: 400,
+                                                                    borderRadius: 10,
+                                                                    background: '#f8f9fa',
+                                                                    border: '1px solid #eee',
+                                                                    display: 'block',
+                                                                    margin: '0 auto'
                                                                 }}
                                                                 title="Ảnh đại diện (bấm để xem lớn)"
                                                                 onClick={() => handleImgClick(featuredImg)}
@@ -197,20 +201,54 @@ const ProductDetail = () => {
                                                                     objectFit: 'cover',
                                                                     cursor: 'pointer',
                                                                     marginBottom: 4,
-                                                                    marginRight: 8
+                                                                    marginRight: 8,
+                                                                    borderRadius: 10,
+                                                                    background: '#f8f9fa',
+                                                                    border: '1px solid #eee',
+                                                                    display: 'block',
                                                                 }}
                                                                 title="Ảnh sản phẩm (bấm để xem lớn)"
                                                                 onClick={() => handleImgClick(img)}
                                                             />
                                                         )) : (
-                                                            !featuredImg && <div className="text-muted">Chưa có ảnh sản phẩm</div>
+                                                            !featuredImg && (
+                                                                <div
+                                                                    style={{
+                                                                        width: '80%',
+                                                                        height: 240,
+                                                                        borderRadius: 10,
+                                                                        background: '#f8f9fa',
+                                                                        border: '1px solid #eee',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        margin: '0 auto',
+                                                                    }}
+                                                                >
+                                                                    <i className="fas fa-image" style={{ fontSize: 80, color: '#bbb' }}></i>
+                                                                </div>
+                                                            )
                                                         )}
                                                     </div>
                                                 </>
                                             );
                                         })()
                                     ) : (
-                                        <div className="text-muted">Chưa có ảnh sản phẩm</div>
+                                        <div
+                                            style={{
+                                                width: '80%',
+                                                height: 240,
+                                                borderRadius: 10,
+                                                background: '#f8f9fa',
+                                                border: '1px solid #eee',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                margin: '0 auto',
+                                            }}
+                                        >
+                                            <i className="fas fa-image" style={{ fontSize: 80, color: '#bbb' }}></i>
+                                        </div>
                                     )}
                                 </div>
                                 <div className="card-body">

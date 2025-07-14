@@ -1,5 +1,6 @@
+import React from 'react';
 
-const ImageList = ({ src, alt = "Không thấy ảnh", style = {}, ...props }) => (
+const ImageList = ({ src, alt = "Không thấy ảnh", style = {}, icon = false, ...props }) => (
     <div
         style={{
             width: '90%',
@@ -18,19 +19,32 @@ const ImageList = ({ src, alt = "Không thấy ảnh", style = {}, ...props }) =
         }}
         {...props}
     >
-        <img
-            src={src ? src : '/no-image.png'}
-            alt={alt}
-            style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'fill',
-                display: 'block',
-                transition: 'transform 0.2s',
-            }}
-            onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.05)'; }}
-            onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-        />
+        {icon ? (
+            <i
+                className="fas fa-image"
+                style={{
+                    fontSize: 48,
+                    color: '#bbb',
+                    transition: 'transform 0.2s',
+                }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.05)'; }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+            />
+        ) : (
+            <img
+                src={src ? src : '/no-image.png'}
+                alt={alt}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'fill',
+                    display: 'block',
+                    transition: 'transform 0.2s',
+                }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.05)'; }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+            />
+        )}
     </div>
 );
 

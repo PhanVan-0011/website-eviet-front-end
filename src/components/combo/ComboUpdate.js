@@ -280,57 +280,60 @@ const ComboUpdate = () => {
                                                 {errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
                                             </div>
                                         </div>
-                                        <div className="mb-3">
-                                            <label htmlFor="inputStartDate" className="form-label fw-semibold">
-                                                Ngày bắt đầu <span className="text-danger">*</span>
-                                            </label>
-                                            <div className="d-flex align-items-center" style={{gap: '4px'}}>
-                                                <DatePicker
-                                                    selected={startDatePicker}
-                                                    onChange={date => {
-                                                        setStartDatePicker(date);
-                                                        setStartDate(date);
-                                                        setValue('start_date', date, { shouldValidate: true });
-                                                    }}
-                                                    locale={vi}
-                                                    dateFormat="dd/MM/yyyy"
-                                                    className="form-control"
-                                                    placeholderText="Chọn ngày bắt đầu"
-                                                    id="inputStartDate"
-                                                    autoComplete="off"
-                                                />
-                                                <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{height: '38px'}} onClick={() => document.getElementById('inputStartDate')?.focus()}>
-                                                    <i className="fas fa-calendar-alt text-secondary"></i>
-                                                </button>
-                                                <input type="hidden" {...register('start_date', { required: 'Ngày bắt đầu là bắt buộc' })} />
+                                        {/* Ngày bắt đầu và kết thúc cùng 1 hàng */}
+                                        <div className="row mb-3">
+                                            <div className="col-6">
+                                                <label htmlFor="inputStartDate" className="form-label fw-semibold">
+                                                    Ngày bắt đầu <span className="text-danger">*</span>
+                                                </label>
+                                                <div className="d-flex align-items-center" style={{gap: '4px'}}>
+                                                    <DatePicker
+                                                        selected={startDatePicker}
+                                                        onChange={date => {
+                                                            setStartDatePicker(date);
+                                                            setStartDate(date);
+                                                            setValue('start_date', date, { shouldValidate: true });
+                                                        }}
+                                                        locale={vi}
+                                                        dateFormat="dd/MM/yyyy"
+                                                        className="form-control"
+                                                        placeholderText="Chọn ngày bắt đầu"
+                                                        id="inputStartDate"
+                                                        autoComplete="off"
+                                                    />
+                                                    <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{height: '38px'}} onClick={() => document.getElementById('inputStartDate')?.focus()}>
+                                                        <i className="fas fa-calendar-alt text-secondary"></i>
+                                                    </button>
+                                                    <input type="hidden" {...register('start_date', { required: 'Ngày bắt đầu là bắt buộc' })} />
+                                                </div>
+                                                {errors.start_date && <div className="text-danger mt-1 small">{errors.start_date.message}</div>}
                                             </div>
-                                            {errors.start_date && <div className="text-danger mt-1 small">{errors.start_date.message}</div>}
-                                        </div>
-                                        <div className="mb-3">
-                                            <label htmlFor="inputEndDate" className="form-label fw-semibold">
-                                                Ngày kết thúc <span className="text-danger">*</span>
-                                            </label>
-                                            <div className="d-flex align-items-center" style={{gap: '4px'}}>
-                                                <DatePicker
-                                                    selected={endDatePicker}
-                                                    onChange={date => {
-                                                        setEndDatePicker(date);
-                                                        setEndDate(date);
-                                                        setValue('end_date', date, { shouldValidate: true });
-                                                    }}
-                                                    locale={vi}
-                                                    dateFormat="dd/MM/yyyy"
-                                                    className="form-control"
-                                                    placeholderText="Chọn ngày kết thúc"
-                                                    id="inputEndDate"
-                                                    autoComplete="off"
-                                                />
-                                                <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{height: '38px'}} onClick={() => document.getElementById('inputEndDate')?.focus()}>
-                                                    <i className="fas fa-calendar-alt text-secondary"></i>
-                                                </button>
-                                                <input type="hidden" {...register('end_date', { required: 'Ngày kết thúc là bắt buộc' })} />
+                                            <div className="col-6">
+                                                <label htmlFor="inputEndDate" className="form-label fw-semibold">
+                                                    Ngày kết thúc <span className="text-danger">*</span>
+                                                </label>
+                                                <div className="d-flex align-items-center" style={{gap: '4px'}}>
+                                                    <DatePicker
+                                                        selected={endDatePicker}
+                                                        onChange={date => {
+                                                            setEndDatePicker(date);
+                                                            setEndDate(date);
+                                                            setValue('end_date', date, { shouldValidate: true });
+                                                        }}
+                                                        locale={vi}
+                                                        dateFormat="dd/MM/yyyy"
+                                                        className="form-control"
+                                                        placeholderText="Chọn ngày kết thúc"
+                                                        id="inputEndDate"
+                                                        autoComplete="off"
+                                                    />
+                                                    <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{height: '38px'}} onClick={() => document.getElementById('inputEndDate')?.focus()}>
+                                                        <i className="fas fa-calendar-alt text-secondary"></i>
+                                                    </button>
+                                                    <input type="hidden" {...register('end_date', { required: 'Ngày kết thúc là bắt buộc' })} />
+                                                </div>
+                                                {errors.end_date && <div className="text-danger mt-1 small">{errors.end_date.message}</div>}
                                             </div>
-                                            {errors.end_date && <div className="text-danger mt-1 small">{errors.end_date.message}</div>}
                                         </div>
                                     </div>
                                 </div>
@@ -463,8 +466,8 @@ const ComboUpdate = () => {
                                                 <div className="col-md-3 d-flex align-items-center">
                                                     <img
                                                         src={
-                                                            products.find(p => String(p.id) === String(item.product_id))?.image_url
-                                                                ? process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).image_url
+                                                            products.find(p => String(p.id) === String(item.product_id))?.featured_image?.main_url
+                                                                ? process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).featured_image.main_url
                                                                 : '/no-image.png'
                                                         }
                                                         alt=""

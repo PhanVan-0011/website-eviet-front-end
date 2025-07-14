@@ -236,13 +236,16 @@ const ProductUpdate = () => {
             (selectedCategories.length > 0 ? selectedCategories : []).forEach(id => formData.append('category_ids[]', id));
 
             // Gửi file ảnh thật sự
-            imageFiles.forEach(file => formData.append('image_url[]', file));
+            if (imageFiles.length > 0) {
+                imageFiles.forEach(file => formData.append('image_url[]', file));
+                 // Gửi deleted_image_ids[]
+                removedOldImageIds.forEach(id => formData.append('deleted_image_ids[]', id));
 
-            // Gửi deleted_image_ids[]
-            removedOldImageIds.forEach(id => formData.append('deleted_image_ids[]', id));
+                // Gửi featured_image_index (luôn truyền lên, không cần điều kiện)
+                formData.append('featured_image_index', featuredImageIndex);
+            }
 
-            // Gửi featured_image_index (luôn truyền lên, không cần điều kiện)
-            formData.append('featured_image_index', featuredImageIndex);
+           
 
             const response = await requestApi(
                 `api/admin/products/${params.id}`,
@@ -398,7 +401,7 @@ const ProductUpdate = () => {
                                         <div className="col-md-6 input-file">
                                             <div className="mb-3">
                                                 <div className="form-label fw-semibold">
-                                                    Hình ảnh sản phẩm <span style={{ color: 'red' }}>*</span>
+                                                    Hình ảnh sản phẩm
                                                 </div>
                                                 <div className="row g-3">
                                                     {[0, 1, 2, 3].map(idx => (
@@ -476,7 +479,6 @@ const ProductUpdate = () => {
                                                 <input
                                                     type="hidden"
                                                     {...register('imageFiles', {
-                                                        validate: () => (oldImages.length + imageFiles.length > 0) || 'Ảnh sản phẩm là bắt buộc',
                                                     })}
                                                 />
                                                 {isSubmitted && errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}

@@ -8,6 +8,9 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import CustomEditor from '../common/CustomEditor';
 import moment from 'moment';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { vi } from 'date-fns/locale';
 
 const PromotionUpdate = () => {
     const params = useParams();
@@ -28,8 +31,10 @@ const PromotionUpdate = () => {
     const [selectedCombos, setSelectedCombos] = useState([]);
 
     // Ngày
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [startDatePicker, setStartDatePicker] = useState(null);
+    const [endDatePicker, setEndDatePicker] = useState(null);
 
     // Giá trị khuyến mãi
     const [promoType, setPromoType] = useState('percentage');
@@ -67,15 +72,17 @@ const PromotionUpdate = () => {
                     setValue('description', data.description || '');
                     setApplicationType(data.application_type);
                     setPromoType(data.type);
-                    setValuePromo(data.value);
+                    setValuePromo(data.type === 'fixed_amount' ? formatVND(data.value) : data.value);
                     setMinOrderValue(data.conditions?.min_order_value ? data.conditions.min_order_value.toString() : '');
                     setMaxDiscountAmount(data.conditions?.max_discount_amount ? data.conditions.max_discount_amount.toString() : '');
                     setMaxUsage(data.usage_limits?.max_usage ? data.usage_limits.max_usage.toString() : '');
                     setMaxUsagePerUser(data.usage_limits?.max_usage_per_user ? data.usage_limits.max_usage_per_user.toString() : '');
                     setValue('is_active', data.is_active === true ? "1" : "0");
                     setValue('is_combinable', data.is_combinable === true ? "1" : "0");
-                    setStartDate(data.dates?.start_date ? moment(data.dates.start_date).format('YYYY-MM-DDTHH:mm') : '');
-                    setEndDate(data.dates?.end_date ? moment(data.dates.end_date).format('YYYY-MM-DDTHH:mm') : '');
+                    setStartDate(data.dates?.start_date ? moment(data.dates.start_date).toDate() : null);
+                    setEndDate(data.dates?.end_date ? moment(data.dates.end_date).toDate() : null);
+                    setStartDatePicker(data.dates?.start_date ? moment(data.dates.start_date).toDate() : null);
+                    setEndDatePicker(data.dates?.end_date ? moment(data.dates.end_date).toDate() : null);
                     if (data.products && data.products.length > 0) setSelectedProducts(data.products.map(p => p.id.toString()));
                     if (data.categories && data.categories.length > 0) setSelectedCategories(data.categories.map(c => c.id.toString()));
                     if (data.combos && data.combos.length > 0) setSelectedCombos(data.combos.map(c => c.id.toString()));
@@ -103,10 +110,15 @@ const PromotionUpdate = () => {
         if (type === 'combos') setSelectedCombos(values);
     };
 
+    // Khi đổi loại khuyến mãi thì reset value
+    useEffect(() => {
+        setValuePromo('');
+    }, [promoType]);
+
     // Xử lý submit
     const handleSubmitForm = async (data) => {
         // Validate ngày
-        if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+        if (startDatePicker && endDatePicker && new Date(endDatePicker) < new Date(startDatePicker)) {
             toast.error("Thời gian kết thúc phải lớn hơn hoặc bằng thời gian bắt đầu", toastErrorConfig);
             setIsSubmitting(false);
             return;
@@ -130,15 +142,15 @@ const PromotionUpdate = () => {
                 description: data.description || '',
                 application_type: applicationType,
                 type: promoType,
-                value: Number(value),
+                value: promoType === 'fixed_amount' ? Number(value.replace(/\./g, '')) : Number(value),
                 min_order_value: minOrderValue ? Number(minOrderValue.replace(/\./g, '')) : 0,
                 max_discount_amount: maxDiscountAmount ? Number(maxDiscountAmount.replace(/\./g, '')) : 0,
                 max_usage: maxUsage ? Number(maxUsage) : null,
                 max_usage_per_user: maxUsagePerUser ? Number(maxUsagePerUser) : null,
                 is_combinable: data.is_combinable === '1' || data.is_combinable === true,
                 is_active: data.is_active === '1' || data.is_active === true,
-                start_date: startDate ? new Date(startDate).toISOString() : '',
-                end_date: endDate ? new Date(endDate).toISOString() : '',
+                start_date: startDatePicker ? startDatePicker.toISOString() : '',
+                end_date: endDatePicker ? endDatePicker.toISOString() : '',
             };
             // Thêm id đối tượng áp dụng
             if (applicationType === 'products') payload.product_ids = selectedProducts.map(Number);
@@ -230,92 +242,9 @@ const PromotionUpdate = () => {
                                         {errors.description && <div className="text-danger">{errors.description.message}</div>}
                                     </div>
                                 </div>
+                                {/* Dòng gồm: Loại khuyến mãi, Giá trị, Trạng thái, Thời gian bắt đầu, Thời gian kết thúc */}
                                 <div className="row mb-3">
-                                    <div className="col-md-4">
-                                        <label className="mb-1">Loại áp dụng <span style={{ color: 'red' }}>*</span></label>
-                                        <select
-                                            className="form-select"
-                                            value={applicationType}
-                                            onChange={e => {
-                                                setApplicationType(e.target.value);
-                                                setSelectedProducts([]);
-                                                setSelectedCategories([]);
-                                                setSelectedCombos([]);
-                                            }}
-                                            required
-                                        >
-                                            <option value="products">Sản phẩm</option>
-                                            <option value="categories">Danh mục</option>
-                                            <option value="combos">Combo</option>
-                                            <option value="orders">Đơn hàng</option>
-                                        </select>
-                                    </div>
-                                    <div className="col-md-8">
-                                        {/* Đối tượng áp dụng */}
-                                        {applicationType === 'products' && (
-                                            <div>
-                                                <label className="mb-1">Chọn sản phẩm <span style={{ color: 'red' }}>*</span></label>
-                                                <select
-                                                    className="form-select"
-                                                    multiple
-                                                    value={selectedProducts}
-                                                    onChange={e => handleSelectChange('products', Array.from(e.target.selectedOptions, option => option.value))}
-                                                    required
-                                                    style={{ minHeight: 80 }}
-                                                >
-                                                    {products.map(prod => (
-                                                        <option key={prod.id} value={prod.id}>
-                                                            {prod.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        )}
-                                        {applicationType === 'categories' && (
-                                            <div>
-                                                <label className="mb-1">Chọn danh mục <span style={{ color: 'red' }}>*</span></label>
-                                                <select
-                                                    className="form-select"
-                                                    multiple
-                                                    value={selectedCategories}
-                                                    onChange={e => handleSelectChange('categories', Array.from(e.target.selectedOptions, option => option.value))}
-                                                    required
-                                                    style={{ minHeight: 80 }}
-                                                >
-                                                    {categories.map(cat => (
-                                                        <option key={cat.id} value={cat.id}>
-                                                            {cat.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        )}
-                                        {applicationType === 'combos' && (
-                                            <div>
-                                                <label className="mb-1">Chọn combo <span style={{ color: 'red' }}>*</span></label>
-                                                <select
-                                                    className="form-select"
-                                                    multiple
-                                                    value={selectedCombos}
-                                                    onChange={e => handleSelectChange('combos', Array.from(e.target.selectedOptions, option => option.value))}
-                                                    required
-                                                    style={{ minHeight: 80 }}
-                                                >
-                                                    {combos.map(combo => (
-                                                        <option key={combo.id} value={combo.id}>
-                                                            {combo.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        )}
-                                        {applicationType === 'orders' && (
-                                            <div className="text-muted fst-italic mt-2">Áp dụng cho toàn bộ đơn hàng</div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-4">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Loại khuyến mãi <span style={{ color: 'red' }}>*</span></label>
                                         <select
                                             className="form-select"
@@ -327,19 +256,20 @@ const PromotionUpdate = () => {
                                             <option value="fixed_amount">Tiền cố định (VNĐ)</option>
                                         </select>
                                     </div>
-                                    <div className="col-md-4">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Giá trị <span style={{ color: 'red' }}>*</span></label>
                                         <input
                                             className="form-control"
-                                            type="number"
+                                            type="text"
+                                            inputMode="numeric"
                                             min={0}
-                                            value={value}
-                                            onChange={e => setValuePromo(e.target.value)}
+                                            value={promoType === 'fixed_amount' ? formatVND(value) : value}
+                                            onChange={e => setValuePromo(promoType === 'fixed_amount' ? formatVND(e.target.value) : e.target.value)}
                                             required
-                                            placeholder={promoType === 'percentage' ? 'VD: 15 (%)' : 'VD: 20000 (VNĐ)'}
+                                            placeholder={promoType === 'percentage' ? 'VD: 15 (%)' : 'VD: 20.000 (VNĐ)'}
                                         />
                                     </div>
-                                    <div className="col-md-4">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Trạng thái <span style={{ color: 'red' }}>*</span></label>
                                         <select
                                             className="form-select"
@@ -351,28 +281,47 @@ const PromotionUpdate = () => {
                                         </select>
                                         {errors.is_active && <div className="text-danger">{errors.is_active.message}</div>}
                                     </div>
+                                    <div className="col-md-3">
+                                        <label className="mb-1">Thời gian bắt đầu <span style={{ color: 'red' }}>*</span></label>
+                                        <DatePicker
+                                            selected={startDatePicker}
+                                            onChange={date => {
+                                                setStartDatePicker(date);
+                                                setStartDate(date);
+                                            }}
+                                            locale={vi}
+                                            dateFormat="dd/MM/yyyy HH:mm"
+                                            className="form-control"
+                                            placeholderText="Chọn thời gian bắt đầu"
+                                            showTimeSelect
+                                            timeFormat="HH:mm"
+                                            timeIntervals={15}
+                                            timeCaption="Giờ"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="col-md-3">
+                                        <label className="mb-1">Thời gian kết thúc <span style={{ color: 'red' }}>*</span></label>
+                                        <DatePicker
+                                            selected={endDatePicker}
+                                            onChange={date => {
+                                                setEndDatePicker(date);
+                                                setEndDate(date);
+                                            }}
+                                            locale={vi}
+                                            dateFormat="dd/MM/yyyy HH:mm"
+                                            className="form-control"
+                                            placeholderText="Chọn thời gian kết thúc"
+                                            showTimeSelect
+                                            timeFormat="HH:mm"
+                                            timeIntervals={15}
+                                            timeCaption="Giờ"
+                                            required
+                                        />
+                                    </div>
                                 </div>
+                                {/* Dòng gồm: Đơn tối thiểu, Giảm tối đa, Tổng lượt sử dụng, Lượt/người, Kết hợp với mã khác */}
                                 <div className="row mb-3">
-                                    <div className="col-md-3">
-                                        <label className="mb-1">Ngày bắt đầu <span style={{ color: 'red' }}>*</span></label>
-                                        <input
-                                            type="datetime-local"
-                                            className="form-control"
-                                            value={startDate}
-                                            onChange={e => setStartDate(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-md-3">
-                                        <label className="mb-1">Ngày kết thúc <span style={{ color: 'red' }}>*</span></label>
-                                        <input
-                                            type="datetime-local"
-                                            className="form-control"
-                                            value={endDate}
-                                            onChange={e => setEndDate(e.target.value)}
-                                            required
-                                        />
-                                    </div>
                                     <div className="col-md-3">
                                         <label className="mb-1">Đơn tối thiểu (VNĐ)</label>
                                         <input
@@ -405,9 +354,7 @@ const PromotionUpdate = () => {
                                             placeholder="VD: 20.000"
                                         />
                                     </div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-3">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Tổng lượt sử dụng</label>
                                         <input
                                             type="number"
@@ -418,7 +365,7 @@ const PromotionUpdate = () => {
                                             placeholder="VD: 100"
                                         />
                                     </div>
-                                    <div className="col-md-3">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Lượt/người</label>
                                         <input
                                             type="number"
@@ -429,7 +376,7 @@ const PromotionUpdate = () => {
                                             placeholder="VD: 1"
                                         />
                                     </div>
-                                    <div className="col-md-3">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Kết hợp với mã khác</label>
                                         <select
                                             className="form-select"

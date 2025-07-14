@@ -282,7 +282,7 @@ const ProductAdd = () => {
                                         <div className="col-md-6 px-3">
                                             <div className="mb-3">
                                                 <div className="form-label fw-semibold">
-                                                    Hình ảnh sản phẩm <span style={{ color: 'red' }}>*</span>
+                                                    Hình ảnh sản phẩm 
                                                 </div>
                                                 <div className="row g-3">
                                                     {[0, 1, 2, 3].map(idx => (
@@ -358,9 +358,7 @@ const ProductAdd = () => {
                                                 />
                                                 <input
                                                     type="hidden"
-                                                    {...register('imageFiles', {
-                                                        required: 'Ảnh sản phẩm là bắt buộc',
-                                                    })}
+                                                    {...register('imageFiles')}
                                                 />
                                                 {errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
                                             </div>

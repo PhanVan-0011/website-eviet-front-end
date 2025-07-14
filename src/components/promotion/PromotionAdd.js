@@ -7,6 +7,9 @@ import requestApi from '../../helpers/api';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import CustomEditor from '../common/CustomEditor';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { vi } from 'date-fns/locale';
 
 const PromotionAdd = () => {
     const navigation = useNavigate();
@@ -26,8 +29,10 @@ const PromotionAdd = () => {
     const [selectedCombos, setSelectedCombos] = useState([]);
 
     // Ngày
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [startDatePicker, setStartDatePicker] = useState(null);
+    const [endDatePicker, setEndDatePicker] = useState(null);
 
     // Giá trị khuyến mãi
     const [promoType, setPromoType] = useState('percentage');
@@ -65,6 +70,11 @@ const PromotionAdd = () => {
         if (type === 'combos') setSelectedCombos(values);
     };
 
+    // Khi đổi loại khuyến mãi thì reset value
+    useEffect(() => {
+        setValuePromo('');
+    }, [promoType]);
+
     // Thêm hàm formatVND giống ComboAdd
     const formatVND = (value) => {
         value = value.replace(/\D/g, '');
@@ -99,7 +109,7 @@ const PromotionAdd = () => {
                 description: data.description || '',
                 application_type: applicationType,
                 type: promoType,
-                value: Number(value),
+                value: promoType === 'fixed_amount' ? Number(value.replace(/\./g, '')) : Number(value),
                 min_order_value: minOrderValue ? Number(minOrderValue.replace(/\./g, '')) : 0,
                 max_discount_amount: maxDiscountAmount ? Number(maxDiscountAmount.replace(/\./g, '')) : 0,
                 max_usage: maxUsage ? Number(maxUsage) : null,
@@ -282,8 +292,9 @@ const PromotionAdd = () => {
                                         )}
                                     </div>
                                 </div>
+                                {/* Dòng gồm: Loại khuyến mãi, Giá trị, Trạng thái, Thời gian bắt đầu, Thời gian kết thúc */}
                                 <div className="row mb-3">
-                                    <div className="col-md-4">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Loại khuyến mãi <span style={{ color: 'red' }}>*</span></label>
                                         <select
                                             className="form-select"
@@ -295,19 +306,20 @@ const PromotionAdd = () => {
                                             <option value="fixed_amount">Tiền cố định (VNĐ)</option>
                                         </select>
                                     </div>
-                                    <div className="col-md-4">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Giá trị <span style={{ color: 'red' }}>*</span></label>
                                         <input
                                             className="form-control"
-                                            type="number"
+                                            type="text"
+                                            inputMode="numeric"
                                             min={0}
-                                            value={value}
-                                            onChange={e => setValuePromo(e.target.value)}
+                                            value={promoType === 'fixed_amount' ? formatVND(value) : value}
+                                            onChange={e => setValuePromo(promoType === 'fixed_amount' ? formatVND(e.target.value) : e.target.value)}
                                             required
-                                            placeholder={promoType === 'percentage' ? 'VD: 15 (%)' : 'VD: 20000 (VNĐ)'}
+                                            placeholder={promoType === 'percentage' ? 'VD: 15 (%)' : 'VD: 20.000 (VNĐ)'}
                                         />
                                     </div>
-                                    <div className="col-md-4">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Trạng thái <span style={{ color: 'red' }}>*</span></label>
                                         <select
                                             className="form-select"
@@ -319,28 +331,47 @@ const PromotionAdd = () => {
                                         </select>
                                         {errors.is_active && <div className="text-danger">{errors.is_active.message}</div>}
                                     </div>
+                                    <div className="col-md-3">
+                                        <label className="mb-1">Thời gian bắt đầu <span style={{ color: 'red' }}>*</span></label>
+                                        <DatePicker
+                                            selected={startDatePicker}
+                                            onChange={date => {
+                                                setStartDatePicker(date);
+                                                setStartDate(date);
+                                            }}
+                                            locale={vi}
+                                            dateFormat="dd/MM/yyyy HH:mm"
+                                            className="form-control"
+                                            placeholderText="Chọn thời gian bắt đầu"
+                                            showTimeSelect
+                                            timeFormat="HH:mm"
+                                            timeIntervals={15}
+                                            timeCaption="Giờ"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="col-md-3">
+                                        <label className="mb-1">Thời gian kết thúc <span style={{ color: 'red' }}>*</span></label>
+                                        <DatePicker
+                                            selected={endDatePicker}
+                                            onChange={date => {
+                                                setEndDatePicker(date);
+                                                setEndDate(date);
+                                            }}
+                                            locale={vi}
+                                            dateFormat="dd/MM/yyyy HH:mm"
+                                            className="form-control"
+                                            placeholderText="Chọn thời gian kết thúc"
+                                            showTimeSelect
+                                            timeFormat="HH:mm"
+                                            timeIntervals={15}
+                                            timeCaption="Giờ"
+                                            required
+                                        />
+                                    </div>
                                 </div>
+                                {/* Dòng gồm: Đơn tối thiểu, Giảm tối đa, Tổng lượt sử dụng, Lượt/người, Kết hợp với mã khác */}
                                 <div className="row mb-3">
-                                    <div className="col-md-3">
-                                        <label className="mb-1">Ngày bắt đầu <span style={{ color: 'red' }}>*</span></label>
-                                        <input
-                                            type="datetime-local"
-                                            className="form-control"
-                                            value={startDate}
-                                            onChange={e => setStartDate(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-md-3">
-                                        <label className="mb-1">Ngày kết thúc <span style={{ color: 'red' }}>*</span></label>
-                                        <input
-                                            type="datetime-local"
-                                            className="form-control"
-                                            value={endDate}
-                                            onChange={e => setEndDate(e.target.value)}
-                                            required
-                                        />
-                                    </div>
                                     <div className="col-md-3">
                                         <label className="mb-1">Đơn tối thiểu (VNĐ)</label>
                                         <input
@@ -373,9 +404,7 @@ const PromotionAdd = () => {
                                             placeholder="VD: 20.000"
                                         />
                                     </div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-3">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Tổng lượt sử dụng</label>
                                         <input
                                             type="number"
@@ -386,7 +415,7 @@ const PromotionAdd = () => {
                                             placeholder="VD: 100"
                                         />
                                     </div>
-                                    <div className="col-md-3">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Lượt/người</label>
                                         <input
                                             type="number"
@@ -397,7 +426,7 @@ const PromotionAdd = () => {
                                             placeholder="VD: 1"
                                         />
                                     </div>
-                                    <div className="col-md-3">
+                                    <div className="col-md-2">
                                         <label className="mb-1">Kết hợp với mã khác</label>
                                         <select
                                             className="form-select"

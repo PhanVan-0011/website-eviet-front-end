@@ -133,7 +133,7 @@ const AdminList = () => {
                         {row.image_url && row.image_url.thumb_url ? (
                             <img
                                 src={process.env.REACT_APP_API_URL + 'api/images/' + row.image_url.thumb_url}
-                                alt=""
+                                alt="avatar"
                                 style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '1px solid #eee', background: '#fafbfc', marginRight: 10, cursor: 'pointer' }}
                             />
                         ) : (
@@ -164,7 +164,7 @@ const AdminList = () => {
                                 {row.image_url && row.image_url.main_url ? (
                                     <img
                                         src={process.env.REACT_APP_API_URL + 'api/images/' + row.image_url.main_url}
-                                        alt="Hình ảnh lỗi"
+                                        alt="avatar-large"
                                         style={{ width: 96, height: 96, borderRadius: '12px', objectFit: 'cover', border: '1px solid #eee', background: '#fafbfc' }}
                                     />
                                 ) : (

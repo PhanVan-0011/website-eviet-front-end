@@ -174,7 +174,7 @@ const ProductList = () => {
                         alt={row.name}
                     />
                 ) : (
-                    <span className="text-muted">Không có ảnh</span>
+                    <ImageList icon alt="Không có ảnh" />
                 )
             ),
             width: "12%"

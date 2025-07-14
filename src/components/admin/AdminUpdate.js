@@ -75,44 +75,11 @@ const AdminUpdate = () => {
         fetchAll();
     }, [params.id, setValue]);
     const handleSubmitForm = async (data) => {
+        console.log("Submit data: ", data);
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
-            let response;
-            if (imageFile) {
-                // Nếu có ảnh mới, dùng FormData
-                const formData = new FormData();
-                Object.keys(data).forEach(key => {
-                    if (Array.isArray(data[key])) {
-                        data[key].forEach(val => formData.append(key + '[]', val));
-                    } else {
-                        formData.append(key, data[key]);
-                    }
-                });
-                // Gửi role_ids dạng array
-                if (Array.isArray(data.role_ids)) {
-                    data.role_ids.forEach(id => formData.append('role_ids[]', id));
-                }
-                formData.append('image_url', imageFile); // key là image_url
-
-                // // Log FormData entries
-                // console.log('FormData entries:');
-                // for (let pair of formData.entries()) {
-                //     console.log(pair[0], pair[1]);
-                // }
-                // Log image file details
-                // if (imageFile) {
-                //     console.log('Image file:', {
-                //         name: imageFile.name,
-                //         type: imageFile.type,
-                //         size: imageFile.size
-                //     });
-                // }
-
-                response = await requestApi(`api/admin/admins/${params.id}`, 'POST', formData,'json', 'multipart/form-data');
-            } else {
-                response = await requestApi(`api/admin/admins/${params.id}`, 'POST', data);
-            }
+            const response = await requestApi(`api/admin/admins/${params.id}`, 'POST', data);
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật thông tin thành công", toastSuccessConfig);
@@ -125,20 +92,11 @@ const AdminUpdate = () => {
         } catch (e) {
             dispatch(actions.controlLoading(false));
             console.log("Error Update user: ", e);
-            let errorMsg = "Server error";
-            if (e.response && e.response.data) {
-                let data = e.response.data;
-                if (typeof data === 'string') {
-                    try {
-                        data = JSON.parse(data);
-                        console.log("Parsed error data: ", data);
-                    } catch {}
-                }
-                if (data.message) {
-                    errorMsg = data.message;
-                }
+            if (e.response && e.response.data && e.response.data.message) {
+                toast.error(e.response.data.message, toastErrorConfig);
+            } else {
+                toast.error("Server error", toastErrorConfig);
             }
-            toast.error(errorMsg, toastErrorConfig);
         } finally {
             setIsSubmitting(false);
         }
@@ -309,7 +267,7 @@ const AdminUpdate = () => {
                                                             ) : oldAvatar ? (
                                                                 <img
                                                                     src={process.env.REACT_APP_API_URL + 'api/images/' + oldAvatar}
-                                                                    alt=""
+                                                                    alt="Avatar"
                                                                     className="w-100 h-100"
                                                                     style={{ objectFit: 'fill' }}
                                                                 />
