@@ -380,7 +380,7 @@ const OrderList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Danh sách đơn hàng</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item active">Đơn hàng</li>

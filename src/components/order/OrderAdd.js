@@ -142,7 +142,7 @@ const OrderAdd = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Thêm đơn hàng</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
                         <li className="breadcrumb-item active">Thêm đơn hàng</li>
@@ -150,7 +150,7 @@ const OrderAdd = () => {
                     <div className='card mb-3'>
                         <div className='card-header'>
                             <i className="fas fa-shopping-cart me-1"></i>
-                            Dữ liệu đơn hàng
+                            Thêm đơn hàng
                         </div>
                         <div className='card-body'>
                             <form onSubmit={handleSubmit(handleSubmitForm)}>
