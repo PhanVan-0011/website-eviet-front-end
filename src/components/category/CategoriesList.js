@@ -152,7 +152,7 @@ const CategoriesList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Danh sách danh mục</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
                         <li className="breadcrumb-item active">Danh sách danh mục</li>
@@ -162,7 +162,7 @@ const CategoriesList = () => {
                         {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa</button>}
                     </div>
                     <DataTables 
-                        name="Dữ liệu danh mục"
+                        name="Danh sách danh mục"
                         columns={columns}
                         data={categories}
                         numOfPages={numOfPages}

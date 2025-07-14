@@ -82,7 +82,7 @@ const CategoryUpdate = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Cập nhật danh mục</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item active">Cập nhật danh mục</li>
@@ -90,7 +90,7 @@ const CategoryUpdate = () => {
                     <div className='card mb-3'>
                         <div className='card-header'>
                             <i className="fas fa-table me-1"></i>
-                            Dữ liệu danh mục
+                            Cập nhật danh mục
                         </div>
                         <div className='card-body'>
                             <div className='mb-3 row'>

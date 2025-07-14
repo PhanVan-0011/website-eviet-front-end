@@ -367,7 +367,7 @@ const ProductList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Danh sách sản phẩm</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item active">Danh sách sản phẩm</li>
@@ -471,7 +471,7 @@ const ProductList = () => {
                     </div>
 
                     <DataTables
-                        name="Dữ liệu sản phẩm"
+                        name="Danh sách sản phẩm"
                         columns={columns}
                         data={sortedProducts}
                         numOfPages={numOfPages}

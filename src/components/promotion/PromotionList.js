@@ -242,7 +242,7 @@ const PromotionList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Danh sách khuyến mãi</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item active">Khuyến mãi</li>
@@ -327,7 +327,7 @@ const PromotionList = () => {
                         </div>
                     </div>
                     <DataTables
-                        name="Dữ liệu khuyến mãi"
+                        name="Danh sách khuyến mãi"
                         columns={columns}
                         data={sortedPromotions}
                         numOfPages={numOfPages}

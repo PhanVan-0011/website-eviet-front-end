@@ -21,7 +21,7 @@ const CategoryAdd = () => {
 
     // Lấy danh sách danh mục cha
     useEffect(() => {
-        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/categories?limit=1000', 'GET', []).then((response) => {
             if (response.data && response.data.data) {
                 setCategories(response.data.data);
             }
@@ -36,7 +36,7 @@ const CategoryAdd = () => {
         }
         try {
             dispatch(actions.controlLoading(true));
-            const response = await requestApi('api/admin/categories', 'POST', data);
+            const response = await requestApi('api/categories', 'POST', data);
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm danh mục thành công!",toastSuccessConfig);
@@ -62,7 +62,7 @@ const CategoryAdd = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Thêm danh mục</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
                         <li className="breadcrumb-item active">Thêm danh mục</li>
@@ -70,7 +70,7 @@ const CategoryAdd = () => {
                     <div className='card mb-3'>
                         <div className='card-header'>
                             <i className="fas fa-table me-1"></i>
-                            Dữ liệu danh mục
+                            Thêm danh mục
                         </div>
                         <div className='card-body'>
                             <div className='mb-3 row'>
@@ -137,25 +137,25 @@ const CategoryAdd = () => {
                                     </div>
 
                                     <div className="mt-4 mb-0">
-                                    <div className="d-flex justify-content-center gap-2">
-                                        <button
-                                            type="button"
-                                            className="btn btn-secondary w-25"
-                                            onClick={() => navigation('/category')}
-                                            disabled={isSubmitting}
-                                        >
-                                            Hủy bỏ
-                                        </button>
-                                        <button
-                                            className="btn btn-primary w-25"
-                                            type="submit"
-                                            disabled={isSubmitting}
-                                        >
-                                            {isSubmitting ? "Đang gửi..." : "Thêm mới"}
-                                        </button>
-                                        
-                                    </div>
-                                </div>
+                                        <div className="d-flex justify-content-center gap-2">
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary w-25"
+                                                onClick={() => navigation('/category')}
+                                                disabled={isSubmitting}
+                                            >
+                                                Hủy bỏ
+                                            </button>
+                                            <button
+                                                className="btn btn-primary w-25"
+                                                type="submit"
+                                                disabled={isSubmitting}
+                                            >
+                                                {isSubmitting ? "Đang gửi..." : "Thêm mới"}
+                                            </button>
+                                            
+                                        </div>
+                                     </div>
 
 
                                     {/* <div className="mt-4 mb-0">

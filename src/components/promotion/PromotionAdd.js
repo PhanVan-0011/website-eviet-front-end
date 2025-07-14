@@ -155,7 +155,7 @@ const PromotionAdd = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Thêm khuyến mãi</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
                         <li className="breadcrumb-item active">Thêm khuyến mãi</li>
@@ -163,7 +163,7 @@ const PromotionAdd = () => {
                     <div className='card mb-3'>
                         <div className='card-header'>
                             <i className="fas fa-gift me-1"></i>
-                            Dữ liệu khuyến mãi
+                            Thêm khuyến mãi
                         </div>
                         <div className='card-body'>
                             <form onSubmit={handleSubmit(handleSubmitForm)}>
