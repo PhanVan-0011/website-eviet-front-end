@@ -114,7 +114,7 @@ const ComboDetail = () => {
             <main>
                 <div className="container-fluid px-4">
                     <div className="mt-4 mb-3">
-                        <h1 className="mt-4">Chi tiết combo</h1>
+                        <h1 className="mt-4"></h1>
                         <ol className="breadcrumb mb-4">
                             <li className="breadcrumb-item"><Link to="/combo">Danh sách combo</Link></li>
                             <li className="breadcrumb-item active">Chi tiết combo</li>

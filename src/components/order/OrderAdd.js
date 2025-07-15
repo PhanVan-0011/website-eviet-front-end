@@ -287,11 +287,11 @@ const OrderAdd = () => {
                                                         <img
                                                             src={
                                                                 item.type === 'product'
-                                                                    ? (products.find(p => String(p.id) === String(item.id))?.featured_image?.main_url
-                                                                        ? process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.id)).featured_image.main_url
+                                                                    ? (products.find(p => String(p.id) === String(item.id))?.featured_image?.thumb_url
+                                                                        ? process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.id)).featured_image.thumb_url
                                                                         : '/no-image.png')
-                                                                    : (combos.find(c => String(c.id) === String(item.id))?.featured_image?.main_url
-                                                                        ? process.env.REACT_APP_API_URL + 'api/images/' + combos.find(c => String(c.id) === String(item.id)).featured_image.main_url
+                                                                    : (combos.find(c => String(c.id) === String(item.id))?.featured_image?.thumb_url
+                                                                        ? process.env.REACT_APP_API_URL + 'api/images/' + combos.find(c => String(c.id) === String(item.id)).featured_image.thumb_url
                                                                         : '/no-image.png')
                                                             }
                                                             alt=""

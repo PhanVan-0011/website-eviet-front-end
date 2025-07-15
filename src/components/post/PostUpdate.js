@@ -228,7 +228,7 @@ const PostUpdate = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Cập nhật bài viết</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
                         <li className="breadcrumb-item active">Cập nhật bài viết</li>
@@ -236,7 +236,7 @@ const PostUpdate = () => {
                     <div className="card mb-3">
                         <div className="card-header">
                             <i className="fas fa-table me-1"></i>
-                            Dữ liệu bài viết
+                            Cập nhật bài viết
                         </div>
                         <div className="card-body">
                             <div className='mb-3 row'>

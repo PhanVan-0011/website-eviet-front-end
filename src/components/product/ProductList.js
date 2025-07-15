@@ -150,7 +150,7 @@ const ProductList = () => {
         { 
             title: () => (
                 <span>
-                    Mã sản phẩm
+                    Mã 
                 </span>
             ),
             element: row => row.product_code,
@@ -408,7 +408,7 @@ const ProductList = () => {
                             </select>
                         </div>
                         {/* Giá gốc */}
-                        <div className="col-md-2">
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-success mb-1" htmlFor="filterOriginalPrice">
                                 <i className="fas fa-money-bill-wave me-1"></i>Giá gốc
                             </label>
@@ -430,7 +430,7 @@ const ProductList = () => {
                             </select>
                         </div>
                         {/* Giá bán */}
-                        <div className="col-md-2">
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-warning mb-1" htmlFor="filterSalePrice">
                                 <i className="fas fa-coins me-1"></i>Giá bán
                             </label>

@@ -241,7 +241,7 @@ const PostList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Danh sách bài viết</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item active">Danh sách bài viết</li>
@@ -292,7 +292,7 @@ const PostList = () => {
                         </div>
                     </div>
                     <DataTables
-                        name="Dữ liệu bài viết"
+                        name="Danh sách bài viết"
                         columns={columns}
                         data={sortedPosts}
                         numOfPages={numOfPages}

@@ -263,25 +263,9 @@ const PromotionList = () => {
                     </div>
                     {/* Bộ lọc */}
                     <div className="row mb-3 g-2 align-items-end">
-                        {/* Trạng thái */}
-                        <div className="col-md-2">
-                            <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
-                                <i className="fas fa-toggle-on me-1"></i>Trạng thái
-                            </label>
-                            <select
-                                id="filterStatus"
-                                className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
-                                value={filterStatus}
-                                onChange={e => setFilterStatus(e.target.value)}
-                            >
-                                <option value="">Tất cả</option>
-                                <option value="true">Hiển thị</option>
-                                <option value="false">Không hiển thị</option>
-                            </select>
-                        </div>
+
                         {/* Loại khuyến mãi */}
-                        <div className="col-md-2">
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-success mb-1" htmlFor="filterType">
                                 <i className="fas fa-percent me-1"></i>Loại khuyến mãi
                             </label>
@@ -298,7 +282,7 @@ const PromotionList = () => {
                             </select>
                         </div>
                         {/* Ngày bắt đầu */}
-                        <div className="col-md-2">
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterStartDate">
                                 <i className="fas fa-calendar-alt me-1"></i>Bắt đầu từ
                             </label>
@@ -312,7 +296,7 @@ const PromotionList = () => {
                             />
                         </div>
                         {/* Ngày kết thúc */}
-                        <div className="col-md-2">
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-danger mb-1" htmlFor="filterEndDate">
                                 <i className="fas fa-calendar-check me-1"></i>Kết thúc đến
                             </label>
@@ -324,6 +308,23 @@ const PromotionList = () => {
                                 value={filterEndDate}
                                 onChange={e => setFilterEndDate(e.target.value)}
                             />
+                        </div>
+                        {/* Trạng thái */}
+                        <div className="col-md-2">
+                            <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
+                                <i className="fas fa-toggle-on me-1"></i>Trạng thái
+                            </label>
+                            <select
+                                id="filterStatus"
+                                className="form-select form-select-sm border-info shadow-sm"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                value={filterStatus}
+                                onChange={e => setFilterStatus(e.target.value)}
+                            >
+                                <option value="">Tất cả</option>
+                                <option value="true">Hiển thị</option>
+                                <option value="false">Không hiển thị</option>
+                            </select>
                         </div>
                     </div>
                     <DataTables
