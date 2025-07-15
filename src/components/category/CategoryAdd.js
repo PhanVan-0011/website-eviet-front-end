@@ -20,13 +20,13 @@ const CategoryAdd = () => {
     const [categories, setCategories] = useState([]);
 
     // Lấy danh sách danh mục cha
-    useEffect(() => {
-        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
-            if (response.data && response.data.data) {
-                setCategories(response.data.data);
-            }
-        });
-    }, []);
+    // useEffect(() => {
+    //     requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
+    //         if (response.data && response.data.data) {
+    //             setCategories(response.data.data);
+    //         }
+    //     });
+    // }, []);
 
     const handleSubmitForm = async (data) => {
         setIsSubmitting(true);

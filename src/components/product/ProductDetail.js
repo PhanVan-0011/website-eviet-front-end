@@ -298,19 +298,22 @@ const ProductDetail = () => {
                                         : <span className="text-muted fst-italic">Chưa có mô tả</span>
                                     }
                                 </div>
-                                <div className="card-footer bg-white border-0">
-                                    <Link className="btn btn-primary me-2" to={`/product/${product.id}`}>
-                                        <i className="fas fa-edit"></i> Sửa sản phẩm
-                                    </Link>
-                                    <button className="btn btn-danger me-2" onClick={handleOpenDeleteModal}>
-                                        <i className="fas fa-trash-alt"></i> Xóa sản phẩm
-                                    </button>
-                                    <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
-                                        <i className="fas fa-arrow-left"></i> Quay lại
-                                    </button>
-                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                {/* Di chuyển các button ra ngoài card, đặt bên dưới hai cột */}
+                <div className="row mb-4">
+                    <div className="col-12 d-flex justify-content-center gap-2">
+                        <Link className="btn btn-primary" to={`/product/${product.id}`}>
+                            <i className="fas fa-edit"></i> Sửa sản phẩm
+                        </Link>
+                        <button className="btn btn-danger" onClick={handleOpenDeleteModal}>
+                            <i className="fas fa-trash-alt"></i> Xóa sản phẩm
+                        </button>
+                        <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
+                            <i className="fas fa-arrow-left"></i> Quay lại
+                        </button>
                     </div>
                 </div>
             </main>

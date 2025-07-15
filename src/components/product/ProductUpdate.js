@@ -236,10 +236,10 @@ const ProductUpdate = () => {
             (selectedCategories.length > 0 ? selectedCategories : []).forEach(id => formData.append('category_ids[]', id));
 
             // Gửi file ảnh thật sự
+            imageFiles.forEach(file => formData.append('image_url[]', file));
+            // Gửi deleted_image_ids[]
+            removedOldImageIds.forEach(id => formData.append('deleted_image_ids[]', id));
             if (imageFiles.length > 0) {
-                imageFiles.forEach(file => formData.append('image_url[]', file));
-                 // Gửi deleted_image_ids[]
-                removedOldImageIds.forEach(id => formData.append('deleted_image_ids[]', id));
 
                 // Gửi featured_image_index (luôn truyền lên, không cần điều kiện)
                 formData.append('featured_image_index', featuredImageIndex);

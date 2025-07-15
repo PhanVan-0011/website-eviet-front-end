@@ -65,7 +65,7 @@ const DataTables = (props) => {
     const renderTableData = () => {
         return (
             data.map((row, index) => (
-                <tr key={index}>
+                <tr key={row.id}>
                     {!hideSelected && (
                         <td>
                             <input
@@ -167,8 +167,8 @@ const DataTables = (props) => {
                         </tr>
                     </tfoot>
                     <tbody>
-                        {data.map((row, index) => (
-                            <tr key={index}>
+                        {data.map((row) => (
+                            <tr key={row.id}>
                                 {!hideSelected && (
                                     <td>
                                         <input

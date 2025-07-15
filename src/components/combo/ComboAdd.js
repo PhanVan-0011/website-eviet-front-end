@@ -387,15 +387,17 @@ const ComboAdd = () => {
                                                     </select>
                                                 </div>
                                                 <div className="col-md-3 d-flex align-items-center">
-                                                    <img
-                                                        src={
-                                                            products.find(p => String(p.id) === String(item.product_id))?.featured_image?.main_url
-                                                                ? process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).featured_image.main_url
-                                                                : '/no-image.png'
-                                                        }
-                                                        alt=""
-                                                        style={{ width: 90, height: 60, objectFit: 'contain', borderRadius: 4, border: '1px solid #eee', background: '#fff' }}
-                                                    />
+                                                    {products.find(p => String(p.id) === String(item.product_id))?.featured_image?.thumb_url ? (
+                                                        <img
+                                                            src={process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).featured_image.main_url}
+                                                            alt=""
+                                                            style={{ width: 90, height: 60, objectFit: 'contain', borderRadius: 4, border: '1px solid #eee', background: '#fff' }}
+                                                        />
+                                                    ) : (
+                                                        <div style={{ width: 90, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 4 }}>
+                                                            <i className="fas fa-image" style={{ fontSize: 32, color: '#bbb' }}></i>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div className="col-md-2">
                                                     <input
