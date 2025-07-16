@@ -476,7 +476,7 @@ const OrderList = () => {
                         )}
                     </div> */}
                     <DataTables
-                        name="Dữ liệu đơn hàng"
+                        name="Danh sách đơn hàng"
                         columns={columns}
                         data={sortedOrders}
                         numOfPages={numOfPages}

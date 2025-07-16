@@ -62,9 +62,9 @@ const Dashboard = () => {
                 label: 'Doanh thu (VNĐ)',
                 data: dashboardData.data.revenue_chart.data,
                 fill: true,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: '#2c5cc5', 
+                borderColor: '#244aa0',
+                pointBackgroundColor: '#2c5cc5', 
                 tension: 0.4,
             },
         ],
@@ -214,7 +214,7 @@ const Dashboard = () => {
                         <div className="card-header"><i className="fas fa-chart-area me-2"></i> Doanh thu 6 tháng gần nhất</div>
                         <div className="card-body d-flex align-items-center justify-content-center" style={{ height: 300 }}>
                             {revenueAreaChartData ? (
-                                <Bar data={revenueAreaChartData} options={{ maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }} />
+                                <Bar  data={revenueAreaChartData} options={{ maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }} />
                             ) : (
                                 <div>Đang tải biểu đồ...</div>
                             )}
