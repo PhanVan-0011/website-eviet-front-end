@@ -4,7 +4,7 @@ import LiveSearch from './LiveSearch';
 
 const DataTables = (props) => {
     console.log("DataTables props: ", props);
-   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, filterHeader, hideSelected } = props;
+   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, filterHeader, hideSelected, isLoading = false } = props;
    const [selectedRows, setSelectedRows] = useState([]);
 
    useEffect(() => {
@@ -149,48 +149,73 @@ const DataTables = (props) => {
                     </div>
                 </div>
                 <table className="table table-striped table-bordered" id="datatablesSimple" width="100%" cellSpacing="0">
-                    <thead>
-                        {renderFilterHeader()}
-                        <tr>
-                            {!hideSelected && (
-                                <td>
-                                    <input type="checkbox" checked={data.length === selectedRows.length && data.length > 0 ? true : false} className="form-check-input" onChange={handleCheckedAll}/>
-                                </td>
-                            )}
-                            {renderTableHeader()}
-                        </tr>
-                    </thead>
-                    <tfoot>
-                        <tr>
-                            {!hideSelected && <td></td>}
-                            {/* {renderTableHeader()} */}
-                        </tr>
-                    </tfoot>
-                    <tbody>
-                        {data.map((row) => (
-                            <tr key={row.id}>
+                    {data.length > 0 && (
+                        <thead>
+                            {renderFilterHeader()}
+                            <tr>
                                 {!hideSelected && (
                                     <td>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedRows.includes(String(row.id))}
-                                            className="form-check-input"
-                                            onChange={handleCheckboxChange}
-                                            value={row.id}
-                                        />
+                                        <input type="checkbox" checked={data.length === selectedRows.length && data.length > 0 ? true : false} className="form-check-input" onChange={handleCheckedAll}/>
                                     </td>
                                 )}
-                                {columns.map((col, colIndex) => (
-                                    <td
-                                        key={colIndex}
-                                        style={col.width ? { width: col.width } : {}}
-                                        className={col.tdClass || ""}
-                                    >
-                                        {col.element(row)}
-                                    </td>
-                                ))}
+                                {renderTableHeader()}
                             </tr>
-                        ))}
+                        </thead>
+                    )}
+                    {data.length > 0 && (
+                        <tfoot>
+                            <tr>
+                                {!hideSelected && <td></td>}
+                                {/* {renderTableHeader()} */}
+                            </tr>
+                        </tfoot>
+                    )}
+                    <tbody>
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan={(!hideSelected ? 1 : 0) + columns.length} className="text-center py-5">
+                                    <div className="d-flex flex-column align-items-center justify-content-center" style={{opacity:0.8}}>
+                                        <div className="spinner-border text-primary mb-2" style={{width:48, height:48}} role="status"></div>
+                                        <div className="fw-bold text-secondary" style={{fontSize:20}}>Đang tải dữ liệu...</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : data.length === 0 ? (
+                            <tr>
+                                <td colSpan={(!hideSelected ? 1 : 0) + columns.length} className="text-center py-5">
+                                    <div className="d-flex flex-column align-items-center justify-content-center" style={{opacity:0.8}}>
+                                        <i className="fas fa-database mb-2" style={{fontSize:48, color:'#bdbdbd'}}></i>
+                                        <div className="fw-bold text-secondary" style={{fontSize:20}}>Không có dữ liệu</div>
+                                        <div className="text-muted" style={{fontSize:14}}>Không tìm thấy dòng dữ liệu nào phù hợp.</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : (
+                            data.map((row) => (
+                                <tr key={row.id}>
+                                    {!hideSelected && (
+                                        <td>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedRows.includes(String(row.id))}
+                                                className="form-check-input"
+                                                onChange={handleCheckboxChange}
+                                                value={row.id}
+                                            />
+                                        </td>
+                                    )}
+                                    {columns.map((col, colIndex) => (
+                                        <td
+                                            key={colIndex}
+                                            style={col.width ? { width: col.width } : {}}
+                                            className={col.tdClass || ""}
+                                        >
+                                            {col.element(row)}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

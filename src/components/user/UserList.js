@@ -43,7 +43,7 @@ const UserList = () => {
                             <img
                                 src={process.env.REACT_APP_API_URL + 'api/images/' + row.image_url.thumb_url}
                                 alt="avatar"
-                                style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '1px solid #eee', background: '#fafbfc', marginRight: 10, cursor: 'pointer' }}
+                                style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'contain', border: '1px solid #eee', background: '#fafbfc', marginRight: 10, cursor: 'pointer' }}
                             />
                         ) : (
                             <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #eee', marginRight: 10 }}>
@@ -73,7 +73,7 @@ const UserList = () => {
                                 <img
                                     src={process.env.REACT_APP_API_URL + 'api/images/' + row.image_url.main_url}
                                     alt="avatar-large"
-                                    style={{ width: 96, height: 96, borderRadius: '12px', objectFit: 'cover', border: '1px solid #eee', background: '#fafbfc' }}
+                                    style={{ width: 96, height: 96, borderRadius: '12px', objectFit: 'contain', border: '1px solid #eee', background: '#fafbfc' }}
                                 />
                             </div>
                         )}

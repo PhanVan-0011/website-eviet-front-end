@@ -249,9 +249,7 @@ const PostAdd = () => {
                                                 />
                                                 <input
                                                     type="hidden"
-                                                    {...register('imageFiles', {
-                                                        required: 'Ảnh bài viết là bắt buộc',
-                                                    })}
+                                                    {...register('imageFiles')}
                                                 />
                                                 {errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
                                             </div>

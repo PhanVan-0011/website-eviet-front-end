@@ -219,7 +219,7 @@ const UserAdd = () => {
                                                 <select
                                                     className="form-select"
                                                     id="inputGender"
-                                                    {...register('gender')}
+                                                    {...register('gender', { required: 'Giới tính là bắt buộc' })}
                                                     defaultValue=""
                                                 >
                                                     <option value="" disabled>Chọn giới tính</option>
@@ -227,7 +227,9 @@ const UserAdd = () => {
                                                     <option value="female">Nữ</option>
                                                     <option value="other">Khác</option>
                                                 </select>
-                                                <label htmlFor="inputGender">Giới tính</label>
+                                                <label htmlFor="inputGender">
+                                                Giới tính <span style={{ color: 'red' }}>*</span>
+                                            </label>
                                             </div>
                                         </div>
                                         <div className="col-md-6">
