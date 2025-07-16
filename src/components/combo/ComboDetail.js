@@ -127,7 +127,7 @@ const ComboDetail = () => {
                                     src={combo.mainImage ? urlImage + combo.mainImage : "https://via.placeholder.com/400x320?text=No+Image"}
                                     alt={combo.name}
                                     className="card-img-top"
-                                    style={{ objectFit: 'cover', height: 320, borderRadius: '8px 8px 0 0', background: '#fafafa' }}
+                                    style={{ objectFit: 'contain', height: 320, borderRadius: '8px 8px 0 0', background: '#fafafa' }}
                                 />
                                 <div className="card-body">
                                     <h4 className="card-title mb-2">{combo.name}</h4>
@@ -192,16 +192,20 @@ const ComboDetail = () => {
                                                         <tr key={item.id}>
                                                             <td>{idx + 1}</td>
                                                             <td>
-                                                                <img
-                                                                    src={item.product && item.product.image_url
-                                                                        ? (item.product.image_url.startsWith('http')
+                                                                {item.product && item.product.image_url ? (
+                                                                    <img
+                                                                        src={item.product.image_url.startsWith('http')
                                                                             ? item.product.image_url
-                                                                            : urlImage + item.product.image_url)
-                                                                        : '/no-image.png'}
-                                                                    alt={item.product ? item.product.name : ''}
-                                                                    className="img-thumbnail"
-                                                                    style={{ width: 56, height: 56, objectFit: 'cover' }}
-                                                                />
+                                                                            : urlImage + item.product.image_url}
+                                                                        alt={item.product ? item.product.name : ''}
+                                                                        className="img-thumbnail"
+                                                                        style={{ width: 56, height: 56, objectFit: 'cover' }}
+                                                                    />
+                                                                ) : (
+                                                                    <div style={{ width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 8 }}>
+                                                                        <i className="fas fa-image" style={{ fontSize: 24, color: '#bbb' }}></i>
+                                                                    </div>
+                                                                )}
                                                             </td>
                                                             <td>
                                                                 <div className="fw-semibold">{item.product ? item.product.name : ''}</div>
@@ -220,18 +224,21 @@ const ComboDetail = () => {
                                         </table>
                                     </div>
                                 </div>
-                                <div className="card-footer bg-white border-0">
-                                    <Link className="btn btn-primary me-2" to={`/combo/${combo.id}`}>
-                                        <i className="fas fa-edit"></i> Sửa combo
-                                    </Link>
-                                    <button className="btn btn-danger me-2" onClick={handleDelete}>
-                                        <i className="fas fa-trash-alt"></i> Xóa combo
-                                    </button>
-                                    <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
-                                        <i className="fas fa-arrow-left"></i> Quay lại
-                                    </button>
-                                </div>
                             </div>
+                        </div>
+                    </div>
+                    {/* Button thao tác ra ngoài card, căn giữa, margin-top */}
+                    <div className="row">
+                        <div className="col-12 d-flex justify-content-center gap-2" style={{ marginTop: 32 }}>
+                            <Link className="btn btn-primary me-2" to={`/combo/${combo.id}`}>
+                                <i className="fas fa-edit"></i> Sửa combo
+                            </Link>
+                            <button className="btn btn-danger me-2" onClick={handleDelete}>
+                                <i className="fas fa-trash-alt"></i> Xóa combo
+                            </button>
+                            <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
+                                <i className="fas fa-arrow-left"></i> Quay lại
+                            </button>
                         </div>
                     </div>
                 </div>

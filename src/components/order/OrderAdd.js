@@ -284,26 +284,27 @@ const OrderAdd = () => {
                                                 </div>
                                                 <div className="col-2 d-flex align-items-center">
                                                     {item.id && (
-                                                        <img
-                                                            src={
-                                                                item.type === 'product'
-                                                                    ? (products.find(p => String(p.id) === String(item.id))?.featured_image?.thumb_url
-                                                                        ? process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.id)).featured_image.thumb_url
-                                                                        : '/no-image.png')
-                                                                    : (combos.find(c => String(c.id) === String(item.id))?.featured_image?.thumb_url
-                                                                        ? process.env.REACT_APP_API_URL + 'api/images/' + combos.find(c => String(c.id) === String(item.id)).featured_image.thumb_url
-                                                                        : '/no-image.png')
+                                                        (() => {
+                                                            const obj = item.type === 'product'
+                                                                ? products.find(p => String(p.id) === String(item.id))
+                                                                : combos.find(c => String(c.id) === String(item.id));
+                                                            const thumbUrl = obj?.featured_image?.thumb_url;
+                                                            if (thumbUrl) {
+                                                                return (
+                                                                    <img
+                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + thumbUrl}
+                                                                        alt=""
+                                                                        style={{ width: 90, height: 60, objectFit: 'contain', borderRadius: 4, border: '1px solid #eee', background: '#fff' }}
+                                                                    />
+                                                                );
+                                                            } else {
+                                                                return (
+                                                                    <div style={{ width: 90, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 4 }}>
+                                                                        <i className="fas fa-image" style={{ fontSize: 32, color: '#bbb' }}></i>
+                                                                    </div>
+                                                                );
                                                             }
-                                                            alt=""
-                                                            style={{
-                                                                width: 90,
-                                                                height: 60,
-                                                                objectFit: 'contain',
-                                                                borderRadius: 4,
-                                                                border: '1px solid #eee',
-                                                                background: '#fff'
-                                                            }}
-                                                        />
+                                                        })()
                                                     )}
                                                 </div>
                                                 <div className="col-2">

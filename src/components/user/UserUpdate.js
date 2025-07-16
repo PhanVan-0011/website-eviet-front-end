@@ -42,7 +42,15 @@ const UserUpdate = () => {
                 setValue('email', data.email);
                 setValue('gender', data.gender);
                 setValue('is_active', data.is_active ? "1" : "0");
-                setDob(data.date_of_birth ? new Date(data.date_of_birth) : null);
+                // Kiểm tra ngày sinh hợp lệ
+                let dobValue = null;
+                if (data.date_of_birth) {
+                    const d = new Date(data.date_of_birth);
+                    if (!isNaN(d.getTime())) {
+                        dobValue = d;
+                    }
+                }
+                setDob(dobValue);
                 setOldAvatar(data.image_url?.main_url || null);
                 dispatch(actions.controlLoading(false));
             } catch (error) {
@@ -95,8 +103,9 @@ const UserUpdate = () => {
             if (imageFile) {
                 formData.append('image_url', imageFile);
             }
-            if (dob) {
-                data.date_of_birth = dob.toISOString().split('T')[0];
+            // Chỉ thêm ngày sinh nếu dob là Date hợp lệ
+            if (dob instanceof Date && !isNaN(dob.getTime())) {
+                formData.set('date_of_birth', dob.toISOString().split('T')[0]);
             }
             const response = await requestApi(`api/admin/users/${params.id}`, 'POST', formData, 'json', 'multipart/form-data');
             dispatch(actions.controlLoading(false));
@@ -204,7 +213,7 @@ const UserUpdate = () => {
                                             <select
                                                 className="form-select"
                                                 id="inputGender"
-                                                {...register('gender')}
+                                                {...register('gender', { required: 'Giới tính là bắt buộc' })}
                                                 defaultValue=""
                                             >
                                                 <option value="" disabled>Chọn giới tính</option>
@@ -212,7 +221,9 @@ const UserUpdate = () => {
                                                 <option value="female">Nữ</option>
                                                 <option value="other">Khác</option>
                                             </select>
-                                            <label htmlFor="inputGender">Giới tính</label>
+                                            <label htmlFor="inputGender">
+                                                Giới tính <span style={{ color: 'red' }}>*</span>
+                                            </label>
                                         </div>
                                     </div>
                                     <div className="col-md-6">

@@ -202,7 +202,7 @@ const OrderDetail = () => {
                         </div>
                         {/* Danh sách sản phẩm */}
                         <div className="col-lg-8">
-                            <div className="card shadow-sm border-0 mb-3">
+                            <div className="card shadow-sm border-0 mb-3 h-100 w-100">
                                 <div className="card-header bg-white border-bottom-0 pb-0">
                                     <h5 className="mb-0 fw-bold text-success">
                                         <i className="fas fa-box-open me-2"></i>Sản phẩm trong đơn
@@ -242,22 +242,26 @@ const OrderDetail = () => {
                                                             <tr key={item.id} style={{ borderLeft: borderStyle }}>
                                                                 <td>{idx + 1}</td>
                                                                 <td>
-                                                                    <img
-                                                                        src={item.product && item.product.image_url
-                                                                            ? (item.product.image_url.startsWith('http')
+                                                                    {item.product && item.product.image_url ? (
+                                                                        <img
+                                                                            src={item.product.image_url.startsWith('http')
                                                                                 ? item.product.image_url
-                                                                                : urlImage + item.product.image_url)
-                                                                            : '/no-image.png'}
-                                                                        alt={item.product ? item.product.name : ''}
-                                                                        className="img-thumbnail"
-                                                                        style={{
-                                                                            width: 56,
-                                                                            height: 56,
-                                                                            objectFit: 'cover',
-                                                                            borderRadius: 8,
-                                                                            border: '1px solid #eee'
-                                                                        }}
-                                                                    />
+                                                                                : urlImage + item.product.image_url}
+                                                                            alt={item.product ? item.product.name : ''}
+                                                                            className="img-thumbnail"
+                                                                            style={{
+                                                                                width: 56,
+                                                                                height: 56,
+                                                                                objectFit: 'cover',
+                                                                                borderRadius: 8,
+                                                                                border: '1px solid #eee'
+                                                                            }}
+                                                                        />
+                                                                    ) : (
+                                                                        <div style={{ width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 8 }}>
+                                                                            <i className="fas fa-image" style={{ fontSize: 24, color: '#bbb' }}></i>
+                                                                        </div>
+                                                                    )}
                                                                 </td>
                                                                 <td>
                                                                     <div className="fw-semibold">{item.product ? item.product.name : ''}</div>
@@ -320,74 +324,74 @@ const OrderDetail = () => {
 
                     {/* Nút thao tác nằm giữa giao diện */}
                     <div className="row mb-4">
-                        <div className="col-12 d-flex justify-content-center gap-3">
-                            {/* <Link className="btn btn-primary px-4" to={`/order/${order.id}`}>
-                                <i className="fas fa-edit"></i> Sửa đơn hàng
-                            </Link> */}
-                            <button className="btn btn-outline-secondary px-4" onClick={() => navigate(-1)}>
+                        <div className="col-12 d-flex justify-content-center gap-3" style={{ marginTop: 32 }}>
+                            <button className="btn btn-outline-secondary" style={{ minWidth: 140, maxWidth: 180 }} onClick={() => navigate(-1)}>
                                 <i className="fas fa-arrow-left me-2"></i>Quay lại
                             </button>
+                            {order.status === 'pending' && (
+                                <>
+                                    <button
+                                        className="btn btn-danger"
+                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        onClick={() => handleUpdateStatus(order.id, 'cancelled')}
+                                        title="Hủy đơn hàng"
+                                    >
+                                        <i className="fas fa-times me-1"></i> Hủy
+                                    </button>
+                                    <button
+                                        className="btn btn-success"
+                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        onClick={() => handleUpdateStatus(order.id, 'processing')}
+                                        title="Duyệt đơn hàng"
+                                    >
+                                        <i className="fas fa-check me-1"></i> Duyệt
+                                    </button>
+                                    
+                                </>
+                            )}
+                            {order.status === 'processing' && (
+                                <>
+                                    <button
+                                        className="btn btn-danger"
+                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        onClick={() => handleUpdateStatus(order.id, 'cancelled')}
+                                        title="Hủy đơn hàng"
+                                    >
+                                        <i className="fas fa-times me-1"></i> Hủy
+                                    </button>
+                                    <button
+                                        className="btn btn-warning"
+                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        onClick={() => handleUpdateStatus(order.id, 'shipped')}
+                                        title="Xác nhận đã gửi hàng"
+                                    >
+                                        <i className="fas fa-truck me-1"></i> Gửi hàng
+                                    </button>
+                                    
+                                </>
+                            )}
+                            {order.status === 'shipped' && (
+                                <>
+                                    <button
+                                        className="btn btn-danger"
+                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        onClick={() => handleUpdateStatus(order.id, 'cancelled')}
+                                        title="Hủy đơn hàng"
+                                    >
+                                        <i className="fas fa-times me-1"></i> Hủy
+                                    </button>
+                                    <button
+                                        className="btn btn-info"
+                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        onClick={() => handleUpdateStatus(order.id, 'delivered')}
+                                        title="Xác nhận đã giao"
+                                    >
+                                        <i className="fas fa-box-open me-1"></i> Đã giao
+                                    </button>
+                                    
+                                </>
+                            )}
                         </div>
-                    </div>
-
-                    <div className="d-flex align-items-center flex-wrap gap-2 mt-3 mb-4">
-                        {/* Duyệt đơn (pending -> processing) */}
-                        {order.status === 'pending' && (
-                            <>
-                                <button
-                                    className="btn btn-success btn-lg px-2 py-1"
-                                    onClick={() => handleUpdateStatus(order.id, 'processing')}
-                                    title="Duyệt đơn hàng"
-                                >
-                                    <i className="fas fa-check me-1"></i> Duyệt
-                                </button>
-                                <button
-                                    className="btn btn-danger btn-lg px-2 py-1"
-                                    onClick={() => handleUpdateStatus(order.id, 'cancelled')}
-                                    title="Hủy đơn hàng"
-                                >
-                                    <i className="fas fa-times me-1"></i> Hủy
-                                </button>
-                            </>
-                        )}
-                        {/* Xác nhận giao hàng (processing -> shipped) */}
-                        {order.status === 'processing' && (
-                            <>
-                                <button
-                                    className="btn btn-warning btn-lg px-2 py-1"
-                                    onClick={() => handleUpdateStatus(order.id, 'shipped')}
-                                    title="Xác nhận đã gửi hàng"
-                                >
-                                    <i className="fas fa-truck me-1"></i> Gửi hàng
-                                </button>
-                                <button
-                                    className="btn btn-danger btn-lg px-2 py-1"
-                                    onClick={() => handleUpdateStatus(order.id, 'cancelled')}
-                                    title="Hủy đơn hàng"
-                                >
-                                    <i className="fas fa-times me-1"></i> Hủy
-                                </button>
-                            </>
-                        )}
-                        {/* Xác nhận giao thành công (shipped -> delivered) */}
-                        {order.status === 'shipped' && (
-                            <>
-                                <button
-                                    className="btn btn-info btn-lg px-2 py-1"
-                                    onClick={() => handleUpdateStatus(order.id, 'delivered')}
-                                    title="Xác nhận đã giao"
-                                >
-                                    <i className="fas fa-box-open me-1"></i> Đã giao
-                                </button>
-                                <button
-                                    className="btn btn-danger btn-lg px-2 py-1"
-                                    onClick={() => handleUpdateStatus(order.id, 'cancelled')}
-                                    title="Hủy đơn hàng"
-                                >
-                                    <i className="fas fa-times me-1"></i> Hủy
-                                </button>
-                            </>
-                        )}
                     </div>
                 </div>
             </main>

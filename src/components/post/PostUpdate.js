@@ -201,7 +201,10 @@ const PostUpdate = () => {
             // Gửi deleted_image_ids[]
             removedOldImageIds.forEach(id => formData.append('deleted_image_ids[]', id));
             // Gửi featured_image_index (luôn truyền lên, không cần điều kiện)
-            formData.append('featured_image_index', featuredImageIndex);
+            if (imageFiles.length > 0) {
+
+                formData.append('featured_image_index', featuredImageIndex);
+            }
             const response = await requestApi(
                 `api/admin/posts/${id}`,
                 'POST',
@@ -351,9 +354,7 @@ const PostUpdate = () => {
                                                 />
                                                 <input
                                                     type="hidden"
-                                                    {...register('imageFiles', {
-                                                        validate: () => (oldImages.length + imageFiles.length > 0) || 'Ảnh bài viết là bắt buộc',
-                                                    })}
+                                                    {...register('imageFiles')}
                                                 />
                                                 {isSubmitted && errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
                                             </div>

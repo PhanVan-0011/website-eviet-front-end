@@ -389,7 +389,7 @@ const ComboAdd = () => {
                                                 <div className="col-md-3 d-flex align-items-center">
                                                     {products.find(p => String(p.id) === String(item.product_id))?.featured_image?.thumb_url ? (
                                                         <img
-                                                            src={process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).featured_image.main_url}
+                                                            src={process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).featured_image.thumb_url}
                                                             alt=""
                                                             style={{ width: 90, height: 60, objectFit: 'contain', borderRadius: 4, border: '1px solid #eee', background: '#fff' }}
                                                         />

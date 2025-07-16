@@ -241,7 +241,6 @@ const ProductUpdate = () => {
             removedOldImageIds.forEach(id => formData.append('deleted_image_ids[]', id));
             if (imageFiles.length > 0) {
 
-                // Gửi featured_image_index (luôn truyền lên, không cần điều kiện)
                 formData.append('featured_image_index', featuredImageIndex);
             }
 

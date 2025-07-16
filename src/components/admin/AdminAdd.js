@@ -244,7 +244,7 @@ const AdminAdd = () => {
                                                 <select
                                                     className="form-select"
                                                     id="inputGender"
-                                                    {...register('gender')}
+                                                    {...register('gender', { required: 'Giới tính là bắt buộc' })}
                                                     defaultValue=""
                                                 >
                                                     <option value="" disabled>Chọn giới tính</option>
@@ -252,7 +252,10 @@ const AdminAdd = () => {
                                                     <option value="female">Nữ</option>
                                                     <option value="other">Khác</option>
                                                 </select>
-                                                <label htmlFor="inputGender">Giới tính</label>
+                                                <label htmlFor="inputGender">
+                                                    Giới tính <span style={{ color: 'red' }}>*</span>
+                                                </label>
+                                                {errors.gender && <div className="text-danger">{errors.gender.message}</div>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">

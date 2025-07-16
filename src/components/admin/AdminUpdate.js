@@ -75,11 +75,32 @@ const AdminUpdate = () => {
         fetchAll();
     }, [params.id, setValue]);
     const handleSubmitForm = async (data) => {
-        console.log("Submit data: ", data);
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
-            const response = await requestApi(`api/admin/admins/${params.id}`, 'POST', data);
+            const formData = new FormData();
+            Object.keys(data).forEach(key => {
+                if (key !== 'role_ids') formData.append(key, data[key]);
+            });
+            // Gửi role_ids dạng array
+            if (Array.isArray(data.role_ids)) {
+                data.role_ids.forEach(id => formData.append('role_ids[]', id));
+            }
+            // Gửi ảnh nếu có
+            if (imageFile) {
+                formData.append('image_url', imageFile);
+            }
+            // Gửi ngày sinh nếu có
+            if (dob instanceof Date && !isNaN(dob.getTime())) {
+                formData.set('date_of_birth', dob.toISOString().split('T')[0]);
+            }
+            const response = await requestApi(
+                `api/admin/admins/${params.id}`,
+                'POST',
+                formData,
+                'json',
+                'multipart/form-data'
+            );
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật thông tin thành công", toastSuccessConfig);
@@ -221,7 +242,7 @@ const AdminUpdate = () => {
                                             <select
                                                 className="form-select"
                                                 id="inputGender"
-                                                {...register('gender')}
+                                                {...register('gender', { required: 'Giới tính là bắt buộc' })}
                                                 defaultValue=""
                                             >
                                                 <option value="" disabled>Chọn giới tính</option>
@@ -229,7 +250,10 @@ const AdminUpdate = () => {
                                                 <option value="female">Nữ</option>
                                                 <option value="other">Khác</option>
                                             </select>
-                                            <label htmlFor="inputGender">Giới tính</label>
+                                            <label htmlFor="inputGender">
+                                                Giới tính <span style={{ color: 'red' }}>*</span>
+                                            </label>
+                                            {errors.gender && <div className="text-danger">{errors.gender.message}</div>}
                                         </div>
                                     </div>
                                     <div className="col-md-6">
