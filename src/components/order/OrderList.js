@@ -397,7 +397,7 @@ const OrderList = () => {
                     {/* Bộ lọc */}
                     <div className="row mb-3 g-2 align-items-end">
                         {/* Trạng thái */}
-                        <div className="col-md-2">
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>

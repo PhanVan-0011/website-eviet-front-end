@@ -25,10 +25,10 @@ const ComboList = () => {
 
     // Bộ lọc
     const [filterStatus, setFilterStatus] = useState('');
+
     const [filterStartDateFrom, setFilterStartDateFrom] = useState('');
-    const [filterStartDateTo, setFilterStartDateTo] = useState('');
-    const [filterEndDateFrom, setFilterEndDateFrom] = useState('');
     const [filterEndDateTo, setFilterEndDateTo] = useState('');
+    
     const [filterPriceRange, setFilterPriceRange] = useState('');
 
     // Sort states
@@ -39,10 +39,9 @@ const ComboList = () => {
     useEffect(() => {
         let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
         if (filterStatus !== '') query += `&is_active=${filterStatus}`;
-        if (filterStartDateFrom) query += `&start_date_from=${filterStartDateFrom}`;
-        if (filterStartDateTo) query += `&start_date_to=${filterStartDateTo}`;
-        if (filterEndDateFrom) query += `&end_date_from=${filterEndDateFrom}`;
-        if (filterEndDateTo) query += `&end_date_to=${filterEndDateTo}`;
+        if (filterStartDateFrom) query += `&start_date=${filterStartDateFrom}`;
+
+        if (filterEndDateTo) query += `&end_date=${filterEndDateTo}`;
         if (filterPriceRange) {
             const [min, max] = filterPriceRange.split('-');
             if (min) query += `&min_price=${min}`;
@@ -64,8 +63,6 @@ const ComboList = () => {
         filterStatus,
 
         filterStartDateFrom,
-        filterStartDateTo,
-        filterEndDateFrom,
         filterEndDateTo,
         filterPriceRange,
         refresh,
@@ -275,7 +272,7 @@ const ComboList = () => {
                     {/* Bộ lọc */}
                     <div className="row mb-3 g-2 align-items-end">
                         {/* Trạng thái */}
-                        <div className="col-md-2">
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
@@ -292,7 +289,7 @@ const ComboList = () => {
                             </select>
                         </div>
                         {/* Giá tối thiểu */}
-                        <div className="col-md-2">
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-success mb-1" htmlFor="filterPriceRange">
                                 <i className="fas fa-money-bill-wave me-1"></i>Khoảng giá
                             </label>
@@ -313,8 +310,8 @@ const ComboList = () => {
                                 <option value="200000-">Trên 200.000 ₫</option>
                             </select>
                         </div>
-                        {/* Khoảng ngày bắt đầu và kết thúc chia làm 4 cột riêng biệt */}
-                        <div className="col-md-2">
+                        {/* Khoảng ngày bắt đầu và kết thúc chia làm 2 cột riêng biệt */}
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-primary mb-1">
                                 <i className="fas fa-calendar-alt me-1"></i>Bắt đầu từ
                             </label>
@@ -327,33 +324,8 @@ const ComboList = () => {
                                 onChange={e => setFilterStartDateFrom(e.target.value)}
                             />
                         </div>
-                        <div className="col-md-2">
-                            <label className="form-label fw-semibold text-primary mb-1">
-                                <i className="fas fa-calendar-alt me-1"></i>Bắt đầu đến
-                            </label>
-                            <input
-                                id="filterStartDateTo"
-                                type="date"
-                                className="form-control form-control-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
-                                value={filterStartDateTo}
-                                onChange={e => setFilterStartDateTo(e.target.value)}
-                            />
-                        </div>
-                        <div className="col-md-2">
-                            <label className="form-label fw-semibold text-danger mb-1">
-                                <i className="fas fa-calendar-check me-1"></i>Kết thúc từ
-                            </label>
-                            <input
-                                id="filterEndDateFrom"
-                                type="date"
-                                className="form-control form-control-sm border-danger shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
-                                value={filterEndDateFrom}
-                                onChange={e => setFilterEndDateFrom(e.target.value)}
-                            />
-                        </div>
-                        <div className="col-md-2">
+                       
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-danger mb-1">
                                 <i className="fas fa-calendar-check me-1"></i>Kết thúc đến
                             </label>
