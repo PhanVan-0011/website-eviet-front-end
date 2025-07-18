@@ -172,68 +172,70 @@ const PromotionDetail = () => {
         </div>
     </div>
     <div className="col-md-7">
-        {/* PHẠM VI ÁP DỤNG - nằm trên mô tả */}
-        <div className="mb-3 border rounded p-3 bg-light">
-            <div className="fw-bold mb-2" style={{ fontSize: 16 }}>
-                <i className="fas fa-globe-asia me-2"></i>Phạm vi áp dụng
-            </div>
-            {/* Thời gian áp dụng */}
-            <div className="mb-2">
-                <span className="fw-semibold">Thời gian áp dụng:</span>
+        <div className="h-100 d-flex flex-column">
+            {/* PHẠM VI ÁP DỤNG */}
+            <div className="mb-3 border rounded p-3 bg-light">
+                <div className="fw-bold mb-2" style={{ fontSize: 16 }}>
+                    <i className="fas fa-globe-asia me-2"></i>Phạm vi áp dụng
+                </div>
+                {/* Thời gian áp dụng */}
+                <div className="mb-2">
+                    <span className="fw-semibold">Thời gian áp dụng:</span>
+                    <div>
+                        <span className="text-primary">{promotion.dates?.start_date ? moment(promotion.dates.start_date).format('HH:mm DD/MM/YYYY') : '-'}</span>
+                        <span className="mx-1">-</span>
+                        <span className="text-danger">{promotion.dates?.end_date ? moment(promotion.dates.end_date).format('HH:mm DD/MM/YYYY') : '-'}</span>
+                    </div>
+                </div>
+                {/* Tình trạng */}
+                <div className="mb-2">
+                    <span className="fw-semibold">Tình trạng:</span> <span className="badge bg-info text-dark">{promotion.status_text}</span>
+                </div>
+                {/* Đối tượng áp dụng */}
                 <div>
-                    <span className="text-primary">{promotion.dates?.start_date ? moment(promotion.dates.start_date).format('HH:mm DD/MM/YYYY') : '-'}</span>
-                    <span className="mx-1">-</span>
-                    <span className="text-danger">{promotion.dates?.end_date ? moment(promotion.dates.end_date).format('HH:mm DD/MM/YYYY') : '-'}</span>
+                    <span className="fw-semibold">Đối tượng áp dụng:</span>
+                    <div className="mt-1">
+                        {promotion.products?.length > 0 && (
+                            <div className="mb-1">
+                                <span className="badge bg-primary me-2">Sản phẩm:</span>
+                                {promotion.products.map(p => (
+                                    <span key={p.id} className="badge bg-light text-dark me-1">{p.name}</span>
+                                ))}
+                            </div>
+                        )}
+                        {promotion.categories?.length > 0 && (
+                            <div className="mb-1">
+                                <span className="badge bg-warning text-dark me-2">Danh mục:</span>
+                                {promotion.categories.map(c => (
+                                    <span key={c.id} className="badge bg-light text-dark me-1">{c.name}</span>
+                                ))}
+                            </div>
+                        )}
+                        {promotion.combos?.length > 0 && (
+                            <div>
+                                <span className="badge bg-success me-2">Combo:</span>
+                                {promotion.combos.map(c => (
+                                    <span key={c.id} className="badge bg-light text-dark me-1">{c.name}</span>
+                                ))}
+                            </div>
+                        )}
+                        {promotion.products?.length === 0 && promotion.categories?.length === 0 && promotion.combos?.length === 0 && (
+                            <span className="text-muted">Tất cả</span>
+                        )}
+                    </div>
                 </div>
             </div>
-            {/* Tình trạng */}
-            <div className="mb-2">
-                <span className="fw-semibold">Tình trạng:</span> <span className="badge bg-info text-dark">{promotion.status_text}</span>
-            </div>
-            {/* Đối tượng áp dụng */}
-            <div>
-                <span className="fw-semibold">Đối tượng áp dụng:</span>
-                <div className="mt-1">
-                    {promotion.products?.length > 0 && (
-                        <div className="mb-1">
-                            <span className="badge bg-primary me-2">Sản phẩm:</span>
-                            {promotion.products.map(p => (
-                                <span key={p.id} className="badge bg-light text-dark me-1">{p.name}</span>
-                            ))}
-                        </div>
-                    )}
-                    {promotion.categories?.length > 0 && (
-                        <div className="mb-1">
-                            <span className="badge bg-warning text-dark me-2">Danh mục:</span>
-                            {promotion.categories.map(c => (
-                                <span key={c.id} className="badge bg-light text-dark me-1">{c.name}</span>
-                            ))}
-                        </div>
-                    )}
-                    {promotion.combos?.length > 0 && (
-                        <div>
-                            <span className="badge bg-success me-2">Combo:</span>
-                            {promotion.combos.map(c => (
-                                <span key={c.id} className="badge bg-light text-dark me-1">{c.name}</span>
-                            ))}
-                        </div>
-                    )}
-                    {promotion.products?.length === 0 && promotion.categories?.length === 0 && promotion.combos?.length === 0 && (
-                        <span className="text-muted">Tất cả</span>
-                    )}
+            {/* Mô tả khuyến mãi nhỏ lại */}
+            <div className="card shadow-sm flex-grow-1 d-flex flex-column">
+                <div className="card-header bg-light fw-bold" style={{ fontSize: 15, padding: '8px 16px' }}>
+                    <i className="fas fa-info-circle me-2"></i>Mô tả khuyến mãi
                 </div>
-            </div>
-        </div>
-        {/* Mô tả khuyến mãi nhỏ lại */}
-        <div className="card shadow-sm">
-            <div className="card-header bg-light fw-bold" style={{ fontSize: 15, padding: '8px 16px' }}>
-                <i className="fas fa-info-circle me-2"></i>Mô tả khuyến mãi
-            </div>
-            <div className="card-body" style={{ minheight: 60, fontSize: 14, padding: '12px 16px' }}>
-                {promotion.description
-                    ? <div>{promotion.description}</div>
-                    : <span className="text-muted fst-italic">Chưa có mô tả</span>
-                }
+                <div className="card-body flex-grow-1" style={{ minHeight: 60, fontSize: 14, padding: '12px 16px' }}>
+                    {promotion.description
+                        ? <div dangerouslySetInnerHTML={{ __html: promotion.description }} />
+                        : <span className="text-muted fst-italic">Chưa có mô tả</span>
+                    }
+                </div>
             </div>
         </div>
     </div>

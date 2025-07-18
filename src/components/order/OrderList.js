@@ -10,6 +10,9 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { vi } from 'date-fns/locale';
 
 const formatVND = (value) => {
     if (typeof value !== 'number' && typeof value !== 'string') return '';
@@ -31,9 +34,12 @@ const OrderList = () => {
     // Bộ lọc mới
     const [filterStatus, setFilterStatus] = useState('');
     const [filterPayment, setFilterPayment] = useState('');
-    // Thêm state cho filter ngày đặt hàng
-    const [filterOrderDateFrom, setFilterOrderDateFrom] = useState('');
-    const [filterOrderDateTo, setFilterOrderDateTo] = useState('');
+    // Thêm state cho filter ngày đặt hàng (kiểu Date)
+    const [filterOrderDateFrom, setFilterOrderDateFrom] = useState(() => {
+        const now = new Date();
+        return new Date(now.getFullYear(), 0, 1); // 1/1/yyyy
+    });
+    const [filterOrderDateTo, setFilterOrderDateTo] = useState(() => new Date());
 
     // Sort states
     const [sortField, setSortField] = useState('');
@@ -48,8 +54,8 @@ const OrderList = () => {
         // console.log('Fetching orders with query:', query);
         if (filterStatus) query += `&status=${filterStatus}`;
         if (filterPayment) query += `&payment_method_code=${filterPayment}`;
-        if (filterOrderDateFrom) query += `&start_date=${filterOrderDateFrom}`;
-        if (filterOrderDateTo) query += `&end_date=${filterOrderDateTo}`;
+        if (filterOrderDateFrom) query += `&start_date=${moment(filterOrderDateFrom).format('YYYY-MM-DD')}`;
+        if (filterOrderDateTo) query += `&end_date=${moment(filterOrderDateTo).format('YYYY-MM-DD')}`;
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/orders${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
@@ -397,14 +403,14 @@ const OrderList = () => {
                     {/* Bộ lọc */}
                     <div className="row mb-3 g-2 align-items-end">
                         {/* Trạng thái */}
-                        <div className="col-md-2">
+                        <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
                             <select
                                 id="filterStatus"
                                 className="form-select form-select-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height:40 }}
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
@@ -417,14 +423,14 @@ const OrderList = () => {
                             </select>
                         </div>
                         {/* Phương thức thanh toán động */}
-                        <div className="col-md-3">
+                        <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-success mb-1" htmlFor="filterPayment">
                                 <i className="fas fa-credit-card me-1"></i>Phương thức thanh toán
                             </label>
                             <select
                                 id="filterPayment"
                                 className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height:40 }}
                                 value={filterPayment}
                                 onChange={e => setFilterPayment(e.target.value)}
                             >
@@ -437,30 +443,36 @@ const OrderList = () => {
                             </select>
                         </div>
                         {/* Bộ lọc ngày đặt hàng */}
-                        <div className="col-md-3">
+                        <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-secondary mb-1" htmlFor="filterOrderDateFrom">
                                 <i className="fas fa-calendar-alt me-1"></i>Đặt hàng từ
                             </label>
-                            <input
+                            <DatePicker
+                                selected={filterOrderDateFrom}
+                                onChange={date => setFilterOrderDateFrom(date)}
+                                locale={vi}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm border-secondary shadow-sm select-date-custom"
+                                placeholderText="Chọn ngày bắt đầu"
                                 id="filterOrderDateFrom"
-                                type="date"
-                                className="form-control form-control-sm border-secondary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, minWidth: 0 }}
-                                value={filterOrderDateFrom}
-                                onChange={e => setFilterOrderDateFrom(e.target.value)}
+                                autoComplete="off"
+                                isClearable
                             />
                         </div>
-                        <div className="col-md-3">
+                        <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-secondary mb-1" htmlFor="filterOrderDateTo">
                                 <i className="fas fa-calendar-check me-1"></i>Đặt hàng đến
                             </label>
-                            <input
+                            <DatePicker
+                                selected={filterOrderDateTo}
+                                onChange={date => setFilterOrderDateTo(date)}
+                                locale={vi}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm border-secondary shadow-sm select-date-custom"
+                                placeholderText="Chọn ngày kết thúc"
                                 id="filterOrderDateTo"
-                                type="date"
-                                className="form-control form-control-sm border-secondary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, minWidth: 0 }}
-                                value={filterOrderDateTo}
-                                onChange={e => setFilterOrderDateTo(e.target.value)}
+                                autoComplete="off"
+                                isClearable
                             />
                         </div>
                     </div>

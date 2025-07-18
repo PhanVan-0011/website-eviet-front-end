@@ -9,6 +9,10 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { vi } from 'date-fns/locale';
+import moment from 'moment';
 
 const PromotionList = () => {
     const [promotions, setPromotions] = useState([]);
@@ -26,8 +30,8 @@ const PromotionList = () => {
     // Bộ lọc
     const [filterStatus, setFilterStatus] = useState('');
     const [filterType, setFilterType] = useState('');
-    const [filterStartDate, setFilterStartDate] = useState('');
-    const [filterEndDate, setFilterEndDate] = useState('');
+    const [filterStartDate, setFilterStartDate] = useState(null);
+    const [filterEndDate, setFilterEndDate] = useState(null);
 
     // Sort states
     const [sortField, setSortField] = useState('');
@@ -39,8 +43,8 @@ const PromotionList = () => {
         if (searchText) query += `&keyword=${searchText}`;
         if (filterStatus !== '') query += `&is_active=${filterStatus}`;
         if (filterType) query += `&type=${filterType}`;
-        if (filterStartDate) query += `&start_date=${filterStartDate}`;
-        if (filterEndDate) query += `&end_date=${filterEndDate}`;
+        if (filterStartDate) query += `&start_date=${moment(filterStartDate).format('YYYY-MM-DD')}`;
+        if (filterEndDate) query += `&end_date=${moment(filterEndDate).format('YYYY-MM-DD')}`;
 
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/promotions${query}`, 'GET', []).then((response) => {
@@ -136,11 +140,11 @@ const PromotionList = () => {
                 <div>
                     <div>
                         <span className="text-secondary small">Từ: </span>
-                        {row.dates?.start_date ? new Date(row.dates.start_date).toLocaleDateString() : '-'}
+                        {row.dates?.start_date ? moment(row.dates.start_date).format('DD/MM/YYYY') : '-'}
                     </div>
                     <div>
                         <span className="text-secondary small">Đến: </span>
-                        {row.dates?.end_date ? new Date(row.dates.end_date).toLocaleDateString() : '-'}
+                        {row.dates?.end_date ? moment(row.dates.end_date).format('DD/MM/YYYY') : '-'}
                     </div>
                 </div>
             ),
@@ -263,16 +267,15 @@ const PromotionList = () => {
                     </div>
                     {/* Bộ lọc */}
                     <div className="row mb-3 g-2 align-items-end">
-
                         {/* Loại khuyến mãi */}
-                        <div className="col-md-3">
+                        <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-success mb-1" htmlFor="filterType">
                                 <i className="fas fa-percent me-1"></i>Loại khuyến mãi
                             </label>
                             <select
                                 id="filterType"
                                 className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height:40, cursor: 'pointer' }}
                                 value={filterType}
                                 onChange={e => setFilterType(e.target.value)}
                             >
@@ -281,43 +284,15 @@ const PromotionList = () => {
                                 <option value="fixed_amount">Tiền cố định (VNĐ)</option>
                             </select>
                         </div>
-                        {/* Ngày bắt đầu */}
-                        <div className="col-md-3">
-                            <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterStartDate">
-                                <i className="fas fa-calendar-alt me-1"></i>Bắt đầu từ
-                            </label>
-                            <input
-                                id="filterStartDate"
-                                type="date"
-                                className="form-control form-control-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
-                                value={filterStartDate}
-                                onChange={e => setFilterStartDate(e.target.value)}
-                            />
-                        </div>
-                        {/* Ngày kết thúc */}
-                        <div className="col-md-3">
-                            <label className="form-label fw-semibold text-danger mb-1" htmlFor="filterEndDate">
-                                <i className="fas fa-calendar-check me-1"></i>Kết thúc đến
-                            </label>
-                            <input
-                                id="filterEndDate"
-                                type="date"
-                                className="form-control form-control-sm border-danger shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
-                                value={filterEndDate}
-                                onChange={e => setFilterEndDate(e.target.value)}
-                            />
-                        </div>
-                        {/* Trạng thái */}
-                        <div className="col-md-2">
+                             {/* Trạng thái */}
+                             <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
                             <select
                                 id="filterStatus"
                                 className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height:40, cursor: 'pointer' }}
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
@@ -326,6 +301,42 @@ const PromotionList = () => {
                                 <option value="false">Không hiển thị</option>
                             </select>
                         </div>
+                        {/* Ngày bắt đầu */}
+                        <div className="col-2 d-flex flex-column">
+                            <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterStartDate">
+                                <i className="fas fa-calendar-alt me-1"></i>Bắt đầu từ
+                            </label>
+                            <DatePicker
+                                selected={filterStartDate}
+                                onChange={date => setFilterStartDate(date)}
+                                locale={vi}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm border-primary shadow-sm select-date-custom"
+        
+                                placeholderText="Chọn ngày: dd/mm/yyyy"
+                                id="filterStartDate"
+                                autoComplete="off"
+                                isClearable
+                            />
+                        </div>
+                        {/* Ngày kết thúc */}
+                        <div className="col-2 d-flex flex-column">
+                            <label className="form-label fw-semibold text-danger mb-1" htmlFor="filterEndDate">
+                                <i className="fas fa-calendar-check me-1"></i>Kết thúc đến
+                            </label>
+                            <DatePicker
+                                selected={filterEndDate}
+                                onChange={date => setFilterEndDate(date)}
+                                locale={vi}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm border-danger shadow-sm select-date-custom"
+                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height:40 }}
+                                placeholderText="Chọn ngày: dd/mm/yyyy"
+                                id="filterEndDate"
+                                isClearable
+                            />
+                        </div>
+                   
                     </div>
                     <DataTables
                         name="Danh sách khuyến mãi"

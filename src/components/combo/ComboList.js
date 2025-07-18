@@ -8,6 +8,10 @@ import { Modal, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import ImageList from '../common/ImageList';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { vi } from 'date-fns/locale';
+import moment from 'moment';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const ComboList = () => {
@@ -25,10 +29,10 @@ const ComboList = () => {
 
     // Bộ lọc
     const [filterStatus, setFilterStatus] = useState('');
-    const [filterStartDateFrom, setFilterStartDateFrom] = useState('');
-    const [filterStartDateTo, setFilterStartDateTo] = useState('');
-    const [filterEndDateFrom, setFilterEndDateFrom] = useState('');
-    const [filterEndDateTo, setFilterEndDateTo] = useState('');
+    const [filterStartDateFrom, setFilterStartDateFrom] = useState(null);
+    const [filterStartDateTo, setFilterStartDateTo] = useState(null);
+    const [filterEndDateFrom, setFilterEndDateFrom] = useState(null);
+    const [filterEndDateTo, setFilterEndDateTo] = useState(null);
     const [filterPriceRange, setFilterPriceRange] = useState('');
 
     // Sort states
@@ -39,10 +43,10 @@ const ComboList = () => {
     useEffect(() => {
         let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
         if (filterStatus !== '') query += `&is_active=${filterStatus}`;
-        if (filterStartDateFrom) query += `&start_date_from=${filterStartDateFrom}`;
-        if (filterStartDateTo) query += `&start_date_to=${filterStartDateTo}`;
-        if (filterEndDateFrom) query += `&end_date_from=${filterEndDateFrom}`;
-        if (filterEndDateTo) query += `&end_date_to=${filterEndDateTo}`;
+        if (filterStartDateFrom) query += `&start_date_from=${moment(filterStartDateFrom).format('YYYY-MM-DD')}`;
+        if (filterStartDateTo) query += `&start_date_to=${moment(filterStartDateTo).format('YYYY-MM-DD')}`;
+        if (filterEndDateFrom) query += `&end_date_from=${moment(filterEndDateFrom).format('YYYY-MM-DD')}`;
+        if (filterEndDateTo) query += `&end_date_to=${moment(filterEndDateTo).format('YYYY-MM-DD')}`;
         if (filterPriceRange) {
             const [min, max] = filterPriceRange.split('-');
             if (min) query += `&min_price=${min}`;
@@ -165,12 +169,12 @@ const ComboList = () => {
         },
         {
             title: "Ngày bắt đầu",
-            element: row => row.start_date ? row.start_date.slice(0, 10) : '',
+            element: row => row.start_date ? moment(row.start_date).format('DD/MM/YYYY') : '',
             width: "10%"
         },
         {
             title: "Ngày kết thúc",
-            element: row => row.end_date ? row.end_date.slice(0, 10) : '',
+            element: row => row.end_date ? moment(row.end_date).format('DD/MM/YYYY') : '',
             width: "10%"
         },
         {
@@ -273,9 +277,9 @@ const ComboList = () => {
                         )}
                     </div>
                     {/* Bộ lọc */}
-                    <div className="row mb-3 g-2 align-items-end">
+                    <div className="row mb-3 g-1 align-items-end">
                         {/* Trạng thái */}
-                        <div className="col-md-2">
+                        <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
@@ -292,7 +296,7 @@ const ComboList = () => {
                             </select>
                         </div>
                         {/* Giá tối thiểu */}
-                        <div className="col-md-2">
+                        <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-success mb-1" htmlFor="filterPriceRange">
                                 <i className="fas fa-money-bill-wave me-1"></i>Khoảng giá
                             </label>
@@ -314,56 +318,68 @@ const ComboList = () => {
                             </select>
                         </div>
                         {/* Khoảng ngày bắt đầu và kết thúc chia làm 4 cột riêng biệt */}
-                        <div className="col-md-2">
+                        <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-primary mb-1">
                                 <i className="fas fa-calendar-alt me-1"></i>Bắt đầu từ
                             </label>
-                            <input
+                            <DatePicker
+                                selected={filterStartDateFrom}
+                                onChange={date => setFilterStartDateFrom(date)}
+                                locale={vi}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm border-primary shadow-sm select-date-custom"
+
+                                placeholderText="Chọn ngày: dd/mm/yyyy"
                                 id="filterStartDateFrom"
-                                type="date"
-                                className="form-control form-control-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
-                                value={filterStartDateFrom}
-                                onChange={e => setFilterStartDateFrom(e.target.value)}
+                                isClearable
                             />
                         </div>
-                        <div className="col-md-2">
+                        <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-primary mb-1">
                                 <i className="fas fa-calendar-alt me-1"></i>Bắt đầu đến
                             </label>
-                            <input
+                            <DatePicker
+                                selected={filterStartDateTo}
+                                onChange={date => setFilterStartDateTo(date)}
+                                locale={vi}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm border-primary shadow-sm select-date-custom"
+
+                                placeholderText="Chọn ngày: dd/mm/yyyy"
                                 id="filterStartDateTo"
-                                type="date"
-                                className="form-control form-control-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
-                                value={filterStartDateTo}
-                                onChange={e => setFilterStartDateTo(e.target.value)}
+                                isClearable
                             />
                         </div>
-                        <div className="col-md-2">
+                        <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-danger mb-1">
                                 <i className="fas fa-calendar-check me-1"></i>Kết thúc từ
                             </label>
-                            <input
+                            <DatePicker
+                                selected={filterEndDateFrom}
+                                onChange={date => setFilterEndDateFrom(date)}
+                                locale={vi}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm border-danger shadow-sm select-date-custom"
+
+                                placeholderText="Chọn ngày: dd/mm/yyyy"
                                 id="filterEndDateFrom"
-                                type="date"
-                                className="form-control form-control-sm border-danger shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
-                                value={filterEndDateFrom}
-                                onChange={e => setFilterEndDateFrom(e.target.value)}
+                                isClearable
                             />
                         </div>
-                        <div className="col-md-2">
+                        <div className="col-2 d-flex flex-column">
                             <label className="form-label fw-semibold text-danger mb-1">
                                 <i className="fas fa-calendar-check me-1"></i>Kết thúc đến
                             </label>
-                            <input
+                            <DatePicker
+                                selected={filterEndDateTo}
+                                onChange={date => setFilterEndDateTo(date)}
+                                locale={vi}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm border-danger shadow-sm select-date-custom"
+                                
+                                placeholderText="Chọn ngày: dd/mm/yyyy"
                                 id="filterEndDateTo"
-                                type="date"
-                                className="form-control form-control-sm border-danger shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40 }}
-                                value={filterEndDateTo}
-                                onChange={e => setFilterEndDateTo(e.target.value)}
+                                isClearable
                             />
                         </div>
                     </div>

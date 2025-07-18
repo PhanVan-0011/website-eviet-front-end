@@ -78,95 +78,46 @@ const PostUpdate = () => {
         // eslint-disable-next-line
     }, [oldImages, imageFiles]);
 
-    // Xử lý chọn nhiều ảnh mới
+    // Xử lý chọn ảnh (chỉ 1 ảnh mới)
     const onChangeImages = (e) => {
-        const newFiles = Array.from(e.target.files);
-        const validFiles = [];
-        let hasLargeFile = false;
-        newFiles.forEach(file => {
-            if (file.size > 2 * 1024 * 1024) {
-                hasLargeFile = true;
-            } else {
-                validFiles.push(file);
-            }
-        });
-        if (hasLargeFile) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
             toast.error('Ảnh phải nhỏ hơn 2MB!', toastErrorConfig);
-        }
-        if (validFiles.length === 0) {
             e.target.value = "";
             return;
         }
-        // Nối file mới vào sau ảnh cũ và ảnh mới đã có
-        let combinedFiles = [...imageFiles, ...validFiles];
-        // Loại bỏ file trùng tên và size
-        combinedFiles = combinedFiles.filter(
-            (file, idx, arr) => arr.findIndex(f => f.name === file.name && f.size === file.size) === idx
-        );
-        // Chỉ cho phép tối đa 5 ảnh (bao gồm cả ảnh cũ và mới)
-        const maxFiles = 5 - oldImages.length;
-        if (combinedFiles.length > maxFiles) {
-            toast.error('Chỉ được chọn tối đa 5 ảnh!', toastErrorConfig);
-            combinedFiles = combinedFiles.slice(0, maxFiles);
-        }
-        setImageFiles(combinedFiles);
-        setValue('imageFiles', combinedFiles, { shouldValidate: true });
-        // Tạo preview mới: ảnh cũ (link) + ảnh mới (file)
+        setImageFiles([file]);
+        setValue('imageFiles', [file], { shouldValidate: true });
         const previews = [
             ...oldImages.map(img => urlImage + (img.thumb_url || img.main_url)),
-            ...combinedFiles.map(file => URL.createObjectURL(file))
+            URL.createObjectURL(file)
         ];
         setImagePreviews(previews);
-        if (featuredImageIndex >= previews.length) setFeaturedImageIndex(0);
+        setFeaturedImageIndex(0);
         e.target.value = "";
-        trigger('imageFiles'); // Trigger validate react-hook-form
+        trigger('imageFiles');
     };
 
-    // Hàm xóa ảnh
+    // Hàm xóa ảnh (chỉ 1 ảnh)
     const handleRemoveImage = (idx) => {
         if (idx < oldImages.length) {
             // Xóa ảnh cũ
             const removed = oldImages[idx];
             setRemovedOldImageIds([...removedOldImageIds, removed.id]);
-            const newOld = oldImages.filter((_, i) => i !== idx);
-            setOldImages(newOld);
-            // Cập nhật preview và files
-            const previews = [
-                ...newOld.map(img => urlImage + (img.thumb_url || img.main_url)),
-                ...imageFiles.map(file => URL.createObjectURL(file))
-            ];
-            setImagePreviews(previews);
-            setValue('imageFiles', imageFiles, { shouldValidate: true });
-            if (featuredImageIndex === idx || featuredImageIndex >= previews.length) {
-                setFeaturedImageIndex(0);
-            } else if (featuredImageIndex > idx) {
-                setFeaturedImageIndex(featuredImageIndex - 1);
-            }
-            // Nếu không còn ảnh nào thì trigger validate
-            if (newOld.length + imageFiles.length === 0) {
-                trigger('imageFiles');
-            }
+            setOldImages([]);
+            setImageFiles([]);
+            setImagePreviews([]);
+            setValue('imageFiles', [], { shouldValidate: true });
+            setFeaturedImageIndex(0);
+            trigger('imageFiles');
         } else {
             // Xóa ảnh mới
-            const newIdx = idx - oldImages.length;
-            const newFiles = imageFiles.filter((_, i) => i !== newIdx);
-            setImageFiles(newFiles);
-            // Cập nhật preview
-            const previews = [
-                ...oldImages.map(img => urlImage + (img.thumb_url || img.main_url)),
-                ...newFiles.map(file => URL.createObjectURL(file))
-            ];
-            setImagePreviews(previews);
-            setValue('imageFiles', newFiles, { shouldValidate: true });
-            if (featuredImageIndex === idx || featuredImageIndex >= previews.length) {
-                setFeaturedImageIndex(0);
-            } else if (featuredImageIndex > idx) {
-                setFeaturedImageIndex(featuredImageIndex - 1);
-            }
-            // Nếu không còn ảnh nào thì trigger validate
-            if (oldImages.length + newFiles.length === 0) {
-                trigger('imageFiles');
-            }
+            setImageFiles([]);
+            setImagePreviews([]);
+            setValue('imageFiles', [], { shouldValidate: true });
+            setFeaturedImageIndex(0);
+            trigger('imageFiles');
         }
     };
 
@@ -185,7 +136,6 @@ const PostUpdate = () => {
 
     // Submit
     const handleSubmitForm = async (data) => {
-        // Trigger validate ảnh trước khi submit
         const valid = await trigger('imageFiles');
         if (!valid) return;
         setIsSubmitting(true);
@@ -196,14 +146,12 @@ const PostUpdate = () => {
             formData.append('content', data.content || '');
             formData.append('status', data.status);
             (selectedCategories.length > 0 ? selectedCategories : []).forEach(id => formData.append('category_ids[]', id));
-            // Gửi file ảnh thật sự
-            imageFiles.forEach(file => formData.append('image_url[]', file));
-            // Gửi deleted_image_ids[]
+            imageFiles.forEach((file) => {
+                formData.append('image_url[]', file);
+            });
             removedOldImageIds.forEach(id => formData.append('deleted_image_ids[]', id));
-            // Gửi featured_image_index (luôn truyền lên, không cần điều kiện)
-            if (imageFiles.length > 0) {
-
-                formData.append('featured_image_index', featuredImageIndex);
+            if (imageFiles.length > 0 || oldImages.length > 0) {
+                formData.append('featured_image_index', 0);
             }
             const response = await requestApi(
                 `api/admin/posts/${id}`,
@@ -276,98 +224,15 @@ const PostUpdate = () => {
                                         </div>
                                     </div>
                                     <div className="row mb-3">
-                                        <div className="col-md-6 px-3">
-                                            <div className="mb-3">
-                                                <div className="form-label fw-semibold">
-                                                    Hình ảnh bài viết <span style={{ color: 'red' }}>*</span>
-                                                </div>
-                                                <div className="row g-3">
-                                                    {[0, 1, 2, 3, 4].map(idx => (
-                                                        <div key={idx} className="col-3 p-2 d-flex flex-column align-items-center">
-                                                            <div
-                                                                className={`w-100 border border-2 ${featuredImageIndex === idx && imagePreviews[idx] ? 'border-primary' : 'border-secondary'} border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center`}
-                                                                style={{ aspectRatio: '1/1', minHeight: 0, height: 'auto', maxWidth: '100%' }}
-                                                            >
-                                                                {imagePreviews[idx] ? (
-                                                                    <>
-                                                                        <img
-                                                                            src={imagePreviews[idx]}
-                                                                            alt={`Preview ${idx}`}
-                                                                            className="w-100 h-100 rounded position-absolute top-0 start-0"
-                                                                            style={{ objectFit: 'fill', aspectRatio: '1/1' }}
-                                                                            onClick={e => { e.stopPropagation(); setFeaturedImageIndex(idx); }}
-                                                                        />
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 m-1 d-flex align-items-center justify-content-center no-hover"
-                                                                            style={{ zIndex: 2, width: 24, height: 24, padding: 0, background: '#fff' }}
-                                                                            aria-label="Xóa ảnh"
-                                                                            onClick={e => { e.stopPropagation(); handleRemoveImage(idx); }}
-                                                                        >
-                                                                            <i className="fas fa-times"></i>
-                                                                        </button>
-                                                                    </>
-                                                                ) : (
-                                                                    <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
-                                                                        <i className="fas fa-image fs-1 text-secondary"></i>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            {imagePreviews[idx] && (
-                                                                <div className="form-check mt-2">
-                                                                    <input
-                                                                        type="radio"
-                                                                        name="featuredImage"
-                                                                        checked={featuredImageIndex === idx}
-                                                                        onChange={() => setFeaturedImageIndex(idx)}
-                                                                        className="form-check-input"
-                                                                        id={`featuredImage${idx}`}
-                                                                    />
-                                                                    <label className="form-check-label" htmlFor={`featuredImage${idx}`}>Ảnh đại diện</label>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                                <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
-                                                    <label htmlFor="inputImages" className="form-label btn btn-secondary mb-0">
-                                                        <i className="fas fa-upload"></i> Thêm ảnh bài viết
-                                                    </label>
-                                                    <div className="d-flex flex-column gap-1">
-                                                        <span className="text-muted small">
-                                                            Chọn tối đa 5 ảnh, định dạng: jpg, png...
-                                                        </span>
-                                                        <span className="text-muted small">
-                                                            <b>Giữ Ctrl hoặc Shift để chọn nhiều ảnh cùng lúc.</b>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <input
-                                                    className="form-control"
-                                                    id="inputImages"
-                                                    type="file"
-                                                    accept="image/*"
-                                                    multiple
-                                                    style={{ display: 'none' }}
-                                                    onChange={onChangeImages}
-                                                    ref={input => (window.imageInput = input)}
-                                                />
-                                                <input
-                                                    type="hidden"
-                                                    {...register('imageFiles')}
-                                                />
-                                                {isSubmitted && errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
-                                            </div>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <div className="mb-3">
+                                    <div className="col-md-6">
+                                            <div className="mb-3 px-3">
                                                 <label className="form-label fw-semibold">
                                                     Danh mục <span style={{ color: 'red' }}>*</span>
                                                 </label>
                                                 <div
                                                     className="row"
                                                     style={{
-                                                        maxHeight: 220,
+                                                        maxHeight: 248,
                                                         overflowY: 'auto',
                                                         border: '1px solid #e0e0e0',
                                                         borderRadius: 4,
@@ -394,6 +259,70 @@ const PostUpdate = () => {
                                                 {errors.category_ids && <div className="text-danger">{errors.category_ids.message}</div>}
                                             </div>
                                         </div>
+                                        <div className="col-md-6 px-3">
+                                            <div className="mb-3">
+                                                <div className="form-label fw-semibold">
+                                                    Hình ảnh bài viết 
+                                                </div>
+                                                <div className="row g-3">
+                                                    <div className="col-3 p-2 d-flex flex-column align-items-center">
+                                                        <div
+                                                            className={`w-100 border border-2 ${imagePreviews[0] ? 'border-primary' : 'border-secondary'} border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center`}
+                                                            style={{ aspectRatio: '1/1', minHeight: 0, height: 'auto', maxWidth: '100%' }}
+                                                        >
+                                                            {imagePreviews[0] ? (
+                                                                <>
+                                                                    <img
+                                                                        src={imagePreviews[0]}
+                                                                        alt={`Preview`}
+                                                                        className="w-100 h-100 rounded position-absolute top-0 start-0"
+                                                                        style={{ objectFit: 'fill', aspectRatio: '1/1' }}
+                                                                    />
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 m-1 d-flex align-items-center justify-content-center no-hover"
+                                                                        style={{ zIndex: 2, width: 24, height: 24, padding: 0, background: '#fff' }}
+                                                                        aria-label="Xóa ảnh"
+                                                                        onClick={e => { e.stopPropagation(); handleRemoveImage(0); }}
+                                                                    >
+                                                                        <i className="fas fa-times"></i>
+                                                                    </button>
+                                                                </>
+                                                            ) : (
+                                                                <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                                                    <i className="fas fa-image fs-1 text-secondary"></i>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
+                                                    <label htmlFor="inputImages" className="form-label btn btn-secondary mb-0">
+                                                        <i className="fas fa-upload"></i> Thêm ảnh bài viết
+                                                    </label>
+                                                    <div className="d-flex flex-column gap-1">
+                                                        <span className="text-muted small">
+                                                            Chỉ chọn 1 ảnh, định dạng: jpg, png...
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <input
+                                                    className="form-control"
+                                                    id="inputImages"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    style={{ display: 'none' }}
+                                                    onChange={onChangeImages}
+                                                    ref={input => (window.imageInput = input)}
+                                                />
+                                                <input
+                                                    type="hidden"
+                                                    {...register('imageFiles')}
+                                                />
+                                                {isSubmitted && errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
+                                            </div>
+                                        </div>
+                                        
                                     </div>
                                     <div className="row mb-3">
                                         <div className="col-md-12">

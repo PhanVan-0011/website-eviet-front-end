@@ -279,7 +279,7 @@ const ProductAdd = () => {
                                     </div>
                                     
                                     <div className="row mb-3">
-                                        <div className="col-md-6 px-3">
+                                        <div className="col-md-6">
                                             <div className="mb-3">
                                                 <div className="form-label fw-semibold">
                                                     Hình ảnh sản phẩm 
@@ -363,8 +363,8 @@ const ProductAdd = () => {
                                                 {errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
                                             </div>
                                         </div>
-                                        <div className="col-md-6 px-3">
-                                            <div className="mb-3">
+                                        <div className="col-md-6 input-file">
+                                            <div className="mb-3 px-3">
                                                 <label className="form-label fw-semibold">
                                                     Danh mục <span style={{ color: 'red' }}>*</span>
                                                 </label>

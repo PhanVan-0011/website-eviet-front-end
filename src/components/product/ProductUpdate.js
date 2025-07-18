@@ -148,7 +148,12 @@ const ProductUpdate = () => {
             ...combinedFiles.map(file => URL.createObjectURL(file))
         ];
         setImagePreviews(previews);
-        if (featuredImageIndex >= previews.length) setFeaturedImageIndex(0);
+        // Đảm bảo featuredImageIndex hợp lệ
+        if (previews.length === 0) {
+            setFeaturedImageIndex(-1);
+        } else if (featuredImageIndex >= previews.length) {
+            setFeaturedImageIndex(0);
+        }
         e.target.value = "";
         trigger('imageFiles');
     };
@@ -168,7 +173,10 @@ const ProductUpdate = () => {
             ];
             setImagePreviews(previews);
             setValue('imageFiles', imageFiles, { shouldValidate: true });
-            if (featuredImageIndex === idx || featuredImageIndex >= previews.length) {
+            // Đảm bảo featuredImageIndex hợp lệ
+            if (previews.length === 0) {
+                setFeaturedImageIndex(-1);
+            } else if (featuredImageIndex === idx || featuredImageIndex >= previews.length) {
                 setFeaturedImageIndex(0);
             } else if (featuredImageIndex > idx) {
                 setFeaturedImageIndex(featuredImageIndex - 1);
@@ -186,7 +194,10 @@ const ProductUpdate = () => {
             ];
             setImagePreviews(previews);
             setValue('imageFiles', newFiles, { shouldValidate: true });
-            if (featuredImageIndex === idx || featuredImageIndex >= previews.length) {
+            // Đảm bảo featuredImageIndex hợp lệ
+            if (previews.length === 0) {
+                setFeaturedImageIndex(-1);
+            } else if (featuredImageIndex === idx || featuredImageIndex >= previews.length) {
                 setFeaturedImageIndex(0);
             } else if (featuredImageIndex > idx) {
                 setFeaturedImageIndex(featuredImageIndex - 1);
@@ -239,12 +250,11 @@ const ProductUpdate = () => {
             imageFiles.forEach(file => formData.append('image_url[]', file));
             // Gửi deleted_image_ids[]
             removedOldImageIds.forEach(id => formData.append('deleted_image_ids[]', id));
-            if (imageFiles.length > 0) {
-
+            // Chỉ gửi featured_image_index nếu còn ảnh
+            if (featuredImageIndex >= 0) {
                 formData.append('featured_image_index', featuredImageIndex);
             }
-
-           
+            
 
             const response = await requestApi(
                 `api/admin/products/${params.id}`,
@@ -444,6 +454,7 @@ const ProductUpdate = () => {
                                                                         onChange={() => setFeaturedImageIndex(idx)}
                                                                         className="form-check-input"
                                                                         id={`featuredImage${idx}`}
+                                                                        disabled={imagePreviews.length === 0}
                                                                     />
                                                                     <label className="form-check-label" htmlFor={`featuredImage${idx}`}>Ảnh đại diện</label>
                                                                 </div>
@@ -484,14 +495,14 @@ const ProductUpdate = () => {
                                             </div>
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="mb-3">
+                                            <div className="mb-3 px-3">
                                                 <label className="form-label fw-semibold">
                                                     Danh mục <span style={{ color: 'red' }}>*</span>
                                                 </label>
                                                 <div
                                                     className="row"
                                                     style={{
-                                                        maxHeight: 220,
+                                                        maxHeight: 245,
                                                         overflowY: 'auto',
                                                         border: '1px solid #e0e0e0',
                                                         borderRadius: 4,

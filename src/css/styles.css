@@ -11266,3 +11266,10 @@ body {
   border-color: #dc3545;
   box-shadow: none;
 }
+
+.select-date-custom{
+  background-color: #f8f9fa;
+  font-weight:  500;
+  height: 40px !important;
+  width: 100% !important;
+}
