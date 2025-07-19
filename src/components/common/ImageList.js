@@ -3,7 +3,7 @@ import React from 'react';
 const ImageList = ({ src, alt = "Không thấy ảnh", style = {}, icon = false, ...props }) => (
     <div
         style={{
-            width: '90%',
+            width: '100%',
             height: '120px',
             borderRadius: 10,
             overflow: 'hidden',

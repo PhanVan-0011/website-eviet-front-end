@@ -68,8 +68,6 @@ const ComboList = () => {
         filterStatus,
 
         filterStartDateFrom,
-        filterStartDateTo,
-        filterEndDateFrom,
         filterEndDateTo,
         filterPriceRange,
         refresh,

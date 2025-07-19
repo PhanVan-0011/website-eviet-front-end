@@ -43,7 +43,7 @@ const RuleList = () => {
                 : '',
             width: '40%'
         },
-        { title: "Số lượng user", element: row => row.users_count || 0, width: '10%' },
+        { title: "Số người dùng", element: row => row.users_count || 0, width: '10%' },
         { title: "Ngày tạo", element: row => formatDate(row.created_at), width: '10%' },
         { title: "Ngày cập nhật", element: row => formatDate(row.updated_at), width: '10%' },
         {

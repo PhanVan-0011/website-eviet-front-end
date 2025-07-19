@@ -274,7 +274,7 @@ const PostList = () => {
                                 ))}
                             </select>
                         </div>
-                        <div className="col-md-2">
+                        <div className="col-md-3">
                             <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
