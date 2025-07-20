@@ -403,7 +403,7 @@ const OrderList = () => {
                     {/* Bộ lọc */}
                     <div className="row mb-3 g-2 align-items-end">
                         {/* Trạng thái */}
-                        <div className="col-2 d-flex flex-column">
+                        <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
@@ -423,7 +423,7 @@ const OrderList = () => {
                             </select>
                         </div>
                         {/* Phương thức thanh toán động */}
-                        <div className="col-2 d-flex flex-column">
+                        <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-success mb-1" htmlFor="filterPayment">
                                 <i className="fas fa-credit-card me-1"></i>Phương thức thanh toán
                             </label>
@@ -443,7 +443,7 @@ const OrderList = () => {
                             </select>
                         </div>
                         {/* Bộ lọc ngày đặt hàng */}
-                        <div className="col-2 d-flex flex-column">
+                        <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-secondary mb-1" htmlFor="filterOrderDateFrom">
                                 <i className="fas fa-calendar-alt me-1"></i>Đặt hàng từ
                             </label>
@@ -459,7 +459,7 @@ const OrderList = () => {
                                 isClearable
                             />
                         </div>
-                        <div className="col-2 d-flex flex-column">
+                        <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-secondary mb-1" htmlFor="filterOrderDateTo">
                                 <i className="fas fa-calendar-check me-1"></i>Đặt hàng đến
                             </label>

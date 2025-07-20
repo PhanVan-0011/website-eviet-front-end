@@ -84,7 +84,9 @@ const Dashboard = () => {
     } : null;
 
     return (
-        <div className="container-fluid px-4">
+    <div id="layoutSidenav_content">
+       <main>
+         <div className="container-fluid px-4">
             <h3 className="mt-4 mb-4"></h3>
             <div className="row mb-4">
                                 {/* Doanh thu tháng */}
@@ -298,7 +300,10 @@ const Dashboard = () => {
                 </div>
             </div>
         </div>
+       </main>
+       </div>
     );
+   
 };
 
 export default Dashboard;

@@ -277,7 +277,7 @@ const ComboList = () => {
                     {/* Bộ lọc */}
                     <div className="row mb-3 g-1 align-items-end">
                         {/* Trạng thái */}
-                        <div className="col-2 d-flex flex-column">
+                        <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
@@ -294,7 +294,7 @@ const ComboList = () => {
                             </select>
                         </div>
                         {/* Giá tối thiểu */}
-                        <div className="col-2 d-flex flex-column">
+                        <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-success mb-1" htmlFor="filterPriceRange">
                                 <i className="fas fa-money-bill-wave me-1"></i>Khoảng giá
                             </label>
@@ -316,7 +316,7 @@ const ComboList = () => {
                             </select>
                         </div>
                         {/* Khoảng ngày bắt đầu và kết thúc chia làm 4 cột riêng biệt */}
-                        <div className="col-2 d-flex flex-column">
+                        <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-primary mb-1">
                                 <i className="fas fa-calendar-alt me-1"></i>Bắt đầu từ
                             </label>
@@ -332,39 +332,8 @@ const ComboList = () => {
                                 isClearable
                             />
                         </div>
-                        <div className="col-2 d-flex flex-column">
-                            <label className="form-label fw-semibold text-primary mb-1">
-                                <i className="fas fa-calendar-alt me-1"></i>Bắt đầu đến
-                            </label>
-                            <DatePicker
-                                selected={filterStartDateTo}
-                                onChange={date => setFilterStartDateTo(date)}
-                                locale={vi}
-                                dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm border-primary shadow-sm select-date-custom"
-
-                                placeholderText="Chọn ngày: dd/mm/yyyy"
-                                id="filterStartDateTo"
-                                isClearable
-                            />
-                        </div>
-                        <div className="col-2 d-flex flex-column">
-                            <label className="form-label fw-semibold text-danger mb-1">
-                                <i className="fas fa-calendar-check me-1"></i>Kết thúc từ
-                            </label>
-                            <DatePicker
-                                selected={filterEndDateFrom}
-                                onChange={date => setFilterEndDateFrom(date)}
-                                locale={vi}
-                                dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm border-danger shadow-sm select-date-custom"
-
-                                placeholderText="Chọn ngày: dd/mm/yyyy"
-                                id="filterEndDateFrom"
-                                isClearable
-                            />
-                        </div>
-                        <div className="col-2 d-flex flex-column">
+            
+                        <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-danger mb-1">
                                 <i className="fas fa-calendar-check me-1"></i>Kết thúc đến
                             </label>

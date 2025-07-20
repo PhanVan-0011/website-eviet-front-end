@@ -268,7 +268,7 @@ const PromotionList = () => {
                     {/* Bộ lọc */}
                     <div className="row mb-3 g-2 align-items-end">
                         {/* Loại khuyến mãi */}
-                        <div className="col-2 d-flex flex-column">
+                        <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-success mb-1" htmlFor="filterType">
                                 <i className="fas fa-percent me-1"></i>Loại khuyến mãi
                             </label>
@@ -285,7 +285,7 @@ const PromotionList = () => {
                             </select>
                         </div>
                              {/* Trạng thái */}
-                             <div className="col-2 d-flex flex-column">
+                             <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
@@ -302,7 +302,7 @@ const PromotionList = () => {
                             </select>
                         </div>
                         {/* Ngày bắt đầu */}
-                        <div className="col-2 d-flex flex-column">
+                        <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterStartDate">
                                 <i className="fas fa-calendar-alt me-1"></i>Bắt đầu từ
                             </label>
@@ -320,7 +320,7 @@ const PromotionList = () => {
                             />
                         </div>
                         {/* Ngày kết thúc */}
-                        <div className="col-2 d-flex flex-column">
+                        <div className="col-3 d-flex flex-column">
                             <label className="form-label fw-semibold text-danger mb-1" htmlFor="filterEndDate">
                                 <i className="fas fa-calendar-check me-1"></i>Kết thúc đến
                             </label>

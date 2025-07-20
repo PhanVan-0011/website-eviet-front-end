@@ -1,9 +1,13 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
+import { initSidebarToggle } from '../js/scripts';
+
 
 const Header = () => {
     const navigate = useNavigate();
-
+    useEffect(() => {
+        initSidebarToggle();
+    }, []);
     const handleLogout = () => {
         // Xóa token khỏi localStorage
         localStorage.removeItem('user');
