@@ -237,9 +237,9 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="row">
-                <div className="col-md-6">
-                    <div className="card mb-3">
+            <div className="row d-flex align-items-stretch">
+                <div className="col-md-6 d-flex">
+                    <div className="card mb-3 w-100">
                         <div className="card-header"><i className="fas fa-fire me-2"></i> Top sản phẩm bán chạy</div>
                         <div className="card-body p-0">
                             <table className="table mb-0">
@@ -267,8 +267,8 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-md-6">
-                    <div className="card mb-3">
+                <div className="col-md-6 d-flex">
+                    <div className="card mb-3 w-100">
                         <div className="card-header"><i className="fas fa-tasks me-2"></i> Đơn hàng cần xử lý</div>
                         <div className="card-body p-0">
                             <table className="table mb-0">
