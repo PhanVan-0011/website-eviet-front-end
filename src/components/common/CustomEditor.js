@@ -1,5 +1,6 @@
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import coreTranslations from 'ckeditor5/translations/vi.js';
+import CustomUploadAdapter from '../../helpers/CustomUploadAdapter';
 import {  ClassicEditor, 
     Essentials, 
     Paragraph, 
@@ -31,6 +32,7 @@ function CustomEditor({data, onReady, onChange, trigger}) {
             editor={ ClassicEditor }
             data={data}
             config={ {
+                extraPlugins: [MyCustomUploadAdapterPlugin],
                  language: {
                       ui: 'vi',
                       content: 'vi'
@@ -93,6 +95,12 @@ function CustomEditor({data, onReady, onChange, trigger}) {
             
         />
     );
+}
+// Plugin để inject custom upload adapter
+function MyCustomUploadAdapterPlugin(editor) {
+    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+        return new CustomUploadAdapter(loader);
+    };
 }
 
 export default CustomEditor;
