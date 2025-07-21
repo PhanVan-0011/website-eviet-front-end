@@ -8173,7 +8173,7 @@ textarea.form-control-lg {
 
 .bg-light {
   --bs-bg-opacity: 1;
-  background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;
+  /*background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;*/
 }
 
 .bg-dark {
@@ -10964,6 +10964,10 @@ body {
 .sb-topnav .navbar-brand {
   width: 225px;
   margin: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
 }
 .sb-topnav.navbar-dark #sidebarToggle {
   color: rgba(255, 255, 255, 0.5);
@@ -11023,7 +11027,7 @@ body {
   color: rgba(255, 255, 255, 0.5);
 }
 .sb-sidenav-dark .sb-sidenav-menu .sb-sidenav-menu-heading {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.5);
 }
 .sb-sidenav-dark .sb-sidenav-menu .nav-link {
   color: #fff;
@@ -11284,18 +11288,30 @@ body {
 }
 
 .nav-link:hover  {
-  background-color:#0d6efd; 
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: #fff;
 }
 
 .nav-link.active {
-  background-color: #0d6efd; 
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: #fff;
   
 }
 .sb-sidenav-dark .nav-link:hover {
-  background-color: rgba(13, 110, 253, 0.8);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: #fff;
   border-left: 4px solid #ffffff50;
   padding-left: 1.2rem;
+}
+.brand-link:focus,
+.brand-link:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.gradient-logo-text {
+  background: linear-gradient(to right, #e50914, #f47920, #f9b233) !important; /* đỏ → cam → vàng */
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: bold ;
+  font-size: 1.5rem;
 }

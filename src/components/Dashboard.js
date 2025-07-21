@@ -102,7 +102,7 @@ const Dashboard = () => {
                                     : 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_revenue?.change !== undefined && (
-                                <span className={` d-block mb-2 ${dashboardData.data.kpis.total_revenue.change < 0 ? 'text-danger' : 'text-success'}`}
+                                <span className={` d-block mb-2 ${dashboardData.data.kpis.total_revenue.change < 0 }`}
                                     >
                                     <i className={`fas ${dashboardData.data.kpis.total_revenue.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
                                     
@@ -128,11 +128,11 @@ const Dashboard = () => {
                             <h5 className="card-title">
                                 <i className="fas fa-shopping-cart me-2"></i> Tổng đơn hàng
                             </h5>
-                            <p className="card-text fs-2">
+                            <p className="card-text fs-3">
                                 {dashboardData?.data?.kpis?.total_orders?.value ?? 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_orders?.change !== undefined && (
-                                <span className={`d-block mb-2 ${dashboardData.data.kpis.total_orders.change < 0 ?'text-danger' : 'text-success'}`}>
+                                <span className={`d-block mb-2 ${dashboardData.data.kpis.total_orders.change < 0 }`}>
                                     <i className={`fas ${dashboardData.data.kpis.total_orders.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
                                     {`${dashboardData.data.kpis.total_orders.change > 0 ? '+' : ''}${dashboardData.data.kpis.total_orders.change}% so với tháng trước`}
                                 </span>
@@ -188,7 +188,7 @@ const Dashboard = () => {
                                 {dashboardData?.data?.kpis?.total_users?.value ?? 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_users?.change !== undefined && (
-                                <span className={`d-block mb-2 ${dashboardData.data.kpis.total_users.change < 0 ? 'text-danger' : 'text-sucess'}`}>
+                                <span className={`d-block mb-2 ${dashboardData.data.kpis.total_users.change < 0 }`}>
                                     <i className={`fas ${dashboardData.data.kpis.total_users.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
                                     {`${dashboardData.data.kpis.total_users.change > 0 ? '+' : ''}${dashboardData.data.kpis.total_users.change}% so với tháng trước`}
                                 </span>
