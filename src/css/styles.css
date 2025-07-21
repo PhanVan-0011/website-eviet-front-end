@@ -11023,13 +11023,13 @@ body {
   color: rgba(255, 255, 255, 0.5);
 }
 .sb-sidenav-dark .sb-sidenav-menu .sb-sidenav-menu-heading {
-  color: rgba(255, 255, 255, 0.25);
+  color: #fff;
 }
 .sb-sidenav-dark .sb-sidenav-menu .nav-link {
-  color: rgba(255, 255, 255, 0.5);
+  color: #fff;
 }
 .sb-sidenav-dark .sb-sidenav-menu .nav-link .sb-nav-link-icon {
-  color: rgba(255, 255, 255, 0.25);
+  color: #fff;
 }
 .sb-sidenav-dark .sb-sidenav-menu .nav-link .sb-sidenav-collapse-arrow {
   color: rgba(255, 255, 255, 0.25);
@@ -11241,6 +11241,8 @@ body {
   font-size: 0.75rem;
   border-radius: 0.375rem !important;
 }
+
+
 /* Custom */
 .input-file {
   #inputImage{
@@ -11272,4 +11274,28 @@ body {
   font-weight:  500;
   height: 40px !important;
   width: 100% !important;
+}
+
+/* Custom */
+
+.nav-link {
+  transition: background-color 0.2s ease, color 0.2s ease;
+  display: flex;
+}
+
+.nav-link:hover  {
+  background-color:#0d6efd; 
+  color: #fff;
+}
+
+.nav-link.active {
+  background-color: #0d6efd; 
+  color: #fff;
+  
+}
+.sb-sidenav-dark .nav-link:hover {
+  background-color: rgba(13, 110, 253, 0.8);
+  color: #fff;
+  border-left: 4px solid #ffffff50;
+  padding-left: 1.2rem;
 }

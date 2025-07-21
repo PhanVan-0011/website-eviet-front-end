@@ -85,7 +85,7 @@ const Dashboard = () => {
 
     return (
     <div id="layoutSidenav_content">
-       <main>
+       <main >
          <div className="container-fluid px-4">
             <h3 className="mt-4 mb-4"></h3>
             <div className="row mb-4">
