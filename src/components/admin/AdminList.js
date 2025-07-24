@@ -301,29 +301,28 @@ const AdminList = () => {
                 </ol>
   
                 <div className='mb-3'>
-                    <Link className="btn btn-primary me-2" to="/admin/add"><i className="fas fa-plus"></i> Thêm nhân viên</Link>
+                    <Link className="btn btn-primary me-2 add-custom-btn" to="/admin/add"><i className="fas fa-plus"></i> Thêm nhân viên</Link>
                 
                     {selectedRows.length > 0 && <button
                         className="btn btn-warning me-2"
                         // disabled={selectedRows.length !== 1}
                         onClick={() => { setAssignUserId(selectedRows[0]); setShowAssignRole(true); }}
                     >
-                        <i className="fas fa-user-tag"></i> Cập nhật vai trò
+                        <i className="fas fa-user-tag add-custom-btn"></i> Cập nhật vai trò
                     </button>
                     }
-                    {selectedRows.length > 0 && <button className="btn btn-danger me-2" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Delete</button>}
+                    {selectedRows.length > 0 && <button className="btn btn-danger me-2 add-custom-btn" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa</button>}
                 </div>
                               {/* Bộ lọc */}
                               <div className="row mb-3 g-2 align-items-end">
                     {/* Lọc trạng thái */}
                     <div className="col-md-3">
-                        <label className="form-label fw-semibold text-info mb-1" htmlFor="filterIsActive">
-                            <i className="fas fa-toggle-on me-1"></i>Trạng thái tài khoản
+                        <label className="form-label fw-semibold mb-1" htmlFor="filterIsActive">
+                            <i className="fas fa-toggle-on me-1 form-rounded-sm"></i>Trạng thái tài khoản
                         </label>
                         <select
                             id="filterIsActive"
-                            className="form-select form-select-sm border-info shadow-sm"
-                            style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height: 40, cursor: 'pointer' }}
+                            className="form-select form-select-sm  shadow-sm form-rounded-sm"
                             value={filterIsActive}
                             onChange={e => setFilterIsActive(e.target.value)}
                         >
@@ -334,13 +333,12 @@ const AdminList = () => {
                     </div>
                     {/* Lọc vai trò */}
                     <div className="col-md-3">
-                        <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterRoleName">
+                        <label className="form-label fw-semibold  mb-1" htmlFor="filterRoleName">
                             <i className="fas fa-user-tag me-1"></i>Vai trò
                         </label>
                         <select
                             id="filterRoleName"
-                            className="form-select form-select-sm border-primary shadow-sm"
-                            style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height: 40, cursor: 'pointer' }}
+                            className="form-select form-select-sm  shadow-sm form-rounded-sm"
                             value={filterRoleName}
                             onChange={e => setFilterRoleName(e.target.value)}
                         >

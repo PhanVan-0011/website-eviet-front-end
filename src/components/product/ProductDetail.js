@@ -265,10 +265,10 @@ const ProductDetail = () => {
                                             : <span className="text-muted">Chưa phân loại</span>}
                                     </div>
                                     <div className="mb-2">
-                                        <span className="fw-semibold text-success">Giá gốc:</span> <span className="text-danger">{formatVND(product.original_price)} ₫</span>
+                                        <span className="fw-semibold text-success">Giá gốc:</span> <span className="text-danger">{formatVND(parseInt(product.original_price))} ₫</span>
                                     </div>
                                     <div className="mb-2">
-                                        <span className="fw-semibold text-warning">Giá bán:</span> <span className="text-danger">{formatVND(product.sale_price)} ₫</span>
+                                        <span className="fw-semibold text-warning">Giá bán:</span> <span className="text-danger">{formatVND(parseInt(product.sale_price))} ₫</span>
                                     </div>
                                     <div className="mb-2">
                                         <span className="fw-semibold">Số lượng:</span> {product.stock_quantity}

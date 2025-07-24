@@ -247,24 +247,23 @@ const PostList = () => {
                         <li className="breadcrumb-item active">Danh sách bài viết</li>
                     </ol>
                     <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/post/add">
+                        <Link className="btn btn-primary me-2 add-custom-btn" to="/post/add">
                             <i className="fas fa-plus"></i> Thêm bài viết
                         </Link>
                         {selectedRows.length > 0 && (
-                            <button className="btn btn-danger" onClick={multiDelete}>
+                            <button className="btn btn-danger add-custom-btn" onClick={multiDelete}>
                                 <i className="fas fa-trash"></i> Xóa đã chọn
                             </button>
                         )}
                     </div>
                     <div className="row mb-3 g-2 align-items-end">
                         <div className="col-md-3">
-                            <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterCategory">
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterCategory">
                                 <i className="fas fa-list me-1"></i>Danh mục
                             </label>
                             <select
                                 id="filterCategory"
-                                className="form-select form-select-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height: 40, cursor: 'pointer' }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
                                 value={filterCategory}
                                 onChange={e => setFilterCategory(e.target.value)}
                             >
@@ -275,13 +274,12 @@ const PostList = () => {
                             </select>
                         </div>
                         <div className="col-md-3">
-                            <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
                             <select
                                 id="filterStatus"
-                                className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height: 40, cursor: 'pointer' }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >

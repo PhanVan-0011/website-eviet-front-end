@@ -148,9 +148,9 @@ const DataTables = (props) => {
                         <LiveSearch changeKeyword={changeKeyword}/>
                     </div>
                 </div>
-                <table className="table table-striped table-bordered" id="datatablesSimple" width="100%" cellSpacing="0">
+                <table className="table table-bordered table-hover " id="datatablesSimple" width="100%" cellSpacing="0">
                     {data.length > 0 && (
-                        <thead>
+                        <thead className="custom-table">
                             {renderFilterHeader()}
                             <tr>
                                 {!hideSelected && (

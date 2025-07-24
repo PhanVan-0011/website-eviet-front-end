@@ -11315,3 +11315,21 @@ body {
   font-weight: bold ;
   font-size: 1.5rem;
 }
+
+
+/* Bộ lọc */
+.form-rounded-sm {
+  background-color: #f8f9fa;
+  -webkit-border-radius: 0.7rem;
+  border-radius: 0.7rem;
+  font-weight: 500;
+  height: 40px;
+}
+.add-custom-btn {
+  -webkit-border-radius: 0.7rem;
+  border-radius: 0.7rem;
+  height: 40px;
+}
+.custom-table{
+  background-color: #e1cdb9;
+}
