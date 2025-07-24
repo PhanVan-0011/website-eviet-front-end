@@ -254,11 +254,11 @@ const SliderList = () => {
                         <li className="breadcrumb-item active">Slider</li>
                     </ol>
                     <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/slider/add">
+                        <Link className="btn btn-primary me-2 add-custom-btn" to="/slider/add">
                             <i className="fas fa-plus"></i> Thêm slider
                         </Link>
                         {selectedRows.length > 0 && (
-                            <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
+                            <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}>
                                 <i className="fas fa-trash"></i> Xóa
                             </button>
                         )}
@@ -266,13 +266,12 @@ const SliderList = () => {
                     {/* Bộ lọc */}
                     <div className="row mb-3 g-2 align-items-end">
                         <div className="col-md-3">
-                            <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
                             <select
                                 id="filterStatus"
-                                className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
@@ -282,13 +281,12 @@ const SliderList = () => {
                             </select>
                         </div>
                         <div className="col-md-3">
-                            <label className="form-label fw-semibold text-success mb-1" htmlFor="filterType">
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterType">
                                 <i className="fas fa-link me-1"></i>Loại liên kết
                             </label>
                             <select
                                 id="filterType"
-                                className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
                                 value={filterType}
                                 onChange={e => setFilterType(e.target.value)}
                             >

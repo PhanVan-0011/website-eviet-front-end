@@ -374,13 +374,13 @@ const ProductList = () => {
                     </ol>
                     <div className='mb-3'>
                         <Permission permission={PERMISSIONS.PRODUCTS_CREATE}>
-                            <Link className="btn btn-primary me-2" to="/product/add">
+                            <Link className="btn btn-primary me-2 add-custom-btn" to="/product/add">
                                 <i className="fas fa-plus"></i> Thêm sản phẩm
                             </Link>
                         </Permission>
                         <Permission permission={PERMISSIONS.PRODUCTS_DELETE}>
                             {selectedRows.length > 0 && (
-                                <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
+                                <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}>
                                     <i className="fas fa-trash"></i> Xóa
                                 </button>
                             )}
@@ -391,13 +391,12 @@ const ProductList = () => {
                     <div className="row mb-3 g-2 align-items-end">
                         {/* Danh mục */}
                         <div className="col-md-3">
-                            <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterCategory">
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterCategory">
                                 <i className="fas fa-list me-1"></i>Danh mục
                             </label>
                             <select
                                 id="filterCategory"
-                                className="form-select form-select-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
                                 value={filterCategory}
                                 onChange={e => setFilterCategory(e.target.value)}
                             >
@@ -409,13 +408,12 @@ const ProductList = () => {
                         </div>
                         {/* Giá gốc */}
                         <div className="col-md-3">
-                            <label className="form-label fw-semibold text-success mb-1" htmlFor="filterOriginalPrice">
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterOriginalPrice">
                                 <i className="fas fa-money-bill-wave me-1"></i>Giá gốc
                             </label>
                             <select
                                 id="filterOriginalPrice"
-                                className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
                                 value={filterOriginalPrice}
                                 onChange={e => setFilterOriginalPrice(e.target.value)}
                             >
@@ -431,13 +429,12 @@ const ProductList = () => {
                         </div>
                         {/* Giá bán */}
                         <div className="col-md-3">
-                            <label className="form-label fw-semibold text-warning mb-1" htmlFor="filterSalePrice">
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterSalePrice">
                                 <i className="fas fa-coins me-1"></i>Giá bán
                             </label>
                             <select
                                 id="filterSalePrice"
-                                className="form-select form-select-sm border-warning shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
                                 value={filterSalePrice}
                                 onChange={e => setFilterSalePrice(e.target.value)}
                             >
@@ -453,13 +450,12 @@ const ProductList = () => {
                         </div>
                         {/* Trạng thái */}
                         <div className="col-md-3">
-                            <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
                             <select
                                 id="filterStatus"
-                                className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >

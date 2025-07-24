@@ -199,8 +199,8 @@ const UserList = () => {
 
                 </ol>
                 <div className='mb-3'>
-                    <Link className="btn btn-primary me-2" to="/user/add"><i className="fas fa-plus"></i> Thêm khách hàng</Link>
-                    {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Delete</button>}
+                    <Link className="btn btn-primary me-2 add-custom-btn" to="/user/add"><i className="fas fa-plus"></i> Thêm khách hàng</Link>
+                    {selectedRows.length > 0 && <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa</button>}
                 </div>
                 <DataTables
                     name="Dữ liệu khách hàng"

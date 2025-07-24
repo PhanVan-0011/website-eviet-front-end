@@ -30,8 +30,6 @@ const ComboList = () => {
     // Bộ lọc
     const [filterStatus, setFilterStatus] = useState('');
     const [filterStartDateFrom, setFilterStartDateFrom] = useState(null);
-    const [filterStartDateTo, setFilterStartDateTo] = useState(null);
-    const [filterEndDateFrom, setFilterEndDateFrom] = useState(null);
     const [filterEndDateTo, setFilterEndDateTo] = useState(null);
     const [filterPriceRange, setFilterPriceRange] = useState('');
 
@@ -43,10 +41,10 @@ const ComboList = () => {
     useEffect(() => {
         let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
         if (filterStatus !== '') query += `&is_active=${filterStatus}`;
-        if (filterStartDateFrom) query += `&start_date_from=${moment(filterStartDateFrom).format('YYYY-MM-DD')}`;
-        if (filterStartDateTo) query += `&start_date_to=${moment(filterStartDateTo).format('YYYY-MM-DD')}`;
-        if (filterEndDateFrom) query += `&end_date_from=${moment(filterEndDateFrom).format('YYYY-MM-DD')}`;
-        if (filterEndDateTo) query += `&end_date_to=${moment(filterEndDateTo).format('YYYY-MM-DD')}`;
+
+        if (filterStartDateFrom) query += `&start_date=${moment(filterStartDateFrom).format('YYYY-MM-DD')}`;
+        if (filterEndDateTo) query += `&end_date=${moment(filterEndDateTo).format('YYYY-MM-DD')}`;
+
         if (filterPriceRange) {
             const [min, max] = filterPriceRange.split('-');
             if (min) query += `&min_price=${min}`;
@@ -69,6 +67,7 @@ const ComboList = () => {
 
         filterStartDateFrom,
         filterEndDateTo,
+
         filterPriceRange,
         refresh,
         dispatch
@@ -193,7 +192,7 @@ const ComboList = () => {
                     <Link className="btn btn-primary btn-sm me-1" to={`/combo/${row.id}`}>
                         <i className="fas fa-edit"></i>
                     </Link>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
+                    <button className="btn btn-danger btn-sm add-custom-btn" onClick={() => handleDelete(row.id)}>
                         <i className="fas fa-trash"></i>
                     </button>
                 </div>
@@ -265,11 +264,11 @@ const ComboList = () => {
                         <li className="breadcrumb-item active">Combo</li>
                     </ol>
                     <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/combo/add">
+                        <Link className="btn btn-primary me-2 add-custom-btn" to="/combo/add">
                             <i className="fas fa-plus"></i> Thêm combo
                         </Link>
                         {selectedRows.length > 0 && (
-                            <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
+                            <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}>
                                 <i className="fas fa-trash"></i> Xóa
                             </button>
                         )}
@@ -278,13 +277,12 @@ const ComboList = () => {
                     <div className="row mb-3 g-1 align-items-end">
                         {/* Trạng thái */}
                         <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
+                            <label className="form-label fw-semibold text-info mb-1 " htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
                             <select
                                 id="filterStatus"
-                                className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                className="form-select form-select-sm border-info shadow-sm form-rounded-sm"
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
@@ -295,13 +293,12 @@ const ComboList = () => {
                         </div>
                         {/* Giá tối thiểu */}
                         <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-success mb-1" htmlFor="filterPriceRange">
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterPriceRange">
                                 <i className="fas fa-money-bill-wave me-1"></i>Khoảng giá
                             </label>
                             <select
                                 id="filterPriceRange"
-                                className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500,height:40, cursor: 'pointer' }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
                                 value={filterPriceRange}
                                 onChange={e => setFilterPriceRange(e.target.value)}
                             >
@@ -317,15 +314,15 @@ const ComboList = () => {
                         </div>
                         {/* Khoảng ngày bắt đầu và kết thúc chia làm 4 cột riêng biệt */}
                         <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-primary mb-1">
-                                <i className="fas fa-calendar-alt me-1"></i>Bắt đầu từ
+                            <label className="form-label fw-semibold mb-1">
+                                <i className="fas fa-calendar-alt me-1"></i>Từ ngày
                             </label>
                             <DatePicker
                                 selected={filterStartDateFrom}
                                 onChange={date => setFilterStartDateFrom(date)}
                                 locale={vi}
                                 dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm border-primary shadow-sm select-date-custom"
+                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
 
                                 placeholderText="Chọn ngày: dd/mm/yyyy"
                                 id="filterStartDateFrom"
@@ -334,15 +331,15 @@ const ComboList = () => {
                         </div>
             
                         <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-danger mb-1">
-                                <i className="fas fa-calendar-check me-1"></i>Kết thúc đến
+                            <label className="form-label fw-semibold mb-1">
+                                <i className="fas fa-calendar-check me-1"></i>Đến ngày
                             </label>
                             <DatePicker
                                 selected={filterEndDateTo}
                                 onChange={date => setFilterEndDateTo(date)}
                                 locale={vi}
                                 dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm border-danger shadow-sm select-date-custom"
+                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
                                 
                                 placeholderText="Chọn ngày: dd/mm/yyyy"
                                 id="filterEndDateTo"

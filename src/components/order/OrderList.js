@@ -394,8 +394,8 @@ const OrderList = () => {
                     <div className='mb-3'>
 
                         <Permission permission={PERMISSIONS.ORDERS_CREATE}>
-                            <Link className="btn btn-primary me-2" to="/order/add">
-                                <i className="fas fa-plus"></i> Tạo đơn hàng
+                            <Link className="btn btn-primary me-2 add-custom-btn" to="/order/add">
+                                <i className="fas fa-plus"></i> Thêm đơn hàng
                             </Link>
                         </Permission>
                         
@@ -404,13 +404,13 @@ const OrderList = () => {
                     <div className="row mb-3 g-2 align-items-end">
                         {/* Trạng thái */}
                         <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterStatus">
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
                             <select
                                 id="filterStatus"
-                                className="form-select form-select-sm border-primary shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height:40 }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
+                                style={{  }}
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
@@ -424,13 +424,12 @@ const OrderList = () => {
                         </div>
                         {/* Phương thức thanh toán động */}
                         <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-success mb-1" htmlFor="filterPayment">
+                            <label className="form-label fw-semibold  mb-1" htmlFor="filterPayment">
                                 <i className="fas fa-credit-card me-1"></i>Phương thức thanh toán
                             </label>
                             <select
                                 id="filterPayment"
-                                className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height:40 }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
                                 value={filterPayment}
                                 onChange={e => setFilterPayment(e.target.value)}
                             >
@@ -444,15 +443,15 @@ const OrderList = () => {
                         </div>
                         {/* Bộ lọc ngày đặt hàng */}
                         <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-secondary mb-1" htmlFor="filterOrderDateFrom">
-                                <i className="fas fa-calendar-alt me-1"></i>Đặt hàng từ
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterOrderDateFrom">
+                                <i className="fas fa-calendar-alt me-1"></i>Từ ngày
                             </label>
                             <DatePicker
                                 selected={filterOrderDateFrom}
                                 onChange={date => setFilterOrderDateFrom(date)}
                                 locale={vi}
                                 dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm border-secondary shadow-sm select-date-custom"
+                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
                                 placeholderText="Chọn ngày bắt đầu"
                                 id="filterOrderDateFrom"
                                 autoComplete="off"
@@ -460,15 +459,15 @@ const OrderList = () => {
                             />
                         </div>
                         <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-secondary mb-1" htmlFor="filterOrderDateTo">
-                                <i className="fas fa-calendar-check me-1"></i>Đặt hàng đến
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterOrderDateTo">
+                                <i className="fas fa-calendar-check me-1"></i>Đến ngày
                             </label>
                             <DatePicker
                                 selected={filterOrderDateTo}
                                 onChange={date => setFilterOrderDateTo(date)}
                                 locale={vi}
                                 dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm border-secondary shadow-sm select-date-custom"
+                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
                                 placeholderText="Chọn ngày kết thúc"
                                 id="filterOrderDateTo"
                                 autoComplete="off"
