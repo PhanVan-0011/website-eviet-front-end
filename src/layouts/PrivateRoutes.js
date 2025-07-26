@@ -3,7 +3,8 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { hasPermission } from '../helpers/permission';
 import { ROUTE_PERMISSIONS } from '../constants/routePermissions';
-
+import { toast } from 'react-toastify';
+import { toastErrorConfig, toastSuccessConfig } from '../tools/toastConfig';
 
 
 // Hàm so khớp path động (ví dụ: /product/123 -> /product/:id)
@@ -30,8 +31,10 @@ function findFirstAccessibleRoute(userPermissions) {
         return route;
       }
     }
-    // Nếu không có route nào, trả về /not-found
-    return '/not-found';
+    // Nếu không có route nào, trả về /login
+    localStorage.removeItem('access_token');
+    toast.error("Tài khoản không có quyền truy cập", toastErrorConfig);
+    return '/login';
   }
 
 const PrivateRoutes = () => {
@@ -55,8 +58,10 @@ const PrivateRoutes = () => {
         const firstRoute = findFirstAccessibleRoute(permissions);
         return <Navigate to={firstRoute} replace />;
     }
-    // Các route khác vẫn chuyển về not-found như cũ
-    return <Navigate to="/not-found" />;
+    // Các route khác vẫn chuyển về not-found 
+    localStorage.removeItem('access_token');
+    toast.error("Tài khoản không có quyền truy cập", toastErrorConfig);
+    return <Navigate to="/login" />;
   }
 
   return <Outlet />;
