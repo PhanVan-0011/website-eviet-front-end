@@ -137,8 +137,8 @@ const RuleList = () => {
                         <li className="breadcrumb-item active">Danh sách vai trò</li>
                     </ol>
                     <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/rule/add"><i className="fas fa-plus"></i> Thêm vai trò</Link>
-                        {selectedRows.length > 0 && <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa</button>}
+                        <Link className="btn btn-primary me-2 add-custom-btn" to="/rule/add"><i className="fas fa-plus"></i> Thêm vai trò</Link>
+                        {selectedRows.length > 0 && <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa</button>}
                     </div>
                     <DataTables
                         name="Dữ liệu vai trò"

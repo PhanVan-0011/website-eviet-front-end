@@ -253,13 +253,13 @@ const PromotionList = () => {
                     </ol>
                     <div className='mb-3'>
                         <Permission permission={PERMISSIONS.PROMOTIONS_CREATE}>
-                            <Link className="btn btn-primary me-2" to="/promotion/add">
+                            <Link className="btn btn-primary me-2 add-custom-btn" to="/promotion/add">
                                 <i className="fas fa-plus"></i> Thêm khuyến mãi
                             </Link>
                         </Permission>
                         <Permission permission={PERMISSIONS.PROMOTIONS_DELETE}>
                             {selectedRows.length > 0 && (
-                                <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
+                                <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}>
                                     <i className="fas fa-trash"></i> Xóa
                                 </button>
                             )}
@@ -269,13 +269,12 @@ const PromotionList = () => {
                     <div className="row mb-3 g-2 align-items-end">
                         {/* Loại khuyến mãi */}
                         <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-success mb-1" htmlFor="filterType">
+                            <label className="form-label fw-semibold  mb-1" htmlFor="filterType">
                                 <i className="fas fa-percent me-1"></i>Loại khuyến mãi
                             </label>
                             <select
                                 id="filterType"
-                                className="form-select form-select-sm border-success shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height:40, cursor: 'pointer' }}
+                                className="form-select form-select-sm  shadow-sm form-rounded-sm"
                                 value={filterType}
                                 onChange={e => setFilterType(e.target.value)}
                             >
@@ -286,13 +285,12 @@ const PromotionList = () => {
                         </div>
                              {/* Trạng thái */}
                              <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-info mb-1" htmlFor="filterStatus">
+                            <label className="form-label fw-semibold  mb-1" htmlFor="filterStatus">
                                 <i className="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
                             <select
                                 id="filterStatus"
-                                className="form-select form-select-sm border-info shadow-sm"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height:40, cursor: 'pointer' }}
+                                className="form-select form-select-sm shadow-sm form-rounded-sm"
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
                             >
@@ -303,15 +301,15 @@ const PromotionList = () => {
                         </div>
                         {/* Ngày bắt đầu */}
                         <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-primary mb-1" htmlFor="filterStartDate">
-                                <i className="fas fa-calendar-alt me-1"></i>Bắt đầu từ
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterStartDate">
+                                <i className="fas fa-calendar-alt me-1"></i>Từ ngày
                             </label>
                             <DatePicker
                                 selected={filterStartDate}
                                 onChange={date => setFilterStartDate(date)}
                                 locale={vi}
                                 dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm border-primary shadow-sm select-date-custom"
+                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
         
                                 placeholderText="Chọn ngày: dd/mm/yyyy"
                                 id="filterStartDate"
@@ -321,16 +319,15 @@ const PromotionList = () => {
                         </div>
                         {/* Ngày kết thúc */}
                         <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-danger mb-1" htmlFor="filterEndDate">
-                                <i className="fas fa-calendar-check me-1"></i>Kết thúc đến
+                            <label className="form-label fw-semibold mb-1" htmlFor="filterEndDate">
+                                <i className="fas fa-calendar-check me-1"></i>Đến ngày
                             </label>
                             <DatePicker
                                 selected={filterEndDate}
                                 onChange={date => setFilterEndDate(date)}
                                 locale={vi}
                                 dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm border-danger shadow-sm select-date-custom"
-                                style={{ backgroundColor: '#f8f9fa', fontWeight: 500, height:40 }}
+                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
                                 placeholderText="Chọn ngày: dd/mm/yyyy"
                                 id="filterEndDate"
                                 isClearable
