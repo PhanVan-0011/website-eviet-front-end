@@ -11280,7 +11280,7 @@ body {
   width: 100% !important;
 }
 
-/* Custom */
+/* Navbar and Sidebar */
 
 .nav-link {
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -11288,17 +11288,17 @@ body {
 }
 
 .nav-link:hover  {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #0b5ed7;
   color: #fff;
 }
 
 .nav-link.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #0b5ed7;
   color: #fff;
   
 }
 .sb-sidenav-dark .nav-link:hover {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #0b5ed7;
   color: #fff;
   border-left: 4px solid #ffffff50;
   padding-left: 1.2rem;
@@ -11317,7 +11317,7 @@ body {
 }
 
 
-/* Bộ lọc */
+/* Fitler*/
 .form-rounded-sm {
   background-color: #f8f9fa;
   -webkit-border-radius: 0.7rem;
@@ -11332,4 +11332,112 @@ body {
 }
 .custom-table{
   background-color: #e1cdb9;
+}
+/* Card */
+.stat-card-revenue {
+  position: relative !important;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 -4px 0 0 #42a5f5 !important; 
+}
+.icon-circle-revenue {
+  background-color: rgb(66, 165, 245);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  color: white; 
+}
+.stat-card-order {
+  position: relative !important;
+  background: white ;
+  border-radius: 10px;
+  box-shadow: 0 -4px 0 0 #faa820 !important; 
+}
+.icon-circle-order {
+  background-color: #faa820;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  color: white; /* Màu chữ */
+}
+
+.stat-card-product {
+  position: relative !important;
+  background: white ;
+  border-radius: 10px;
+  box-shadow: 0 -4px 0 0 #43e97b !important; 
+}
+.icon-circle-product {
+  background-color: #43e97b;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  color: white; /* Màu chữ */
+}
+
+.stat-card-user {
+  position: relative !important;
+  background: white ;
+  border-radius: 10px;
+  box-shadow: 0 -4px 0 0 #ed7020 !important; 
+}
+.icon-circle-user {
+  background-color: #ed7020;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  color: white; /* Màu chữ */
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+}
+.percent-change{
+   font-size: 14px;
+   font-weight: 600;
+    background-color: #e0f7fa;
+    padding: 3px 8px;
+    border-radius: 20px;
+}
+.card {
+  position: relative;
+  background: var(--card-color);
+  border-radius: 10px;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+}
+
+.card .btn {
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.card-text-custom{
+  font-weight: 600 !important;
 }
