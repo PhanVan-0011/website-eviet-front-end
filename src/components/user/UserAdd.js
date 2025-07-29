@@ -75,9 +75,9 @@ const UserAdd = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm khách hàng thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/user');
-                }, 1500);
+                
+                navigation('/user');
+                
             } else {
                 toast.error(response.data.message || "Thêm khách hàng thất bại", toastErrorConfig);
             }

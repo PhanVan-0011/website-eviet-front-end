@@ -7,7 +7,7 @@ import * as actions from '../../redux/actions/index';
 import { toast } from 'react-toastify';
 import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig , toastSuccessConfig} from '../../tools/toastConfig';
-
+import { cleanHtml, oembedToIframe } from '../../helpers/formatData';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const ProductDetail = () => {
@@ -134,9 +134,9 @@ const ProductDetail = () => {
                         </ol>
                     </div>
                     <div className="row g-4">
-                        <div className="col-md-5">
-                            <div className="card shadow-sm mb-4">
-                                <div className="d-flex flex-column align-items-center p-3">
+                        <div className="col-md-5 d-flex" style={{ height: '75vh' }}>
+                            <div className="card shadow-sm mb-4 flex-fill" style={{ height: '100%' }}>
+                                <div style={{ height: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
                                     {product.image_urls && product.image_urls.length > 0 ? (
                                         (() => {
                                             const featuredImg = product.image_urls.find(img => img.is_featured === 1);
@@ -251,7 +251,7 @@ const ProductDetail = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="card-body">
+                                <div className="card-body" style={{ height: '50%', overflowY: 'auto' }}>
                                     <h4 className="card-title mb-2">{product.name}</h4>
                                     <div className="mb-2">
                                         {product.status === 1
@@ -287,14 +287,14 @@ const ProductDetail = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-7 mb-4">
-                            <div className="card shadow-sm h-100">
+                        <div className="col-md-7 mb-4 d-flex" style={{ height: '75vh' }}>
+                            <div className="card shadow-sm h-100 flex-fill d-flex flex-column" style={{ height: '100%' }}>
                                 <div className="card-header bg-light fw-bold">
                                     <i className="fas fa-info-circle me-2"></i>Mô tả sản phẩm
                                 </div>
-                                <div className="card-body" style={{ minHeight: 200 }}>
+                                <div className="card-body flex-grow-1" style={{ minHeight: 200, overflowY: 'auto' }}>
                                     {product.description
-                                        ? <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                                        ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(product.description)) }} />
                                         : <span className="text-muted fst-italic">Chưa có mô tả</span>
                                     }
                                 </div>

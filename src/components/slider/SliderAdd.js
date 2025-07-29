@@ -84,9 +84,9 @@ const SliderAdd = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm slider thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/slider');
-                }, 1200);
+                
+                navigation('/slider');
+                
             } else {
                 toast.error(response.data.message || "Thêm slider thất bại", toastErrorConfig);
             }

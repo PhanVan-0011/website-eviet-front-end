@@ -6,6 +6,7 @@ import * as actions from '../../redux/actions/index';
 import requestApi from '../../helpers/api';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Select from 'react-select';
 
 const OrderAdd = () => {
     const navigation = useNavigate();
@@ -20,6 +21,10 @@ const OrderAdd = () => {
     const [paymentMethod, setPaymentMethod] = useState('cod');
     const [shippingFee, setShippingFee] = useState('');
     const [paymentMethods, setPaymentMethods] = useState([]);
+
+    // Tạo options cho react-select
+    const productOptions = products.map(p => ({ value: p.id, label: p.name + (p.size ? ` - ${p.size}` : '') + (p.category?.name ? ` (${p.category.name})` : '') }));
+    const comboOptions = combos.map(c => ({ value: c.id, label: c.name }));
 
     // Lấy danh sách sản phẩm, combo và phương thức thanh toán
     useEffect(() => {
@@ -84,17 +89,42 @@ const OrderAdd = () => {
         return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
 
+    // Validate sản phẩm/combo trong đơn hàng
+    useEffect(() => {
+        if (!orderItems || orderItems.length === 0) {
+            setError('items', { type: 'manual', message: 'Vui lòng chọn ít nhất 1 sản phẩm hoặc combo!' });
+            return;
+        }
+        // Kiểm tra trùng id cùng loại
+        const keys = orderItems.map(i => i.type + '-' + i.id).filter(k => k.split('-')[1]);
+        const hasDuplicate = keys.length !== new Set(keys).size;
+        if (hasDuplicate) {
+            setError('items', { type: 'manual', message: 'Không được chọn trùng sản phẩm hoặc combo trong đơn hàng!' });
+            return;
+        }
+        // Kiểm tra số lượng > 0 và id không rỗng
+        if (orderItems.some(i => !i.id || !i.quantity || Number(i.quantity) <= 0)) {
+            setError('items', { type: 'manual', message: 'Vui lòng chọn sản phẩm hoặc combo và số lượng phải lớn hơn 0' });
+            return;
+        }
+        clearErrors('items');
+    }, [orderItems, setError, clearErrors]);
+
     // Xử lý submit
     const handleSubmitForm = async (data) => {
-        // Kiểm tra có ít nhất 1 item và tất cả item đều có id
-        if (
-            orderItems.length === 0 ||
-            orderItems.some(item => !item.id)
-        ) {
-            setError('items', { type: 'manual', message: 'Vui lòng chọn sản phẩm hoặc combo cho đơn hàng!' });
+        // Validate sản phẩm/combo trong đơn hàng
+        if (!orderItems || orderItems.length === 0) {
+            setError('items', { type: 'manual', message: 'Vui lòng chọn sản phẩm hoặc combo và số lượng phải lớn hơn 0' });
             return;
-        } else {
-            clearErrors('items');
+        }
+        const keys = orderItems.map(i => i.type + '-' + i.id).filter(k => k.split('-')[1]);
+        if (keys.length !== new Set(keys).size) {
+            setError('items', { type: 'manual', message: 'Không được chọn trùng sản phẩm hoặc combo trong đơn hàng!' });
+            return;
+        }
+        if (orderItems.some(i => !i.id || !i.quantity || Number(i.quantity) <= 0)) {
+            setError('items', { type: 'manual', message: 'Mỗi sản phẩm/combo phải có số lượng > 0 và không được bỏ trống!' });
+            return;
         }
         setIsSubmitting(true);
         try {
@@ -120,9 +150,9 @@ const OrderAdd = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Tạo đơn hàng thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/order');
-                }, 1500);
+               
+                navigation('/order');
+           
             } else {
                 toast.error(response.data.message || "Tạo đơn hàng thất bại", toastErrorConfig);
             }
@@ -265,23 +295,19 @@ const OrderAdd = () => {
                                                         <option value="product">Sản phẩm</option>
                                                         <option value="combo">Combo</option>
                                                     </select>
-                                                    <select
-                                                        className="form-select ms-2"
-                                                        value={item.id}
-                                                        onChange={e => handleChangeItem(idx, 'id', e.target.value)}
-                                                        
-                                                    >
-                                                        <option value="" disabled>
-                                                            {item.type === 'product' ? 'Chọn sản phẩm' : 'Chọn combo'}
-                                                        </option>
-                                                        {(item.type === 'product' ? products : combos).map(obj => (
-                                                            <option key={obj.id} value={obj.id}>
-                                                                {obj.name}
-                                                                {obj.size ? ` - ${obj.size}` : ''}
-                                                                {obj.category?.name ? ` (${obj.category.name})` : ''}
-                                                            </option>
-                                                        ))}
-                                                    </select>
+                                                    <div className="flex-grow-1 ms-2">
+                                                        <Select
+                                                            options={
+                                                                (item.type === 'product' ? productOptions : comboOptions)
+                                                                    .filter(opt => !orderItems.some((it, i) => it.type === item.type && it.id === opt.value && i !== idx))
+                                                            }
+                                                            value={(item.type === 'product' ? productOptions : comboOptions).find(opt => String(opt.value) === String(item.id)) || null}
+                                                            onChange={opt => handleChangeItem(idx, 'id', opt ? opt.value : '')}
+                                                            placeholder={item.type === 'product' ? 'Chọn sản phẩm...' : 'Chọn combo...'}
+                                                            
+                                                            classNamePrefix="react-select"
+                                                        />
+                                                    </div>
                                                 </div>
                                                 <div className="col-2 d-flex align-items-center">
                                                     {item.id && (
@@ -341,7 +367,7 @@ const OrderAdd = () => {
                                             </div>
                                         ))}
                                         {errors.items && (
-                                            <div className="text-danger mt-1">{errors.items.message}</div>
+                                            <div className="text-danger small w-100">{errors.items.message}</div>
                                         )}
                                     </div>
                                 </div>

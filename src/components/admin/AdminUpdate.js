@@ -11,6 +11,7 @@ import { Modal, Button } from 'react-bootstrap';
 import { vi } from 'date-fns/locale';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import Select from 'react-select';
 
 const AdminUpdate = () => {
     const params = useParams();
@@ -20,6 +21,7 @@ const AdminUpdate = () => {
         handleSubmit,
         setValue,
         formState: { errors },
+        trigger,
     } = useForm();
      const dispatch = useDispatch();
      const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,6 +32,8 @@ const AdminUpdate = () => {
      const [imagePreview, setImagePreview] = useState(null);
      const [imageFile, setImageFile] = useState(null);
      const [oldAvatar, setOldAvatar] = useState(null);
+     const [selectedRoles, setSelectedRoles] = useState([]);
+     const roleOptions = roles.map(role => ({ value: role.id, label: role.display_name || role.name }));
 
     useEffect(() => {
         // Lấy dữ liệu user và roles song song
@@ -60,9 +64,9 @@ const AdminUpdate = () => {
                     setOldAvatar(data.image_url.main_url);
                 }
                 if (data.roles && Array.isArray(data.roles)) {
-                    setTimeout(() => {
-                        setValue('role_ids', data.roles.map(r => String(r.id)));
-                    }, 0);
+                    const roleIds = data.roles.map(r => String(r.id));
+                    setSelectedRoles(roleIds);
+                    setValue('role_ids', roleIds);
                 }
                 // Xử lý roles
                 if (rolesRes.data && rolesRes.data.data) setRoles(rolesRes.data.data);
@@ -75,6 +79,9 @@ const AdminUpdate = () => {
         fetchAll();
     }, [params.id, setValue]);
     const handleSubmitForm = async (data) => {
+        // Validate role_ids
+        const valid = await trigger('role_ids');
+        if (!valid) return;
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
@@ -104,9 +111,9 @@ const AdminUpdate = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật thông tin thành công", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/admin');
-                }, 1500);
+                
+                navigation('/admin');
+               
             } else {
                 toast.error(response.data.message || "Cập nhật thất bại", toastErrorConfig);
             }
@@ -364,28 +371,25 @@ const AdminUpdate = () => {
                                             <label className="form-label fw-semibold">
                                                 Vai trò <span style={{ color: 'red' }}>*</span>
                                             </label>
-                                            {roles && roles.length > 0 ? (
-                                                <div className="row g-2 overflow-auto border rounded p-2 bg-light" style={{maxHeight: 220}}>
-                                                    {roles.map((role, idx) => (
-                                                        <div className="col-6 col-md-4" key={role.id}>
-                                                            <div className="form-check">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    id={`role_${role.id}`}
-                                                                    value={role.id}
-                                                                    {...register('role_ids', { required: 'Vai trò là bắt buộc' })}
-                                                                />
-                                                                <label className="form-check-label" htmlFor={`role_${role.id}`}>
-                                                                    {role.display_name || role.name}
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <div>Đang lấy dữ liệu vai trò...</div>
-                                            )}
+                                            <Select
+                                                options={roleOptions}
+                                                isMulti
+                                                value={roleOptions.filter(opt => selectedRoles.includes(String(opt.value)) || selectedRoles.includes(opt.value))}
+                                                onChange={opts => {
+                                                    const values = opts ? opts.map(opt => opt.value) : [];
+                                                    setSelectedRoles(values);
+                                                    setValue('role_ids', values, { shouldValidate: true });
+                                                }}
+                                                placeholder="Tìm kiếm & chọn vai trò..."
+                                                classNamePrefix="react-select"
+                                                onBlur={() => trigger('role_ids')}
+                                            />
+                                            <input
+                                                type="hidden"
+                                                {...register('role_ids', {
+                                                    validate: value => (value && value.length > 0) || 'Phải chọn ít nhất 1 vai trò!'
+                                                })}
+                                            />
                                             {errors.role_ids && <div className="text-danger">{errors.role_ids.message}</div>}
                                         </div>
                                     </div>
@@ -449,9 +453,9 @@ const AdminUpdate = () => {
                                 dispatch(actions.controlLoading(false));
                                 if (response.data && response.data.success) {
                                     toast.success(response.data.message || "Xóa nhân viên thành công!", toastSuccessConfig);
-                                    setTimeout(() => {
-                                        navigation('/admin');
-                                    }, 1200);
+                                    
+                                    navigation('/admin');
+                                    
                                 } else {
                                     toast.error(response.data.message || "Xóa nhân viên thất bại", toastErrorConfig);
                                 }

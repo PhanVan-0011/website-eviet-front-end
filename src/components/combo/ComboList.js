@@ -12,6 +12,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { vi } from 'date-fns/locale';
 import moment from 'moment';
+import { cleanHtml } from '../../helpers/formatData';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const ComboList = () => {
@@ -29,8 +30,11 @@ const ComboList = () => {
 
     // Bộ lọc
     const [filterStatus, setFilterStatus] = useState('');
-    const [filterStartDateFrom, setFilterStartDateFrom] = useState(null);
-    const [filterEndDateTo, setFilterEndDateTo] = useState(null);
+    const [filterStartDateFrom, setFilterStartDateFrom] = useState(() => {
+        const now = new Date();
+        return new Date(now.getFullYear(), 0, 1);
+    });
+    const [filterEndDateTo, setFilterEndDateTo] = useState(() => new Date());
     const [filterPriceRange, setFilterPriceRange] = useState('');
 
     // Sort states
@@ -146,7 +150,7 @@ const ComboList = () => {
                         whiteSpace: 'pre-line',
                         textOverflow: 'ellipsis'
                     }}
-                    dangerouslySetInnerHTML={{ __html: row.description }}
+                    dangerouslySetInnerHTML={{ __html: cleanHtml(row.description) }}
                 />
             ),
             width: "20%"

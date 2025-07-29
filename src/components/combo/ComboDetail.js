@@ -7,6 +7,7 @@ import * as actions from '../../redux/actions/index';
 import { toast } from 'react-toastify';
 import moment from 'moment';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import { cleanHtml, oembedToIframe } from '../../helpers/formatData';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const formatVND = (value) => {
@@ -166,9 +167,10 @@ const ComboDetail = () => {
                                     <i className="fas fa-info-circle me-2"></i>Mô tả combo
                                 </div>
                                 <div className="card-body" style={{ minHeight: 120 }}>
-                                    {combo.description
-                                        ? <div>{combo.description}</div>
-                                        : <span className="text-muted fst-italic">Chưa có mô tả</span>
+                                    {  
+                                    combo.description
+                                        ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(combo.description)) }} />
+                                        : <span className="text-muted fst-italic"></span>
                                     }
                                 </div>
                                 <div className="card-header bg-light fw-bold border-top">
@@ -209,7 +211,7 @@ const ComboDetail = () => {
                                                             </td>
                                                             <td>
                                                                 <div className="fw-semibold">{item.product ? item.product.name : ''}</div>
-                                                                <div className="text-muted small" dangerouslySetInnerHTML={{__html: item.product ? item.product.description : ''}} />
+                                                                <div className="text-muted small" dangerouslySetInnerHTML={{__html: item.product ? cleanHtml(item.product.description) : ''}} />
                                                             </td>
                                                             <td className="text-center">{item.product ? formatVND(item.product.sale_price) : ''} ₫</td>
                                                             <td className="text-center">{item.quantity}</td>

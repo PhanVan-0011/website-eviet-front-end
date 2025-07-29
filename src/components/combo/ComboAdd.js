@@ -10,10 +10,11 @@ import CustomEditor from '../common/CustomEditor';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { vi } from 'date-fns/locale';
+import Select from 'react-select';
 
 const ComboAdd = () => {
     const navigation = useNavigate();
-    const { register, handleSubmit, setValue, trigger, formState: { errors }, watch } = useForm();
+    const { register, handleSubmit, setValue, trigger, formState: { errors }, watch, setError, clearErrors } = useForm();
     const dispatch = useDispatch();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [products, setProducts] = useState([]);
@@ -34,6 +35,9 @@ const ComboAdd = () => {
             }
         });
     }, []);
+
+    // Tạo options cho react-select
+    const productOptions = products.map(p => ({ value: p.id, label: p.name + (p.size ? ` - ${p.size}` : '') + (p.category?.name ? ` (${p.category.name})` : '') }));
 
     // Hàm xử lý khi chọn ảnh
     const onChangeImage = (e) => {
@@ -82,7 +86,43 @@ const ComboAdd = () => {
         ));
     };
 
+    // Validate sản phẩm trong combo
+    useEffect(() => {
+        // Kiểm tra ít nhất 1 sản phẩm
+        if (!comboItems || comboItems.length === 0) {
+            setError('comboItems', { type: 'manual', message: 'Cần chọn ít nhất 1 sản phẩm cho combo!' });
+            return;
+        }
+        // Kiểm tra trùng sản phẩm
+        const ids = comboItems.map(i => i.product_id).filter(Boolean);
+        const hasDuplicate = ids.length !== new Set(ids).size;
+        if (hasDuplicate) {
+            setError('comboItems', { type: 'manual', message: 'Không được chọn trùng sản phẩm trong combo!' });
+            return;
+        }
+        // Kiểm tra số lượng > 0
+        if (comboItems.some(i => !i.product_id || !i.quantity || Number(i.quantity) <= 0)) {
+            setError('comboItems', { type: 'manual', message: 'Vui lòng chọn sản phẩm và số lượng phải lớn hơn 0' });
+            return;
+        }
+        clearErrors('comboItems');
+    }, [comboItems, setError, clearErrors]);
+
     const handleSubmitForm = async (data) => {
+        // Validate sản phẩm trong combo
+        if (!comboItems || comboItems.length === 0) {
+            setError('comboItems', { type: 'manual', message: 'Cần chọn ít nhất 1 sản phẩm cho combo!' });
+            return;
+        }
+        const ids = comboItems.map(i => i.product_id).filter(Boolean);
+        if (ids.length !== new Set(ids).size) {
+            setError('comboItems', { type: 'manual', message: 'Không được chọn trùng sản phẩm trong combo!' });
+            return;
+        }
+        if (comboItems.some(i => !i.product_id || !i.quantity || Number(i.quantity) <= 0)) {
+            setError('comboItems', { type: 'manual', message: 'Vui lòng chọn sản phẩm và số lượng phải lớn hơn 0!' });
+            return;
+        }
         // Validate thời gian kết thúc phải lớn hơn hoặc bằng ngày bắt đầu
         if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
             toast.error("Thời gian kết thúc phải lớn hơn hoặc bằng thời gian bắt đầu", toastErrorConfig);
@@ -118,9 +158,9 @@ const ComboAdd = () => {
             console.log("Response from adding combo:", response);
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm combo thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/combo');
-                }, 1500);
+                
+                navigation('/combo');
+                
             } else {
                 toast.error(response.data.message || "Thêm combo thất bại", toastErrorConfig);
             }
@@ -330,6 +370,86 @@ const ComboAdd = () => {
                                 </div>
                             </div>
                         </div>
+                          {/* Sản phẩm trong combo */}
+                          <div className="row mt-4">
+                            <div className="col-lg-12">
+                                <div className="card shadow-sm border-0">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-boxes me-2"></i>Sản phẩm trong combo <span className="text-danger">*</span></h5>
+                                    </div>
+                                    <div className="card-body pt-2">
+                                        {comboItems.map((item, idx) => {
+                                            // Kiểm tra lỗi riêng cho từng dòng
+                                            let itemError = '';
+                                            if (!item.product_id || !item.quantity || Number(item.quantity) <= 0) {
+                                                itemError = 'Vui lòng chọn sản phẩm và số lượng phải lớn hơn 0';
+                                            } else if (comboItems.filter((it, i) => it.product_id === item.product_id && i !== idx).length > 0) {
+                                                itemError = 'Không được chọn trùng sản phẩm trong combo!';
+                                            }
+                                            return (
+                                                <div className="row align-items-center mb-3" key={idx}>
+                                                    <div className="col-md-5 position-relative">
+                                                        <Select
+                                                            options={productOptions.filter(opt => !comboItems.some((it, i) => it.product_id === opt.value && i !== idx))}
+                                                            value={productOptions.find(opt => String(opt.value) === String(item.product_id)) || null}
+                                                            onChange={opt => handleChangeItem(idx, 'product_id', opt ? opt.value : '')}
+                                                            placeholder="Tìm kiếm & chọn sản phẩm..."
+                                                            classNamePrefix="react-select"
+                                                        />
+                                                        {itemError && (
+                                                            <div className="text-danger mt-1 small position-absolute w-100">{itemError}</div>
+                                                        )}
+                                                    </div>
+                                                    <div className="col-md-3 d-flex align-items-center">
+                                                        {products.find(p => String(p.id) === String(item.product_id))?.featured_image?.thumb_url ? (
+                                                            <img
+                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).featured_image.thumb_url}
+                                                                alt=""
+                                                                style={{ width: 90, height: 60, objectFit: 'contain', borderRadius: 4, border: '1px solid #eee', background: '#fff' }}
+                                                            />
+                                                        ) : (
+                                                            <div style={{ width: 90, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 4 }}>
+                                                                <i className="fas fa-image" style={{ fontSize: 32, color: '#bbb' }}></i>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="col-md-2">
+                                                        <input
+                                                            type="number"
+                                                            className="form-control"
+                                                            min={1}
+                                                            value={item.quantity}
+                                                            onChange={e => handleChangeItem(idx, 'quantity', e.target.value)}
+                                                            placeholder="Số lượng"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-2 d-flex align-items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-danger"
+                                                            onClick={() => handleRemoveItem(idx)}
+                                                            disabled={comboItems.length === 1}
+                                                        >
+                                                            <i className="fas fa-minus"></i>
+                                                        </button>
+                                                        {idx === comboItems.length - 1 && (
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-success"
+                                                                onClick={handleAddItem}
+                                                            >
+                                                                <i className="fas fa-plus"></i>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         {/* Mô tả combo */}
                         <div className="row mt-4">
                             <div className="col-lg-12">
@@ -348,93 +468,7 @@ const ComboAdd = () => {
                                 </div>
                             </div>
                         </div>
-                        {/* Sản phẩm trong combo */}
-                        <div className="row mt-4">
-                            <div className="col-lg-12">
-                                <div className="card shadow-sm border-0">
-                                    <div className="card-header bg-white border-bottom-0 pb-0">
-                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-boxes me-2"></i>Sản phẩm trong combo <span className="text-danger">*</span></h5>
-                                    </div>
-                                    <div className="card-body pt-2">
-                                        {comboItems.map((item, idx) => (
-                                            <div className="row align-items-center mb-3" key={idx}>
-                                                <div className="col-md-5">
-                                                    <select
-                                                        className="form-select"
-                                                        value={item.product_id}
-                                                        onChange={e => handleChangeItem(idx, 'product_id', e.target.value)}
-                                                        required
-                                                    >
-                                                        <option value="" disabled>
-                                                            Chọn sản phẩm
-                                                        </option>
-                                                        {products.map(prod => {
-                                                            const isSelected = comboItems.some((it, i) => it.product_id === prod.id && i !== idx);
-                                                            return (
-                                                                <option
-                                                                    key={prod.id}
-                                                                    value={prod.id}
-                                                                    disabled={isSelected}
-                                                                    style={isSelected ? { color: '#ccc', backgroundColor: '#f5f5f5' } : {}}
-                                                                >
-                                                                    {prod.name}
-                                                                    {prod.size ? ` - ${prod.size}` : ''}
-                                                                    {prod.category?.name ? ` (${prod.category.name})` : ''}
-                                                                    {isSelected ? ' (Đã chọn)' : ''}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                    </select>
-                                                </div>
-                                                <div className="col-md-3 d-flex align-items-center">
-                                                    {products.find(p => String(p.id) === String(item.product_id))?.featured_image?.thumb_url ? (
-                                                        <img
-                                                            src={process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).featured_image.thumb_url}
-                                                            alt=""
-                                                            style={{ width: 90, height: 60, objectFit: 'contain', borderRadius: 4, border: '1px solid #eee', background: '#fff' }}
-                                                        />
-                                                    ) : (
-                                                        <div style={{ width: 90, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 4 }}>
-                                                            <i className="fas fa-image" style={{ fontSize: 32, color: '#bbb' }}></i>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="col-md-2">
-                                                    <input
-                                                        type="number"
-                                                        className="form-control"
-                                                        min={1}
-                                                        value={item.quantity}
-                                                        onChange={e => handleChangeItem(idx, 'quantity', e.target.value)}
-                                                        placeholder="Số lượng"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="col-md-2 d-flex align-items-center gap-2">
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-danger"
-                                                        onClick={() => handleRemoveItem(idx)}
-                                                        disabled={comboItems.length === 1}
-                                                    >
-                                                        <i className="fas fa-minus"></i>
-                                                    </button>
-                                                    {idx === comboItems.length - 1 && (
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-success"
-                                                            onClick={handleAddItem}
-                                                        >
-                                                            <i className="fas fa-plus"></i>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                      
                         {/* Nút hành động */}
                         <div className="row mt-4 mb-4">
                             <div className="col-lg-12">

@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import moment from 'moment';
 import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import { cleanHtml,oembedToIframe} from '../../helpers/formatData';
 const PromotionDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -232,7 +233,7 @@ const PromotionDetail = () => {
                 </div>
                 <div className="card-body flex-grow-1" style={{ minHeight: 60, fontSize: 14, padding: '12px 16px' }}>
                     {promotion.description
-                        ? <div dangerouslySetInnerHTML={{ __html: promotion.description }} />
+                        ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(promotion.description)) }} />
                         : <span className="text-muted fst-italic">Chưa có mô tả</span>
                     }
                 </div>

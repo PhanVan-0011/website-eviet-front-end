@@ -13,7 +13,9 @@ const Layout = () => {
         bottom: 0,
         backgroundColor: "rgba(0, 0, 0, 0.4)", // Màu nền mờ
         zIndex: 9999, // Đảm bảo lớp phủ nằm trên cùng
-        textAlign: "center", //  /* Căn giữa nội dung theo chiều ngang */
+        display: "flex",                // Thêm dòng này
+        justifyContent: "center",       // Thêm dòng này
+        alignItems: "center",  
     };
     return (
       <div>

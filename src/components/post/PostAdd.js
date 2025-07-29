@@ -7,6 +7,7 @@ import requestApi from '../../helpers/api';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import CustomEditor from '../common/CustomEditor';
+import Select from 'react-select';
 
 const PostAdd = () => {
     const navigate = useNavigate();
@@ -17,6 +18,8 @@ const PostAdd = () => {
     const [imageFiles, setImageFiles] = useState([]);
     const [imagePreviews, setImagePreviews] = useState([]);
     const [featuredImageIndex, setFeaturedImageIndex] = useState(0);
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const categoryOptions = categories.map(cat => ({ value: cat.id, label: cat.name }));
 
     useEffect(() => {
         dispatch(actions.controlLoading(true));
@@ -50,6 +53,8 @@ const PostAdd = () => {
     };
 
     const handleSubmitForm = async (data) => {
+        const valid = await trigger(['imageFiles', 'category_ids']);
+        if (!valid) return;
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
@@ -76,9 +81,9 @@ const PostAdd = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm bài viết thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigate('/post');
-                }, 1500);
+
+                navigate('/post');
+         
             } else {
                 toast.error(response.data.message || "Thêm bài viết thất bại", toastErrorConfig);
             }
@@ -145,38 +150,29 @@ const PostAdd = () => {
                                     </div>
                                     <div className="row mb-3">
                                     <div className="col-md-6">
-                                        <div className="mb-3 px-3">
+                                        <div className="mb-3">
                                             <label className="form-label fw-semibold">
                                                 Danh mục <span style={{ color: 'red' }}>*</span>
                                             </label>
-                                            <div
-                                                className="row"
-                                                style={{
-                                                    maxHeight: 248,
-                                                    overflowY: 'auto',
-                                                    border: '1px solid #e0e0e0',
-                                                    borderRadius: 4,
-                                                    padding: 8,
-                                                    background: '#fafbfc'
+                                            <Select
+                                                options={categoryOptions}
+                                                isMulti
+                                                value={categoryOptions.filter(opt => selectedCategories.includes(String(opt.value)) || selectedCategories.includes(opt.value))}
+                                                onChange={opts => {
+                                                    const values = opts ? opts.map(opt => opt.value) : [];
+                                                    setSelectedCategories(values);
+                                                    setValue('category_ids', values, { shouldValidate: true });
                                                 }}
-                                            >
-                                                {categories.map(cat => (
-                                                    <div className="col-12" key={cat.id}>
-                                                        <div className="form-check">
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                id={`cat_${cat.id}`}
-                                                                value={cat.id}
-                                                                {...register('category_ids', { required: 'Danh mục là bắt buộc' })}
-                                                            />
-                                                            <label className="form-check-label" htmlFor={`cat_${cat.id}`}>
-                                                                {cat.name}
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                                placeholder="Tìm kiếm & chọn danh mục..."
+                                                classNamePrefix="react-select"
+                                                onBlur={() => trigger('category_ids')}
+                                            />
+                                            <input
+                                                type="hidden"
+                                                {...register('category_ids', {
+                                                    validate: value => (value && value.length > 0) || 'Phải chọn ít nhất 1 danh mục!'
+                                                })}
+                                            />
                                             {errors.category_ids && <div className="text-danger">{errors.category_ids.message}</div>}
                                         </div>
                                     </div>

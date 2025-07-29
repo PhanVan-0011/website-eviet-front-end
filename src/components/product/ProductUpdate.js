@@ -8,12 +8,13 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import CustomEditor from '../common/CustomEditor';
 import { Modal, Button } from 'react-bootstrap';
+import Select from 'react-select';
 
 const ProductUpdate = () => {
     const params = useParams();
     const navigation = useNavigate();
     const dispatch = useDispatch();
-    const { register, handleSubmit, setValue, trigger, formState: { errors, isSubmitted } } = useForm();
+    const { register, handleSubmit, setValue, trigger, formState: { errors, isSubmitted }, watch } = useForm();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categories, setCategories] = useState([]);
     const [originalPrice, setOriginalPrice] = useState('');
@@ -231,7 +232,7 @@ const ProductUpdate = () => {
 
     // Submit
     const handleSubmitForm = async (data) => {
-        const valid = await trigger('imageFiles');
+        const valid = await trigger(['imageFiles', 'category_ids']);
         if (!valid) return;
         setIsSubmitting(true);
         try {
@@ -251,7 +252,7 @@ const ProductUpdate = () => {
             // Gửi deleted_image_ids[]
             removedOldImageIds.forEach(id => formData.append('deleted_image_ids[]', id));
             // Chỉ gửi featured_image_index nếu còn ảnh
-            if (featuredImageIndex >= 0) {
+            if (imageFiles.length > 0 || oldImages.length > 0) {
                 formData.append('featured_image_index', featuredImageIndex);
             }
             
@@ -266,9 +267,9 @@ const ProductUpdate = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật sản phẩm thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/product');
-                }, 1500);
+                
+                navigation('/product');
+                
             } else {
                 toast.error(response.data.message || "Cập nhật sản phẩm thất bại", toastErrorConfig);
             }
@@ -283,6 +284,9 @@ const ProductUpdate = () => {
             setIsSubmitting(false);
         }
     };
+
+    // Tạo options cho react-select
+    const categoryOptions = categories.map(cat => ({ value: cat.id, label: cat.name }));
 
     return (
         <div id="layoutSidenav_content">
@@ -494,40 +498,30 @@ const ProductUpdate = () => {
                                                 {isSubmitted && errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
                                             </div>
                                         </div>
-                                        <div className="col-md-6">
+                                        <div className="col-md-6 input-file">
                                             <div className="mb-3 px-3">
                                                 <label className="form-label fw-semibold">
                                                     Danh mục <span style={{ color: 'red' }}>*</span>
                                                 </label>
-                                                <div
-                                                    className="row"
-                                                    style={{
-                                                        maxHeight: 245,
-                                                        overflowY: 'auto',
-                                                        border: '1px solid #e0e0e0',
-                                                        borderRadius: 4,
-                                                        padding: 8,
-                                                        background: '#fafbfc'
+                                                <Select
+                                                    options={categoryOptions}
+                                                    isMulti
+                                                    value={categoryOptions.filter(opt => selectedCategories.includes(opt.value) || selectedCategories.includes(String(opt.value)))}
+                                                    onChange={opts => {
+                                                        const values = opts ? opts.map(opt => opt.value) : [];
+                                                        setSelectedCategories(values);
+                                                        setValue('category_ids', values, { shouldValidate: true });
                                                     }}
-                                                >
-                                                    {categories.map(cat => (
-                                                        <div className="col-12" key={cat.id}>
-                                                            <div className="form-check">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    id={`cat_${cat.id}`}
-                                                                    value={cat.id}
-                                                                    checked={selectedCategories.includes(cat.id)}
-                                                                    onChange={handleCategoryChange}
-                                                                />
-                                                                <label className="form-check-label" htmlFor={`cat_${cat.id}`}>
-                                                                    {cat.name}
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    </div>
+                                                    placeholder="Tìm kiếm & chọn danh mục..."
+                                                    classNamePrefix="react-select"
+                                                    onBlur={() => trigger('category_ids')}
+                                                />
+                                                <input
+                                                    type="hidden"
+                                                    {...register('category_ids', {
+                                                        validate: value => (value && value.length > 0) || 'Phải chọn ít nhất 1 danh mục!'
+                                                    })}
+                                                />
                                                 {errors.category_ids && <div className="text-danger">{errors.category_ids.message}</div>}
                                             </div>
                                         </div>
@@ -598,9 +592,9 @@ const ProductUpdate = () => {
                                 dispatch(actions.controlLoading(false));
                                 if (response.data && response.data.success) {
                                     toast.success(response.data.message || "Xóa sản phẩm thành công!", toastSuccessConfig);
-                                    setTimeout(() => {
-                                        navigation('/product');
-                                    }, 1200);
+                                    
+                                    navigation('/product');
+                                    
                                 } else {
                                     toast.error(response.data.message || "Xóa sản phẩm thất bại", toastErrorConfig);
                                 }
