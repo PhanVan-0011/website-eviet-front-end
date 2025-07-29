@@ -60,9 +60,9 @@ const CategoryUpdate = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật danh mục thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/category');
-                }, 1500);
+                
+                navigation('/category');
+               
             } else {
                 toast.error(response.data.message || "Cập nhật danh mục thất bại", toastErrorConfig);
             }
@@ -215,9 +215,9 @@ const CategoryUpdate = () => {
                                 dispatch(actions.controlLoading(false));
                                 if (response.data && response.data.success) {
                                     toast.success(response.data.message || "Xóa danh mục thành công!", toastSuccessConfig);
-                                    setTimeout(() => {
-                                        navigation('/category');
-                                    }, 1200);
+                                   
+                                    navigation('/category');
+                                    
                                 } else {
                                     toast.error(response.data.message || "Xóa danh mục thất bại", toastErrorConfig);
                                 }

@@ -11444,3 +11444,7 @@ body {
 .card-text-custom{
   font-weight: 600 !important;
 }
+
+.react-select__menu {
+  z-index: 9999 !important;
+}

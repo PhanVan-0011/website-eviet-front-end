@@ -129,9 +129,9 @@ const SliderUpdate = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật slider thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/slider');
-                }, 1200);
+                
+                navigation('/slider');
+                
             } else {
                 toast.error(response.data.message || "Cập nhật slider thất bại", toastErrorConfig);
             }
@@ -157,9 +157,9 @@ const SliderUpdate = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Xóa slider thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/slider');
-                }, 1200);
+                
+                navigation('/slider');
+                
             } else {
                 toast.error(response.data.message || "Xóa slider thất bại", toastErrorConfig);
             }

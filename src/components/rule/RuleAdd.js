@@ -48,9 +48,9 @@ const RuleAdd = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm vai trò thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigate('/rule');
-                }, 1500);
+                
+                navigate('/rule');
+                
             } else {
                 toast.error(response.data.message || "Thêm vai trò thất bại", toastErrorConfig);
             }

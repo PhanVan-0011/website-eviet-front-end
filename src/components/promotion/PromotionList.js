@@ -30,8 +30,11 @@ const PromotionList = () => {
     // Bộ lọc
     const [filterStatus, setFilterStatus] = useState('');
     const [filterType, setFilterType] = useState('');
-    const [filterStartDate, setFilterStartDate] = useState(null);
-    const [filterEndDate, setFilterEndDate] = useState(null);
+    const [filterStartDate, setFilterStartDate] = useState(() => {
+        const now = new Date();
+        return new Date(now.getFullYear(), 0, 1);
+    });
+    const [filterEndDate, setFilterEndDate] = useState(() => new Date());
 
     // Sort states
     const [sortField, setSortField] = useState('');

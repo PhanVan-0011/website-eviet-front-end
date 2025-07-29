@@ -6,7 +6,7 @@ import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
-
+import { cleanHtml,oembedToIframe } from '../../helpers/formatData';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const PostDetail = () => {
@@ -118,87 +118,71 @@ const PostDetail = () => {
                         </ol>
                     </div>
                     <div className="row g-4">
-                        <div className="col-md-5">
-                            <div className="card shadow-sm">
-                                <div className="d-flex flex-column align-items-center p-3">
+                        <div className="col-md-5 d-flex" style={{ height: '75vh' }}>
+                            <div className="card shadow-sm flex-fill" style={{ height: '100%' }}>
+                                <div style={{ height: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
                                     {/* Ảnh đại diện lớn */}
                                     {post.image_urls && post.image_urls.length > 0 ? (
                                         (() => {
                                             const featuredImg = post.image_urls.find(img => img.is_featured === 1);
-                                            const otherImgs = post.image_urls.filter(img => img.is_featured !== 1);
-                                            return (
-                                                <>
-                                                    {featuredImg ? (
-                                                        <>
-                                                            <img
-                                                                key={featuredImg.id}
-                                                                src={urlImage + (featuredImg.main_url || featuredImg.thumb_url)}
-                                                                alt={post.title + '-featured'}
-                                                                className="img-thumbnail mb-3"
-                                                                style={{
-                                                                    objectFit: 'contain',
-                                                                    boxShadow: '0 0 12px #007bff55',
-                                                                    cursor: 'pointer',
-                                                                    maxWidth: '80%',
-                                                                    maxHeight: 400,
-                                                                   
-                                                                }}
-                                                                title="Ảnh đại diện (bấm để xem lớn)"
-                                                                onClick={() => handleImgClick(featuredImg)}
-                                                            />
-                                                            {/* Modal xem ảnh full */}
-                                                            {showModal && modalImg && (
-                                                                <Modal show={showModal} onHide={handleCloseModal} centered>
-                                                                    <Modal.Body style={{ position: 'relative', padding: 0, background: 'transparent', border: 0 }}>
-                                                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
-                                                                            <img
-                                                                                src={urlImage + (modalImg.main_url || modalImg.thumb_url)}
-                                                                                alt={post.title + '-modal-full'}
-                                                                                style={{
-                                                                                    maxWidth: '80vw',
-                                                                                    maxHeight: '80vh',
-                                                                                    display: 'block',
-                                                                                    margin: '0 auto',
-                                                                                    borderRadius: 8
-                                                                                }}
-                                                                            />
-                                                                        </div>
-                                                                        {/* Đã ẩn nút X đóng */}
-                                                                    </Modal.Body>
-                                                                </Modal>
-                                                            )}
-                                                        </>
-                                                    ) : null}
-                                                    {/* Các ảnh còn lại nhỏ hơn */}
-                                                    <div className="d-flex flex-wrap gap-2 justify-content-center align-items-center">
-                                                        {otherImgs.length > 0 ? otherImgs.map((img, idx) => (
-                                                            <img
-                                                                key={img.id}
-                                                                src={urlImage + (img.main_url || img.thumb_url)}
-                                                                alt={post.title + '-' + idx}
-                                                                style={{
-                                                                    width: 90,
-                                                                    height: 90,
-                                                                    objectFit: 'cover',
-                                                                    cursor: 'pointer',
-                                                                    marginBottom: 4,
-                                                                    marginRight: 8
-                                                                }}
-                                                                title="Ảnh bài viết (bấm để xem lớn)"
-                                                                onClick={() => handleImgClick(img)}
-                                                            />
-                                                        )) : (
-                                                            !featuredImg && <div className="text-muted">Chưa có ảnh bài viết</div>
-                                                        )}
-                                                    </div>
-                                                </>
+                                            return featuredImg ? (
+                                                <img
+                                                    key={featuredImg.id}
+                                                    src={urlImage + (featuredImg.main_url || featuredImg.thumb_url)}
+                                                    alt={post.title + '-featured'}
+                                                    className="img-thumbnail"
+                                                    style={{
+                                                        objectFit: 'contain',
+                                                        boxShadow: '0 0 12px #007bff55',
+                                                        cursor: 'pointer',
+                                                        maxWidth: '80%',
+                                                        maxHeight: '100%',
+                                                        borderRadius: 10,
+                                                        background: '#f8f9fa',
+                                                        border: '1px solid #eee',
+                                                        display: 'block',
+                                                        margin: '0 auto'
+                                                    }}
+                                                    title="Ảnh đại diện (bấm để xem lớn)"
+                                                    onClick={() => handleImgClick(featuredImg)}
+                                                />
+                                            ) : (
+                                                <div
+                                                    style={{
+                                                        width: '80%',
+                                                        height: '100%',
+                                                        borderRadius: 10,
+                                                        background: '#f8f9fa',
+                                                        border: '1px solid #eee',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        margin: '0 auto',
+                                                    }}
+                                                >
+                                                    <i className="fas fa-image" style={{ fontSize: 80, color: '#bbb' }}></i>
+                                                </div>
                                             );
                                         })()
                                     ) : (
-                                        <div className="text-muted">Chưa có ảnh bài viết</div>
+                                        <div
+                                            style={{
+                                                width: '80%',
+                                                height: '100%',
+                                                borderRadius: 10,
+                                                background: '#f8f9fa',
+                                                border: '1px solid #eee',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                margin: '0 auto',
+                                            }}
+                                        >
+                                            <i className="fas fa-image" style={{ fontSize: 80, color: '#bbb' }}></i>
+                                        </div>
                                     )}
                                 </div>
-                                <div className="card-body">
+                                <div className="card-body" style={{ height: '50%', overflowY: 'auto' }}>
                                     <h4 className="card-title mb-2">{post.title}</h4>
                                     <div className="mb-2">
                                         {post.status === 1
@@ -218,30 +202,31 @@ const PostDetail = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-7 mb-4">
-                            <div className="card shadow-sm h-100">
+                        <div className="col-md-7 mb-4 d-flex" style={{ height: '75vh' }}>
+                            <div className="card shadow-sm flex-fill d-flex flex-column" style={{ height: '100%' }}>
                                 <div className="card-header bg-light fw-bold">
                                     <i className="fas fa-info-circle me-2"></i>Nội dung bài viết
                                 </div>
-                                <div className="card-body" style={{ minHeight: 200 }}>
+                                <div className="card-body flex-grow-1" style={{ minHeight: 200, overflowY: 'auto' }}>
                                     {post.content
-                                        ? <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                                        ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(post.content)) }} />
                                         : <span className="text-muted fst-italic">Chưa có nội dung</span>
                                     }
                                 </div>
-                                <div className="card-footer bg-white border-0">
-                                    <Link className="btn btn-primary me-2" to={`/post/${post.id}`}>
-                                        <i className="fas fa-edit"></i> Sửa bài viết
-                                    </Link>
-                                    <button className="btn btn-danger me-2" onClick={handleOpenDeleteModal}>
-                                        <i className="fas fa-trash-alt"></i> Xóa bài viết
-                                    </button>
-                                    <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
-                                        <i className="fas fa-arrow-left"></i> Quay lại
-                                    </button>
-                                </div>
                             </div>
                         </div>
+                    </div>
+                    {/* Các nút thao tác nằm giữa bên dưới, ngoài các card */}
+                    <div className="d-flex justify-content-center gap-2 mt-3 mb-3">
+                        <Link className="btn btn-primary" to={`/post/${post.id}`}>
+                            <i className="fas fa-edit"></i> Sửa bài viết
+                        </Link>
+                        <button className="btn btn-danger" onClick={handleOpenDeleteModal}>
+                            <i className="fas fa-trash-alt"></i> Xóa bài viết
+                        </button>
+                        <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
+                            <i className="fas fa-arrow-left"></i> Quay lại
+                        </button>
                     </div>
                 </div>
             </main>

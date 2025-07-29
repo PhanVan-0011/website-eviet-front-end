@@ -11,6 +11,7 @@ import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig'
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import {vi} from 'date-fns/locale';
+import Select from 'react-select';
 
 const AdminAdd = () => {
     const navigation = useNavigate();
@@ -19,6 +20,7 @@ const AdminAdd = () => {
         handleSubmit,
         setValue,
         formState: { errors },
+        trigger,
     } = useForm();
     const dispatch = useDispatch();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,6 +29,8 @@ const AdminAdd = () => {
     const [dob, setDob] = useState(null);
     // State cho roles và role_ids
     const [roles, setRoles] = useState([]);
+    const [selectedRoles, setSelectedRoles] = useState([]);
+    const roleOptions = roles.map(role => ({ value: role.id, label: role.display_name || role.name }));
 
     // State cho ảnh đại diện
     const [imagePreview, setImagePreview] = useState(null);
@@ -72,6 +76,9 @@ const AdminAdd = () => {
         if (data.role_ids && !Array.isArray(data.role_ids)) {
             data.role_ids = [data.role_ids];
         }
+        // Validate role_ids
+        const valid = await trigger('role_ids');
+        if (!valid) return;
         // Đưa ngày sinh vào data nếu có chọn
         if (dob) {
             data.date_of_birth = dob.toISOString().split('T')[0];
@@ -102,9 +109,9 @@ const AdminAdd = () => {
                 // if (response.data.data && response.data.data.access_token) {
                 //     localStorage.setItem('access_token', response.data.data.access_token);
                 // }
-                setTimeout(() => {
-                    navigation('/admin');
-                }, 1500);
+               
+                navigation('/admin');
+                
             } else {
                 toast.error(response.data.message || "Thêm nhân viên thất bại", toastErrorConfig);
             }
@@ -357,28 +364,25 @@ const AdminAdd = () => {
                                                 <label className="form-label fw-semibold">
                                                     Vai trò <span style={{ color: 'red' }}>*</span>
                                                 </label>
-                                                {roles && roles.length > 0 ? (
-                                                    <div className="row g-2 overflow-auto border rounded p-2 bg-light" style={{maxHeight: 220}}>
-                                                        {roles.map((role, idx) => (
-                                                            <div className="col-6 col-md-4" key={role.id}>
-                                                                <div className="form-check">
-                                                                    <input
-                                                                        className="form-check-input"
-                                                                        type="checkbox"
-                                                                        id={`role_${role.id}`}
-                                                                        value={role.id}
-                                                                        {...register('role_ids', { required: 'Vai trò là bắt buộc' })}
-                                                                    />
-                                                                    <label className="form-check-label" htmlFor={`role_${role.id}`}>
-                                                                        {role.display_name || role.name}
-                                                                    </label>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                ) : (
-                                                    <div>Đang lấy dữ liệu vai trò...</div>
-                                                )}
+                                                <Select
+                                                    options={roleOptions}
+                                                    isMulti
+                                                    value={roleOptions.filter(opt => selectedRoles.includes(String(opt.value)) || selectedRoles.includes(opt.value))}
+                                                    onChange={opts => {
+                                                        const values = opts ? opts.map(opt => opt.value) : [];
+                                                        setSelectedRoles(values);
+                                                        setValue('role_ids', values, { shouldValidate: true });
+                                                    }}
+                                                    placeholder="Tìm kiếm & chọn vai trò..."
+                                                    classNamePrefix="react-select"
+                                                    onBlur={() => trigger('role_ids')}
+                                                />
+                                                <input
+                                                    type="hidden"
+                                                    {...register('role_ids', {
+                                                        validate: value => (value && value.length > 0) || 'Phải chọn ít nhất 1 vai trò!'
+                                                    })}
+                                                />
                                                 {errors.role_ids && <div className="text-danger">{errors.role_ids.message}</div>}
                                             </div>
                                     </div>

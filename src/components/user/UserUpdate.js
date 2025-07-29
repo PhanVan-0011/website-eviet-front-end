@@ -111,9 +111,9 @@ const UserUpdate = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật thông tin thành công", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/user');
-                }, 1500);
+                
+                navigation('/user');
+                
             } else {
                 toast.error(response.data.message || "Cập nhật thất bại", toastErrorConfig);
             }
@@ -388,9 +388,9 @@ const UserUpdate = () => {
                                 dispatch(actions.controlLoading(false));
                                 if (response.data && response.data.success) {
                                     toast.success(response.data.message || "Xóa khách hàng thành công!", toastSuccessConfig);
-                                    setTimeout(() => {
-                                        navigation('/user');
-                                    }, 1200);
+                                    
+                                    navigation('/user');
+                                   
                                 } else {
                                     toast.error(response.data.message || "Xóa khách hàng thất bại", toastErrorConfig);
                                 }

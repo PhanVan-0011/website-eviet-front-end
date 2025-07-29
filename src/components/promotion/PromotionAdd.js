@@ -10,10 +10,11 @@ import CustomEditor from '../common/CustomEditor';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { vi } from 'date-fns/locale';
+import Select from 'react-select';
 
 const PromotionAdd = () => {
     const navigation = useNavigate();
-    const { register, handleSubmit, setValue, trigger, formState: { errors }, watch } = useForm();
+    const { register, handleSubmit, setValue, trigger, formState: { errors }, watch, setError, clearErrors } = useForm();
     const dispatch = useDispatch();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,6 +44,11 @@ const PromotionAdd = () => {
     const [maxDiscountAmount, setMaxDiscountAmount] = useState('');
     const [maxUsage, setMaxUsage] = useState('');
     const [maxUsagePerUser, setMaxUsagePerUser] = useState('');
+
+    // Tạo options cho react-select
+    const productOptions = products.map(p => ({ value: p.id, label: p.name + (p.size ? ` - ${p.size}` : '') + (p.category?.name ? ` (${p.category.name})` : '') }));
+    const categoryOptions = categories.map(c => ({ value: c.id, label: c.name }));
+    const comboOptions = combos.map(c => ({ value: c.id, label: c.name }));
 
     // Lấy danh sách sản phẩm, danh mục, combo
     useEffect(() => {
@@ -82,6 +88,34 @@ const PromotionAdd = () => {
         return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
 
+    // Validate đối tượng áp dụng react-hook-form
+    useEffect(() => {
+        if (applicationType === 'products') {
+            if (selectedProducts.length === 0) {
+                setError('selectedProducts', { type: 'manual', message: 'Vui lòng chọn sản phẩm áp dụng!' });
+            } else {
+                clearErrors('selectedProducts');
+            }
+            clearErrors(['selectedCategories', 'selectedCombos']);
+        } else if (applicationType === 'categories') {
+            if (selectedCategories.length === 0) {
+                setError('selectedCategories', { type: 'manual', message: 'Vui lòng chọn danh mục áp dụng!' });
+            } else {
+                clearErrors('selectedCategories');
+            }
+            clearErrors(['selectedProducts', 'selectedCombos']);
+        } else if (applicationType === 'combos') {
+            if (selectedCombos.length === 0) {
+                setError('selectedCombos', { type: 'manual', message: 'Vui lòng chọn combo áp dụng!' });
+            } else {
+                clearErrors('selectedCombos');
+            }
+            clearErrors(['selectedProducts', 'selectedCategories']);
+        } else if (applicationType === 'orders') {
+            clearErrors(['selectedProducts', 'selectedCategories', 'selectedCombos']);
+        }
+    }, [applicationType, selectedProducts, selectedCategories, selectedCombos, setError, clearErrors]);
+
     // Xử lý submit
     const handleSubmitForm = async (data) => {
         // Validate ngày
@@ -90,14 +124,17 @@ const PromotionAdd = () => {
             setIsSubmitting(false);
             return;
         }
-        // Validate đối tượng áp dụng
-        if (
-            (applicationType === 'products' && selectedProducts.length === 0) ||
-            (applicationType === 'categories' && selectedCategories.length === 0) ||
-            (applicationType === 'combos' && selectedCombos.length === 0)
-        ) {
-            toast.error("Vui lòng chọn đối tượng áp dụng!", toastErrorConfig);
-            setIsSubmitting(false);
+        // Validate đối tượng áp dụng react-hook-form
+        if (applicationType === 'products' && selectedProducts.length === 0) {
+            setError('selectedProducts', { type: 'manual', message: 'Vui lòng chọn sản phẩm áp dụng!' });
+            return;
+        }
+        if (applicationType === 'categories' && selectedCategories.length === 0) {
+            setError('selectedCategories', { type: 'manual', message: 'Vui lòng chọn danh mục áp dụng!' });
+            return;
+        }
+        if (applicationType === 'combos' && selectedCombos.length === 0) {
+            setError('selectedCombos', { type: 'manual', message: 'Vui lòng chọn combo áp dụng!' });
             return;
         }
         setIsSubmitting(true);
@@ -133,9 +170,9 @@ const PromotionAdd = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm khuyến mãi thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/promotion');
-                }, 1500);
+                
+                navigation('/promotion');
+                
             } else {
                 toast.error(response.data.message || "Thêm khuyến mãi thất bại", toastErrorConfig);
             }
@@ -233,58 +270,43 @@ const PromotionAdd = () => {
                                         {applicationType === 'products' && (
                                             <div>
                                                 <label className="mb-1">Chọn sản phẩm <span style={{ color: 'red' }}>*</span></label>
-                                                <select
-                                                    className="form-select"
-                                                    multiple
-                                                    value={selectedProducts}
-                                                    onChange={e => handleSelectChange('products', Array.from(e.target.selectedOptions, option => option.value))}
-                                                    required
-                                                    style={{ minHeight: 80 }}
-                                                >
-                                                    {products.map(prod => (
-                                                        <option key={prod.id} value={prod.id}>
-                                                            {prod.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                <Select
+                                                    options={productOptions}
+                                                    isMulti
+                                                    value={productOptions.filter(opt => selectedProducts.includes(String(opt.value)) || selectedProducts.includes(opt.value))}
+                                                    onChange={opts => handleSelectChange('products', opts ? opts.map(opt => opt.value) : [])}
+                                                    placeholder="Tìm kiếm & chọn sản phẩm..."
+                                                    classNamePrefix="react-select"
+                                                />
+                                                {errors.selectedProducts && <div className="text-danger mt-1 small">{errors.selectedProducts.message}</div>}
                                             </div>
                                         )}
                                         {applicationType === 'categories' && (
                                             <div>
                                                 <label className="mb-1">Chọn danh mục <span style={{ color: 'red' }}>*</span></label>
-                                                <select
-                                                    className="form-select"
-                                                    multiple
-                                                    value={selectedCategories}
-                                                    onChange={e => handleSelectChange('categories', Array.from(e.target.selectedOptions, option => option.value))}
-                                                    required
-                                                    style={{ minHeight: 80 }}
-                                                >
-                                                    {categories.map(cat => (
-                                                        <option key={cat.id} value={cat.id}>
-                                                            {cat.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                <Select
+                                                    options={categoryOptions}
+                                                    isMulti
+                                                    value={categoryOptions.filter(opt => selectedCategories.includes(String(opt.value)) || selectedCategories.includes(opt.value))}
+                                                    onChange={opts => handleSelectChange('categories', opts ? opts.map(opt => opt.value) : [])}
+                                                    placeholder="Tìm kiếm & chọn danh mục..."
+                                                    classNamePrefix="react-select"
+                                                />
+                                                {errors.selectedCategories && <div className="text-danger mt-1 small">{errors.selectedCategories.message}</div>}
                                             </div>
                                         )}
                                         {applicationType === 'combos' && (
                                             <div>
                                                 <label className="mb-1">Chọn combo <span style={{ color: 'red' }}>*</span></label>
-                                                <select
-                                                    className="form-select"
-                                                    multiple
-                                                    value={selectedCombos}
-                                                    onChange={e => handleSelectChange('combos', Array.from(e.target.selectedOptions, option => option.value))}
-                                                    required
-                                                    style={{ minHeight: 80 }}
-                                                >
-                                                    {combos.map(combo => (
-                                                        <option key={combo.id} value={combo.id}>
-                                                            {combo.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                <Select
+                                                    options={comboOptions}
+                                                    isMulti
+                                                    value={comboOptions.filter(opt => selectedCombos.includes(String(opt.value)) || selectedCombos.includes(opt.value))}
+                                                    onChange={opts => handleSelectChange('combos', opts ? opts.map(opt => opt.value) : [])}
+                                                    placeholder="Tìm kiếm & chọn combo..."
+                                                    classNamePrefix="react-select"
+                                                />
+                                                {errors.selectedCombos && <div className="text-danger mt-1 small">{errors.selectedCombos.message}</div>}
                                             </div>
                                         )}
                                         {applicationType === 'orders' && (
@@ -312,18 +334,26 @@ const PromotionAdd = () => {
                                             className="form-control"
                                             type="text"
                                             inputMode="numeric"
-                                            min={0}
                                             value={promoType === 'fixed_amount' ? formatVND(value) : value}
+                                            {...register('promoValue', {
+                                                required: 'Giá trị khuyến mãi là bắt buộc',
+                                                validate: v => {
+                                                    const val = promoType === 'fixed_amount' ? Number((v || '').replace(/\./g, '')) : Number(v);
+                                                    if (isNaN(val) || val <= 0) return 'Giá trị phải lớn hơn 0';
+                                                    if (promoType === 'percentage' && val > 100) return 'Phần trăm tối đa là 100';
+                                                    return true;
+                                                }
+                                            })}
                                             onChange={e => setValuePromo(promoType === 'fixed_amount' ? formatVND(e.target.value) : e.target.value)}
-                                            required
                                             placeholder={promoType === 'percentage' ? 'VD: 15 (%)' : 'VD: 20.000 (VNĐ)'}
                                         />
+                                        {errors.promoValue && <div className="text-danger">{errors.promoValue.message}</div>}
                                     </div>
                                     <div className="col-md-2">
                                         <label className="mb-1">Trạng thái <span style={{ color: 'red' }}>*</span></label>
                                         <select
                                             className="form-select"
-                                            {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
+                                            {...register('is_active', { required: 'Trạng thái là bắt buộc', validate: v => v === '1' || v === '0' || 'Trạng thái không hợp lệ' })}
                                             defaultValue="1"
                                         >
                                             <option value="1">Hiển thị</option>
@@ -338,6 +368,7 @@ const PromotionAdd = () => {
                                             onChange={date => {
                                                 setStartDatePicker(date);
                                                 setStartDate(date);
+                                                setValue('start_date', date, { shouldValidate: true });
                                             }}
                                             locale={vi}
                                             dateFormat="dd/MM/yyyy HH:mm"
@@ -347,8 +378,9 @@ const PromotionAdd = () => {
                                             timeFormat="HH:mm"
                                             timeIntervals={15}
                                             timeCaption="Giờ"
-                                            required
                                         />
+                                        <input type="hidden" {...register('start_date', { required: 'Thời gian bắt đầu là bắt buộc' })} />
+                                        {errors.start_date && <div className="text-danger">{errors.start_date.message}</div>}
                                     </div>
                                     <div className="col-md-3">
                                         <label className="mb-1">Thời gian kết thúc <span style={{ color: 'red' }}>*</span></label>
@@ -357,6 +389,7 @@ const PromotionAdd = () => {
                                             onChange={date => {
                                                 setEndDatePicker(date);
                                                 setEndDate(date);
+                                                setValue('end_date', date, { shouldValidate: true });
                                             }}
                                             locale={vi}
                                             dateFormat="dd/MM/yyyy HH:mm"
@@ -366,8 +399,9 @@ const PromotionAdd = () => {
                                             timeFormat="HH:mm"
                                             timeIntervals={15}
                                             timeCaption="Giờ"
-                                            required
                                         />
+                                        <input type="hidden" {...register('end_date', { required: 'Thời gian kết thúc là bắt buộc' })} />
+                                        {errors.end_date && <div className="text-danger">{errors.end_date.message}</div>}
                                     </div>
                                 </div>
                                 {/* Dòng gồm: Đơn tối thiểu, Giảm tối đa, Tổng lượt sử dụng, Lượt/người, Kết hợp với mã khác */}
@@ -409,22 +443,30 @@ const PromotionAdd = () => {
                                         <input
                                             type="number"
                                             className="form-control"
-                                            min={1}
+                                            {...register('max_usage', {
+                                                min: { value: 1, message: 'Tổng lượt sử dụng phải lớn hơn 0' },
+                                                validate: v => !v || Number(v) > 0 || 'Tổng lượt sử dụng phải lớn hơn 0'
+                                            })}
                                             value={maxUsage}
                                             onChange={e => setMaxUsage(e.target.value)}
                                             placeholder="VD: 100"
                                         />
+                                        {errors.max_usage && <div className="text-danger">{errors.max_usage.message}</div>}
                                     </div>
                                     <div className="col-md-2">
                                         <label className="mb-1">Lượt/người</label>
                                         <input
                                             type="number"
                                             className="form-control"
-                                            min={1}
+                                            {...register('max_usage_per_user', {
+                                                min: { value: 1, message: 'Lượt/người phải lớn hơn 0' },
+                                                validate: v => !v || Number(v) > 0 || 'Lượt/người phải lớn hơn 0'
+                                            })}
                                             value={maxUsagePerUser}
                                             onChange={e => setMaxUsagePerUser(e.target.value)}
                                             placeholder="VD: 1"
                                         />
+                                        {errors.max_usage_per_user && <div className="text-danger">{errors.max_usage_per_user.message}</div>}
                                     </div>
                                     <div className="col-md-2">
                                         <label className="mb-1">Kết hợp với mã khác</label>

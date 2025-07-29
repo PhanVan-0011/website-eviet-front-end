@@ -11,12 +11,13 @@ import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { vi } from 'date-fns/locale';
+import Select from 'react-select';
 
 const PromotionUpdate = () => {
     const params = useParams();
     const navigation = useNavigate();
     const dispatch = useDispatch();
-    const { register, handleSubmit, setValue, trigger, watch, formState: { errors } } = useForm();
+    const { register, handleSubmit, setValue, trigger, watch, formState: { errors }, setError, clearErrors } = useForm();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Danh sách đối tượng áp dụng
@@ -72,20 +73,30 @@ const PromotionUpdate = () => {
                     setValue('description', data.description || '');
                     setApplicationType(data.application_type);
                     setPromoType(data.type);
-                    setValuePromo(data.type === 'fixed_amount' ? formatVND(data.value) : data.value);
+                    const promoVal = data.type === 'fixed_amount' ? formatVND(data.value) : data.value;
+                    setValuePromo(promoVal);
+                    setValue('promoValue', promoVal);
                     setMinOrderValue(data.conditions?.min_order_value ? data.conditions.min_order_value.toString() : '');
                     setMaxDiscountAmount(data.conditions?.max_discount_amount ? data.conditions.max_discount_amount.toString() : '');
                     setMaxUsage(data.usage_limits?.max_usage ? data.usage_limits.max_usage.toString() : '');
                     setMaxUsagePerUser(data.usage_limits?.max_usage_per_user ? data.usage_limits.max_usage_per_user.toString() : '');
                     setValue('is_active', data.is_active === true ? "1" : "0");
                     setValue('is_combinable', data.is_combinable === true ? "1" : "0");
-                    setStartDate(data.dates?.start_date ? moment(data.dates.start_date).toDate() : null);
-                    setEndDate(data.dates?.end_date ? moment(data.dates.end_date).toDate() : null);
-                    setStartDatePicker(data.dates?.start_date ? moment(data.dates.start_date).toDate() : null);
-                    setEndDatePicker(data.dates?.end_date ? moment(data.dates.end_date).toDate() : null);
+                    const start = data.dates?.start_date ? moment(data.dates.start_date).toDate() : null;
+                    const end = data.dates?.end_date ? moment(data.dates.end_date).toDate() : null;
+                    setStartDate(start);
+                    setEndDate(end);
+                    setStartDatePicker(start);
+                    setEndDatePicker(end);
+                    setValue('start_date', start);
+                    setValue('end_date', end);
                     if (data.products && data.products.length > 0) setSelectedProducts(data.products.map(p => p.id.toString()));
                     if (data.categories && data.categories.length > 0) setSelectedCategories(data.categories.map(c => c.id.toString()));
                     if (data.combos && data.combos.length > 0) setSelectedCombos(data.combos.map(c => c.id.toString()));
+                    // Trigger validate các trường liên quan sau khi set dữ liệu
+                    setTimeout(() => {
+                        trigger(['start_date', 'end_date', 'promoValue', 'selectedProducts', 'selectedCategories', 'selectedCombos']);
+                    }, 0);
                 }
                 dispatch(actions.controlLoading(false));
             } catch (error) {
@@ -94,7 +105,7 @@ const PromotionUpdate = () => {
             }
         };
         fetchData();
-    }, [params.id, setValue, dispatch]);
+    }, [params.id, setValue, dispatch, trigger]);
 
     // Hàm format tiền
     const formatVND = (value) => {
@@ -110,27 +121,70 @@ const PromotionUpdate = () => {
         if (type === 'combos') setSelectedCombos(values);
     };
 
+    // Tạo options cho react-select
+    const productOptions = products.map(p => ({ value: p.id, label: p.name + (p.size ? ` - ${p.size}` : '') + (p.category?.name ? ` (${p.category.name})` : '') }));
+    const categoryOptions = categories.map(c => ({ value: c.id, label: c.name }));
+    const comboOptions = combos.map(c => ({ value: c.id, label: c.name }));
+
     // Khi đổi loại khuyến mãi thì reset value
     useEffect(() => {
         setValuePromo('');
     }, [promoType]);
 
+    // Validate đối tượng áp dụng react-hook-form
+    useEffect(() => {
+        if (applicationType === 'products') {
+            if (selectedProducts.length === 0) {
+                setError('selectedProducts', { type: 'manual', message: 'Vui lòng chọn sản phẩm áp dụng!' });
+            } else {
+                clearErrors('selectedProducts');
+            }
+            clearErrors(['selectedCategories', 'selectedCombos']);
+        } else if (applicationType === 'categories') {
+            if (selectedCategories.length === 0) {
+                setError('selectedCategories', { type: 'manual', message: 'Vui lòng chọn danh mục áp dụng!' });
+            } else {
+                clearErrors('selectedCategories');
+            }
+            clearErrors(['selectedProducts', 'selectedCombos']);
+        } else if (applicationType === 'combos') {
+            if (selectedCombos.length === 0) {
+                setError('selectedCombos', { type: 'manual', message: 'Vui lòng chọn combo áp dụng!' });
+            } else {
+                clearErrors('selectedCombos');
+            }
+            clearErrors(['selectedProducts', 'selectedCategories']);
+        } else if (applicationType === 'orders') {
+            clearErrors(['selectedProducts', 'selectedCategories', 'selectedCombos']);
+        }
+    }, [applicationType, selectedProducts, selectedCategories, selectedCombos, setError, clearErrors]);
+
     // Xử lý submit
     const handleSubmitForm = async (data) => {
         // Validate ngày
-        if (startDatePicker && endDatePicker && new Date(endDatePicker) < new Date(startDatePicker)) {
-            toast.error("Thời gian kết thúc phải lớn hơn hoặc bằng thời gian bắt đầu", toastErrorConfig);
-            setIsSubmitting(false);
+        if (startDatePicker && endDatePicker) {
+            if (new Date(endDatePicker) < new Date(startDatePicker)) {
+                setError('end_date', { type: 'manual', message: 'Thời gian kết thúc phải lớn hơn hoặc bằng thời gian bắt đầu' });
+                setIsSubmitting(false);
+                return;
+            } else {
+                clearErrors('end_date');
+            }
+        } else {
+            // Nếu 1 trong 2 chưa chọn thì không báo lỗi
+            clearErrors('end_date');
+        }
+        // Validate đối tượng áp dụng react-hook-form
+        if (applicationType === 'products' && selectedProducts.length === 0) {
+            setError('selectedProducts', { type: 'manual', message: 'Vui lòng chọn sản phẩm áp dụng!' });
             return;
         }
-        // Validate đối tượng áp dụng
-        if (
-            (applicationType === 'products' && selectedProducts.length === 0) ||
-            (applicationType === 'categories' && selectedCategories.length === 0) ||
-            (applicationType === 'combos' && selectedCombos.length === 0)
-        ) {
-            toast.error("Vui lòng chọn đối tượng áp dụng!", toastErrorConfig);
-            setIsSubmitting(false);
+        if (applicationType === 'categories' && selectedCategories.length === 0) {
+            setError('selectedCategories', { type: 'manual', message: 'Vui lòng chọn danh mục áp dụng!' });
+            return;
+        }
+        if (applicationType === 'combos' && selectedCombos.length === 0) {
+            setError('selectedCombos', { type: 'manual', message: 'Vui lòng chọn combo áp dụng!' });
             return;
         }
         setIsSubmitting(true);
@@ -166,9 +220,9 @@ const PromotionUpdate = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật khuyến mãi thành công!", toastSuccessConfig);
-                setTimeout(() => {
-                    navigation('/promotion');
-                }, 1500);
+                
+                navigation('/promotion');
+                
             } else {
                 toast.error(response.data.message || "Cập nhật khuyến mãi thất bại", toastErrorConfig);
             }
@@ -242,6 +296,75 @@ const PromotionUpdate = () => {
                                         {errors.description && <div className="text-danger">{errors.description.message}</div>}
                                     </div>
                                 </div>
+                                <div className="row mb-3">
+                                    <div className="col-md-4">
+                                        <label className="mb-1">Loại áp dụng <span style={{ color: 'red' }}>*</span></label>
+                                        <select
+                                            className="form-select"
+                                            value={applicationType}
+                                            onChange={e => {
+                                                setApplicationType(e.target.value);
+                                                setSelectedProducts([]);
+                                                setSelectedCategories([]);
+                                                setSelectedCombos([]);
+                                            }}
+                                            required
+                                        >
+                                            <option value="products">Sản phẩm</option>
+                                            <option value="categories">Danh mục</option>
+                                            <option value="combos">Combo</option>
+                                            <option value="orders">Đơn hàng</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-md-8">
+                                        {/* Đối tượng áp dụng */}
+                                        {applicationType === 'products' && (
+                                            <div>
+                                                <label className="mb-1">Chọn sản phẩm <span style={{ color: 'red' }}>*</span></label>
+                                                <Select
+                                                    options={productOptions}
+                                                    isMulti
+                                                    value={productOptions.filter(opt => selectedProducts.includes(String(opt.value)) || selectedProducts.includes(opt.value))}
+                                                    onChange={opts => handleSelectChange('products', opts ? opts.map(opt => opt.value) : [])}
+                                                    placeholder="Tìm kiếm & chọn sản phẩm..."
+                                                    classNamePrefix="react-select"
+                                                />
+                                                {errors.selectedProducts && <div className="text-danger mt-1 small">{errors.selectedProducts.message}</div>}
+                                            </div>
+                                        )}
+                                        {applicationType === 'categories' && (
+                                            <div>
+                                                <label className="mb-1">Chọn danh mục <span style={{ color: 'red' }}>*</span></label>
+                                                <Select
+                                                    options={categoryOptions}
+                                                    isMulti
+                                                    value={categoryOptions.filter(opt => selectedCategories.includes(String(opt.value)) || selectedCategories.includes(opt.value))}
+                                                    onChange={opts => handleSelectChange('categories', opts ? opts.map(opt => opt.value) : [])}
+                                                    placeholder="Tìm kiếm & chọn danh mục..."
+                                                    classNamePrefix="react-select"
+                                                />
+                                                {errors.selectedCategories && <div className="text-danger mt-1 small">{errors.selectedCategories.message}</div>}
+                                            </div>
+                                        )}
+                                        {applicationType === 'combos' && (
+                                            <div>
+                                                <label className="mb-1">Chọn combo <span style={{ color: 'red' }}>*</span></label>
+                                                <Select
+                                                    options={comboOptions}
+                                                    isMulti
+                                                    value={comboOptions.filter(opt => selectedCombos.includes(String(opt.value)) || selectedCombos.includes(opt.value))}
+                                                    onChange={opts => handleSelectChange('combos', opts ? opts.map(opt => opt.value) : [])}
+                                                    placeholder="Tìm kiếm & chọn combo..."
+                                                    classNamePrefix="react-select"
+                                                />
+                                                {errors.selectedCombos && <div className="text-danger mt-1 small">{errors.selectedCombos.message}</div>}
+                                            </div>
+                                        )}
+                                        {applicationType === 'orders' && (
+                                            <div className="text-muted fst-italic mt-2">Áp dụng cho toàn bộ đơn hàng</div>
+                                        )}
+                                    </div>
+                                </div>
                                 {/* Dòng gồm: Loại khuyến mãi, Giá trị, Trạng thái, Thời gian bắt đầu, Thời gian kết thúc */}
                                 <div className="row mb-3">
                                     <div className="col-md-2">
@@ -262,18 +385,26 @@ const PromotionUpdate = () => {
                                             className="form-control"
                                             type="text"
                                             inputMode="numeric"
-                                            min={0}
                                             value={promoType === 'fixed_amount' ? formatVND(value) : value}
+                                            {...register('promoValue', {
+                                                required: 'Giá trị khuyến mãi là bắt buộc',
+                                                validate: v => {
+                                                    const val = promoType === 'fixed_amount' ? Number((v || '').replace(/\./g, '')) : Number(v);
+                                                    if (isNaN(val) || val <= 0) return 'Giá trị phải lớn hơn 0';
+                                                    if (promoType === 'percentage' && val > 100) return 'Phần trăm tối đa là 100';
+                                                    return true;
+                                                }
+                                            })}
                                             onChange={e => setValuePromo(promoType === 'fixed_amount' ? formatVND(e.target.value) : e.target.value)}
-                                            required
                                             placeholder={promoType === 'percentage' ? 'VD: 15 (%)' : 'VD: 20.000 (VNĐ)'}
                                         />
+                                        {errors.promoValue && <div className="text-danger">{errors.promoValue.message}</div>}
                                     </div>
                                     <div className="col-md-2">
                                         <label className="mb-1">Trạng thái <span style={{ color: 'red' }}>*</span></label>
                                         <select
                                             className="form-select"
-                                            {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
+                                            {...register('is_active', { required: 'Trạng thái là bắt buộc', validate: v => v === '1' || v === '0' || 'Trạng thái không hợp lệ' })}
                                             defaultValue="1"
                                         >
                                             <option value="1">Hiển thị</option>
@@ -288,6 +419,7 @@ const PromotionUpdate = () => {
                                             onChange={date => {
                                                 setStartDatePicker(date);
                                                 setStartDate(date);
+                                                setValue('start_date', date, { shouldValidate: true });
                                             }}
                                             locale={vi}
                                             dateFormat="dd/MM/yyyy HH:mm"
@@ -297,8 +429,9 @@ const PromotionUpdate = () => {
                                             timeFormat="HH:mm"
                                             timeIntervals={15}
                                             timeCaption="Giờ"
-                                            required
                                         />
+                                        <input type="hidden" {...register('start_date', { required: 'Thời gian bắt đầu là bắt buộc' })} />
+                                        {errors.start_date && <div className="text-danger">{errors.start_date.message}</div>}
                                     </div>
                                     <div className="col-md-3">
                                         <label className="mb-1">Thời gian kết thúc <span style={{ color: 'red' }}>*</span></label>
@@ -307,6 +440,7 @@ const PromotionUpdate = () => {
                                             onChange={date => {
                                                 setEndDatePicker(date);
                                                 setEndDate(date);
+                                                setValue('end_date', date, { shouldValidate: true });
                                             }}
                                             locale={vi}
                                             dateFormat="dd/MM/yyyy HH:mm"
@@ -316,8 +450,9 @@ const PromotionUpdate = () => {
                                             timeFormat="HH:mm"
                                             timeIntervals={15}
                                             timeCaption="Giờ"
-                                            required
                                         />
+                                        <input type="hidden" {...register('end_date', { required: 'Thời gian kết thúc là bắt buộc' })} />
+                                        {errors.end_date && <div className="text-danger">{errors.end_date.message}</div>}
                                     </div>
                                 </div>
                                 {/* Dòng gồm: Đơn tối thiểu, Giảm tối đa, Tổng lượt sử dụng, Lượt/người, Kết hợp với mã khác */}
@@ -359,22 +494,30 @@ const PromotionUpdate = () => {
                                         <input
                                             type="number"
                                             className="form-control"
-                                            min={1}
+                                            {...register('max_usage', {
+                                                min: { value: 1, message: 'Tổng lượt sử dụng phải lớn hơn 0' },
+                                                validate: v => !v || Number(v) > 0 || 'Tổng lượt sử dụng phải lớn hơn 0'
+                                            })}
                                             value={maxUsage}
                                             onChange={e => setMaxUsage(e.target.value)}
                                             placeholder="VD: 100"
                                         />
+                                        {errors.max_usage && <div className="text-danger">{errors.max_usage.message}</div>}
                                     </div>
                                     <div className="col-md-2">
                                         <label className="mb-1">Lượt/người</label>
                                         <input
                                             type="number"
                                             className="form-control"
-                                            min={1}
+                                            {...register('max_usage_per_user', {
+                                                min: { value: 1, message: 'Lượt/người phải lớn hơn 0' },
+                                                validate: v => !v || Number(v) > 0 || 'Lượt/người phải lớn hơn 0'
+                                            })}
                                             value={maxUsagePerUser}
                                             onChange={e => setMaxUsagePerUser(e.target.value)}
                                             placeholder="VD: 1"
                                         />
+                                        {errors.max_usage_per_user && <div className="text-danger">{errors.max_usage_per_user.message}</div>}
                                     </div>
                                     <div className="col-md-2">
                                         <label className="mb-1">Kết hợp với mã khác</label>

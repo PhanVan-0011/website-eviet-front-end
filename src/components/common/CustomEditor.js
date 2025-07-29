@@ -21,7 +21,8 @@ import {  ClassicEditor,
     TableToolbar,
     MediaEmbed,
     Indent,
-    Alignment
+    Alignment,
+    ImageResize,
 } from 'ckeditor5';
 
 import 'ckeditor5/ckeditor5.css';
@@ -55,7 +56,7 @@ function CustomEditor({data, onReady, onChange, trigger}) {
                     ImageToolbar,
                     ImageUpload,
                     Table,
-                    TableToolbar, MediaEmbed, Alignment],
+                    TableToolbar, MediaEmbed, Alignment,ImageResize],
                 toolbar: ['undo',
                                 'redo','heading',
                                 '|',
@@ -73,7 +74,7 @@ function CustomEditor({data, onReady, onChange, trigger}) {
                                 'link',
                                 'blockQuote',
                                 'insertTable',
-                                'imageUpload',
+                                'imageUpload',                             
                                 'mediaEmbed',
                                     '|',
                                 ],
