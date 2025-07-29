@@ -62,7 +62,7 @@ const Dashboard = () => {
                 label: 'Doanh thu (VNĐ)',
                 data: dashboardData.data.revenue_chart.data,
                 fill: true,
-                backgroundColor: '#2c5cc5', 
+                backgroundColor: '#1e4c8e', 
                 borderColor: '#244aa0',
                 pointBackgroundColor: '#2c5cc5', 
                 tension: 0.4,

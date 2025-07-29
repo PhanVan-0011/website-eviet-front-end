@@ -11288,17 +11288,17 @@ body {
 }
 
 .nav-link:hover  {
-  background: #0b5ed7;
+  background: #1e4c8e;
   color: #fff;
 }
 
 .nav-link.active {
-  background: #0b5ed7;
+  background: #1e4c8e;
   color: #fff;
   
 }
 .sb-sidenav-dark .nav-link:hover {
-  background: #0b5ed7;
+  background: #1e4c8e;
   color: #fff;
   border-left: 4px solid #ffffff50;
   padding-left: 1.2rem;
@@ -11376,10 +11376,10 @@ body {
   position: relative !important;
   background: white ;
   border-radius: 10px;
-  box-shadow: 0 -4px 0 0 #43e97b !important; 
+  box-shadow: 0 -4px 0 0 #36bd64!important; 
 }
 .icon-circle-product {
-  background-color: #43e97b;
+  background-color: #36bd64;
   display: inline-flex;
   justify-content: center;
   align-items: center;
