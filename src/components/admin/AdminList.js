@@ -318,7 +318,7 @@ const AdminList = () => {
                     {/* Lọc trạng thái */}
                     <div className="col-md-3">
                         <label className="form-label fw-semibold mb-1" htmlFor="filterIsActive">
-                            <i className="fas fa-toggle-on me-1 form-rounded-sm"></i>Trạng thái tài khoản
+                            <i className="fas fa-toggle-on me-1"></i>Trạng thái tài khoản
                         </label>
                         <select
                             id="filterIsActive"

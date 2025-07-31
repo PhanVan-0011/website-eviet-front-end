@@ -102,7 +102,7 @@ const Login = () => {
   
 
   return (
-        <div id="layoutAuthentication" className="bg-primary">
+        <div id="layoutAuthentication" className="">
     <div id="layoutAuthentication_content">
         <main>
             <div className="container">

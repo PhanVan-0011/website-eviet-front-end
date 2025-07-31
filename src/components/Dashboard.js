@@ -62,7 +62,7 @@ const Dashboard = () => {
                 label: 'Doanh thu (VNĐ)',
                 data: dashboardData.data.revenue_chart.data,
                 fill: true,
-                backgroundColor: '#2c5cc5', 
+                backgroundColor: '#1e4c8e', 
                 borderColor: '#244aa0',
                 pointBackgroundColor: '#2c5cc5', 
                 tension: 0.4,
@@ -171,10 +171,14 @@ const Dashboard = () => {
                                 {dashboardData?.data?.kpis?.total_products?.value ?? 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_products?.secondary_info?.text && (
-                                <span className="text-warning percent-change">
-                                    <i className="fas fa-exclamation-triangle me-1"></i>
-                                    {dashboardData.data.kpis.total_products.secondary_info.text}
-                                </span>
+                            <span className="d-block mb-2">
+                                <i className="fas fa-exclamation-triangle me-1 text-warning-custom"></i>
+                                    <span className="percent-change">
+                                        <span className='text-warning-custom'>{dashboardData.data.kpis.total_products.secondary_info.text}</span>
+                                    </span>
+                            </span>
+                            
+
                             )}
                             
                             {/* <div className="d-flex justify-content-end">
