@@ -56,12 +56,11 @@ const PromotionDetail = () => {
 
     if (loading) {
         return (
-            <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 300 }}>
-                <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </div>
-                <span className="ms-3 fs-5">Đang tải dữ liệu...</span>
-            </div>
+            <div className="container-fluid">
+            <div className="d-flex justify-content-center align-items-center vh-100">
+               <span className="fs-5">Đang tải dữ liệu...</span>
+           </div>
+       </div> 
         );
     }
     if (!promotion) {

@@ -29,6 +29,20 @@ const formatVND = (value) => {
     return number.toLocaleString('vi-VN');
 };
 
+// Thêm map trạng thái payment
+const paymentStatusMap = {
+    pending: 'Chờ thanh toán',
+    success: 'Đã thanh toán',
+    failed: 'Thanh toán thất bại'
+};
+
+// Thêm map màu cho payment status
+const paymentStatusColorMap = {
+    pending: 'warning',
+    success: 'success',
+    failed: 'danger'
+};
+
 const OrderDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -74,10 +88,11 @@ const OrderDetail = () => {
 
     if (loading) {
         return (
-            <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 300 }}>
-                <div className="spinner-border text-primary" role="status"></div>
-                <span className="ms-3 fs-5">Đang tải dữ liệu...</span>
+            <div className="container-fluid">
+                <div className="d-flex justify-content-center align-items-center vh-100">
+                <span className="fs-5">Đang tải dữ liệu...</span>
             </div>
+        </div> 
         );
     }
 
@@ -180,9 +195,11 @@ const OrderDetail = () => {
                                                 <div className="mb-2">
                                                     <span className="fw-semibold">Phương thức:</span> {order.payment.method.name}
                                                 </div>
-                                                <div className="mb-2">
-                                                    <span className="fw-semibold">Trạng thái:</span> {order.payment.status}
-                                                </div>
+                                                {order.payment && (
+                                                    <div className="mb-2">
+                                                        <span className="fw-semibold">Trạng thái:</span> <span className={`badge bg-${paymentStatusColorMap[order.payment.status] || 'secondary'}`}>{paymentStatusMap[order.payment.status] || order.payment.status}</span>
+                                                    </div>
+                                                )}
                                                 <div className="mb-2">
                                                     <span className="fw-semibold">Số tiền:</span> {formatVND(order.payment.amount)} ₫
                                                 </div>
