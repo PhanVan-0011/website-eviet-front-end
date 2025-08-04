@@ -80,11 +80,12 @@ const UserList = () => {
                     </div>
                     <span style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.name}</span>
                 </div>
-            )
+            ),
+            width: '18%'
         },
-        { title: "Email", element: row => row.email },
-        { title: "Số điện thoại", element: row => row.phone },
-        { title: "Giới tính", element: row => row.gender === "male" ? "Nam" : row.gender === "female" ? "Nữ" : "Khác" },
+        { title: "Email", element: row => row.email, width: '15%' },
+        { title: "Số điện thoại", element: row => row.phone, width: '14%' },
+        { title: "Giới tính", element: row => row.gender === "male" ? "Nam" : row.gender === "female" ? "Nữ" : "Khác", width: '8%' },
         {
             title: "Ngày sinh",
             element: row => {
@@ -92,17 +93,19 @@ const UserList = () => {
                 // Thử parse với nhiều định dạng
                 const m = moment(row.date_of_birth, ["DD/MM/YYYY", "YYYY-MM-DD", "YYYY/MM/DD"], true);
                 return m.isValid() ? m.format("DD/MM/YYYY") : "";
-            }
+            },
+            width: '10%'
         },
         // { title: "Xác thực", element: row => row.is_verified ? "Đã xác thực" : "Chưa xác thực" },
-        { title: "Ngày tạo", element: row => formatDate(row.created_at) },
-        { title: "Ngày cập nhật", element: row => formatDate(row.updated_at) },
+        { title: "Ngày tạo", element: row => formatDate(row.created_at), width: '10%' },
+        { title: "Ngày cập nhật", element: row => formatDate(row.updated_at), width: '10%' },
         {
             title: "Trạng thái",
             element: row =>
                 row.is_active
                     ? <span className="badge bg-success">Hoạt động</span>
-                    : <span className="badge bg-secondary">Không hoạt động</span>
+                    : <span className="badge bg-secondary">Không hoạt động</span>,
+            width: '7%'
         },
         {
             title: "Hành động", element: row => (

@@ -177,26 +177,29 @@ const AdminList = () => {
                     </div>
                     <span style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.name}</span>
                 </div>
-            )
+            ),
+            width: '18%'
         },
-        { title: "Email", element: row => row.email },
-        { title: "Số điện thoại", element: row => row.phone },
+        { title: "Email", element: row => row.email, width: '15%' },
+        { title: "Số điện thoại", element: row => row.phone, width: '12%' },
       
         // { title: "Xác thực", element: row => row.is_verified ? "Đã xác thực" : "Chưa xác thực" },
-        { title: "Ngày tạo", element: row => formatDate(row.created_at) },
-        { title: "Ngày cập nhật", element: row => formatDate(row.updated_at) },
+        { title: "Ngày tạo", element: row => formatDate(row.created_at), width: '10%' },
+        { title: "Ngày cập nhật", element: row => formatDate(row.updated_at), width: '10%' },
         {
             title: "Vai trò",
             element: row => Array.isArray(row.roles) && row.roles.length > 0
                 ? row.roles.map(r => r.display_name || r.name).join(", ")
-                : <span className="text-muted">Chưa có</span>
+                : <span className="text-muted">Chưa có</span>,
+            width: '14%'
         },
         {
             title: "Trạng thái",
             element: row =>
                 row.is_active
                     ? <span className="badge bg-success">Hoạt động</span>
-                    : <span className="badge bg-secondary">Không hoạt động</span>
+                    : <span className="badge bg-secondary">Không hoạt động</span>,
+            width: '10%'
         },
         {
             title: "Hành động", element: row => (
@@ -302,16 +305,9 @@ const AdminList = () => {
   
                 <div className='mb-3'>
                     <Link className="btn btn-primary me-2 add-custom-btn" to="/admin/add"><i className="fas fa-plus"></i> Thêm nhân viên</Link>
-                
-                    {selectedRows.length > 0 && <button
-                        className="btn btn-warning me-2"
-                        // disabled={selectedRows.length !== 1}
-                        onClick={() => { setAssignUserId(selectedRows[0]); setShowAssignRole(true); }}
-                    >
-                        <i className="fas fa-user-tag add-custom-btn"></i> Cập nhật vai trò
-                    </button>
-                    }
                     {selectedRows.length > 0 && <button className="btn btn-danger me-2 add-custom-btn" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa</button>}
+                   
+                    
                 </div>
                               {/* Bộ lọc */}
                               <div className="row mb-3 g-2 align-items-end">

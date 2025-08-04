@@ -1,16 +1,32 @@
 import React, { use, useEffect, useState } from 'react'
 import LiveSearch from './LiveSearch';
+import { useRef } from 'react';
 
 
 const DataTables = (props) => {
     console.log("DataTables props: ", props);
    const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, filterHeader, hideSelected, isLoading = false } = props;
    const [selectedRows, setSelectedRows] = useState([]);
+   const [visibleColumns, setVisibleColumns] = useState(props.columns ? props.columns.map((col, idx) => idx) : []);
+   const [showColumnSelector, setShowColumnSelector] = useState(false);
+   const columnSelectorRef = useRef();
 
    useEffect(() => {
        console.log("Selected rows: ", selectedRows);
        onSelectedRows(selectedRows);
     }, [selectedRows]);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (columnSelectorRef.current && !columnSelectorRef.current.contains(event.target)) {
+                setShowColumnSelector(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const handleCheckboxChange = (event) => {
         const isChecked = event.target.checked;
@@ -35,17 +51,47 @@ const DataTables = (props) => {
         }
     };
 
+    const handleColumnToggle = (idx) => {
+        setVisibleColumns((prev) =>
+            prev.includes(idx)
+                ? prev.filter((i) => i !== idx)
+                : [...prev, idx]
+        );
+    };
+
+    // Helper để lấy width số từ chuỗi %
+    const getWidthNumber = (w) => {
+        if (!w) return 0;
+        if (typeof w === 'string' && w.endsWith('%')) return parseFloat(w);
+        return Number(w) || 0;
+    };
+
    const renderTableHeader = () => {
-        return columns.map((col, index) => (
-            <th
-                key={index}
-                scope="col"
-                style={col.width ? { width: col.width } : {}}
-                className={col.thClass || ""}
-            >
-                {typeof col.title === "function" ? col.title() : col.title}
-            </th>
-        ));
+        // Tính lại width động cho các cột đang hiển thị
+        const visibleIdx = columns.map((_, idx) => idx).filter(idx => visibleColumns.includes(idx));
+        const allWidths = columns.map(col => getWidthNumber(col.width));
+        const sumAll = allWidths.reduce((a, b) => a + b, 0);
+        const visibleWidths = visibleIdx.map(idx => allWidths[idx]);
+        const sumVisible = visibleWidths.reduce((a, b) => a + b, 0);
+        // width mới cho các cột còn lại
+        const newWidths = visibleIdx.map((idx, i) => {
+            if (sumVisible === 0) return '';
+            const ratio = allWidths[idx] / sumVisible;
+            return (ratio * sumAll).toFixed(2) + '%';
+        });
+        let widthIdx = 0;
+        return columns.map((col, index) =>
+            visibleColumns.includes(index) && (
+                <th
+                    key={index}
+                    scope="col"
+                    style={col.thClass ? { ...col.thClass, width: newWidths[widthIdx++] } : { width: newWidths[widthIdx++] }}
+                    className={col.thClass || ""}
+                >
+                    {typeof col.title === "function" ? col.title() : col.title}
+                </th>
+            )
+        );
     };
 
     const renderFilterHeader = () => {
@@ -63,31 +109,47 @@ const DataTables = (props) => {
     };
 
     const renderTableData = () => {
+        // Tính lại width động cho các cột đang hiển thị
+        const visibleIdx = columns.map((_, idx) => idx).filter(idx => visibleColumns.includes(idx));
+        const allWidths = columns.map(col => getWidthNumber(col.width));
+        const sumAll = allWidths.reduce((a, b) => a + b, 0);
+        const visibleWidths = visibleIdx.map(idx => allWidths[idx]);
+        const sumVisible = visibleWidths.reduce((a, b) => a + b, 0);
+        const newWidths = visibleIdx.map((idx, i) => {
+            if (sumVisible === 0) return '';
+            const ratio = allWidths[idx] / sumVisible;
+            return (ratio * sumAll).toFixed(2) + '%';
+        });
         return (
-            data.map((row, index) => (
-                <tr key={row.id}>
-                    {!hideSelected && (
-                        <td>
-                            <input
-                                type="checkbox"
-                                checked={selectedRows.includes(String(row.id))}
-                                className="form-check-input"
-                                onChange={handleCheckboxChange}
-                                value={row.id}
-                            />
-                        </td>
-                    )}
-                    {columns.map((col, colIndex) => (
-                        <td
-                            key={colIndex}
-                            style={col.width ? { width: col.width } : {}}
-                            className={col.tdClass || ""}
-                        >
-                            {col.element(row)}
-                        </td>
-                    ))}
-                </tr>
-            ))
+            data.map((row, index) => {
+                let widthIdx = 0;
+                return (
+                    <tr key={row.id}>
+                        {!hideSelected && (
+                            <td style={{ width: '1%' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={selectedRows.includes(String(row.id))}
+                                    className="form-check-input"
+                                    onChange={handleCheckboxChange}
+                                    value={row.id}
+                                />
+                            </td>
+                        )}
+                        {columns.map((col, colIndex) =>
+                            visibleColumns.includes(colIndex) && (
+                                <td
+                                    key={colIndex}
+                                    style={col.tdClass ? { ...col.tdClass, width: newWidths[widthIdx++] } : { width: newWidths[widthIdx++] }}
+                                    className={col.tdClass || ""}
+                                >
+                                    {col.element(row)}
+                                </td>
+                            )
+                        )}
+                    </tr>
+                );
+            })
         );
     };
 
@@ -126,9 +188,57 @@ const DataTables = (props) => {
 
   return (
     <div className="card mb-4">
-            <div className="card-header">
-                <i className="fas fa-table me-1"></i>
-                {name}
+            <div className="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <i className="fas fa-table me-1"></i>
+                    {name}
+                </div>
+                <div style={{ position: "relative" }}>
+                    <button
+                        type="button"
+                        style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer" }}
+                        onClick={() => {
+                            setShowColumnSelector((prev) => !prev);
+                            console.log("showColumnSelector", showColumnSelector);
+                        }}
+                        title="Chọn cột hiển thị"
+                    >
+                        <i className="fas fa-bars"></i>
+                    </button>
+                    {showColumnSelector && (
+                        <div
+                            ref={columnSelectorRef}
+                            style={{
+                                position: "absolute",
+                                right: 0,
+                                top: "100%",
+                                background: "#fff",
+                                border: "1px solid #ccc",
+                                zIndex: 1000,
+                                padding: 10,
+                                minWidth: 200,
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+                            }}
+                        >
+                            <strong>Chọn cột hiển thị</strong>
+                            <div>
+                                {columns.map((col, idx) => (
+                                    <div key={idx}>
+                                        <input
+                                            type="checkbox"
+                                            checked={visibleColumns.includes(idx)}
+                                            onChange={() => handleColumnToggle(idx)}
+                                            id={`col-toggle-${idx}`}
+                                        />
+                                        <label htmlFor={`col-toggle-${idx}`} style={{ marginLeft: 8 }}>
+                                            {typeof col.title === "function" ? col.title() : col.title}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
             <div className="card-body">
                 <div className="row mb-3">
@@ -148,15 +258,15 @@ const DataTables = (props) => {
                         <LiveSearch changeKeyword={changeKeyword}/>
                     </div>
                 </div>
-                <table className="table table-bordered table-hover " id="datatablesSimple" width="100%" cellSpacing="0">
+                <table className="table table-bordered table-hover " id="datatablesSimple" style={{ width: "100%" }} cellSpacing="0">
                     {data.length > 0 && (
                         <thead className="custom-table">
                             {renderFilterHeader()}
                             <tr>
                                 {!hideSelected && (
-                                    <td>
+                                    <th style={{ width: '1%' }}>
                                         <input type="checkbox" checked={data.length === selectedRows.length && data.length > 0 ? true : false} className="form-check-input" onChange={handleCheckedAll}/>
-                                    </td>
+                                    </th>
                                 )}
                                 {renderTableHeader()}
                             </tr>
@@ -191,30 +301,7 @@ const DataTables = (props) => {
                                 </td>
                             </tr>
                         ) : (
-                            data.map((row) => (
-                                <tr key={row.id}>
-                                    {!hideSelected && (
-                                        <td>
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedRows.includes(String(row.id))}
-                                                className="form-check-input"
-                                                onChange={handleCheckboxChange}
-                                                value={row.id}
-                                            />
-                                        </td>
-                                    )}
-                                    {columns.map((col, colIndex) => (
-                                        <td
-                                            key={colIndex}
-                                            style={col.width ? { width: col.width } : {}}
-                                            className={col.tdClass || ""}
-                                        >
-                                            {col.element(row)}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))
+                            renderTableData()
                         )}
                     </tbody>
                 </table>
