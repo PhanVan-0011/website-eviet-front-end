@@ -199,7 +199,7 @@ const AdminList = () => {
                 row.is_active
                     ? <span className="badge bg-success">Hoạt động</span>
                     : <span className="badge bg-secondary">Không hoạt động</span>,
-            width: '10%'
+            width: '8%'
         },
         {
             title: "Hành động", element: row => (
@@ -209,7 +209,7 @@ const AdminList = () => {
                     <Link className="btn btn-primary btn-sm me-1" to={`/admin/${row.id}`}><i className="fas fa-edit"></i></Link>
                     <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>
                 </>
-            ), width: '11%'
+            ), width: '13%'
         }
     ];
     // Handle single Delete

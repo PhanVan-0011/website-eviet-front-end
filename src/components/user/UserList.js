@@ -30,9 +30,7 @@ const UserList = () => {
     const [hoveredUserId, setHoveredUserId] = useState(null);
 
     const columns = [
-        {
-            title: "Khách hàng",
-            element: row => (
+        { title: "Khách hàng", element: row => (
                 <div style={{ display: 'flex', alignItems: 'center', minWidth: 120, position: 'relative' }}>
                     <div
                         onMouseEnter={() => row.image_url && row.image_url.thumb_url && setHoveredUserId(row.id)}
@@ -80,12 +78,10 @@ const UserList = () => {
                     </div>
                     <span style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.name}</span>
                 </div>
-            ),
-            width: '18%'
-        },
-        { title: "Email", element: row => row.email, width: '15%' },
-        { title: "Số điện thoại", element: row => row.phone, width: '14%' },
-        { title: "Giới tính", element: row => row.gender === "male" ? "Nam" : row.gender === "female" ? "Nữ" : "Khác", width: '8%' },
+            ), width: '18%' },
+        { title: "Email", element: row => row.email, width: '13%' },
+        { title: "Số điện thoại", element: row => row.phone, width: '12%' },
+        { title: "Giới tính", element: row => row.gender === "male" ? "Nam" : row.gender === "female" ? "Nữ" : "Khác", width: '5%' },
         {
             title: "Ngày sinh",
             element: row => {
@@ -94,18 +90,18 @@ const UserList = () => {
                 const m = moment(row.date_of_birth, ["DD/MM/YYYY", "YYYY-MM-DD", "YYYY/MM/DD"], true);
                 return m.isValid() ? m.format("DD/MM/YYYY") : "";
             },
-            width: '10%'
+            width: '8%'
         },
         // { title: "Xác thực", element: row => row.is_verified ? "Đã xác thực" : "Chưa xác thực" },
-        { title: "Ngày tạo", element: row => formatDate(row.created_at), width: '10%' },
-        { title: "Ngày cập nhật", element: row => formatDate(row.updated_at), width: '10%' },
+        { title: "Ngày tạo", element: row => formatDate(row.created_at), width: '9%' },
+        { title: "Ngày cập nhật", element: row => formatDate(row.updated_at), width: '9%' },
         {
             title: "Trạng thái",
             element: row =>
                 row.is_active
                     ? <span className="badge bg-success">Hoạt động</span>
                     : <span className="badge bg-secondary">Không hoạt động</span>,
-            width: '7%'
+            width: '6%'
         },
         {
             title: "Hành động", element: row => (

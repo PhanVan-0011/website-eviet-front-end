@@ -163,7 +163,7 @@ const ProductList = () => {
                 </span>
             ),
             element: row => row.name,
-            width: "18%"
+            width: "13%"
         },
         { 
             title: "Hình ảnh", 
@@ -197,7 +197,7 @@ const ProductList = () => {
                 </span>
             ),
             element: row => row.stock_quantity,
-            width: "9%"
+            width: "7%"
         },
         {
             title: () => (

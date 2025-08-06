@@ -7,7 +7,13 @@ const DataTables = (props) => {
     console.log("DataTables props: ", props);
    const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, filterHeader, hideSelected, isLoading = false } = props;
    const [selectedRows, setSelectedRows] = useState([]);
-   const [visibleColumns, setVisibleColumns] = useState(props.columns ? props.columns.map((col, idx) => idx) : []);
+   // --- Lấy trạng thái cột hiển thị từ localStorage khi component mount ---
+   const [visibleColumns, setVisibleColumns] = useState(() => {
+        // Nếu có trạng thái đã lưu thì lấy ra, không thì hiển thị tất cả cột
+        const saved = name && localStorage.getItem(`datatable_visible_columns_${name}`);
+        if (saved) return JSON.parse(saved);
+        return props.columns ? props.columns.map((col, idx) => idx) : [];
+   });
    const [showColumnSelector, setShowColumnSelector] = useState(false);
    const columnSelectorRef = useRef();
 
@@ -15,6 +21,13 @@ const DataTables = (props) => {
        console.log("Selected rows: ", selectedRows);
        onSelectedRows(selectedRows);
     }, [selectedRows]);
+
+    // --- Lưu trạng thái cột hiển thị vào localStorage mỗi khi visibleColumns thay đổi ---
+    useEffect(() => {
+        if (name) {
+            localStorage.setItem(`datatable_visible_columns_${name}`, JSON.stringify(visibleColumns));
+        }
+    }, [visibleColumns, name]);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -67,17 +80,28 @@ const DataTables = (props) => {
     };
 
    const renderTableHeader = () => {
-        // Tính lại width động cho các cột đang hiển thị
+        // Xác định các cột đang hiển thị
         const visibleIdx = columns.map((_, idx) => idx).filter(idx => visibleColumns.includes(idx));
-        const allWidths = columns.map(col => getWidthNumber(col.width));
-        const sumAll = allWidths.reduce((a, b) => a + b, 0);
-        const visibleWidths = visibleIdx.map(idx => allWidths[idx]);
-        const sumVisible = visibleWidths.reduce((a, b) => a + b, 0);
-        // width mới cho các cột còn lại
-        const newWidths = visibleIdx.map((idx, i) => {
-            if (sumVisible === 0) return '';
-            const ratio = allWidths[idx] / sumVisible;
-            return (ratio * sumAll).toFixed(2) + '%';
+        // Lấy width gốc của các cột (nếu không có thì mặc định là 0)
+        const baseWidths = columns.map(col => {
+            const w = col.width;
+            if (w && typeof w === 'string' && w.endsWith('%')) return parseFloat(w);
+            if (w && typeof w === 'string' && w.endsWith('px')) return 0; // chỉ xử lý %
+            if (typeof w === 'number') return w;
+            return 0;
+        });
+        // Tổng width gốc của các cột đang hiển thị
+        const totalVisibleBaseWidth = visibleIdx.reduce((sum, idx) => sum + baseWidths[idx], 0);
+        // Tổng width gốc của các cột bị ẩn
+        const totalHiddenBaseWidth = baseWidths.reduce((sum, w, idx) => sum + (!visibleColumns.includes(idx) ? w : 0), 0);
+        // Số cột còn lại
+        const visibleCount = visibleIdx.length;
+        // Tính width mới cho từng cột đang hiển thị
+        // Mỗi cột sẽ được cộng thêm (totalHiddenBaseWidth / visibleCount)
+        const newWidths = visibleIdx.map(idx => {
+            const base = baseWidths[idx];
+            const plus = visibleCount > 0 ? totalHiddenBaseWidth / visibleCount : 0;
+            return (base + plus).toFixed(2) + '%';
         });
         let widthIdx = 0;
         return columns.map((col, index) =>
@@ -109,16 +133,27 @@ const DataTables = (props) => {
     };
 
     const renderTableData = () => {
-        // Tính lại width động cho các cột đang hiển thị
+        // Xác định các cột đang hiển thị
         const visibleIdx = columns.map((_, idx) => idx).filter(idx => visibleColumns.includes(idx));
-        const allWidths = columns.map(col => getWidthNumber(col.width));
-        const sumAll = allWidths.reduce((a, b) => a + b, 0);
-        const visibleWidths = visibleIdx.map(idx => allWidths[idx]);
-        const sumVisible = visibleWidths.reduce((a, b) => a + b, 0);
-        const newWidths = visibleIdx.map((idx, i) => {
-            if (sumVisible === 0) return '';
-            const ratio = allWidths[idx] / sumVisible;
-            return (ratio * sumAll).toFixed(2) + '%';
+        // Lấy width gốc của các cột (nếu không có thì mặc định là 0)
+        const baseWidths = columns.map(col => {
+            const w = col.width;
+            if (w && typeof w === 'string' && w.endsWith('%')) return parseFloat(w);
+            if (w && typeof w === 'string' && w.endsWith('px')) return 0;
+            if (typeof w === 'number') return w;
+            return 0;
+        });
+        // Tổng width gốc của các cột đang hiển thị
+        const totalVisibleBaseWidth = visibleIdx.reduce((sum, idx) => sum + baseWidths[idx], 0);
+        // Tổng width gốc của các cột bị ẩn
+        const totalHiddenBaseWidth = baseWidths.reduce((sum, w, idx) => sum + (!visibleColumns.includes(idx) ? w : 0), 0);
+        // Số cột còn lại
+        const visibleCount = visibleIdx.length;
+        // Tính width mới cho từng cột đang hiển thị
+        const newWidths = visibleIdx.map(idx => {
+            const base = baseWidths[idx];
+            const plus = visibleCount > 0 ? totalHiddenBaseWidth / visibleCount : 0;
+            return (base + plus).toFixed(2) + '%';
         });
         return (
             data.map((row, index) => {
@@ -186,6 +221,8 @@ const DataTables = (props) => {
 
     
 
+  const visibleColumnCount = props.columns ? props.columns.filter((_, idx) => visibleColumns.includes(idx)).length : 0;
+  const tableMinWidth = visibleColumnCount >= 9 ? 1600 : 1200;
   return (
     <div className="card mb-4">
             <div className="card-header d-flex justify-content-between align-items-center">
@@ -258,53 +295,56 @@ const DataTables = (props) => {
                         <LiveSearch changeKeyword={changeKeyword}/>
                     </div>
                 </div>
-                <table className="table table-bordered table-hover " id="datatablesSimple" style={{ width: "100%" }} cellSpacing="0">
-                    {data.length > 0 && (
-                        <thead className="custom-table">
-                            {renderFilterHeader()}
-                            <tr>
-                                {!hideSelected && (
-                                    <th style={{ width: '1%' }}>
-                                        <input type="checkbox" checked={data.length === selectedRows.length && data.length > 0 ? true : false} className="form-check-input" onChange={handleCheckedAll}/>
-                                    </th>
-                                )}
-                                {renderTableHeader()}
-                            </tr>
-                        </thead>
-                    )}
-                    {data.length > 0 && (
-                        <tfoot>
-                            <tr>
-                                {!hideSelected && <td></td>}
-                                {/* {renderTableHeader()} */}
-                            </tr>
-                        </tfoot>
-                    )}
-                    <tbody>
-                        {isLoading ? (
-                            <tr>
-                                <td colSpan={(!hideSelected ? 1 : 0) + columns.length} className="text-center py-5">
-                                    <div className="d-flex flex-column align-items-center justify-content-center" style={{opacity:0.8}}>
-                                        <div className="spinner-border text-primary mb-2" style={{width:48, height:48}} role="status"></div>
-                                        <div className="fw-bold text-secondary" style={{fontSize:20}}>Đang tải dữ liệu...</div>
-                                    </div>
-                                </td>
-                            </tr>
-                        ) : data.length === 0 ? (
-                            <tr>
-                                <td colSpan={(!hideSelected ? 1 : 0) + columns.length} className="text-center py-5">
-                                    <div className="d-flex flex-column align-items-center justify-content-center" style={{opacity:0.8}}>
-                                        <i className="fas fa-database mb-2" style={{fontSize:48, color:'#bdbdbd'}}></i>
-                                        <div className="fw-bold text-secondary" style={{fontSize:20}}>Không có dữ liệu</div>
-                                        <div className="text-muted" style={{fontSize:14}}>Không tìm thấy dòng dữ liệu nào phù hợp.</div>
-                                    </div>
-                                </td>
-                            </tr>
-                        ) : (
-                            renderTableData()
+                {/* Bọc bảng trong div để hỗ trợ scroll ngang */}
+                <div style={{ width: '100%', overflowX: 'auto' }}>
+                    <table className="table table-bordered table-hover " id="datatablesSimple" style={{minWidth: tableMinWidth, width: '100%'}} cellSpacing="0">
+                        {data.length > 0 && (
+                            <thead className="custom-table">
+                                {renderFilterHeader()}
+                                <tr>
+                                    {!hideSelected && (
+                                        <th style={{ width: '1%' }}>
+                                            <input type="checkbox" checked={data.length === selectedRows.length && data.length > 0 ? true : false} className="form-check-input" onChange={handleCheckedAll}/>
+                                        </th>
+                                    )}
+                                    {renderTableHeader()}
+                                </tr>
+                            </thead>
                         )}
-                    </tbody>
-                </table>
+                        {data.length > 0 && (
+                            <tfoot>
+                                <tr>
+                                    {!hideSelected && <td></td>}
+                                    {/* {renderTableHeader()} */}
+                                </tr>
+                            </tfoot>
+                        )}
+                        <tbody>
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={(!hideSelected ? 1 : 0) + columns.length} className="text-center py-5">
+                                        <div className="d-flex flex-column align-items-center justify-content-center" style={{opacity:0.8}}>
+                                            <div className="spinner-border text-primary mb-2" style={{width:48, height:48}} role="status"></div>
+                                            <div className="fw-bold text-secondary" style={{fontSize:20}}>Đang tải dữ liệu...</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : data.length === 0 ? (
+                                <tr>
+                                    <td colSpan={(!hideSelected ? 1 : 0) + columns.length} className="text-center py-5">
+                                        <div className="d-flex flex-column align-items-center justify-content-center" style={{opacity:0.8}}>
+                                            <i className="fas fa-database mb-2" style={{fontSize:48, color:'#bdbdbd'}}></i>
+                                            <div className="fw-bold text-secondary" style={{fontSize:20}}>Không có dữ liệu</div>
+                                            <div className="text-muted" style={{fontSize:14}}>Không tìm thấy dòng dữ liệu nào phù hợp.</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : (
+                                renderTableData()
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             {numOfPages > 1 && 
                 <div className="row">
