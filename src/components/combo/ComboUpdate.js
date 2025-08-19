@@ -92,24 +92,25 @@ const ComboUpdate = () => {
     // Tạo options cho react-select
     const productOptions = products.map(p => ({ value: p.id, label: p.name + (p.size ? ` - ${p.size}` : '') + (p.category?.name ? ` (${p.category.name})` : '') }));
 
-    // Validate sản phẩm trong combo
-    useEffect(() => {
+    // Hàm validate sản phẩm trong combo
+    const validateComboItems = () => {
         if (!comboItems || comboItems.length === 0) {
             setError('comboItems', { type: 'manual', message: 'Cần chọn ít nhất 1 sản phẩm cho combo!' });
-            return;
+            return false;
         }
         const ids = comboItems.map(i => i.product_id).filter(Boolean);
         const hasDuplicate = ids.length !== new Set(ids).size;
         if (hasDuplicate) {
             setError('comboItems', { type: 'manual', message: 'Không được chọn trùng sản phẩm trong combo!' });
-            return;
+            return false;
         }
         if (comboItems.some(i => !i.product_id || !i.quantity || Number(i.quantity) <= 0)) {
             setError('comboItems', { type: 'manual', message: 'Vui lòng chọn sản phẩm và số lượng phải lớn hơn 0' });
-            return;
+            return false;
         }
         clearErrors('comboItems');
-    }, [comboItems, setError, clearErrors]);
+        return true;
+    };
 
     // Hàm xử lý khi chọn ảnh mới
     const onChangeImage = (e) => {
@@ -149,31 +150,24 @@ const ComboUpdate = () => {
     // Thêm/xóa sản phẩm trong combo
     const handleAddItem = () => {
         setComboItems([...comboItems, { product_id: '', quantity: 1 }]);
+        clearErrors('comboItems');
     };
     const handleRemoveItem = (idx) => {
         if (comboItems.length === 1) return;
         setComboItems(comboItems.filter((_, i) => i !== idx));
+        clearErrors('comboItems');
     };
     const handleChangeItem = (idx, field, value) => {
         setComboItems(comboItems.map((item, i) =>
             i === idx ? { ...item, [field]: value } : item
         ));
+        clearErrors('comboItems');
     };
 
     // Submit form
     const handleSubmitForm = async (data) => {
         // Validate sản phẩm trong combo
-        if (!comboItems || comboItems.length === 0) {
-            setError('comboItems', { type: 'manual', message: 'Cần chọn ít nhất 1 sản phẩm cho combo!' });
-            return;
-        }
-        const ids = comboItems.map(i => i.product_id).filter(Boolean);
-        if (ids.length !== new Set(ids).size) {
-            setError('comboItems', { type: 'manual', message: 'Không được chọn trùng sản phẩm trong combo!' });
-            return;
-        }
-        if (comboItems.some(i => !i.product_id || !i.quantity || Number(i.quantity) <= 0)) {
-            setError('comboItems', { type: 'manual', message: 'Mỗi sản phẩm phải có số lượng > 0 và không được bỏ trống!' });
+        if (!validateComboItems()) {
             return;
         }
         // Validate thời gian kết thúc phải lớn hơn hoặc bằng ngày bắt đầu
@@ -283,7 +277,7 @@ const ComboUpdate = () => {
                                                         required: 'Giá combo là bắt buộc',
                                                         validate: {
                                                             isNumber: v => v && !isNaN(Number(v.replace(/\./g, ''))) || 'Giá phải là số',
-                                                            min: v => Number(v.replace(/\./g, '')) > 0 || 'Giá phải lớn hơn 0'
+                                                            min: v => Number(v.replace(/\./g, '')) >= 0 || 'Giá phải lớn hơn hoặc bằng 0'
                                                         }
                                                     })}
                                                     onChange={e => {
@@ -451,28 +445,16 @@ const ComboUpdate = () => {
                                         <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-boxes me-2"></i>Sản phẩm trong combo <span className="text-danger">*</span></h5>
                                     </div>
                                     <div className="card-body pt-2">
-                                        {comboItems.map((item, idx) => {
-                                            // Kiểm tra lỗi riêng cho từng dòng
-                                            let itemError = '';
-                                            if (!item.product_id || !item.quantity || Number(item.quantity) <= 0) {
-                                                itemError = 'Vui lòng chọn sản phẩm và số lượng phải lớn hơn 0';
-                                            } else if (comboItems.filter((it, i) => it.product_id === item.product_id && i !== idx).length > 0) {
-                                                itemError = 'Không được chọn trùng sản phẩm trong combo!';
-                                            }
-                                            return (
+                                        {comboItems.map((item, idx) => (
                                                 <div className="row align-items-center mb-3" key={idx}>
-                                                    <div className="col-md-5 position-relative">
+                                                    <div className="col-md-5">
                                                         <Select
                                                             options={productOptions.filter(opt => !comboItems.some((it, i) => it.product_id === opt.value && i !== idx))}
                                                             value={productOptions.find(opt => String(opt.value) === String(item.product_id)) || null}
                                                             onChange={opt => handleChangeItem(idx, 'product_id', opt ? opt.value : '')}
                                                             placeholder="Tìm kiếm & chọn sản phẩm..."
-                                                            
                                                             classNamePrefix="react-select"
                                                         />
-                                                        {itemError && (
-                                                            <div className="text-danger mt-1 small position-absolute w-100">{itemError}</div>
-                                                        )}
                                                     </div>
                                                     <div className="col-md-3 d-flex align-items-center">
                                                         {products.find(p => String(p.id) === String(item.product_id))?.featured_image?.thumb_url ? (
@@ -518,8 +500,10 @@ const ComboUpdate = () => {
                                                         )}
                                                     </div>
                                                 </div>
-                                            );
-                                        })}
+                                        ))}
+                                        {errors.comboItems && (
+                                            <div className="text-danger small mt-2">{errors.comboItems.message}</div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

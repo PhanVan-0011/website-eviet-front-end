@@ -39,7 +39,7 @@ const PostDetail = () => {
         return (
             <div className="container-fluid">
                 <div className="d-flex justify-content-center align-items-center vh-100">
-                <span className="fs-5">Đang tải dữ liệu...</span>
+                {/* <span className="fs-5">Đang tải dữ liệu...</span> */}
             </div>
         </div> 
         );

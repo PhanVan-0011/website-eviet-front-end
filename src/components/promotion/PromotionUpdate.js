@@ -116,9 +116,18 @@ const PromotionUpdate = () => {
 
     // Xử lý chọn đối tượng áp dụng
     const handleSelectChange = (type, values) => {
-        if (type === 'products') setSelectedProducts(values);
-        if (type === 'categories') setSelectedCategories(values);
-        if (type === 'combos') setSelectedCombos(values);
+        if (type === 'products') {
+            setSelectedProducts(values);
+            clearErrors('selectedProducts');
+        }
+        if (type === 'categories') {
+            setSelectedCategories(values);
+            clearErrors('selectedCategories');
+        }
+        if (type === 'combos') {
+            setSelectedCombos(values);
+            clearErrors('selectedCombos');
+        }
     };
 
     // Tạo options cho react-select
@@ -131,36 +140,30 @@ const PromotionUpdate = () => {
         setValuePromo('');
     }, [promoType]);
 
-    // Validate đối tượng áp dụng react-hook-form
-    useEffect(() => {
-        if (applicationType === 'products') {
-            if (selectedProducts.length === 0) {
-                setError('selectedProducts', { type: 'manual', message: 'Vui lòng chọn sản phẩm áp dụng!' });
-            } else {
-                clearErrors('selectedProducts');
-            }
-            clearErrors(['selectedCategories', 'selectedCombos']);
-        } else if (applicationType === 'categories') {
-            if (selectedCategories.length === 0) {
-                setError('selectedCategories', { type: 'manual', message: 'Vui lòng chọn danh mục áp dụng!' });
-            } else {
-                clearErrors('selectedCategories');
-            }
-            clearErrors(['selectedProducts', 'selectedCombos']);
-        } else if (applicationType === 'combos') {
-            if (selectedCombos.length === 0) {
-                setError('selectedCombos', { type: 'manual', message: 'Vui lòng chọn combo áp dụng!' });
-            } else {
-                clearErrors('selectedCombos');
-            }
-            clearErrors(['selectedProducts', 'selectedCategories']);
-        } else if (applicationType === 'orders') {
-            clearErrors(['selectedProducts', 'selectedCategories', 'selectedCombos']);
+    // Hàm validate đối tượng áp dụng
+    const validateApplicationTargets = () => {
+        if (applicationType === 'products' && selectedProducts.length === 0) {
+            setError('selectedProducts', { type: 'manual', message: 'Vui lòng chọn sản phẩm áp dụng!' });
+            return false;
         }
-    }, [applicationType, selectedProducts, selectedCategories, selectedCombos, setError, clearErrors]);
+        if (applicationType === 'categories' && selectedCategories.length === 0) {
+            setError('selectedCategories', { type: 'manual', message: 'Vui lòng chọn danh mục áp dụng!' });
+            return false;
+        }
+        if (applicationType === 'combos' && selectedCombos.length === 0) {
+            setError('selectedCombos', { type: 'manual', message: 'Vui lòng chọn combo áp dụng!' });
+            return false;
+        }
+        clearErrors(['selectedProducts', 'selectedCategories', 'selectedCombos']);
+        return true;
+    };
 
     // Xử lý submit
     const handleSubmitForm = async (data) => {
+        // Validate đối tượng áp dụng
+        if (!validateApplicationTargets()) {
+            return;
+        }
         // Validate ngày
         if (startDatePicker && endDatePicker) {
             if (new Date(endDatePicker) < new Date(startDatePicker)) {
@@ -173,19 +176,6 @@ const PromotionUpdate = () => {
         } else {
             // Nếu 1 trong 2 chưa chọn thì không báo lỗi
             clearErrors('end_date');
-        }
-        // Validate đối tượng áp dụng react-hook-form
-        if (applicationType === 'products' && selectedProducts.length === 0) {
-            setError('selectedProducts', { type: 'manual', message: 'Vui lòng chọn sản phẩm áp dụng!' });
-            return;
-        }
-        if (applicationType === 'categories' && selectedCategories.length === 0) {
-            setError('selectedCategories', { type: 'manual', message: 'Vui lòng chọn danh mục áp dụng!' });
-            return;
-        }
-        if (applicationType === 'combos' && selectedCombos.length === 0) {
-            setError('selectedCombos', { type: 'manual', message: 'Vui lòng chọn combo áp dụng!' });
-            return;
         }
         setIsSubmitting(true);
         try {
@@ -307,6 +297,7 @@ const PromotionUpdate = () => {
                                                 setSelectedProducts([]);
                                                 setSelectedCategories([]);
                                                 setSelectedCombos([]);
+                                                clearErrors(['selectedProducts', 'selectedCategories', 'selectedCombos']);
                                             }}
                                             required
                                         >

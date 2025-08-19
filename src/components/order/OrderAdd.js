@@ -56,17 +56,13 @@ const OrderAdd = () => {
     const handleAddItem = () => {
         const newItems = [...orderItems, { type: 'product', id: '', quantity: 1 }];
         setOrderItems(newItems);
-        if (newItems.length > 0) {
-            clearErrors('items');
-        }
+        clearErrors('items');
     };
     const handleRemoveItem = (idx) => {
         if (orderItems.length === 1) return;
         const newItems = orderItems.filter((_, i) => i !== idx);
         setOrderItems(newItems);
-        if (newItems.length === 0) {
-            setError('items', { type: 'manual', message: 'Vui lòng chọn ít nhất 1 sản phẩm hoặc combo!' });
-        }
+        clearErrors('items');
     };
     const handleChangeItem = (idx, field, value) => {
         const newItems = orderItems.map((item, i) =>
@@ -77,9 +73,7 @@ const OrderAdd = () => {
             : item
         );
         setOrderItems(newItems);
-        if (newItems.length > 0) {
-            clearErrors('items');
-        }
+        clearErrors('items');
     };
 
     // Thêm hàm formatVND giống ComboAdd
@@ -89,41 +83,32 @@ const OrderAdd = () => {
         return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
 
-    // Validate sản phẩm/combo trong đơn hàng
-    useEffect(() => {
+    // Hàm validate sản phẩm/combo trong đơn hàng
+    const validateOrderItems = () => {
         if (!orderItems || orderItems.length === 0) {
             setError('items', { type: 'manual', message: 'Vui lòng chọn ít nhất 1 sản phẩm hoặc combo!' });
-            return;
+            return false;
         }
         // Kiểm tra trùng id cùng loại
         const keys = orderItems.map(i => i.type + '-' + i.id).filter(k => k.split('-')[1]);
         const hasDuplicate = keys.length !== new Set(keys).size;
         if (hasDuplicate) {
             setError('items', { type: 'manual', message: 'Không được chọn trùng sản phẩm hoặc combo trong đơn hàng!' });
-            return;
+            return false;
         }
         // Kiểm tra số lượng > 0 và id không rỗng
         if (orderItems.some(i => !i.id || !i.quantity || Number(i.quantity) <= 0)) {
             setError('items', { type: 'manual', message: 'Vui lòng chọn sản phẩm hoặc combo và số lượng phải lớn hơn 0' });
-            return;
+            return false;
         }
         clearErrors('items');
-    }, [orderItems, setError, clearErrors]);
+        return true;
+    };
 
     // Xử lý submit
     const handleSubmitForm = async (data) => {
         // Validate sản phẩm/combo trong đơn hàng
-        if (!orderItems || orderItems.length === 0) {
-            setError('items', { type: 'manual', message: 'Vui lòng chọn sản phẩm hoặc combo và số lượng phải lớn hơn 0' });
-            return;
-        }
-        const keys = orderItems.map(i => i.type + '-' + i.id).filter(k => k.split('-')[1]);
-        if (keys.length !== new Set(keys).size) {
-            setError('items', { type: 'manual', message: 'Không được chọn trùng sản phẩm hoặc combo trong đơn hàng!' });
-            return;
-        }
-        if (orderItems.some(i => !i.id || !i.quantity || Number(i.quantity) <= 0)) {
-            setError('items', { type: 'manual', message: 'Mỗi sản phẩm/combo phải có số lượng > 0 và không được bỏ trống!' });
+        if (!validateOrderItems()) {
             return;
         }
         setIsSubmitting(true);

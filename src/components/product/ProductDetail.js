@@ -81,7 +81,7 @@ const ProductDetail = () => {
         return (
             <div className="container-fluid">
             <div className="d-flex justify-content-center align-items-center vh-100">
-               <span className="fs-5">Đang tải dữ liệu...</span>
+               {/* <span className="fs-5">Đang tải dữ liệu...</span> */}
            </div>
        </div> 
         );
@@ -135,7 +135,7 @@ const ProductDetail = () => {
                     <div className="row g-4">
                         <div className="col-md-5 d-flex" style={{ height: '75vh' }}>
                             <div className="card shadow-sm mb-4 flex-fill" style={{ height: '100%' }}>
-                                <div style={{ height: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+                                <div style={{ height: '50%', display: 'flex', flexDirection: 'column', padding: 16, overflow: 'hidden' }}>
                                     {product.image_urls && product.image_urls.length > 0 ? (
                                         (() => {
                                             const featuredImg = product.image_urls.find(img => img.is_featured === 1);
@@ -144,26 +144,26 @@ const ProductDetail = () => {
                                                 <>
                                                     {featuredImg ? (
                                                         <>
-                                                            <img
-                                                                key={featuredImg.id}
-                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + (featuredImg.main_url || featuredImg.thumb_url)}
-                                                                alt={product.name + '-featured'}
-                                                                className="img-thumbnail mb-3"
-                                                                style={{
-                                                                    objectFit: 'contain',
-                                                                    boxShadow: '0 0 12px #007bff55',
-                                                                    cursor: 'pointer',
-                                                                    maxWidth: '80%',
-                                                                    maxHeight: 400,
-                                                                    borderRadius: 10,
-                                                                    background: '#f8f9fa',
-                                                                    border: '1px solid #eee',
-                                                                    display: 'block',
-                                                                    margin: '0 auto'
-                                                                }}
-                                                                title="Ảnh đại diện (bấm để xem lớn)"
-                                                                onClick={() => handleImgClick(featuredImg)}
-                                                            />
+                                                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12, overflow: 'hidden' }}>
+                                                                <img
+                                                                    key={featuredImg.id}
+                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + (featuredImg.main_url || featuredImg.thumb_url)}
+                                                                    alt={product.name + '-featured'}
+                                                                    className="img-thumbnail"
+                                                                    style={{
+                                                                        objectFit: 'contain',
+                                                                        boxShadow: '0 0 12px #007bff55',
+                                                                        cursor: 'pointer',
+                                                                        maxWidth: '100%',
+                                                                        maxHeight: '100%',
+                                                                        borderRadius: 10,
+                                                                        background: '#f8f9fa',
+                                                                        border: '1px solid #eee'
+                                                                    }}
+                                                                    title="Ảnh đại diện (bấm để xem lớn)"
+                                                                    onClick={() => handleImgClick(featuredImg)}
+                                                                />
+                                                            </div>
                                                             {/* Modal xem ảnh full */}
                                                             {showModal && modalImg && (
                                                                 <Modal show={showModal} onHide={handleCloseModal} centered>
@@ -175,6 +175,7 @@ const ProductDetail = () => {
                                                                                 style={{
                                                                                     maxWidth: '80vw',
                                                                                     maxHeight: '80vh',
+                                                                                    objectFit: 'contain',
                                                                                     display: 'block',
                                                                                     margin: '0 auto',
                                                                                     borderRadius: 8
@@ -188,62 +189,44 @@ const ProductDetail = () => {
                                                         </>
                                                     ) : null}
                                                     {/* Các ảnh còn lại nhỏ hơn */}
-                                                    <div className="d-flex flex-wrap gap-2 justify-content-center align-items-center">
-                                                        {otherImgs.length > 0 ? otherImgs.map((img, idx) => (
-                                                            <img
-                                                                key={img.id}
-                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + (img.main_url || img.thumb_url)}
-                                                                alt={product.name + '-' + idx}
-                                                                style={{
-                                                                    width: 90,
-                                                                    height: 90,
-                                                                    objectFit: 'cover',
-                                                                    cursor: 'pointer',
-                                                                    marginBottom: 4,
-                                                                    marginRight: 8,
-                                                                    borderRadius: 10,
-                                                                    background: '#f8f9fa',
-                                                                    border: '1px solid #eee',
-                                                                    display: 'block',
-                                                                }}
-                                                                title="Ảnh sản phẩm (bấm để xem lớn)"
-                                                                onClick={() => handleImgClick(img)}
-                                                            />
-                                                        )) : (
-                                                            !featuredImg && (
-                                                                <div
+                                                    {otherImgs.length > 0 && (
+                                                        <div className="d-flex flex-wrap gap-2 justify-content-center align-items-center" style={{ maxHeight: 100, overflowY: 'auto', flexShrink: 0 }}>
+                                                            {otherImgs.map((img, idx) => (
+                                                                <img
+                                                                    key={img.id}
+                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + (img.main_url || img.thumb_url)}
+                                                                    alt={product.name + '-' + idx}
                                                                     style={{
-                                                                        width: '80%',
-                                                                        height: 240,
-                                                                        borderRadius: 10,
+                                                                        width: 60,
+                                                                        height: 60,
+                                                                        objectFit: 'cover',
+                                                                        cursor: 'pointer',
+                                                                        borderRadius: 8,
                                                                         background: '#f8f9fa',
                                                                         border: '1px solid #eee',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                        margin: '0 auto',
+                                                                        flexShrink: 0
                                                                     }}
-                                                                >
-                                                                    <i className="fas fa-image" style={{ fontSize: 80, color: '#bbb' }}></i>
-                                                                </div>
-                                                            )
-                                                        )}
-                                                    </div>
+                                                                    className="img-thumbnail"
+                                                                    title="Ảnh sản phẩm (bấm để xem lớn)"
+                                                                    onClick={() => handleImgClick(img)}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </>
                                             );
                                         })()
                                     ) : (
                                         <div
                                             style={{
-                                                width: '80%',
-                                                height: 240,
+                                                width: '100%',
+                                                height: '100%',
                                                 borderRadius: 10,
                                                 background: '#f8f9fa',
                                                 border: '1px solid #eee',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                justifyContent: 'center',
-                                                margin: '0 auto',
+                                                justifyContent: 'center'
                                             }}
                                         >
                                             <i className="fas fa-image" style={{ fontSize: 80, color: '#bbb' }}></i>
