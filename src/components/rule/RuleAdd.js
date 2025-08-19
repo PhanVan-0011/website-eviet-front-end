@@ -67,7 +67,7 @@ const RuleAdd = () => {
     };
 
     return (
-        <div className="container-fluid px-4 min-vh-100 d-flex flex-column">
+        <div id="layoutSidenav_content">
             <main className="flex-grow-1 d-flex flex-column">
                 <div className="container-fluid px-4 flex-grow-1 d-flex flex-column">
                     <h1 className="mt-4">Thêm vai trò</h1>

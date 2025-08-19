@@ -79,7 +79,7 @@ const RuleUpdate = () => {
     };
 
     return (
-        <div className="container-fluid px-4 min-vh-100 d-flex flex-column">
+        <div className="layoutSidenav_content">
             <main className="flex-grow-1 d-flex flex-column">
                 <div className="container-fluid px-4 flex-grow-1 d-flex flex-column">
                     <h1 className="mt-4">Cập nhật vai trò</h1>

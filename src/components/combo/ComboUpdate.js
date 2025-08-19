@@ -25,7 +25,9 @@ const ComboUpdate = () => {
     const [products, setProducts] = useState([]);
     const [price, setPrice] = useState('');
     const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
     const [oldImage, setOldImage] = useState(null);
+    const [shouldRemoveImage, setShouldRemoveImage] = useState(false);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [comboItems, setComboItems] = useState([{ product_id: '', quantity: 1 }]);
@@ -115,25 +117,31 @@ const ComboUpdate = () => {
     // Hàm xử lý khi chọn ảnh mới
     const onChangeImage = (e) => {
         const file = e.target.files[0];
-        if (!file) {
-            setImageFile(null);
-            setValue('imageFile', null, { shouldValidate: true });
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('Ảnh phải nhỏ hơn 2MB!', toastErrorConfig);
+            e.target.value = "";
             return;
         }
-        // Validate size
-        if (file && typeof file.size === 'number' && file.size > 2 * 1024 * 1024) {
-            setImageFile(null);
-            setValue('imageFile', null, { shouldValidate: true });
+        if (!['image/jpeg', 'image/png', 'image/jpg', 'image/gif'].includes(file.type)) {
+            toast.error('Chỉ chấp nhận ảnh jpg, jpeg, png, gif', toastErrorConfig);
             e.target.value = "";
-            toast.error('Kích thước ảnh tối đa 2MB', toastErrorConfig);
             return;
         }
         setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
         setValue('imageFile', file, { shouldValidate: true });
+        setShouldRemoveImage(false); // Reset flag khi chọn ảnh mới
         e.target.value = "";
     };
+
     const handleRemoveImage = () => {
         setImageFile(null);
+        setImagePreview(null);
+        // Nếu có ảnh cũ thì đánh dấu cần xóa
+        if (oldImage) {
+            setShouldRemoveImage(true);
+        }
         setOldImage(null);
         setValue('imageFile', null, { shouldValidate: true });
     };
@@ -186,11 +194,15 @@ const ComboUpdate = () => {
             formData.append('start_date', startDate ? new Date(startDate).toISOString() : '');
             formData.append('end_date', endDate ? new Date(endDate).toISOString() : '');
             formData.append('is_active', data.is_active);
-            // Chỉ gửi file mới nếu có và là kiểu File
+            // Xử lý ảnh
             if (imageFile) {
-                console.log("test", imageFile);
+                // Có ảnh mới
                 formData.append('image_url', imageFile);
+            } else if (shouldRemoveImage) {
+                // Xóa ảnh cũ - gửi empty string để backend hiểu là xóa
+                formData.append('image_url', '');
             }
+            
             // Thêm sản phẩm vào combo
             comboItems.forEach((item, idx) => {
                 formData.append(`items[${idx}][product_id]`, item.product_id);
@@ -380,11 +392,11 @@ const ComboUpdate = () => {
                                             <div className="d-flex flex-column align-items-center">
                                                 <div className="border border-2 border-secondary border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center mb-2"
                                                     style={{ aspectRatio: '3/2', width: '100%', maxWidth: 320 }}>
-                                                    {(imageFile || oldImage) ? (
+                                                    {(imagePreview || oldImage) ? (
                                                         <>
                                                             <img
-                                                                src={imageFile ? (typeof imageFile === 'string' ? imageFile : URL.createObjectURL(imageFile)) : (process.env.REACT_APP_API_URL + 'api/images/' + oldImage)}
-                                                                alt="ảnh combo"
+                                                                src={imagePreview || (oldImage?.startsWith('http') ? oldImage : urlImage + oldImage)}
+                                                                alt="Preview"
                                                                 className="w-100 h-100 rounded position-absolute top-0 start-0"
                                                                 style={{ objectFit: 'fill', aspectRatio: '1/1' }}
                                                             />
@@ -405,7 +417,7 @@ const ComboUpdate = () => {
                                                     )}
                                                 </div>
                                                 <label htmlFor="inputImage" className="form-label btn btn-secondary mb-0 mt-2">
-                                                    <i className="fas fa-upload"></i> Thêm ảnh combo
+                                                    <i className="fas fa-upload"></i> {imagePreview || oldImage ? 'Thay đổi ảnh' : 'Thêm ảnh combo'}
                                                 </label>
                                                 <div className="text-muted small">
                                                             Chỉ chọn 1 ảnh, định dạng: jpg, png...<br/>
@@ -421,14 +433,7 @@ const ComboUpdate = () => {
                                                 />
                                                 <input
                                                     type="hidden"
-                                                    {...register('imageFile', {
-                                                        validate: file => {
-                                                            // Nếu đã có ảnh cũ thì không bắt buộc
-                                                            if (oldImage && !imageFile) return true;
-                                                            if (!file && !oldImage) return 'Ảnh combo là bắt buộc';
-                                                            return true;
-                                                        }
-                                                    })}
+                                                    {...register('imageFile')}
                                                 />
                                                 {errors.imageFile && <div className="text-danger mt-1 small">{errors.imageFile.message}</div>}
                                             </div>
@@ -521,6 +526,7 @@ const ComboUpdate = () => {
                                             onReady={() => register('description', { required: "Mô tả combo là bắt buộc" })}
                                             onChange={data => setValue('description', data)}
                                             trigger={() => trigger('description')}
+                                            folder='combos'
                                         />
                                         {errors.description && <div className="text-danger mt-1 small">{errors.description.message}</div>}
                                     </div>

@@ -1,6 +1,8 @@
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import coreTranslations from 'ckeditor5/translations/vi.js';
 import CustomUploadAdapter from '../../helpers/CustomUploadAdapter';
+import { useMemo, useRef } from 'react';
+import { deleteImage } from '../../helpers/imageUtils';
 import {  ClassicEditor, 
     Essentials, 
     Paragraph, 
@@ -27,13 +29,49 @@ import {  ClassicEditor,
 
 import 'ckeditor5/ckeditor5.css';
 
-function CustomEditor({data, onReady, onChange, trigger}) {
+function CustomEditor({data, onReady, onChange, trigger, folder = 'posts', autoDeleteImages = true}) {
+
+    // Track các ảnh đã upload trong session này
+    const uploadedImages = useRef(new Set());
+
+    // Handle onReady và inject adapter
+    const handleReady = (editor) => {
+        // Inject upload adapter với khả năng track ảnh
+        editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+            return new CustomUploadAdapter(loader, folder, uploadedImages.current);
+        };
+
+        // Nếu bật tính năng tự động xóa ảnh
+        if (autoDeleteImages) {
+            // Lắng nghe thay đổi nội dung editor
+            editor.model.document.on('change:data', () => {
+                const editorData = editor.getData();
+                
+                // Kiểm tra các ảnh đã upload nhưng không còn trong nội dung
+                uploadedImages.current.forEach(imageUrl => {
+                    if (!editorData.includes(imageUrl)) {
+                        // Ảnh đã bị xóa khỏi nội dung, gọi API xóa với thông tin folder
+                        deleteImage(imageUrl, folder)
+                            .then(() => {
+                                uploadedImages.current.delete(imageUrl);
+                                console.log('Đã xóa ảnh khỏi server:', imageUrl);
+                            })
+                            .catch(error => {
+                                console.warn('Không thể xóa ảnh khỏi server:', imageUrl, error);
+                            });
+                    }
+                });
+            });
+        }
+        
+        if (onReady) onReady(editor);
+    };
+
     return (
         <CKEditor
             editor={ ClassicEditor }
             data={data}
             config={ {
-                extraPlugins: [MyCustomUploadAdapterPlugin],
                  language: {
                       ui: 'vi',
                       content: 'vi'
@@ -90,18 +128,11 @@ function CustomEditor({data, onReady, onChange, trigger}) {
                 trigger && trigger();
             }}
             
-            onReady={ ( editor ) => {
-                if (onReady) onReady(editor);
-            } }
+            onReady={handleReady}
             
         />
     );
 }
-// Plugin để inject custom upload adapter
-function MyCustomUploadAdapterPlugin(editor) {
-    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-        return new CustomUploadAdapter(loader);
-    };
-}
+// Plugin để inject custom upload adapter đã được di chuyển vào trong component
 
 export default CustomEditor;

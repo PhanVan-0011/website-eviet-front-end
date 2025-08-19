@@ -159,7 +159,7 @@ const CategoriesList = () => {
                     </ol>
                     <div className='mb-3'>
                         <Link className="btn btn-primary me-2 add-custom-btn" to="/category/add"><i className="fas fa-plus"></i> Thêm danh mục</Link>
-                        {selectedRows.length > 0 && <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa</button>}
+                        {selectedRows.length > 0 && <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa ({selectedRows.length})</button>}
                     </div>
                     <DataTables 
                         name="Danh sách danh mục"

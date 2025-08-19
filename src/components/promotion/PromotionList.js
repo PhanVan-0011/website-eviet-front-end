@@ -263,7 +263,7 @@ const PromotionList = () => {
                         <Permission permission={PERMISSIONS.PROMOTIONS_DELETE}>
                             {selectedRows.length > 0 && (
                                 <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}>
-                                    <i className="fas fa-trash"></i> Xóa
+                                    <i className="fas fa-trash"></i> Xóa ({selectedRows.length})
                                 </button>
                             )}
                         </Permission>
@@ -359,7 +359,7 @@ const PromotionList = () => {
                     {typeDelete === 'single' ? (
                         <p>Bạn có chắc chắn muốn xóa khuyến mãi này?</p>
                     ) : (
-                        <p>Bạn có chắc chắn muốn xóa các khuyến mãi này?</p>
+                        <p>Bạn có chắc chắn muốn xóa các sản phẩm này?</p>
                     )}
                 </Modal.Body>
                 <Modal.Footer>

@@ -26,9 +26,10 @@ const SliderUpdate = () => {
     const params = useParams();
     const navigation = useNavigate();
     const dispatch = useDispatch();
-    const { register, handleSubmit, setValue, formState: { errors } } = useForm();
+    const { register, handleSubmit, setValue, formState: { errors }, setError, clearErrors } = useForm();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
     const [oldImage, setOldImage] = useState(null);
     const [products, setProducts] = useState([]);
     const [combos, setCombos] = useState([]);
@@ -63,7 +64,17 @@ const SliderUpdate = () => {
                 setValue('display_order', data.display_order || 1);
                 setDisplayOrder(data.display_order || 1);
                 setValue('is_active', data.is_active === true ? "1" : "0");
-                setOldImage(data.image_url);
+                
+                // Xử lý ảnh từ image_urls array
+                if (data.image_urls && data.image_urls.length > 0) {
+                    const featuredImg = data.image_urls.find(img => img.is_featured === 1);
+                    const firstImg = featuredImg || data.image_urls[0];
+                    const imageUrl = firstImg.thumb_url || firstImg.main_url;
+                    setOldImage(imageUrl);
+                } else if (data.image_url) {
+                    // Fallback cho trường hợp API trả về image_url string
+                    setOldImage(data.image_url);
+                }
                 // Xử lý loại liên kết và id liên kết
                 const type = reverseLinkTypeMap[data.linkable_type] || '';
                 setLinkType(type);
@@ -82,13 +93,29 @@ const SliderUpdate = () => {
     // Xử lý chọn ảnh mới
     const onChangeImage = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => setImageFile(ev.target.result);
-            reader.readAsDataURL(file);
-        } else {
-            setImageFile(null);
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('Ảnh phải nhỏ hơn 2MB!', toastErrorConfig);
+            e.target.value = "";
+            return;
         }
+        if (!['image/jpeg', 'image/png', 'image/jpg', 'image/gif'].includes(file.type)) {
+            toast.error('Chỉ chấp nhận ảnh jpg, jpeg, png, gif', toastErrorConfig);
+            e.target.value = "";
+            return;
+        }
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+        setValue('imageFile', file, { shouldValidate: true });
+        clearErrors('imageFile'); // Clear error khi chọn ảnh mới
+        e.target.value = "";
+    };
+
+    const handleRemoveImage = () => {
+        setImageFile(null);
+        setImagePreview(null);
+        setOldImage(null); // Xóa cả ảnh cũ
+        setValue('imageFile', null, { shouldValidate: true });
     };
 
     // Khi đổi loại liên kết, reset id liên kết
@@ -102,6 +129,12 @@ const SliderUpdate = () => {
 
     // Submit form
     const handleSubmitForm = async (data) => {
+        // Kiểm tra nếu không có ảnh nào (cả mới và cũ)
+        if (!imageFile && !oldImage) {
+            setError('imageFile', { type: 'manual', message: 'Ảnh slider là bắt buộc' });
+            return;
+        }
+        clearErrors('imageFile');
 
         setIsSubmitting(true);
         try {
@@ -111,8 +144,8 @@ const SliderUpdate = () => {
             formData.append('description', data.description || '');
             formData.append('display_order', data.display_order || 1);
             formData.append('is_active', data.is_active);
-            if (data.imageFile && data.imageFile[0]) {
-                formData.append('image_url', data.imageFile[0]);
+            if (imageFile) {
+                formData.append('image_url', imageFile);
             }
             // Xử lý liên kết
             if (data.link_type && data.link_id) {
@@ -180,240 +213,289 @@ const SliderUpdate = () => {
             <main>
                 <div className="container-fluid px-4">
                     <h1 className="mt-4">Cập nhật slider</h1>
-                    <ol className="breadcrumb mb-4">
+                    <ol className="breadcrumb mb-4 p-2">
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
                         <li className="breadcrumb-item active">Cập nhật slider</li>
                     </ol>
-                    <div className='card mb-3'>
-                        <div className='card-header'>
-                            <i className="fas fa-table me-1"></i>
-                            Dữ liệu slider
-                        </div>
-                        <div className='card-body'>
-                            <form onSubmit={handleSubmit(handleSubmitForm)}>
-                                <div className="row mb-3">
-                                    <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
-                                            <input
-                                                className="form-control"
-                                                id="inputTitle"
-                                                {...register('title', { required: 'Tiêu đề là bắt buộc' })}
-                                                placeholder="Nhập tiêu đề"
-                                            />
-                                            <label htmlFor="inputTitle">
-                                                Tiêu đề <span style={{ color: 'red' }}>*</span>
-                                            </label>
-                                            {errors.title && <div className="text-danger">{errors.title.message}</div>}
-                                        </div>
+                    <form onSubmit={handleSubmit(handleSubmitForm)}>
+                        <div className="row g-4">
+                            {/* Thông tin cơ bản */}
+                            <div className="col-lg-6">
+                                <div className="card shadow-sm border-0 h-100">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-info-circle me-2"></i>Thông tin cơ bản</h5>
                                     </div>
-                                    <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
-                                            <input
-                                                className="form-control"
-                                                id="inputDisplayOrder"
-                                                type="number"
-                                                min="1"
-                                                {...register('display_order')}
-                                                value={displayOrder}
-                                                onChange={e => {
-                                                    setDisplayOrder(e.target.value);
-                                                    setValue('display_order', e.target.value);
-                                                }}
-                                                placeholder="Nhập thứ tự hiển thị"
-                                            />
-                                            <label htmlFor="inputDisplayOrder">
-                                                Thứ tự hiển thị
-                                            </label>
-                                            {errors.display_order && <div className="text-danger">{errors.display_order.message}</div>}
+                                    <div className="card-body pt-2">
+                                        <div className="mb-3">
+                                            <div className="form-floating">
+                                                <input
+                                                    className="form-control"
+                                                    id="inputTitle"
+                                                    {...register('title', { required: 'Tiêu đề là bắt buộc' })}
+                                                    placeholder="Nhập tiêu đề slider"
+                                                />
+                                                <label htmlFor="inputTitle">
+                                                    Tiêu đề slider <span className="text-danger">*</span>
+                                                </label>
+                                                {errors.title && <div className="text-danger mt-1 small">{errors.title.message}</div>}
+                                            </div>
+                                        </div>
+                                        <div className="mb-3">
+                                            <div className="form-floating">
+                                                <input
+                                                    className="form-control"
+                                                    id="inputDisplayOrder"
+                                                    type="number"
+                                                    min={1}
+                                                    {...register('display_order')}
+                                                    value={displayOrder}
+                                                    onChange={e => {
+                                                        setDisplayOrder(e.target.value);
+                                                        setValue('display_order', e.target.value);
+                                                    }}
+                                                    placeholder="Nhập thứ tự hiển thị"
+                                                />
+                                                <label htmlFor="inputDisplayOrder">
+                                                    Thứ tự hiển thị
+                                                </label>
+                                                {errors.display_order && <div className="text-danger mt-1 small">{errors.display_order.message}</div>}
+                                            </div>
+                                        </div>
+                                        <div className="mb-3">
+                                            <div className="form-floating">
+                                                <select
+                                                    className="form-select"
+                                                    id="inputStatus"
+                                                    {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
+                                                    defaultValue="1"
+                                                >
+                                                    <option value="1">Hiển thị</option>
+                                                    <option value="0">Ẩn</option>
+                                                </select>
+                                                <label htmlFor="inputStatus">Trạng thái <span className="text-danger">*</span></label>
+                                                {errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-6">
-                                        <div className="mb-3 input-file">
-                                            <label htmlFor="inputImage" className="form-label btn btn-secondary">
-                                                Chọn ảnh slider
-                                            </label>
-                                            <input
-                                                className="form-control"
-                                                id="inputImage"
-                                                type="file"
-                                                accept="image/*"
-                                                {...register('imageFile', {
-                                                    onChange: onChangeImage,
-                                                    validate: {
-                                                        checkType: (files) =>
-                                                            files && files[0]
-                                                                ? (['image/jpeg', 'image/png', 'image/jpg', 'image/gif'].includes(files[0].type)
-                                                                    ? true
-                                                                    : 'Chỉ chấp nhận ảnh jpg, jpeg, png, gif')
-                                                                : true,
-                                                        checkSize: (files) =>
-                                                            files && files[0]
-                                                                ? (files[0].size <= 2 * 1024 * 1024
-                                                                    ? true
-                                                                    : 'Kích thước ảnh tối đa 2MB')
-                                                                : true
-                                                    }
-                                                })}
-                                            />
-                                            <small className="text-muted"> Chỉ chọn 1 ảnh, định dạng: jpg, png...</small>
-                                            {errors.imageFile && <div className="text-danger">{errors.imageFile.message}</div>}
-                                            {(imageFile || oldImage) && (
-                                                <div className="mt-2">
-                                                    <img
-                                                        src={imageFile ? imageFile : (oldImage?.startsWith('http') ? oldImage : urlImage + oldImage)}
-                                                        alt="ảnh slider"
-                                                        className="img-thumbnail"
-                                                        style={{ maxWidth: '200px' }}
-                                                    />
+                            </div>
+                            {/* Hình ảnh slider */}
+                            <div className="col-lg-6">
+                                <div className="card shadow-sm border-0 h-100">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-image me-2"></i>Hình ảnh slider</h5>
+                                    </div>
+                                    <div className="card-body pt-2">
+                                        <div className="mb-3">
+                                            <div className="d-flex flex-column align-items-center">
+                                                <div
+                                                    className="border border-2 border-secondary border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center mb-2"
+                                                    style={{ aspectRatio: '3/2', width: '100%', maxWidth: 320 }}
+                                                >
+                                                    {(imagePreview || oldImage) ? (
+                                                        <>
+                                                            <img
+                                                                src={imagePreview || (oldImage?.startsWith('http') ? oldImage : urlImage + oldImage)}
+                                                                alt="Preview"
+                                                                className="w-100 h-100 rounded position-absolute top-0 start-0"
+                                                                style={{ objectFit: 'fill', aspectRatio: '1/1' }}
+                                                            />
+                                                            {(imagePreview || oldImage) && (
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 m-1 d-flex align-items-center justify-content-center no-hover"
+                                                                    style={{ zIndex: 2, width: 28, height: 28, padding: 0, background: '#fff' }}
+                                                                    aria-label="Xóa ảnh"
+                                                                    onClick={handleRemoveImage}
+                                                                >
+                                                                    <i className="fas fa-times"></i>
+                                                                </button>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                                            <i className="fas fa-image fs-1 text-secondary"></i>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
-                                            <select
-                                                className="form-select"
-                                                id="inputStatus"
-                                                {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
-                                                defaultValue="1"
-                                            >
-                                                <option value="1">Hiển thị</option>
-                                                <option value="0">Ẩn</option>
-                                            </select>
-                                            <label htmlFor="inputStatus">Trạng thái <span style={{ color: 'red' }}>*</span></label>
-                                            {errors.is_active && <div className="text-danger">{errors.is_active.message}</div>}
+                                                <label htmlFor="inputImage" className="form-label btn btn-secondary mb-0 mt-2">
+                                                    <i className="fas fa-upload"></i> {imagePreview || oldImage ? 'Thay đổi ảnh' : 'Thêm ảnh slider'}
+                                                </label>
+                                                <div className="text-muted small">
+                                                    Chỉ chọn 1 ảnh, định dạng: jpg, png...<br/>
+                                                    Kích thước tối đa: 2MB
+                                                </div>
+                                                <input
+                                                    className="form-control"
+                                                    id="inputImage"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    style={{ display: 'none' }}
+                                                    onChange={onChangeImage}
+                                                />
+                                                <input
+                                                    type="hidden"
+                                                    {...register('imageFile')}
+                                                />
+                                                {errors.imageFile && <div className="text-danger mt-1 small">{errors.imageFile.message}</div>}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
-                                            <select
-                                                className="form-select"
-                                                id="inputLinkType"
-                                                {...register('link_type', { required: 'Loại liên kết là bắt buộc' })}
-                                                value={linkType}
-                                                onChange={handleChangeLinkType}
-                                            >
-                                                <option value="" disabled>Chọn loại liên kết</option>
-                                                <option value="product">Sản phẩm</option>
-                                                <option value="combo">Combo</option>
-                                                <option value="post">Khuyến mãi</option>
-                                            </select>
-                                            <label htmlFor="inputLinkType">Loại liên kết <span style={{ color: 'red' }}>*</span></label>
-                                            {errors.link_type && <div className="text-danger">{errors.link_type.message}</div>}
+                            </div>
+                        </div>
+                        {/* Liên kết slider */}
+                        <div className="row mt-4">
+                            <div className="col-lg-12">
+                                <div className="card shadow-sm border-0">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-link me-2"></i>Liên kết slider <span className="text-danger">*</span></h5>
+                                    </div>
+                                    <div className="card-body pt-2">
+                                        <div className="row mb-3">
+                                            <div className="col-md-6">
+                                                <div className="form-floating">
+                                                    <select
+                                                        className="form-select"
+                                                        id="inputLinkType"
+                                                        {...register('link_type', { required: 'Loại liên kết là bắt buộc' })}
+                                                        value={linkType}
+                                                        onChange={handleChangeLinkType}
+                                                    >
+                                                        <option value="" disabled>Chọn loại liên kết</option>
+                                                        <option value="product">Sản phẩm</option>
+                                                        <option value="combo">Combo</option>
+                                                        <option value="post">Khuyến mãi</option>
+                                                    </select>
+                                                    <label htmlFor="inputLinkType">Loại liên kết <span className="text-danger">*</span></label>
+                                                    {errors.link_type && <div className="text-danger mt-1 small">{errors.link_type.message}</div>}
+                                                </div>
+                                            </div>
+                                            <div className="col-md-6">
+                                                {linkType === "product" && (
+                                                    <div className="form-floating">
+                                                        <select
+                                                            className="form-select"
+                                                            id="inputLinkIdProduct"
+                                                            {...register('link_id', { required: 'Sản phẩm liên kết là bắt buộc' })}
+                                                            value={linkId}
+                                                            onChange={e => {
+                                                                setLinkId(e.target.value);
+                                                                setValue('link_id', e.target.value);
+                                                            }}
+                                                        >
+                                                            <option value="" disabled>Chọn sản phẩm</option>
+                                                            {products.map(prod => (
+                                                                <option key={prod.id} value={prod.id}>{prod.name}</option>
+                                                            ))}
+                                                        </select>
+                                                        <label htmlFor="inputLinkIdProduct">Sản phẩm liên kết <span className="text-danger">*</span></label>
+                                                        {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
+                                                    </div>
+                                                )}
+                                                {linkType === "combo" && (
+                                                    <div className="form-floating">
+                                                        <select
+                                                            className="form-select"
+                                                            id="inputLinkIdCombo"
+                                                            {...register('link_id', { required: 'Combo liên kết là bắt buộc' })}
+                                                            value={linkId}
+                                                            onChange={e => {
+                                                                setLinkId(e.target.value);
+                                                                setValue('link_id', e.target.value);
+                                                            }}
+                                                        >
+                                                            <option value="" disabled>Chọn combo</option>
+                                                            {combos.map(combo => (
+                                                                <option key={combo.id} value={combo.id}>{combo.name}</option>
+                                                            ))}
+                                                        </select>
+                                                        <label htmlFor="inputLinkIdCombo">Combo liên kết <span className="text-danger">*</span></label>
+                                                        {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
+                                                    </div>
+                                                )}
+                                                {linkType === "post" && (
+                                                    <div className="form-floating">
+                                                        <select
+                                                            className="form-select"
+                                                            id="inputLinkIdPost"
+                                                            {...register('link_id', { required: 'Khuyến mãi liên kết là bắt buộc' })}
+                                                            value={linkId}
+                                                            onChange={e => {
+                                                                setLinkId(e.target.value);
+                                                                setValue('link_id', e.target.value);
+                                                            }}
+                                                        >
+                                                            <option value="" disabled>Chọn khuyến mãi</option>
+                                                            {posts.map(post => (
+                                                                <option key={post.id} value={post.id}>{post.name}</option>
+                                                            ))}
+                                                        </select>
+                                                        <label htmlFor="inputLinkIdPost">Khuyến mãi liên kết <span className="text-danger">*</span></label>
+                                                        {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
+                                                    </div>
+                                                )}
+                                                {!linkType && (
+                                                    <div className="d-flex align-items-center justify-content-center h-100">
+                                                        <span className="text-muted fst-italic">Vui lòng chọn loại liên kết</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="col-md-6">
-                                        {linkType === "product" && (
-                                            <div className="form-floating mb-3 mb-md-0">
-                                                <select
-                                                    className="form-select"
-                                                    id="inputLinkIdProduct"
-                                                    {...register('link_id', { required: 'Sản phẩm liên kết là bắt buộc' })}
-                                                    value={linkId}
-                                                    onChange={e => {
-                                                        setLinkId(e.target.value);
-                                                        setValue('link_id', e.target.value);
-                                                    }}
-                                                >
-                                                    <option value="" disabled>Chọn sản phẩm</option>
-                                                    {products.map(prod => (
-                                                        <option key={prod.id} value={prod.id}>{prod.name}</option>
-                                                    ))}
-                                                </select>
-                                                <label htmlFor="inputLinkIdProduct">Sản phẩm liên kết <span style={{ color: 'red' }}>*</span></label>
-                                                {errors.link_id && <div className="text-danger">{errors.link_id.message}</div>}
-                                            </div>
-                                        )}
-                                        {linkType === "combo" && (
-                                            <div className="form-floating mb-3 mb-md-0">
-                                                <select
-                                                    className="form-select"
-                                                    id="inputLinkIdCombo"
-                                                    {...register('link_id', { required: 'Combo liên kết là bắt buộc' })}
-                                                    value={linkId}
-                                                    onChange={e => {
-                                                        setLinkId(e.target.value);
-                                                        setValue('link_id', e.target.value);
-                                                    }}
-                                                >
-                                                    <option value="" disabled>Chọn combo</option>
-                                                    {combos.map(combo => (
-                                                        <option key={combo.id} value={combo.id}>{combo.name}</option>
-                                                    ))}
-                                                </select>
-                                                <label htmlFor="inputLinkIdCombo">Combo liên kết <span style={{ color: 'red' }}>*</span></label>
-                                                {errors.link_id && <div className="text-danger">{errors.link_id.message}</div>}
-                                            </div>
-                                        )}
-                                        {linkType === "post" && (
-                                            <div className="form-floating mb-3 mb-md-0">
-                                                <select
-                                                    className="form-select"
-                                                    id="inputLinkIdPost"
-                                                    {...register('link_id', { required: 'Khuyến mãi liên kết là bắt buộc' })}
-                                                    value={linkId}
-                                                    onChange={e => {
-                                                        setLinkId(e.target.value);
-                                                        setValue('link_id', e.target.value);
-                                                    }}
-                                                >
-                                                    <option value="" disabled>Chọn khuyến mãi</option>
-                                                    {posts.map(post => (
-                                                        <option key={post.id} value={post.id}>{post.name}</option>
-                                                    ))}
-                                                </select>
-                                                <label htmlFor="inputLinkIdPost">Khuyến mãi liên kết <span style={{ color: 'red' }}>*</span></label>
-                                                {errors.link_id && <div className="text-danger">{errors.link_id.message}</div>}
-                                            </div>
-                                        )}
-                                    </div>
                                 </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-12">
-                                        <label htmlFor="description">Mô tả slider</label>
+                            </div>
+                        </div>
+                        {/* Mô tả slider */}
+                        <div className="row mt-4">
+                            <div className="col-lg-12">
+                                <div className="card shadow-sm border-0">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-align-left me-2"></i>Mô tả slider</h5>
+                                    </div>
+                                    <div className="card-body pt-2">
                                         <textarea
                                             className="form-control"
                                             id="description"
-                                            rows={3}
+                                            rows={4}
                                             {...register('description')}
-                                            placeholder="Nhập mô tả slider"
+                                            placeholder="Nhập mô tả chi tiết cho slider..."
                                         />
                                     </div>
                                 </div>
-                                <div className="mt-4 mb-0">
-                                    <div className="d-flex justify-content-center gap-2">
-                                        <button
-                                            type="button"
-                                            className="btn btn-danger w-25 font-weight-bold"
-                                            onClick={() => setShowModal(true)}
-                                            disabled={isSubmitting}
-                                        >
-                                            Xóa
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="btn btn-secondary w-25 font-weight-bold"
-                                            onClick={() => navigation('/slider')}
-                                            disabled={isSubmitting}
-                                        >
-                                            Hủy bỏ
-                                        </button>
-                                        <button
-                                            className="btn btn-primary w-25"
-                                            type="submit"
-                                            disabled={isSubmitting}
-                                        >
-                                            {isSubmitting ? "Đang gửi..." : "Cập nhật"}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
+                            </div>
                         </div>
-                    </div>
+                        {/* Nút hành động */}
+                        <div className="row mt-4 mb-4">
+                            <div className="col-lg-12">
+                                <div className="d-flex justify-content-center gap-2">
+                                    <button
+                                        type="button"
+                                        className="btn btn-danger w-25"
+                                        onClick={() => setShowModal(true)}
+                                        disabled={isSubmitting}
+                                    >
+                                        <i className="fas fa-trash me-1"></i>Xóa
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary w-25"
+                                        onClick={() => navigation('/slider')}
+                                        disabled={isSubmitting}
+                                    >
+                                        Hủy bỏ
+                                    </button>
+                                    <button
+                                        className="btn btn-primary w-25"
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                    >
+                                        {isSubmitting ? "Đang gửi..." : "Cập nhật"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </main>
             <Modal show={showModal} onHide={() => setShowModal(false)}>

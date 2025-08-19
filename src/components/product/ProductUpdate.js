@@ -530,6 +530,7 @@ const ProductUpdate = () => {
                                         <div className="col-md-12">
                                             <label htmlFor="description">Mô tả sản phẩm</label>
                                             <CustomEditor
+                                                folder='products'
                                                 data={description}
                                                 onReady={() => register('description', {'required': "Mô tả sản phẩm là bắt buộc"})}
                                                 onChange={data => setValue('description', data)}

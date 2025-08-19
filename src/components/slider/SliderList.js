@@ -101,41 +101,75 @@ const SliderList = () => {
         },
         {
             title: "Hình ảnh",
-            element: row => (
-                <>
-                    <ImageList src={row.image_url?.startsWith('http') ? row.image_url : urlImage + row.image_url} alt={row.name || row.title}  onClick={() => setPreviewImage(row.image_url?.startsWith('http') ? row.image_url : urlImage + row.image_url)} />
-                    {/* Modal xem ảnh lớn */}
-                    {previewImage && (
-                        <div
-                            style={{
-                                position: 'fixed',
-                                top: 0,
-                                left: 0,
-                                width: '100vw',
-                                height: '100vh',
-                                background: 'rgba(0,0,0,0.7)',
+            element: row => {
+                // Lấy ảnh đầu tiên từ mảng image_urls hoặc ảnh featured
+                const imageUrl = row.image_urls && row.image_urls.length > 0 
+                    ? (() => {
+                        const featuredImg = row.image_urls.find(img => img.is_featured === 1);
+                        const firstImg = featuredImg || row.image_urls[0];
+                        return firstImg.thumb_url || firstImg.main_url;
+                    })()
+                    : null;
+                
+                const fullImageUrl = imageUrl 
+                    ? (imageUrl.startsWith('http') ? imageUrl : urlImage + imageUrl)
+                    : null;
+
+                return (
+                    <>
+                        {fullImageUrl ? (
+                            <ImageList 
+                                src={fullImageUrl} 
+                                alt={row.title}  
+                                onClick={() => setPreviewImage(fullImageUrl)} 
+                            />
+                        ) : (
+                            <div style={{ 
+                                width: 60, 
+                                height: 40, 
+                                background: '#f8f9fa', 
+                                border: '1px solid #dee2e6',
+                                borderRadius: 4,
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                zIndex: 9999
-                            }}
-                            onClick={() => setPreviewImage(null)}
-                        >
-                            <img
-                                src={previewImage}
-                                alt="Preview"
+                                justifyContent: 'center'
+                            }}>
+                                <i className="fas fa-image text-muted"></i>
+                            </div>
+                        )}
+                        {/* Modal xem ảnh lớn */}
+                        {previewImage && (
+                            <div
                                 style={{
-                                    maxWidth: '90vw',
-                                    maxHeight: '90vh',
-                                    borderRadius: 8,
-                                    boxShadow: '0 2px 16px rgba(0,0,0,0.3)'
+                                    position: 'fixed',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100vw',
+                                    height: '100vh',
+                                    background: 'rgba(0,0,0,0.7)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    zIndex: 9999
                                 }}
-                                onClick={e => e.stopPropagation()}
-                            />
-                        </div>
-                    )}
-                </>
-            ),
+                                onClick={() => setPreviewImage(null)}
+                            >
+                                <img
+                                    src={previewImage}
+                                    alt="Preview"
+                                    style={{
+                                        maxWidth: '90vw',
+                                        maxHeight: '90vh',
+                                        borderRadius: 8,
+                                        boxShadow: '0 2px 16px rgba(0,0,0,0.3)'
+                                    }}
+                                    onClick={e => e.stopPropagation()}
+                                />
+                            </div>
+                        )}
+                    </>
+                );
+            },
             width: "12%"
         },
         {
@@ -259,7 +293,7 @@ const SliderList = () => {
                         </Link>
                         {selectedRows.length > 0 && (
                             <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}>
-                                <i className="fas fa-trash"></i> Xóa
+                                <i className="fas fa-trash"></i> Xóa ({selectedRows.length})
                             </button>
                         )}
                     </div>

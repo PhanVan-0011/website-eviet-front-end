@@ -133,7 +133,9 @@ const ComboAdd = () => {
             formData.append('start_date', startDate ? new Date(startDate).toISOString() : '');
             formData.append('end_date', endDate ? new Date(endDate).toISOString() : '');
             formData.append('is_active', data.is_active);
-            formData.append('image_url', imageFile);
+            if (imageFile) {
+                formData.append('image_url', imageFile);
+            }
 
             // Thêm sản phẩm vào combo
             comboItems.forEach((item, idx) => {
@@ -359,9 +361,7 @@ const ComboAdd = () => {
                                                 />
                                                 <input
                                                     type="hidden"
-                                                    {...register('imageFile', {
-                                                        required: 'Ảnh combo là bắt buộc',
-                                                    })}
+                                                    {...register('imageFile')}
                                                 />
                                                 {errors.imageFile && <div className="text-danger mt-1 small">{errors.imageFile.message}</div>}
                                             </div>
@@ -453,6 +453,7 @@ const ComboAdd = () => {
                                             onReady={() => register('description', { required: "Mô tả combo là bắt buộc" })}
                                             onChange={data => setValue('description', data)}
                                             trigger={() => trigger('description')}
+                                            folder='combos'
                                         />
                                         {errors.description && <div className="text-danger mt-1 small">{errors.description.message}</div>}
                                     </div>

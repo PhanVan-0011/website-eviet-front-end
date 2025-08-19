@@ -273,7 +273,7 @@ const ComboList = () => {
                         </Link>
                         {selectedRows.length > 0 && (
                             <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}>
-                                <i className="fas fa-trash"></i> Xóa
+                                <i className="fas fa-trash"></i> Xóa ({selectedRows.length})
                             </button>
                         )}
                     </div>

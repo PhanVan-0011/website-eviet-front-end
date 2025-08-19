@@ -252,7 +252,7 @@ const PostList = () => {
                         </Link>
                         {selectedRows.length > 0 && (
                             <button className="btn btn-danger add-custom-btn" onClick={multiDelete}>
-                                <i className="fas fa-trash"></i> Xóa đã chọn
+                                <i className="fas fa-trash"></i> Xóa ({selectedRows.length})
                             </button>
                         )}
                     </div>

@@ -282,6 +282,7 @@ const PromotionUpdate = () => {
                                             onReady={() => register('description', { required: "Mô tả khuyến mãi là bắt buộc" })}
                                             onChange={data => setValue('description', data)}
                                             trigger={() => trigger('description')}
+                                            folder='promotions'
                                         />
                                         {errors.description && <div className="text-danger">{errors.description.message}</div>}
                                     </div>

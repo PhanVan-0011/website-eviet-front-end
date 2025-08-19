@@ -322,6 +322,7 @@ const PostUpdate = () => {
                                         <div className="col-md-12">
                                             <label className="form-label">Nội dung</label>
                                             <CustomEditor
+                                                folder='posts'
                                                 data={description}
                                                 onReady={() => register('content', { required: "Nội dung là bắt buộc" })}
                                                 onChange={data => setValue('content', data)}
