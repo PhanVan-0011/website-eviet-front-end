@@ -73,7 +73,7 @@ const SliderUpdate = () => {
                     setOldImage(imageUrl);
                 } else if (data.image_url) {
                     // Fallback cho trường hợp API trả về image_url string
-                    setOldImage(data.image_url);
+                setOldImage(data.image_url);
                 }
                 // Xử lý loại liên kết và id liên kết
                 const type = reverseLinkTypeMap[data.linkable_type] || '';
@@ -112,7 +112,7 @@ const SliderUpdate = () => {
     };
 
     const handleRemoveImage = () => {
-        setImageFile(null);
+            setImageFile(null);
         setImagePreview(null);
         setOldImage(null); // Xóa cả ảnh cũ
         setValue('imageFile', null, { shouldValidate: true });
@@ -147,7 +147,7 @@ const SliderUpdate = () => {
             if (imageFile) {
                 formData.append('image_url', imageFile);
             }
-            // Xử lý liên kết
+            // Xử lý liên kết (không bắt buộc)
             if (data.link_type && data.link_id) {
                 formData.append('linkable_type', data.link_type);
                 formData.append('linkable_id', data.link_id);
@@ -224,54 +224,54 @@ const SliderUpdate = () => {
                                 <div className="card shadow-sm border-0 h-100">
                                     <div className="card-header bg-white border-bottom-0 pb-0">
                                         <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-info-circle me-2"></i>Thông tin cơ bản</h5>
-                                    </div>
+                        </div>
                                     <div className="card-body pt-2">
                                         <div className="mb-3">
                                             <div className="form-floating">
-                                                <input
-                                                    className="form-control"
-                                                    id="inputTitle"
-                                                    {...register('title', { required: 'Tiêu đề là bắt buộc' })}
+                                            <input
+                                                className="form-control"
+                                                id="inputTitle"
+                                                {...register('title', { required: 'Tiêu đề là bắt buộc' })}
                                                     placeholder="Nhập tiêu đề slider"
-                                                />
-                                                <label htmlFor="inputTitle">
+                                            />
+                                            <label htmlFor="inputTitle">
                                                     Tiêu đề slider <span className="text-danger">*</span>
-                                                </label>
+                                            </label>
                                                 {errors.title && <div className="text-danger mt-1 small">{errors.title.message}</div>}
-                                            </div>
                                         </div>
+                                    </div>
                                         <div className="mb-3">
                                             <div className="form-floating">
-                                                <input
-                                                    className="form-control"
-                                                    id="inputDisplayOrder"
-                                                    type="number"
+                                            <input
+                                                className="form-control"
+                                                id="inputDisplayOrder"
+                                                type="number"
                                                     min={1}
-                                                    {...register('display_order')}
-                                                    value={displayOrder}
-                                                    onChange={e => {
-                                                        setDisplayOrder(e.target.value);
-                                                        setValue('display_order', e.target.value);
-                                                    }}
-                                                    placeholder="Nhập thứ tự hiển thị"
-                                                />
-                                                <label htmlFor="inputDisplayOrder">
-                                                    Thứ tự hiển thị
-                                                </label>
+                                                {...register('display_order')}
+                                                value={displayOrder}
+                                                onChange={e => {
+                                                    setDisplayOrder(e.target.value);
+                                                    setValue('display_order', e.target.value);
+                                                }}
+                                                placeholder="Nhập thứ tự hiển thị"
+                                            />
+                                            <label htmlFor="inputDisplayOrder">
+                                                Thứ tự hiển thị
+                                            </label>
                                                 {errors.display_order && <div className="text-danger mt-1 small">{errors.display_order.message}</div>}
-                                            </div>
                                         </div>
+                                    </div>
                                         <div className="mb-3">
                                             <div className="form-floating">
-                                                <select
-                                                    className="form-select"
-                                                    id="inputStatus"
-                                                    {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
-                                                    defaultValue="1"
-                                                >
-                                                    <option value="1">Hiển thị</option>
-                                                    <option value="0">Ẩn</option>
-                                                </select>
+                                            <select
+                                                className="form-select"
+                                                id="inputStatus"
+                                                {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
+                                                defaultValue="1"
+                                            >
+                                                <option value="1">Hiển thị</option>
+                                                <option value="0">Ẩn</option>
+                                            </select>
                                                 <label htmlFor="inputStatus">Trạng thái <span className="text-danger">*</span></label>
                                                 {errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
                                             </div>
@@ -341,107 +341,107 @@ const SliderUpdate = () => {
                                             </div>
                                         </div>
                                     </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
                         {/* Liên kết slider */}
                         <div className="row mt-4">
                             <div className="col-lg-12">
                                 <div className="card shadow-sm border-0">
                                     <div className="card-header bg-white border-bottom-0 pb-0">
-                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-link me-2"></i>Liên kết slider <span className="text-danger">*</span></h5>
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-link me-2"></i>Liên kết slider</h5>
                                     </div>
                                     <div className="card-body pt-2">
-                                        <div className="row mb-3">
-                                            <div className="col-md-6">
+                                <div className="row mb-3">
+                                    <div className="col-md-6">
                                                 <div className="form-floating">
-                                                    <select
-                                                        className="form-select"
-                                                        id="inputLinkType"
-                                                        {...register('link_type', { required: 'Loại liên kết là bắt buộc' })}
-                                                        value={linkType}
-                                                        onChange={handleChangeLinkType}
-                                                    >
-                                                        <option value="" disabled>Chọn loại liên kết</option>
-                                                        <option value="product">Sản phẩm</option>
-                                                        <option value="combo">Combo</option>
-                                                        <option value="post">Khuyến mãi</option>
-                                                    </select>
-                                                    <label htmlFor="inputLinkType">Loại liên kết <span className="text-danger">*</span></label>
+                                            <select
+                                                className="form-select"
+                                                id="inputLinkType"
+                                                        {...register('link_type')}
+                                                value={linkType}
+                                                onChange={handleChangeLinkType}
+                                            >
+                                                <option value="" disabled>Chọn loại liên kết</option>
+                                                <option value="product">Sản phẩm</option>
+                                                <option value="combo">Combo</option>
+                                                <option value="post">Khuyến mãi</option>
+                                            </select>
+                                                    <label htmlFor="inputLinkType">Loại liên kết</label>
                                                     {errors.link_type && <div className="text-danger mt-1 small">{errors.link_type.message}</div>}
-                                                </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6">
+                                        {linkType === "product" && (
+                                                    <div className="form-floating">
+                                                <select
+                                                    className="form-select"
+                                                    id="inputLinkIdProduct"
+                                                            {...register('link_id')}
+                                                    value={linkId}
+                                                    onChange={e => {
+                                                        setLinkId(e.target.value);
+                                                        setValue('link_id', e.target.value);
+                                                    }}
+                                                >
+                                                    <option value="" disabled>Chọn sản phẩm</option>
+                                                    {products.map(prod => (
+                                                        <option key={prod.id} value={prod.id}>{prod.name}</option>
+                                                    ))}
+                                                </select>
+                                                        <label htmlFor="inputLinkIdProduct">Sản phẩm liên kết</label>
+                                                        {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
                                             </div>
-                                            <div className="col-md-6">
-                                                {linkType === "product" && (
+                                        )}
+                                        {linkType === "combo" && (
                                                     <div className="form-floating">
-                                                        <select
-                                                            className="form-select"
-                                                            id="inputLinkIdProduct"
-                                                            {...register('link_id', { required: 'Sản phẩm liên kết là bắt buộc' })}
-                                                            value={linkId}
-                                                            onChange={e => {
-                                                                setLinkId(e.target.value);
-                                                                setValue('link_id', e.target.value);
-                                                            }}
-                                                        >
-                                                            <option value="" disabled>Chọn sản phẩm</option>
-                                                            {products.map(prod => (
-                                                                <option key={prod.id} value={prod.id}>{prod.name}</option>
-                                                            ))}
-                                                        </select>
-                                                        <label htmlFor="inputLinkIdProduct">Sản phẩm liên kết <span className="text-danger">*</span></label>
+                                                <select
+                                                    className="form-select"
+                                                    id="inputLinkIdCombo"
+                                                            {...register('link_id')}
+                                                    value={linkId}
+                                                    onChange={e => {
+                                                        setLinkId(e.target.value);
+                                                        setValue('link_id', e.target.value);
+                                                    }}
+                                                >
+                                                    <option value="" disabled>Chọn combo</option>
+                                                    {combos.map(combo => (
+                                                        <option key={combo.id} value={combo.id}>{combo.name}</option>
+                                                    ))}
+                                                </select>
+                                                        <label htmlFor="inputLinkIdCombo">Combo liên kết</label>
                                                         {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
-                                                    </div>
-                                                )}
-                                                {linkType === "combo" && (
+                                            </div>
+                                        )}
+                                        {linkType === "post" && (
                                                     <div className="form-floating">
-                                                        <select
-                                                            className="form-select"
-                                                            id="inputLinkIdCombo"
-                                                            {...register('link_id', { required: 'Combo liên kết là bắt buộc' })}
-                                                            value={linkId}
-                                                            onChange={e => {
-                                                                setLinkId(e.target.value);
-                                                                setValue('link_id', e.target.value);
-                                                            }}
-                                                        >
-                                                            <option value="" disabled>Chọn combo</option>
-                                                            {combos.map(combo => (
-                                                                <option key={combo.id} value={combo.id}>{combo.name}</option>
-                                                            ))}
-                                                        </select>
-                                                        <label htmlFor="inputLinkIdCombo">Combo liên kết <span className="text-danger">*</span></label>
-                                                        {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
-                                                    </div>
-                                                )}
-                                                {linkType === "post" && (
-                                                    <div className="form-floating">
-                                                        <select
-                                                            className="form-select"
-                                                            id="inputLinkIdPost"
-                                                            {...register('link_id', { required: 'Khuyến mãi liên kết là bắt buộc' })}
-                                                            value={linkId}
-                                                            onChange={e => {
-                                                                setLinkId(e.target.value);
-                                                                setValue('link_id', e.target.value);
-                                                            }}
-                                                        >
-                                                            <option value="" disabled>Chọn khuyến mãi</option>
-                                                            {posts.map(post => (
-                                                                <option key={post.id} value={post.id}>{post.name}</option>
-                                                            ))}
-                                                        </select>
-                                                        <label htmlFor="inputLinkIdPost">Khuyến mãi liên kết <span className="text-danger">*</span></label>
+                                                <select
+                                                    className="form-select"
+                                                    id="inputLinkIdPost"
+                                                            {...register('link_id')}
+                                                    value={linkId}
+                                                    onChange={e => {
+                                                        setLinkId(e.target.value);
+                                                        setValue('link_id', e.target.value);
+                                                    }}
+                                                >
+                                                    <option value="" disabled>Chọn khuyến mãi</option>
+                                                    {posts.map(post => (
+                                                        <option key={post.id} value={post.id}>{post.name}</option>
+                                                    ))}
+                                                </select>
+                                                        <label htmlFor="inputLinkIdPost">Khuyến mãi liên kết</label>
                                                         {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
                                                     </div>
                                                 )}
                                                 {!linkType && (
                                                     <div className="d-flex align-items-center justify-content-center h-100">
                                                         <span className="text-muted fst-italic">Vui lòng chọn loại liên kết</span>
-                                                    </div>
-                                                )}
                                             </div>
-                                        </div>
+                                        )}
+                                    </div>
+                                </div>
                                     </div>
                                 </div>
                             </div>
@@ -468,34 +468,34 @@ const SliderUpdate = () => {
                         {/* Nút hành động */}
                         <div className="row mt-4 mb-4">
                             <div className="col-lg-12">
-                                <div className="d-flex justify-content-center gap-2">
-                                    <button
-                                        type="button"
+                                    <div className="d-flex justify-content-center gap-2">
+                                        <button
+                                            type="button"
                                         className="btn btn-danger w-25"
-                                        onClick={() => setShowModal(true)}
-                                        disabled={isSubmitting}
-                                    >
+                                            onClick={() => setShowModal(true)}
+                                            disabled={isSubmitting}
+                                        >
                                         <i className="fas fa-trash me-1"></i>Xóa
-                                    </button>
-                                    <button
-                                        type="button"
+                                        </button>
+                                        <button
+                                            type="button"
                                         className="btn btn-secondary w-25"
-                                        onClick={() => navigation('/slider')}
-                                        disabled={isSubmitting}
-                                    >
-                                        Hủy bỏ
-                                    </button>
-                                    <button
-                                        className="btn btn-primary w-25"
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                    >
-                                        {isSubmitting ? "Đang gửi..." : "Cập nhật"}
-                                    </button>
+                                            onClick={() => navigation('/slider')}
+                                            disabled={isSubmitting}
+                                        >
+                                            Hủy bỏ
+                                        </button>
+                                        <button
+                                            className="btn btn-primary w-25"
+                                            type="submit"
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting ? "Đang gửi..." : "Cập nhật"}
+                                        </button>
                                 </div>
-                            </div>
-                        </div>
-                    </form>
+                                    </div>
+                                </div>
+                            </form>
                 </div>
             </main>
             <Modal show={showModal} onHide={() => setShowModal(false)}>

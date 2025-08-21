@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig , toastSuccessConfig} from '../../tools/toastConfig';
 import { cleanHtml, oembedToIframe } from '../../helpers/formatData';
+import { formatVNDWithUnit } from '../../helpers/formatMoney';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const ProductDetail = () => {
@@ -19,15 +20,6 @@ const ProductDetail = () => {
     const [showModal, setShowModal] = useState(false);
     const [modalImg, setModalImg] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-    // Hàm format giá tiền
-    const formatVND = (value) => {
-        if (value === null || value === undefined) return '';
-        value = value.toString();
-        value = value.replace(/\D/g, '');
-        if (!value) return '';
-        return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
 
     useEffect(() => {
         setLoading(true);
@@ -247,10 +239,10 @@ const ProductDetail = () => {
                                             : <span className="text-muted">Chưa phân loại</span>}
                                     </div>
                                     <div className="mb-2">
-                                        <span className="fw-semibold text-success">Giá gốc:</span> <span className="text-danger">{formatVND(parseInt(product.original_price))} ₫</span>
+                                        <span className="fw-semibold text-success">Giá gốc:</span> <span className="text-danger">{formatVNDWithUnit(product.original_price)}</span>
                                     </div>
                                     <div className="mb-2">
-                                        <span className="fw-semibold text-warning">Giá bán:</span> <span className="text-danger">{formatVND(parseInt(product.sale_price))} ₫</span>
+                                        <span className="fw-semibold text-warning">Giá bán:</span> <span className="text-danger">{formatVNDWithUnit(product.sale_price)}</span>
                                     </div>
                                     <div className="mb-2">
                                         <span className="fw-semibold">Số lượng:</span> {product.stock_quantity}

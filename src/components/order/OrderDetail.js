@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import { toast } from 'react-toastify';
 import requestApi from '../../helpers/api';
+import {formatVNDWithUnit } from '../../helpers/formatMoney';
 
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
@@ -14,19 +15,6 @@ const statusMap = {
     shipped: { color: 'primary', text: 'Đã gửi hàng' },
     delivered: { color: 'success', text: 'Đã giao' },
     cancelled: { color: 'danger', text: 'Đã hủy' }
-};
-
-// Hàm format tiền (nếu chưa có)
-const formatVND = (value) => {
-    if (value === null || value === undefined) return '';
-    // Xử lý chuỗi kiểu "72,300.00" => 72300
-    let number = value;
-    if (typeof value === 'string') {
-        number = value.replace(/,/g, '').replace(/\.00$/, '');
-    }
-    number = Number(number);
-    if (isNaN(number) || number === 0) return '0';
-    return number.toLocaleString('vi-VN');
 };
 
 // Thêm map trạng thái payment
@@ -167,10 +155,10 @@ const OrderDetail = () => {
                                         </div>
                                         <div className="mb-2">
                                             <span className="fw-semibold">Tổng tiền:</span>{' '}
-                                            <span className="fw-bold text-danger">{formatVND(order.total_amount)} ₫</span>
+                                            <span className="fw-bold text-danger">{formatVNDWithUnit(order.total_amount)}</span>
                                         </div>
                                         <div className="mb-2">
-                                            <span className="fw-semibold">Phí giao hàng:</span> {formatVND(order.shipping_fee)} ₫
+                                            <span className="fw-semibold">Phí giao hàng:</span> {formatVNDWithUnit(order.shipping_fee)}
                                         </div>
                                         <div className="mb-2">
                                             <span className="fw-semibold">Địa chỉ giao:</span> {order.shipping_address}
@@ -201,7 +189,7 @@ const OrderDetail = () => {
                                                     </div>
                                                 )}
                                                 <div className="mb-2">
-                                                    <span className="fw-semibold">Số tiền:</span> {formatVND(order.payment.amount)} ₫
+                                                    <span className="fw-semibold">Số tiền:</span> {formatVNDWithUnit(order.payment.amount)}
                                                 </div>
                                                 <div className="mb-2">
                                                     <span className="fw-semibold">Mã giao dịch:</span> {order.payment.transaction_id || 'Chưa có thông tin giao dịch'}
@@ -288,13 +276,13 @@ const OrderDetail = () => {
                                                                     <div className="text-muted small" dangerouslySetInnerHTML={{ __html: item.product ? item.product.name : '' }} />
                                                                 </td>
                                                                 <td className="text-center">
-                                                                    <span className="fw-bold text-primary">{formatVND(item.unit_price)} ₫</span>
+                                                                    <span className="fw-bold text-primary">{formatVNDWithUnit(item.unit_price)}</span>
                                                                 </td>
                                                                 <td className="text-center">
                                                                     <span className="fw-bold">{item.quantity}</span>
                                                                 </td>
                                                                 <td className="text-end fw-bold">
-                                                                    <span className="text-danger">{formatVND(item.unit_price * item.quantity)} ₫</span>
+                                                                    <span className="text-danger">{formatVNDWithUnit(item.unit_price * item.quantity)}</span>
                                                                 </td>
                                                                 <td className="text-center">
                                                                     <span
@@ -329,7 +317,7 @@ const OrderDetail = () => {
                                             <tfoot>
                                                 <tr>
                                                     <td colSpan={6} className="text-end fw-bold">Tổng cộng:</td>
-                                                    <td className="text-end fw-bold text-danger">{formatVND(order.total_amount)} ₫</td>
+                                                    <td className="text-end fw-bold text-danger">{formatVNDWithUnit(order.total_amount)}</td>
                                                 </tr>
                                             </tfoot>
                                         </table>

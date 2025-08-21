@@ -32,9 +32,12 @@ const PromotionList = () => {
     const [filterType, setFilterType] = useState('');
     const [filterStartDate, setFilterStartDate] = useState(() => {
         const now = new Date();
-        return new Date(now.getFullYear(), 0, 1);
+        return new Date(now.getFullYear(), 0, 1); // Ngày đầu năm
     });
-    const [filterEndDate, setFilterEndDate] = useState(() => new Date());
+    const [filterEndDate, setFilterEndDate] = useState(() => {
+        const now = new Date();
+        return new Date(now.getFullYear(), 11, 31); // Ngày cuối năm (31/12)
+    });
 
     // Sort states
     const [sortField, setSortField] = useState('');

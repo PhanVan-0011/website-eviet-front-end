@@ -8,15 +8,8 @@ import { toast } from 'react-toastify';
 import moment from 'moment';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import { cleanHtml, oembedToIframe } from '../../helpers/formatData';
+import { formatVNDWithUnit } from '../../helpers/formatMoney';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
-
-const formatVND = (value) => {
-    if (value === null || value === undefined) return '';
-    value = value.toString();
-    value = value.replace(/\D/g, '');
-    if (!value) return '';
-    return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-};
 
 const ComboDetail = () => {
     const { id } = useParams();
@@ -138,7 +131,9 @@ const ComboDetail = () => {
                                         }
                                     </div>
                                     <div className="mb-2">
-                                        <span className="fw-semibold text-success">Giá combo:</span> <span className="text-danger">{formatVND(combo.price)} ₫</span>
+                                        <span className="fw-semibold text-success">Giá combo:</span> <span className="text-danger">
+                                            {formatVNDWithUnit(combo.price)}
+                                        </span>
                                     </div>
                                     <div className="mb-2">
                                         <span className="fw-semibold">Số sản phẩm:</span> {combo.items ? combo.items.length : 0}
@@ -210,9 +205,11 @@ const ComboDetail = () => {
                                                             </td>
                                                             <td>
                                                                 <div className="fw-semibold">{item.product ? item.product.name : ''}</div>
-                                                                <div className="text-muted small" dangerouslySetInnerHTML={{__html: item.product ? cleanHtml(item.product.description) : ''}} />
+                                                                <div className="text-muted small">{item.product ? item.product.size : ''}</div>
                                                             </td>
-                                                            <td className="text-center">{item.product ? formatVND(item.product.sale_price) : ''} ₫</td>
+                                                            <td className="text-center">
+                                                                {formatVNDWithUnit(item.product?.sale_price)}
+                                                            </td>
                                                             <td className="text-center">{item.quantity}</td>
                                                         </tr>
                                                     ))

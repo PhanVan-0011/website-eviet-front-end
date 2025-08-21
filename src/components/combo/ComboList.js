@@ -34,7 +34,10 @@ const ComboList = () => {
         const now = new Date();
         return new Date(now.getFullYear(), 0, 1);
     });
-    const [filterEndDateTo, setFilterEndDateTo] = useState(() => new Date());
+    const [filterEndDateTo, setFilterEndDateTo] =  useState(() => {
+        const now = new Date();
+        return new Date(now.getFullYear(), 11, 31); // Ngày cuối năm (31/12)
+    });
     const [filterPriceRange, setFilterPriceRange] = useState('');
 
     // Sort states
@@ -196,7 +199,7 @@ const ComboList = () => {
                     <Link className="btn btn-primary btn-sm me-1" to={`/combo/${row.id}`}>
                         <i className="fas fa-edit"></i>
                     </Link>
-                    <button className="btn btn-danger btn-sm add-custom-btn" onClick={() => handleDelete(row.id)}>
+                    <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}>
                         <i className="fas fa-trash"></i>
                     </button>
                 </div>

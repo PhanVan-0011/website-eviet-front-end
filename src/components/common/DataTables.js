@@ -79,30 +79,59 @@ const DataTables = (props) => {
         return Number(w) || 0;
     };
 
-   const renderTableHeader = () => {
+    // Helper để tính toán width cho cột
+    const calculateColumnWidths = () => {
         // Xác định các cột đang hiển thị
         const visibleIdx = columns.map((_, idx) => idx).filter(idx => visibleColumns.includes(idx));
-        // Lấy width gốc của các cột (nếu không có thì mặc định là 0)
+        // Lấy width gốc của các cột
         const baseWidths = columns.map(col => {
             const w = col.width;
             if (w && typeof w === 'string' && w.endsWith('%')) return parseFloat(w);
-            if (w && typeof w === 'string' && w.endsWith('px')) return 0; // chỉ xử lý %
+            if (w && typeof w === 'string' && w.endsWith('px')) return 0;
             if (typeof w === 'number') return w;
             return 0;
         });
-        // Tổng width gốc của các cột đang hiển thị
-        const totalVisibleBaseWidth = visibleIdx.reduce((sum, idx) => sum + baseWidths[idx], 0);
-        // Tổng width gốc của các cột bị ẩn
-        const totalHiddenBaseWidth = baseWidths.reduce((sum, w, idx) => sum + (!visibleColumns.includes(idx) ? w : 0), 0);
-        // Số cột còn lại
-        const visibleCount = visibleIdx.length;
-        // Tính width mới cho từng cột đang hiển thị
-        // Mỗi cột sẽ được cộng thêm (totalHiddenBaseWidth / visibleCount)
+        
+        // Phân loại cột cố định (hình ảnh) và cột linh hoạt
+        const fixedWidthColumns = visibleIdx.filter(idx => {
+            const col = columns[idx];
+            const title = typeof col.title === "function" ? col.title() : col.title;
+            const titleStr = typeof title === 'string' ? title : '';
+            return col.fixedWidth || titleStr.toLowerCase().includes('hình ảnh') || titleStr.toLowerCase().includes('ảnh');
+        });
+        const flexibleColumns = visibleIdx.filter(idx => !fixedWidthColumns.includes(idx));
+        
+        // Tính tổng width của cột bị ẩn (chỉ từ cột linh hoạt)
+        const totalHiddenFlexibleWidth = columns.reduce((sum, col, idx) => {
+            if (!visibleColumns.includes(idx)) {
+                const title = typeof col.title === "function" ? col.title() : col.title;
+                const titleStr = typeof title === 'string' ? title : '';
+                const isFixed = col.fixedWidth || titleStr.toLowerCase().includes('hình ảnh') || titleStr.toLowerCase().includes('ảnh');
+                if (!isFixed) {
+                    return sum + baseWidths[idx];
+                }
+            }
+            return sum;
+        }, 0);
+        
+        // Tính width mới
         const newWidths = visibleIdx.map(idx => {
             const base = baseWidths[idx];
-            const plus = visibleCount > 0 ? totalHiddenBaseWidth / visibleCount : 0;
+            // Nếu là cột cố định thì giữ nguyên width
+            if (fixedWidthColumns.includes(idx)) {
+                return base.toFixed(2) + '%';
+            }
+            // Nếu là cột linh hoạt thì phân bổ thêm width từ cột bị ẩn
+            const plus = flexibleColumns.length > 0 ? totalHiddenFlexibleWidth / flexibleColumns.length : 0;
             return (base + plus).toFixed(2) + '%';
         });
+        
+        return { visibleIdx, newWidths };
+    };
+
+   const renderTableHeader = () => {
+        const { visibleIdx, newWidths } = calculateColumnWidths();
+        
         let widthIdx = 0;
         return columns.map((col, index) =>
             visibleColumns.includes(index) && (
@@ -133,28 +162,8 @@ const DataTables = (props) => {
     };
 
     const renderTableData = () => {
-        // Xác định các cột đang hiển thị
-        const visibleIdx = columns.map((_, idx) => idx).filter(idx => visibleColumns.includes(idx));
-        // Lấy width gốc của các cột (nếu không có thì mặc định là 0)
-        const baseWidths = columns.map(col => {
-            const w = col.width;
-            if (w && typeof w === 'string' && w.endsWith('%')) return parseFloat(w);
-            if (w && typeof w === 'string' && w.endsWith('px')) return 0;
-            if (typeof w === 'number') return w;
-            return 0;
-        });
-        // Tổng width gốc của các cột đang hiển thị
-        const totalVisibleBaseWidth = visibleIdx.reduce((sum, idx) => sum + baseWidths[idx], 0);
-        // Tổng width gốc của các cột bị ẩn
-        const totalHiddenBaseWidth = baseWidths.reduce((sum, w, idx) => sum + (!visibleColumns.includes(idx) ? w : 0), 0);
-        // Số cột còn lại
-        const visibleCount = visibleIdx.length;
-        // Tính width mới cho từng cột đang hiển thị
-        const newWidths = visibleIdx.map(idx => {
-            const base = baseWidths[idx];
-            const plus = visibleCount > 0 ? totalHiddenBaseWidth / visibleCount : 0;
-            return (base + plus).toFixed(2) + '%';
-        });
+        const { visibleIdx, newWidths } = calculateColumnWidths();
+        
         return (
             data.map((row, index) => {
                 let widthIdx = 0;

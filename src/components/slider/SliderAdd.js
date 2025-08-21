@@ -84,7 +84,7 @@ const SliderAdd = () => {
             if (imageFile) {
                 formData.append('image_url', imageFile);
             }
-            // Xử lý liên kết
+            // Xử lý liên kết (không bắt buộc)
             if (data.link_type && data.link_id) {
                 formData.append('linkable_type', data.link_type);
                 formData.append('linkable_id', data.link_id);
@@ -259,7 +259,7 @@ const SliderAdd = () => {
                             <div className="col-lg-12">
                                 <div className="card shadow-sm border-0">
                                     <div className="card-header bg-white border-bottom-0 pb-0">
-                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-link me-2"></i>Liên kết slider <span className="text-danger">*</span></h5>
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-link me-2"></i>Liên kết slider</h5>
                                     </div>
                                     <div className="card-body pt-2">
                                         <div className="row mb-3">
@@ -268,7 +268,7 @@ const SliderAdd = () => {
                                                     <select
                                                         className="form-select"
                                                         id="inputLinkType"
-                                                        {...register('link_type', { required: 'Loại liên kết là bắt buộc' })}
+                                                        {...register('link_type')}
                                                         value={linkType}
                                                         onChange={handleChangeLinkType}
                                                     >
@@ -277,7 +277,7 @@ const SliderAdd = () => {
                                                         <option value="combo">Combo</option>
                                                         <option value="post">Khuyến mãi</option>
                                                     </select>
-                                                    <label htmlFor="inputLinkType">Loại liên kết <span className="text-danger">*</span></label>
+                                                    <label htmlFor="inputLinkType">Loại liên kết</label>
                                                     {errors.link_type && <div className="text-danger mt-1 small">{errors.link_type.message}</div>}
                                                 </div>
                                             </div>
@@ -287,7 +287,7 @@ const SliderAdd = () => {
                                                         <select
                                                             className="form-select"
                                                             id="inputLinkIdProduct"
-                                                            {...register('link_id', { required: 'Sản phẩm liên kết là bắt buộc' })}
+                                                            {...register('link_id')}
                                                             value={linkId}
                                                             onChange={e => {
                                                                 setLinkId(e.target.value);
@@ -299,7 +299,7 @@ const SliderAdd = () => {
                                                                 <option key={prod.id} value={prod.id}>{prod.name}</option>
                                                             ))}
                                                         </select>
-                                                        <label htmlFor="inputLinkIdProduct">Sản phẩm liên kết <span className="text-danger">*</span></label>
+                                                        <label htmlFor="inputLinkIdProduct">Sản phẩm liên kết</label>
                                                         {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
                                                     </div>
                                                 )}
@@ -308,7 +308,7 @@ const SliderAdd = () => {
                                                         <select
                                                             className="form-select"
                                                             id="inputLinkIdCombo"
-                                                            {...register('link_id', { required: 'Combo liên kết là bắt buộc' })}
+                                                            {...register('link_id')}
                                                             value={linkId}
                                                             onChange={e => {
                                                                 setLinkId(e.target.value);
@@ -320,7 +320,7 @@ const SliderAdd = () => {
                                                                 <option key={combo.id} value={combo.id}>{combo.name}</option>
                                                             ))}
                                                         </select>
-                                                        <label htmlFor="inputLinkIdCombo">Combo liên kết <span className="text-danger">*</span></label>
+                                                        <label htmlFor="inputLinkIdCombo">Combo liên kết</label>
                                                         {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
                                                     </div>
                                                 )}
@@ -329,7 +329,7 @@ const SliderAdd = () => {
                                                         <select
                                                             className="form-select"
                                                             id="inputLinkIdPost"
-                                                            {...register('link_id', { required: 'Khuyến mãi liên kết là bắt buộc' })}
+                                                            {...register('link_id')}
                                                             value={linkId}
                                                             onChange={e => {
                                                                 setLinkId(e.target.value);
@@ -341,7 +341,7 @@ const SliderAdd = () => {
                                                                 <option key={post.id} value={post.id}>{post.name}</option>
                                                             ))}
                                                         </select>
-                                                        <label htmlFor="inputLinkIdPost">Khuyến mãi liên kết <span className="text-danger">*</span></label>
+                                                        <label htmlFor="inputLinkIdPost">Khuyến mãi liên kết</label>
                                                         {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
                                                     </div>
                                                 )}
