@@ -8,6 +8,7 @@ import moment from 'moment';
 import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import { cleanHtml,oembedToIframe} from '../../helpers/formatData';
+const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 const PromotionDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -21,7 +22,17 @@ const PromotionDetail = () => {
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/promotions/${id}`, 'GET')
             .then(res => {
-                setPromotion(res.data.data);
+                // Xử lý dữ liệu trả về cho phù hợp
+                const data = res.data.data;
+                // Lấy ảnh chính
+                let mainImage = '';
+                if (data.image && data.image.main_url) {
+                    mainImage = data.image.main_url;
+                }
+                setPromotion({
+                    ...data,
+                    mainImage,
+                });
                 setLoading(false);
                 dispatch(actions.controlLoading(false));
             })
@@ -131,127 +142,139 @@ const PromotionDetail = () => {
                         </ol>
                     </div>
                     <div className="row g-4">
-    <div className="col-md-5">
-        <div className="card shadow-sm h-100 d-flex flex-column">
-            <div className="card-body flex-grow-1">
-                <h4 className="card-title mb-2">{promotion.name}</h4>
-                <span className="badge bg-info text-dark me-2">{promotion.code}</span>
-                {promotion.is_active
-                    ? <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Đang áp dụng</span>
-                    : <span className="badge bg-secondary"><i className="fas fa-ban me-1"></i>Ngừng áp dụng</span>
-                }
-                <div className="mb-2 mt-3">
-                    <span className="fw-semibold">Loại áp dụng:</span> {renderApplicationType(promotion.application_type)}
-                </div>
-                <div className="mb-2">
-                    <span className="fw-semibold">Hình thức:</span> {renderType(promotion.type)}
-                </div>
-                <div className="mb-2">
-                    <span className="fw-semibold">Giá trị:</span> <span className="text-danger">{renderValue(promotion)}</span>
-                </div>
-                <div className="mb-2">
-                    <span className="fw-semibold">Điều kiện:</span>
-                    <ul className="mb-0">
-                        <li>Đơn tối thiểu: {promotion.conditions?.min_order_value ? promotion.conditions.min_order_value.toLocaleString() + ' ₫' : '-'}</li>
-                        <li>Giảm tối đa: {promotion.conditions?.max_discount_amount ? promotion.conditions.max_discount_amount.toLocaleString() + ' ₫' : '-'}</li>
-                    </ul>
-                </div>
-                <div className="mb-2">
-                    <span className="fw-semibold">Giới hạn sử dụng:</span>
-                    <ul className="mb-0">
-                        <li>Tổng lượt: {promotion.usage_limits?.max_usage || '-'}</li>
-                        <li>Mỗi người: {promotion.usage_limits?.max_usage_per_user || '-'}</li>
-                    </ul>
-                </div>
-                <div className="mb-2">
-                    <span className="fw-semibold">Kết hợp khuyến mãi khác:</span> {promotion.is_combinable
-                        ? <span className="badge bg-success">Có</span>
-                        : <span className="badge bg-secondary">Không</span>}
-                </div>
-            </div>
-        </div>
-    </div>
-    <div className="col-md-7">
-        <div className="h-100 d-flex flex-column">
-            {/* PHẠM VI ÁP DỤNG */}
-            <div className="mb-3 border rounded p-3 bg-light">
-                <div className="fw-bold mb-2" style={{ fontSize: 16 }}>
-                    <i className="fas fa-globe-asia me-2"></i>Phạm vi áp dụng
-                </div>
-                {/* Thời gian áp dụng */}
-                <div className="mb-2">
-                    <span className="fw-semibold">Thời gian áp dụng:</span>
-                    <div>
-                        <span className="text-primary">{promotion.dates?.start_date ? moment(promotion.dates.start_date).format('HH:mm DD/MM/YYYY') : '-'}</span>
-                        <span className="mx-1">-</span>
-                        <span className="text-danger">{promotion.dates?.end_date ? moment(promotion.dates.end_date).format('HH:mm DD/MM/YYYY') : '-'}</span>
+                        <div className="col-md-5">
+                            <div className="card shadow-sm">
+                                <img
+                                    src={promotion.mainImage ? urlImage + promotion.mainImage : "https://via.placeholder.com/400x320?text=No+Image"}
+                                    alt={promotion.name}
+                                    className="card-img-top"
+                                    style={{ objectFit: 'contain', height: 320, borderRadius: '8px 8px 0 0', background: '#fafafa' }}
+                                />
+                                <div className="card-body">
+                                    <h4 className="card-title mb-2">{promotion.name}</h4>
+                                    <div className="mb-2">
+                                        <span className="badge bg-info text-dark me-2">{promotion.code}</span>
+                                        {promotion.is_active
+                                            ? <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Đang áp dụng</span>
+                                            : <span className="badge bg-secondary"><i className="fas fa-ban me-1"></i>Ngừng áp dụng</span>
+                                        }
+                                    </div>
+                                    <div className="mb-2">
+                                        <span className="fw-semibold">Loại áp dụng:</span> {renderApplicationType(promotion.application_type)}
+                                    </div>
+                                    <div className="mb-2">
+                                        <span className="fw-semibold">Hình thức:</span> {renderType(promotion.type)}
+                                    </div>
+                                    <div className="mb-2">
+                                        <span className="fw-semibold text-success">Giá trị:</span> <span className="text-danger">{renderValue(promotion)}</span>
+                                    </div>
+                                    <div className="mb-2">
+                                        <span className="fw-semibold">Thời gian áp dụng:</span>
+                                        <div>
+                                            <div className="small text-muted">Từ:</div>
+                                            <span className="text-primary">{promotion.dates?.start_date ? moment(promotion.dates.start_date).format('HH:mm DD/MM/YYYY') : '-'}</span>
+                                            <div className="small text-muted mt-1">Đến:</div>
+                                            <span className="text-danger">{promotion.dates?.end_date ? moment(promotion.dates.end_date).format('HH:mm DD/MM/YYYY') : '-'}</span>
+                                        </div>
+                                    </div>
+                                    <div className="mb-2">
+                                        <span className="fw-semibold">Tình trạng:</span> <span className="badge bg-info text-dark">{promotion.status_text}</span>
+                                    </div>
+                                    <div className="mb-2">
+                                        <span className="fw-semibold">Kết hợp khuyến mãi khác:</span> {promotion.is_combinable
+                                            ? <span className="badge bg-success">Có</span>
+                                            : <span className="badge bg-secondary">Không</span>}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-md-7">
+                            <div className="card shadow-sm h-100">
+                                <div className="card-header bg-light fw-bold">
+                                    <i className="fas fa-globe-asia me-2"></i>Điều kiện và giới hạn
+                                </div>
+                                <div className="card-body">
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="mb-2">
+                                                <span className="fw-semibold">Điều kiện:</span>
+                                                <ul className="mb-0">
+                                                    <li>Đơn tối thiểu: {promotion.conditions?.min_order_value ? promotion.conditions.min_order_value.toLocaleString() + ' ₫' : '-'}</li>
+                                                    <li>Giảm tối đa: {promotion.conditions?.max_discount_amount ? promotion.conditions.max_discount_amount.toLocaleString() + ' ₫' : '-'}</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-2">
+                                                <span className="fw-semibold">Giới hạn sử dụng:</span>
+                                                <ul className="mb-0">
+                                                    <li>Tổng lượt: {promotion.usage_limits?.max_usage || '-'}</li>
+                                                    <li>Mỗi người: {promotion.usage_limits?.max_usage_per_user || '-'}</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="card-header bg-light fw-bold border-top">
+                                    <i className="fas fa-bullseye me-2"></i>Đối tượng áp dụng
+                                </div>
+                                <div className="card-body p-0">
+                                    <div className="p-3">
+                                        {promotion.products?.length > 0 && (
+                                            <div className="mb-2">
+                                                <span className="badge bg-primary me-2">Sản phẩm:</span>
+                                                {promotion.products.map(p => (
+                                                    <span key={p.id} className="badge bg-light text-dark me-1">{p.name}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {promotion.categories?.length > 0 && (
+                                            <div className="mb-2">
+                                                <span className="badge bg-warning text-dark me-2">Danh mục:</span>
+                                                {promotion.categories.map(c => (
+                                                    <span key={c.id} className="badge bg-light text-dark me-1">{c.name}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {promotion.combos?.length > 0 && (
+                                            <div className="mb-2">
+                                                <span className="badge bg-success me-2">Combo:</span>
+                                                {promotion.combos.map(c => (
+                                                    <span key={c.id} className="badge bg-light text-dark me-1">{c.name}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {promotion.products?.length === 0 && promotion.categories?.length === 0 && promotion.combos?.length === 0 && (
+                                            <span className="text-muted">Áp dụng cho tất cả</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="card-header bg-light fw-bold border-top">
+                                    <i className="fas fa-info-circle me-2"></i>Mô tả khuyến mãi
+                                </div>
+                                <div className="card-body" style={{ minHeight: 120 }}>
+                                    {promotion.description
+                                        ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(promotion.description)) }} />
+                                        : <span className="text-muted fst-italic">Chưa có mô tả</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                {/* Tình trạng */}
-                <div className="mb-2">
-                    <span className="fw-semibold">Tình trạng:</span> <span className="badge bg-info text-dark">{promotion.status_text}</span>
-                </div>
-                {/* Đối tượng áp dụng */}
-                <div>
-                    <span className="fw-semibold">Đối tượng áp dụng:</span>
-                    <div className="mt-1">
-                        {promotion.products?.length > 0 && (
-                            <div className="mb-1">
-                                <span className="badge bg-primary me-2">Sản phẩm:</span>
-                                {promotion.products.map(p => (
-                                    <span key={p.id} className="badge bg-light text-dark me-1">{p.name}</span>
-                                ))}
-                            </div>
-                        )}
-                        {promotion.categories?.length > 0 && (
-                            <div className="mb-1">
-                                <span className="badge bg-warning text-dark me-2">Danh mục:</span>
-                                {promotion.categories.map(c => (
-                                    <span key={c.id} className="badge bg-light text-dark me-1">{c.name}</span>
-                                ))}
-                            </div>
-                        )}
-                        {promotion.combos?.length > 0 && (
-                            <div>
-                                <span className="badge bg-success me-2">Combo:</span>
-                                {promotion.combos.map(c => (
-                                    <span key={c.id} className="badge bg-light text-dark me-1">{c.name}</span>
-                                ))}
-                            </div>
-                        )}
-                        {promotion.products?.length === 0 && promotion.categories?.length === 0 && promotion.combos?.length === 0 && (
-                            <span className="text-muted">Tất cả</span>
-                        )}
+                    {/* Button thao tác ra ngoài card, căn giữa, margin-top */}
+                    <div className="row mb-4">
+                        <div className="col-12 d-flex justify-content-center gap-2" style={{ marginTop: 32 }}>
+                            <Link className="btn btn-primary me-2" to={`/promotion/${promotion.id}`}>
+                                <i className="fas fa-edit"></i> Sửa khuyến mãi
+                            </Link>
+                            <button className="btn btn-danger me-2" onClick={handleDelete}>
+                                <i className="fas fa-trash-alt"></i> Xóa khuyến mãi
+                            </button>
+                            <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
+                                <i className="fas fa-arrow-left"></i> Quay lại
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </div>
-            {/* Mô tả khuyến mãi nhỏ lại */}
-            <div className="card shadow-sm flex-grow-1 d-flex flex-column">
-                <div className="card-header bg-light fw-bold" style={{ fontSize: 15, padding: '8px 16px' }}>
-                    <i className="fas fa-info-circle me-2"></i>Mô tả khuyến mãi
-                </div>
-                <div className="card-body flex-grow-1" style={{ minHeight: 60, fontSize: 14, padding: '12px 16px' }}>
-                    {promotion.description
-                        ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(promotion.description)) }} />
-                        : <span className="text-muted fst-italic">Chưa có mô tả</span>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-            {/* BUTTONS cuối giao diện, căn giữa */}
-            <div className="d-flex justify-content-center gap-2 mt-4">
-                <Link className="btn btn-primary" to={`/promotion/${promotion.id}`}>
-                    <i className="fas fa-edit"></i> Sửa
-                </Link>
-                <button className="btn btn-danger" onClick={handleDelete}>
-                    <i className="fas fa-trash-alt"></i> Xóa
-                </button>
-                <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
-                    <i className="fas fa-arrow-left"></i> Quay lại
-                </button>
-            </div>
 
             {/* Modal xác nhận xóa */}
 <Modal show={showModal} onHide={() => setShowModal(false)}>

@@ -141,8 +141,9 @@ const ComboDetail = () => {
                                     <div className="mb-2">
                                         <span className="fw-semibold">Thời gian áp dụng:</span>
                                         <div>
+                                            <div className="small text-muted">Từ:</div>
                                             <span className="text-primary">{moment(combo.start_date).format('HH:mm DD/MM/YYYY')}</span>
-                                            <span className="mx-1">-</span>
+                                            <div className="small text-muted mt-1">Đến:</div>
                                             <span className="text-danger">{moment(combo.end_date).format('HH:mm DD/MM/YYYY')}</span>
                                         </div>
                                     </div>

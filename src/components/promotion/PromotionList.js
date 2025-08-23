@@ -13,6 +13,8 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { vi } from 'date-fns/locale';
 import moment from 'moment';
+import ImageList from '../common/ImageList';
+const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const PromotionList = () => {
     const [promotions, setPromotions] = useState([]);
@@ -99,10 +101,22 @@ const PromotionList = () => {
 
     // Columns
     const columns = [
+        
         {
             title: "Tên khuyến mãi",
             element: row => row.name,
-            width: "16%"
+            width: "14%"
+        },
+        {
+            title: "Hình ảnh",
+            element: row => {
+                return row.image && row.image.thumb_url ? (
+                    <ImageList src={urlImage + row.image.thumb_url} alt={row.name} />
+                ) : (
+                    <ImageList icon alt="Không có ảnh" />
+                );
+            },
+            width: "8%"
         },
         {
             title: "Mã code",
@@ -146,15 +160,15 @@ const PromotionList = () => {
                 <div>
                     <div>
                         <span className="text-secondary small">Từ: </span>
-                        {row.dates?.start_date ? moment(row.dates.start_date).format('DD/MM/YYYY') : '-'}
+                        {row.dates?.start_date ? moment(row.dates.start_date).format('HH:mm DD/MM/YYYY') : '-'}
                     </div>
                     <div>
                         <span className="text-secondary small">Đến: </span>
-                        {row.dates?.end_date ? moment(row.dates.end_date).format('DD/MM/YYYY') : '-'}
+                        {row.dates?.end_date ? moment(row.dates.end_date).format('HH:mm DD/MM/YYYY') : '-'}
                     </div>
                 </div>
             ),
-            width: "14%"
+            width: "16%"
         },
         {
             title: "Trạng thái",
@@ -191,7 +205,7 @@ const PromotionList = () => {
                     </Permission>
                 </div>
             ),
-            width: "12%"
+            width: "14%"
         }
     ];
 

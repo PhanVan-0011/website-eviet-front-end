@@ -10,6 +10,7 @@ import CustomEditor from '../common/CustomEditor';
 import moment from 'moment';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import vi from 'date-fns/locale/vi';
+import { format } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 import Select from 'react-select';
 registerLocale('vi', vi);
@@ -56,15 +57,17 @@ const ComboUpdate = () => {
                     setValue('description', data.description);
                     setValue('price', formatVND(parseInt(data.price, 10)));
                     setPrice(formatVND(parseInt(data.price, 10)));
-                    // DatePicker expects Date objects
+                    // DatePicker expects Date objects - xử lý đầy đủ thời gian
                     if (data.start_date) {
-                        const start = new Date(data.start_date.replace(' ', 'T'));
+                        // Parse datetime string từ server (có thể là format: 'YYYY-MM-DD HH:mm:ss' hoặc ISO)
+                        const start = new Date(data.start_date);
                         setStartDatePicker(start);
                         setStartDate(start);
                         setValue('start_date', start, { shouldValidate: true });
                     }
                     if (data.end_date) {
-                        const end = new Date(data.end_date.replace(' ', 'T'));
+                        // Parse datetime string từ server (có thể là format: 'YYYY-MM-DD HH:mm:ss' hoặc ISO)
+                        const end = new Date(data.end_date);
                         setEndDatePicker(end);
                         setEndDate(end);
                         setValue('end_date', end, { shouldValidate: true });
@@ -178,9 +181,9 @@ const ComboUpdate = () => {
         if (!validateComboItems()) {
             return;
         }
-        // Validate thời gian kết thúc phải lớn hơn hoặc bằng ngày bắt đầu
-        if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
-            toast.error("Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu", toastErrorConfig);
+        // Validate thời gian kết thúc phải lớn hơn thời gian bắt đầu
+        if (startDate && endDate && new Date(endDate) <= new Date(startDate)) {
+            toast.error("Thời gian kết thúc phải lớn hơn thời gian bắt đầu", toastErrorConfig);
             setIsSubmitting(false);
             return;
         }
@@ -191,8 +194,8 @@ const ComboUpdate = () => {
             formData.append('name', data.name);
             formData.append('description', data.description || '');
             formData.append('price', Number(data.price.replace(/\./g, '')));
-            formData.append('start_date', startDate ? new Date(startDate).toISOString() : '');
-            formData.append('end_date', endDate ? new Date(endDate).toISOString() : '');
+            formData.append('start_date', startDate ? format(new Date(startDate), 'yyyy-MM-dd HH:mm:ss') : '');
+            formData.append('end_date', endDate ? format(new Date(endDate), 'yyyy-MM-dd HH:mm:ss') : '');
             formData.append('is_active', data.is_active);
             // Xử lý ảnh
             if (imageFile) {
@@ -325,9 +328,9 @@ const ComboUpdate = () => {
                                         </div>
                                         {/* Ngày bắt đầu và kết thúc cùng 1 hàng */}
                                         <div className="row mb-3">
-                                            <div className="col-6">
+                                            <div className="col-5 offset-1">
                                                 <label htmlFor="inputStartDate" className="form-label fw-semibold">
-                                                    Ngày bắt đầu <span className="text-danger">*</span>
+                                                    Thời gian bắt đầu <span className="text-danger">*</span>
                                                 </label>
                                                 <div className="d-flex align-items-center" style={{gap: '4px'}}>
                                                     <DatePicker
@@ -338,22 +341,27 @@ const ComboUpdate = () => {
                                                             setValue('start_date', date, { shouldValidate: true });
                                                         }}
                                                         locale={vi}
-                                                        dateFormat="dd/MM/yyyy"
+                                                        dateFormat="dd/MM/yyyy HH:mm"
                                                         className="form-control"
-                                                        placeholderText="Chọn ngày bắt đầu"
+                                                        placeholderText="Chọn thời gian bắt đầu"
                                                         id="inputStartDate"
                                                         autoComplete="off"
+                                                        showTimeSelect
+                                                        timeFormat="HH:mm"
+                                                        timeIntervals={15}
+                                                        timeCaption="Giờ"
+                                                        
                                                     />
                                                     <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{height: '38px'}} onClick={() => document.getElementById('inputStartDate')?.focus()}>
                                                         <i className="fas fa-calendar-alt text-secondary"></i>
                                                     </button>
-                                                    <input type="hidden" {...register('start_date', { required: 'Ngày bắt đầu là bắt buộc' })} />
+                                                    <input type="hidden" {...register('start_date', { required: 'Thời gian bắt đầu là bắt buộc' })} />
                                                 </div>
                                                 {errors.start_date && <div className="text-danger mt-1 small">{errors.start_date.message}</div>}
                                             </div>
-                                            <div className="col-6">
+                                            <div className="col-5">
                                                 <label htmlFor="inputEndDate" className="form-label fw-semibold">
-                                                    Ngày kết thúc <span className="text-danger">*</span>
+                                                    Thời gian kết thúc <span className="text-danger">*</span>
                                                 </label>
                                                 <div className="d-flex align-items-center" style={{gap: '4px'}}>
                                                     <DatePicker
@@ -364,16 +372,20 @@ const ComboUpdate = () => {
                                                             setValue('end_date', date, { shouldValidate: true });
                                                         }}
                                                         locale={vi}
-                                                        dateFormat="dd/MM/yyyy"
+                                                        dateFormat="dd/MM/yyyy HH:mm"
                                                         className="form-control"
-                                                        placeholderText="Chọn ngày kết thúc"
+                                                        placeholderText="Chọn thời gian kết thúc"
                                                         id="inputEndDate"
                                                         autoComplete="off"
+                                                        showTimeSelect
+                                                        timeFormat="HH:mm"
+                                                        timeIntervals={15}
+                                                        timeCaption="Giờ"
                                                     />
                                                     <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{height: '38px'}} onClick={() => document.getElementById('inputEndDate')?.focus()}>
                                                         <i className="fas fa-calendar-alt text-secondary"></i>
                                                     </button>
-                                                    <input type="hidden" {...register('end_date', { required: 'Ngày kết thúc là bắt buộc' })} />
+                                                    <input type="hidden" {...register('end_date', { required: 'Thời gian kết thúc là bắt buộc' })} />
                                                 </div>
                                                 {errors.end_date && <div className="text-danger mt-1 small">{errors.end_date.message}</div>}
                                             </div>

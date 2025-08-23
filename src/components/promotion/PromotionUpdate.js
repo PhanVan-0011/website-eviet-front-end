@@ -11,6 +11,7 @@ import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { vi } from 'date-fns/locale';
+import { format } from 'date-fns';
 import Select from 'react-select';
 
 const PromotionUpdate = () => {
@@ -46,6 +47,12 @@ const PromotionUpdate = () => {
     const [maxDiscountAmount, setMaxDiscountAmount] = useState('');
     const [maxUsage, setMaxUsage] = useState('');
     const [maxUsagePerUser, setMaxUsagePerUser] = useState('');
+
+    // Hình ảnh
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [oldImage, setOldImage] = useState(null);
+    const [shouldRemoveImage, setShouldRemoveImage] = useState(false);
 
     // Lấy danh sách sản phẩm, danh mục, combo
     useEffect(() => {
@@ -93,6 +100,10 @@ const PromotionUpdate = () => {
                     if (data.products && data.products.length > 0) setSelectedProducts(data.products.map(p => p.id.toString()));
                     if (data.categories && data.categories.length > 0) setSelectedCategories(data.categories.map(c => c.id.toString()));
                     if (data.combos && data.combos.length > 0) setSelectedCombos(data.combos.map(c => c.id.toString()));
+                    // Xử lý hình ảnh hiện có - sử dụng main_url
+                    if (data.image && data.image.main_url) {
+                        setOldImage(data.image.main_url);
+                    }
                     // Trigger validate các trường liên quan sau khi set dữ liệu
                     setTimeout(() => {
                         trigger(['start_date', 'end_date', 'promoValue', 'selectedProducts', 'selectedCategories', 'selectedCombos']);
@@ -112,6 +123,38 @@ const PromotionUpdate = () => {
         value = value ? value.toString().replace(/\D/g, '') : '';
         if (!value) return '';
         return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
+
+    // Hàm xử lý khi chọn ảnh mới
+    const onChangeImage = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('Ảnh phải nhỏ hơn 2MB!', toastErrorConfig);
+            e.target.value = "";
+            return;
+        }
+        if (!['image/jpeg', 'image/png', 'image/jpg', 'image/gif'].includes(file.type)) {
+            toast.error('Chỉ chấp nhận ảnh jpg, jpeg, png, gif', toastErrorConfig);
+            e.target.value = "";
+            return;
+        }
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+        setValue('imageFile', file, { shouldValidate: true });
+        setShouldRemoveImage(false); // Reset flag khi chọn ảnh mới
+        e.target.value = "";
+    };
+
+    const handleRemoveImage = () => {
+        setImageFile(null);
+        setImagePreview(null);
+        // Nếu có ảnh cũ thì đánh dấu cần xóa
+        if (oldImage) {
+            setShouldRemoveImage(true);
+        }
+        setOldImage(null);
+        setValue('imageFile', null, { shouldValidate: true });
     };
 
     // Xử lý chọn đối tượng áp dụng
@@ -164,10 +207,10 @@ const PromotionUpdate = () => {
         if (!validateApplicationTargets()) {
             return;
         }
-        // Validate ngày
+        // Validate thời gian
         if (startDatePicker && endDatePicker) {
-            if (new Date(endDatePicker) < new Date(startDatePicker)) {
-                setError('end_date', { type: 'manual', message: 'Thời gian kết thúc phải lớn hơn hoặc bằng thời gian bắt đầu' });
+            if (new Date(endDatePicker) <= new Date(startDatePicker)) {
+                setError('end_date', { type: 'manual', message: 'Thời gian kết thúc phải lớn hơn thời gian bắt đầu' });
                 setIsSubmitting(false);
                 return;
             } else {
@@ -180,32 +223,54 @@ const PromotionUpdate = () => {
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
-            const payload = {
-                name: data.name,
-                code: data.code,
-                description: data.description || '',
-                application_type: applicationType,
-                type: promoType,
-                value: promoType === 'fixed_amount' ? Number(value.replace(/\./g, '')) : Number(value),
-                min_order_value: minOrderValue ? Number(minOrderValue.replace(/\./g, '')) : 0,
-                max_discount_amount: maxDiscountAmount ? Number(maxDiscountAmount.replace(/\./g, '')) : 0,
-                max_usage: maxUsage ? Number(maxUsage) : null,
-                max_usage_per_user: maxUsagePerUser ? Number(maxUsagePerUser) : null,
-                is_combinable: data.is_combinable === '1' || data.is_combinable === true,
-                is_active: data.is_active === '1' || data.is_active === true,
-                start_date: startDatePicker ? startDatePicker.toISOString() : '',
-                end_date: endDatePicker ? endDatePicker.toISOString() : '',
-            };
+            const formData = new FormData();
+            formData.append('name', data.name);
+            formData.append('code', data.code);
+            formData.append('description', data.description || '');
+            formData.append('application_type', applicationType);
+            formData.append('type', promoType);
+            formData.append('value', promoType === 'fixed_amount' ? Number(value.replace(/\./g, '')) : Number(value));
+            formData.append('min_order_value', minOrderValue ? Number(minOrderValue.replace(/\./g, '')) : 0);
+            formData.append('max_discount_amount', maxDiscountAmount ? Number(maxDiscountAmount.replace(/\./g, '')) : 0);
+            formData.append('max_usage', maxUsage ? Number(maxUsage) : '');
+            formData.append('max_usage_per_user', maxUsagePerUser ? Number(maxUsagePerUser) : '');
+            formData.append('is_combinable', data.is_combinable === '1' || data.is_combinable === true ? 1 : 0);
+            formData.append('is_active', data.is_active === '1' || data.is_active === true ? 1 : 0);
+            formData.append('start_date', startDatePicker ? format(new Date(startDatePicker), 'yyyy-MM-dd HH:mm:ss') : '');
+            formData.append('end_date', endDatePicker ? format(new Date(endDatePicker), 'yyyy-MM-dd HH:mm:ss') : '');
+            
+            // Xử lý ảnh
+            if (imageFile) {
+                // Có ảnh mới
+                formData.append('image_url', imageFile);
+            } else if (shouldRemoveImage) {
+                // Xóa ảnh cũ - gửi empty string để backend hiểu là xóa
+                formData.append('image_url', '');
+            }
+
             // Thêm id đối tượng áp dụng
-            if (applicationType === 'products') payload.product_ids = selectedProducts.map(Number);
-            if (applicationType === 'categories') payload.category_ids = selectedCategories.map(Number);
-            if (applicationType === 'combos') payload.combo_ids = selectedCombos.map(Number);
+            if (applicationType === 'products') {
+                selectedProducts.forEach((id, index) => {
+                    formData.append(`product_ids[${index}]`, id);
+                });
+            }
+            if (applicationType === 'categories') {
+                selectedCategories.forEach((id, index) => {
+                    formData.append(`category_ids[${index}]`, id);
+                });
+            }
+            if (applicationType === 'combos') {
+                selectedCombos.forEach((id, index) => {
+                    formData.append(`combo_ids[${index}]`, id);
+                });
+            }
 
             const response = await requestApi(
                 `api/admin/promotions/${params.id}`,
-                'PUT', // hoặc 'PUT' nếu backend hỗ trợ
-                payload,
-                'json'
+                'POST',
+                formData,
+                'json',
+                'multipart/form-data'
             );
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
@@ -232,133 +297,227 @@ const PromotionUpdate = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Cập nhật khuyến mãi</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
                         <li className="breadcrumb-item active">Cập nhật khuyến mãi</li>
                     </ol>
-                    <div className='card mb-3'>
-                        <div className='card-header'>
-                            <i className="fas fa-gift me-1"></i>
-                            Dữ liệu khuyến mãi
+                    <form onSubmit={handleSubmit(handleSubmitForm)}>
+                        <div className="row g-4">
+                            {/* Thông tin cơ bản */}
+                            <div className="col-lg-8">
+                                <div className="card shadow-sm border-0 h-100">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-info-circle me-2"></i>Thông tin cơ bản</h5>
+                                    </div>
+                                    <div className="card-body pt-2">
+                                        <div className="row mb-3">
+                                            <div className="col-md-6">
+                                                <div className="form-floating mb-3 mb-md-0">
+                                                    <input
+                                                        className="form-control"
+                                                        id="inputName"
+                                                        {...register('name', { required: 'Tên khuyến mãi là bắt buộc' })}
+                                                        placeholder="Nhập tên khuyến mãi"
+                                                    />
+                                                    <label htmlFor="inputName">
+                                                        Tên khuyến mãi <span style={{ color: 'red' }}>*</span>
+                                                    </label>
+                                                    {errors.name && <div className="text-danger">{errors.name.message}</div>}
+                                                </div>
+                                            </div>
+                                            <div className="col-md-6">
+                                                <div className="form-floating mb-3 mb-md-0">
+                                                    <input
+                                                        className="form-control"
+                                                        id="inputCode"
+                                                        {...register('code', { required: 'Mã khuyến mãi là bắt buộc' })}
+                                                        placeholder="Nhập mã khuyến mãi"
+                                                    />
+                                                    <label htmlFor="inputCode">
+                                                        Mã khuyến mãi <span style={{ color: 'red' }}>*</span>
+                                                    </label>
+                                                    {errors.code && <div className="text-danger">{errors.code.message}</div>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="row mb-3">
+                                            <div className="col-md-12">
+                                                <label htmlFor="description">Mô tả khuyến mãi <span style={{ color: 'red' }}>*</span></label>
+                                                <CustomEditor
+                                                    data={watch('description')}
+                                                    onReady={() => register('description', { required: "Mô tả khuyến mãi là bắt buộc" })}
+                                                    onChange={data => setValue('description', data)}
+                                                    trigger={() => trigger('description')}
+                                                    folder='promotions'
+                                                />
+                                                {errors.description && <div className="text-danger">{errors.description.message}</div>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Hình ảnh khuyến mãi */}
+                            <div className="col-lg-4">
+                                <div className="card shadow-sm border-0 h-100">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-image me-2"></i>Hình ảnh khuyến mãi</h5>
+                                    </div>
+                                    <div className="card-body pt-2">
+                                        <div className="mb-3">
+                                            <div className="d-flex flex-column align-items-center">
+                                                <div
+                                                    className="border border-2 border-secondary border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center mb-2"
+                                                    style={{ aspectRatio: '3/2', width: '100%', maxWidth: 280 }}
+                                                >
+                                                    {imagePreview ? (
+                                                        <>
+                                                            <img
+                                                                src={imagePreview}
+                                                                alt="Preview"
+                                                                className="w-100 h-100 rounded position-absolute top-0 start-0"
+                                                                style={{ objectFit: 'fill', aspectRatio: '1/1' }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 m-1 d-flex align-items-center justify-content-center no-hover"
+                                                                style={{ zIndex: 2, width: 28, height: 28, padding: 0, background: '#fff' }}
+                                                                aria-label="Xóa ảnh"
+                                                                onClick={handleRemoveImage}
+                                                            >
+                                                                <i className="fas fa-times"></i>
+                                                            </button>
+                                                        </>
+                                                    ) : oldImage ? (
+                                                        <>
+                                                            <img
+                                                                src={oldImage?.startsWith('http') ? oldImage : `${process.env.REACT_APP_API_URL}api/images/${oldImage}`}
+                                                                alt="Current"
+                                                                className="w-100 h-100 rounded position-absolute top-0 start-0"
+                                                                style={{ objectFit: 'fill', aspectRatio: '1/1' }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 m-1 d-flex align-items-center justify-content-center no-hover"
+                                                                style={{ zIndex: 2, width: 28, height: 28, padding: 0, background: '#fff' }}
+                                                                aria-label="Xóa ảnh"
+                                                                onClick={handleRemoveImage}
+                                                            >
+                                                                <i className="fas fa-times"></i>
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                                            <i className="fas fa-image fs-1 text-secondary"></i>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <label htmlFor="inputImage" className="form-label btn btn-secondary mb-0 mt-2">
+                                                    <i className="fas fa-upload"></i> {oldImage || imagePreview ? 'Thay đổi ảnh' : 'Thêm ảnh khuyến mãi'}
+                                                </label>
+                                                <div className="text-muted small text-center">
+                                                    Chỉ chọn 1 ảnh, định dạng: jpg, png...<br/>
+                                                    Kích thước tối đa: 2MB
+                                                </div>
+                                                <input
+                                                    className="form-control"
+                                                    id="inputImage"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    style={{ display: 'none' }}
+                                                    onChange={onChangeImage}
+                                                />
+                                                <input
+                                                    type="hidden"
+                                                    {...register('imageFile')}
+                                                />
+                                                {errors.imageFile && <div className="text-danger mt-1 small">{errors.imageFile.message}</div>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className='card-body'>
-                            <form onSubmit={handleSubmit(handleSubmitForm)}>
-                                <div className="row mb-3">
-                                    <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
-                                            <input
-                                                className="form-control"
-                                                id="inputName"
-                                                {...register('name', { required: 'Tên khuyến mãi là bắt buộc' })}
-                                                placeholder="Nhập tên khuyến mãi"
-                                            />
-                                            <label htmlFor="inputName">
-                                                Tên khuyến mãi <span style={{ color: 'red' }}>*</span>
-                                            </label>
-                                            {errors.name && <div className="text-danger">{errors.name.message}</div>}
+                        {/* Cài đặt khuyến mãi */}
+                        <div className="row mt-4">
+                            <div className="col-lg-12">
+                                <div className="card shadow-sm border-0">
+                                    <div className="card-header bg-white border-bottom-0 pb-0">
+                                        <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-cogs me-2"></i>Cài đặt khuyến mãi</h5>
+                                    </div>
+                                    <div className="card-body pt-2">
+                                        <div className="row mb-3">
+                                            <div className="col-md-4">
+                                                <label className="mb-1">Loại áp dụng <span style={{ color: 'red' }}>*</span></label>
+                                                <select
+                                                    className="form-select"
+                                                    value={applicationType}
+                                                    onChange={e => {
+                                                        setApplicationType(e.target.value);
+                                                        setSelectedProducts([]);
+                                                        setSelectedCategories([]);
+                                                        setSelectedCombos([]);
+                                                        clearErrors(['selectedProducts', 'selectedCategories', 'selectedCombos']);
+                                                    }}
+                                                    required
+                                                >
+                                                    <option value="products">Sản phẩm</option>
+                                                    <option value="categories">Danh mục</option>
+                                                    <option value="combos">Combo</option>
+                                                    <option value="orders">Đơn hàng</option>
+                                                </select>
+                                            </div>
+                                            <div className="col-md-8">
+                                                {/* Đối tượng áp dụng */}
+                                                {applicationType === 'products' && (
+                                                    <div>
+                                                        <label className="mb-1">Chọn sản phẩm <span style={{ color: 'red' }}>*</span></label>
+                                                        <Select
+                                                            options={productOptions}
+                                                            isMulti
+                                                            value={productOptions.filter(opt => selectedProducts.includes(String(opt.value)) || selectedProducts.includes(opt.value))}
+                                                            onChange={opts => handleSelectChange('products', opts ? opts.map(opt => opt.value) : [])}
+                                                            placeholder="Tìm kiếm & chọn sản phẩm..."
+                                                            classNamePrefix="react-select"
+                                                        />
+                                                        {errors.selectedProducts && <div className="text-danger mt-1 small">{errors.selectedProducts.message}</div>}
+                                                    </div>
+                                                )}
+                                                {applicationType === 'categories' && (
+                                                    <div>
+                                                        <label className="mb-1">Chọn danh mục <span style={{ color: 'red' }}>*</span></label>
+                                                        <Select
+                                                            options={categoryOptions}
+                                                            isMulti
+                                                            value={categoryOptions.filter(opt => selectedCategories.includes(String(opt.value)) || selectedCategories.includes(opt.value))}
+                                                            onChange={opts => handleSelectChange('categories', opts ? opts.map(opt => opt.value) : [])}
+                                                            placeholder="Tìm kiếm & chọn danh mục..."
+                                                            classNamePrefix="react-select"
+                                                        />
+                                                        {errors.selectedCategories && <div className="text-danger mt-1 small">{errors.selectedCategories.message}</div>}
+                                                    </div>
+                                                )}
+                                                {applicationType === 'combos' && (
+                                                    <div>
+                                                        <label className="mb-1">Chọn combo <span style={{ color: 'red' }}>*</span></label>
+                                                        <Select
+                                                            options={comboOptions}
+                                                            isMulti
+                                                            value={comboOptions.filter(opt => selectedCombos.includes(String(opt.value)) || selectedCombos.includes(opt.value))}
+                                                            onChange={opts => handleSelectChange('combos', opts ? opts.map(opt => opt.value) : [])}
+                                                            placeholder="Tìm kiếm & chọn combo..."
+                                                            classNamePrefix="react-select"
+                                                        />
+                                                        {errors.selectedCombos && <div className="text-danger mt-1 small">{errors.selectedCombos.message}</div>}
+                                                    </div>
+                                                )}
+                                                {applicationType === 'orders' && (
+                                                    <div className="text-muted fst-italic mt-2">Áp dụng cho toàn bộ đơn hàng</div>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
-                                            <input
-                                                className="form-control"
-                                                id="inputCode"
-                                                {...register('code', { required: 'Mã khuyến mãi là bắt buộc' })}
-                                                placeholder="Nhập mã khuyến mãi"
-                                            />
-                                            <label htmlFor="inputCode">
-                                                Mã khuyến mãi <span style={{ color: 'red' }}>*</span>
-                                            </label>
-                                            {errors.code && <div className="text-danger">{errors.code.message}</div>}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-12">
-                                        <label htmlFor="description">Mô tả khuyến mãi <span style={{ color: 'red' }}>*</span></label>
-                                        <CustomEditor
-                                            data={watch('description')}
-                                            onReady={() => register('description', { required: "Mô tả khuyến mãi là bắt buộc" })}
-                                            onChange={data => setValue('description', data)}
-                                            trigger={() => trigger('description')}
-                                            folder='promotions'
-                                        />
-                                        {errors.description && <div className="text-danger">{errors.description.message}</div>}
-                                    </div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-md-4">
-                                        <label className="mb-1">Loại áp dụng <span style={{ color: 'red' }}>*</span></label>
-                                        <select
-                                            className="form-select"
-                                            value={applicationType}
-                                            onChange={e => {
-                                                setApplicationType(e.target.value);
-                                                setSelectedProducts([]);
-                                                setSelectedCategories([]);
-                                                setSelectedCombos([]);
-                                                clearErrors(['selectedProducts', 'selectedCategories', 'selectedCombos']);
-                                            }}
-                                            required
-                                        >
-                                            <option value="products">Sản phẩm</option>
-                                            <option value="categories">Danh mục</option>
-                                            <option value="combos">Combo</option>
-                                            <option value="orders">Đơn hàng</option>
-                                        </select>
-                                    </div>
-                                    <div className="col-md-8">
-                                        {/* Đối tượng áp dụng */}
-                                        {applicationType === 'products' && (
-                                            <div>
-                                                <label className="mb-1">Chọn sản phẩm <span style={{ color: 'red' }}>*</span></label>
-                                                <Select
-                                                    options={productOptions}
-                                                    isMulti
-                                                    value={productOptions.filter(opt => selectedProducts.includes(String(opt.value)) || selectedProducts.includes(opt.value))}
-                                                    onChange={opts => handleSelectChange('products', opts ? opts.map(opt => opt.value) : [])}
-                                                    placeholder="Tìm kiếm & chọn sản phẩm..."
-                                                    classNamePrefix="react-select"
-                                                />
-                                                {errors.selectedProducts && <div className="text-danger mt-1 small">{errors.selectedProducts.message}</div>}
-                                            </div>
-                                        )}
-                                        {applicationType === 'categories' && (
-                                            <div>
-                                                <label className="mb-1">Chọn danh mục <span style={{ color: 'red' }}>*</span></label>
-                                                <Select
-                                                    options={categoryOptions}
-                                                    isMulti
-                                                    value={categoryOptions.filter(opt => selectedCategories.includes(String(opt.value)) || selectedCategories.includes(opt.value))}
-                                                    onChange={opts => handleSelectChange('categories', opts ? opts.map(opt => opt.value) : [])}
-                                                    placeholder="Tìm kiếm & chọn danh mục..."
-                                                    classNamePrefix="react-select"
-                                                />
-                                                {errors.selectedCategories && <div className="text-danger mt-1 small">{errors.selectedCategories.message}</div>}
-                                            </div>
-                                        )}
-                                        {applicationType === 'combos' && (
-                                            <div>
-                                                <label className="mb-1">Chọn combo <span style={{ color: 'red' }}>*</span></label>
-                                                <Select
-                                                    options={comboOptions}
-                                                    isMulti
-                                                    value={comboOptions.filter(opt => selectedCombos.includes(String(opt.value)) || selectedCombos.includes(opt.value))}
-                                                    onChange={opts => handleSelectChange('combos', opts ? opts.map(opt => opt.value) : [])}
-                                                    placeholder="Tìm kiếm & chọn combo..."
-                                                    classNamePrefix="react-select"
-                                                />
-                                                {errors.selectedCombos && <div className="text-danger mt-1 small">{errors.selectedCombos.message}</div>}
-                                            </div>
-                                        )}
-                                        {applicationType === 'orders' && (
-                                            <div className="text-muted fst-italic mt-2">Áp dụng cho toàn bộ đơn hàng</div>
-                                        )}
-                                    </div>
-                                </div>
-                                {/* Dòng gồm: Loại khuyến mãi, Giá trị, Trạng thái, Thời gian bắt đầu, Thời gian kết thúc */}
-                                <div className="row mb-3">
+                                        {/* Dòng gồm: Loại khuyến mãi, Giá trị, Trạng thái, Thời gian bắt đầu, Thời gian kết thúc */}
+                                        <div className="row mb-3">
                                     <div className="col-md-2">
                                         <label className="mb-1">Loại khuyến mãi <span style={{ color: 'red' }}>*</span></label>
                                         <select
@@ -521,30 +680,35 @@ const PromotionUpdate = () => {
                                             <option value="1">Có</option>
                                             <option value="0">Không</option>
                                         </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="mt-4 mb-0">
-                                    <div className="d-flex justify-content-center gap-2">
-                                        <button
-                                            type="button"
-                                            className="btn btn-secondary w-25"
-                                            onClick={() => navigation('/promotion')}
-                                            disabled={isSubmitting}
-                                        >
-                                            Hủy bỏ
-                                        </button>
-                                        <button
-                                            className="btn btn-primary w-25"
-                                            type="submit"
-                                            disabled={isSubmitting}
-                                        >
-                                            {isSubmitting ? "Đang gửi..." : "Cập nhật"}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
+                            </div>
                         </div>
-                    </div>
+                        {/* Nút hành động */}
+                        <div className="row mt-4 mb-4">
+                            <div className="col-lg-12">
+                                <div className="d-flex justify-content-center gap-2">
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary w-25"
+                                        onClick={() => navigation('/promotion')}
+                                        disabled={isSubmitting}
+                                    >
+                                        Hủy bỏ
+                                    </button>
+                                    <button
+                                        className="btn btn-primary w-25"
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                    >
+                                        {isSubmitting ? "Đang gửi..." : "Cập nhật"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </main>
         </div>

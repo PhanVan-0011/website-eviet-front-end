@@ -172,14 +172,14 @@ const ComboList = () => {
             width: "10%"
         },
         {
-            title: "Ngày bắt đầu",
-            element: row => row.start_date ? moment(row.start_date).format('DD/MM/YYYY') : '',
-            width: "10%"
+            title: "Thời gian bắt đầu",
+            element: row => row.start_date ? moment(row.start_date).format('HH:mm DD/MM/YYYY') : '',
+            width: "12%"
         },
         {
-            title: "Ngày kết thúc",
-            element: row => row.end_date ? moment(row.end_date).format('DD/MM/YYYY') : '',
-            width: "10%"
+            title: "Thời gian kết thúc",
+            element: row => row.end_date ? moment(row.end_date).format('HH:mm DD/MM/YYYY') : '',
+            width: "12%"
         },
         {
             title: "Trạng thái",
@@ -204,7 +204,7 @@ const ComboList = () => {
                     </button>
                 </div>
             ),
-            width: "10%"
+            width: "8%"
         }
     ];
 
