@@ -193,7 +193,7 @@ const ProductList = () => {
         { 
             title: () => (
                 <span style={{cursor: 'pointer'}} onClick={() => handleSort('stock_quantity')}>
-                    Số lượng {renderSortIcon('stock_quantity')}
+                    Tồn kho {renderSortIcon('stock_quantity')}
                 </span>
             ),
             element: row => row.stock_quantity,

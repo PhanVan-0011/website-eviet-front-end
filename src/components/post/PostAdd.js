@@ -183,7 +183,7 @@ const PostAdd = () => {
                                             Hình ảnh bài viết
                                         </div>
                                         <div className="row g-3">
-                                            <div className="col-3 p-2 d-flex flex-column align-items-center">
+                                            <div className="col-3 d-flex flex-column align-items-center">
                                                 <div
                                                     className={`w-100 border border-2 ${imagePreviews[0] ? 'border-primary' : 'border-secondary'} border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center`}
                                                     style={{ aspectRatio: '1/1', minHeight: 0, height: 'auto', maxWidth: '100%' }}
