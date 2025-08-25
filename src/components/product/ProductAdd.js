@@ -292,7 +292,7 @@ const ProductAdd = () => {
                                                 </div>
                                                 <div className="row g-3">
                                                     {[0, 1, 2, 3].map(idx => (
-                                                        <div key={idx} className="col-3 p-2 d-flex flex-column align-items-center">
+                                                        <div key={idx} className="col-3 d-flex flex-column align-items-center">
                                                             <div
                                                                 className="w-100 border border-2 border-secondary border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center"
                                                                 style={{ aspectRatio: '1/1', minHeight: 0, height: 'auto', maxWidth: '100%' }}
