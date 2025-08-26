@@ -16,6 +16,8 @@ const PromotionDetail = () => {
     const [promotion, setPromotion] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [modalImg, setModalImg] = useState(null);
 
     useEffect(() => {
         setLoading(true);
@@ -24,15 +26,7 @@ const PromotionDetail = () => {
             .then(res => {
                 // Xử lý dữ liệu trả về cho phù hợp
                 const data = res.data.data;
-                // Lấy ảnh chính
-                let mainImage = '';
-                if (data.image && data.image.main_url) {
-                    mainImage = data.image.main_url;
-                }
-                setPromotion({
-                    ...data,
-                    mainImage,
-                });
+                setPromotion(data);
                 setLoading(false);
                 dispatch(actions.controlLoading(false));
             })
@@ -63,6 +57,17 @@ const PromotionDetail = () => {
                 e?.response?.data?.message || 'Xóa khuyến mãi thất bại!', toastErrorConfig
             );
         }
+    };
+
+    // Hàm xử lý khi click vào bất kỳ ảnh nào
+    const handleImgClick = (img) => {
+        setModalImg(img);
+        setShowImageModal(true);
+    };
+
+    const handleCloseImageModal = () => {
+        setShowImageModal(false);
+        setModalImg(null);
     };
 
     if (loading) {
@@ -142,15 +147,72 @@ const PromotionDetail = () => {
                         </ol>
                     </div>
                     <div className="row g-4">
-                        <div className="col-md-5">
-                            <div className="card shadow-sm">
-                                <img
-                                    src={promotion.mainImage ? urlImage + promotion.mainImage : "https://via.placeholder.com/400x320?text=No+Image"}
-                                    alt={promotion.name}
-                                    className="card-img-top"
-                                    style={{ objectFit: 'contain', height: 320, borderRadius: '8px 8px 0 0', background: '#fafafa' }}
-                                />
-                                <div className="card-body">
+                        <div className="col-md-5 d-flex" style={{ height: '75vh' }}>
+                            <div className="card shadow-sm mb-4 flex-fill" style={{ height: '100%' }}>
+                                <div style={{ height: '50%', display: 'flex', flexDirection: 'column', padding: 16, overflow: 'hidden' }}>
+                                    {promotion.image && promotion.image.main_url ? (
+                                        <>
+                                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12, overflow: 'hidden' }}>
+                                                <img
+                                                    key={promotion.image.id}
+                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + (promotion.image.main_url || promotion.image.thumb_url)}
+                                                    alt={promotion.name + '-featured'}
+                                                    className="img-thumbnail"
+                                                    style={{
+                                                        objectFit: 'contain',
+                                                        boxShadow: '0 0 12px #007bff55',
+                                                        cursor: 'pointer',
+                                                        maxWidth: '100%',
+                                                        maxHeight: '100%',
+                                                        borderRadius: 10,
+                                                        background: '#f8f9fa',
+                                                        border: '1px solid #eee'
+                                                    }}
+                                                    title="Ảnh khuyến mãi (bấm để xem lớn)"
+                                                    onClick={() => handleImgClick(promotion.image)}
+                                                />
+                                            </div>
+                                            {/* Modal xem ảnh full */}
+                                            {showImageModal && modalImg && (
+                                                <Modal show={showImageModal} onHide={handleCloseImageModal} centered>
+                                                    <Modal.Body style={{ position: 'relative', padding: 0, background: 'transparent', border: 0 }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+                                                            <img
+                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + (modalImg.main_url || modalImg.thumb_url)}
+                                                                alt={promotion.name + '-modal-full'}
+                                                                style={{
+                                                                    maxWidth: '80vw',
+                                                                    maxHeight: '80vh',
+                                                                    objectFit: 'contain',
+                                                                    display: 'block',
+                                                                    margin: '0 auto',
+                                                                    borderRadius: 8
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        {/* Không có nút X đóng */}
+                                                    </Modal.Body>
+                                                </Modal>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <div
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                borderRadius: 10,
+                                                background: '#f8f9fa',
+                                                border: '1px solid #eee',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}
+                                        >
+                                            <i className="fas fa-image" style={{ fontSize: 80, color: '#bbb' }}></i>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="card-body" style={{ height: '50%', overflowY: 'auto' }}>
                                     <h4 className="card-title mb-2">{promotion.name}</h4>
                                     <div className="mb-2">
                                         <span className="badge bg-info text-dark me-2">{promotion.code}</span>
@@ -171,9 +233,8 @@ const PromotionDetail = () => {
                                     <div className="mb-2">
                                         <span className="fw-semibold">Thời gian áp dụng:</span>
                                         <div>
-                                            <div className="small text-muted">Từ:</div>
                                             <span className="text-primary">{promotion.dates?.start_date ? moment(promotion.dates.start_date).format('HH:mm DD/MM/YYYY') : '-'}</span>
-                                            <div className="small text-muted mt-1">Đến:</div>
+                                             <span> đến </span>
                                             <span className="text-danger">{promotion.dates?.end_date ? moment(promotion.dates.end_date).format('HH:mm DD/MM/YYYY') : '-'}</span>
                                         </div>
                                     </div>
@@ -188,12 +249,12 @@ const PromotionDetail = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-7">
-                            <div className="card shadow-sm h-100">
+                        <div className="col-md-7 mb-4 d-flex" style={{ height: '75vh' }}>
+                            <div className="card shadow-sm h-100 flex-fill d-flex flex-column" style={{ height: '100%' }}>
                                 <div className="card-header bg-light fw-bold">
                                     <i className="fas fa-globe-asia me-2"></i>Điều kiện và giới hạn
                                 </div>
-                                <div className="card-body">
+                                <div className="card-body" style={{ maxHeight: '25%', overflowY: 'auto' }}>
                                     <div className="row">
                                         <div className="col-md-6">
                                             <div className="mb-2">
@@ -218,7 +279,7 @@ const PromotionDetail = () => {
                                 <div className="card-header bg-light fw-bold border-top">
                                     <i className="fas fa-bullseye me-2"></i>Đối tượng áp dụng
                                 </div>
-                                <div className="card-body p-0">
+                                <div className="card-body p-0" style={{ maxHeight: '30%', overflowY: 'auto' }}>
                                     <div className="p-3">
                                         {promotion.products?.length > 0 && (
                                             <div className="mb-2">
@@ -252,7 +313,7 @@ const PromotionDetail = () => {
                                 <div className="card-header bg-light fw-bold border-top">
                                     <i className="fas fa-info-circle me-2"></i>Mô tả khuyến mãi
                                 </div>
-                                <div className="card-body" style={{ minHeight: 120 }}>
+                                <div className="card-body flex-grow-1" style={{ overflowY: 'auto' }}>
                                     {promotion.description
                                         ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(promotion.description)) }} />
                                         : <span className="text-muted fst-italic">Chưa có mô tả</span>
@@ -263,11 +324,11 @@ const PromotionDetail = () => {
                     </div>
                     {/* Button thao tác ra ngoài card, căn giữa, margin-top */}
                     <div className="row mb-4">
-                        <div className="col-12 d-flex justify-content-center gap-2" style={{ marginTop: 32 }}>
-                            <Link className="btn btn-primary me-2" to={`/promotion/${promotion.id}`}>
+                        <div className="col-12 d-flex justify-content-center gap-2">
+                            <Link className="btn btn-primary" to={`/promotion/${promotion.id}`}>
                                 <i className="fas fa-edit"></i> Sửa khuyến mãi
                             </Link>
-                            <button className="btn btn-danger me-2" onClick={handleDelete}>
+                            <button className="btn btn-danger" onClick={handleDelete}>
                                 <i className="fas fa-trash-alt"></i> Xóa khuyến mãi
                             </button>
                             <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>

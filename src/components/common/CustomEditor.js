@@ -29,7 +29,7 @@ import {  ClassicEditor,
 
 import 'ckeditor5/ckeditor5.css';
 
-function CustomEditor({data, onReady, onChange, trigger, folder = 'posts', autoDeleteImages = true}) {
+function CustomEditor({data, onReady, onChange, trigger, folder = 'posts', autoDeleteImages = true, maxHeight = '500px'}) {
 
     // Track các ảnh đã upload trong session này
     const uploadedImages = useRef(new Set());
@@ -68,69 +68,102 @@ function CustomEditor({data, onReady, onChange, trigger, folder = 'posts', autoD
     };
 
     return (
-        <CKEditor
-            editor={ ClassicEditor }
-            data={data}
-            config={ {
-                 language: {
-                      ui: 'vi',
-                      content: 'vi'
-                  },
-                licenseKey: 'GPL', // Or 'GPL'.
-                plugins: [ Essentials,
-                    Paragraph,
-                    Bold,
-                    Italic,
-                    Underline,
-                    Strikethrough,
-                    Heading,
-                    List,
-                    Indent,
-                    Link,
-                    BlockQuote,
-                    Image,
-                    ImageCaption,
-                    ImageStyle,
-                    ImageToolbar,
-                    ImageUpload,
-                    Table,
-                    TableToolbar, MediaEmbed, Alignment,ImageResize],
-                toolbar: ['undo',
-                                'redo','heading',
-                                '|',
-                                'bold',
-                                'italic',
-                                'underline',
-                                'strikethrough',
-                                '|',
-                                'alignment',
-                                'bulletedList',
-                                'numberedList',
-                                'indent',
-                                'outdent',  
-                                '|',
-                                'link',
-                                'blockQuote',
-                                'insertTable',
-                                'imageUpload',                             
-                                'mediaEmbed',
-                                    '|',
-                                ],
-                initialData: '',
-                translations: [
-                  coreTranslations,
-                ]
-            
-            } }
-           
-             onChange={(_, editor) => {
-                if (onChange) onChange(editor.getData());
-                trigger && trigger();
+        <div 
+            className="custom-editor-wrapper"
+            style={{
+                // minHeight: height,
+                maxHeight: maxHeight,
+                overflowY: 'auto',
+                border: '1px solid #ccc',
+                borderRadius: '4px'
             }}
-            
-            onReady={handleReady}
-            
-        />
+        >
+            <style>
+                {`
+                    .custom-editor-wrapper::-webkit-scrollbar {
+                        width: 8px;
+                    }
+                    .custom-editor-wrapper::-webkit-scrollbar-track {
+                        background: #f1f1f1;
+                        border-radius: 4px;
+                    }
+                    .custom-editor-wrapper::-webkit-scrollbar-thumb {
+                        background: #c1c1c1;
+                        border-radius: 4px;
+                    }
+                    .custom-editor-wrapper::-webkit-scrollbar-thumb:hover {
+                        background: #a8a8a8;
+                    }
+                    .custom-editor-wrapper .ck-editor {
+                        border: none !important;
+                    }
+                   
+                `}
+            </style>
+            <CKEditor
+                editor={ ClassicEditor }
+                data={data}
+                config={ {
+                     language: {
+                          ui: 'vi',
+                          content: 'vi'
+                      },
+                    licenseKey: 'GPL', // Or 'GPL'.
+                    plugins: [ Essentials,
+                        Paragraph,
+                        Bold,
+                        Italic,
+                        Underline,
+                        Strikethrough,
+                        Heading,
+                        List,
+                        Indent,
+                        Link,
+                        BlockQuote,
+                        Image,
+                        ImageCaption,
+                        ImageStyle,
+                        ImageToolbar,
+                        ImageUpload,
+                        Table,
+                        TableToolbar, MediaEmbed, Alignment,ImageResize],
+                    toolbar: ['undo',
+                                    'redo','heading',
+                                    '|',
+                                    'bold',
+                                    'italic',
+                                    'underline',
+                                    'strikethrough',
+                                    '|',
+                                    'alignment',
+                                    'bulletedList',
+                                    'numberedList',
+                                    'indent',
+                                    'outdent',  
+                                    '|',
+                                    'link',
+                                    'blockQuote',
+                                    'insertTable',
+                                    'imageUpload',                             
+                                    'mediaEmbed',
+                                        '|',
+                                    ],
+                    initialData: '',
+                    translations: [
+                      coreTranslations,
+                    ]
+                
+                } }
+               
+                 onChange={(_, editor) => {
+                    if (onChange) onChange(editor.getData());
+                    trigger && trigger();
+                }}
+                
+                onReady={handleReady}
+                
+            />
+        </div>
     );
 }
 // Plugin để inject custom upload adapter đã được di chuyển vào trong component

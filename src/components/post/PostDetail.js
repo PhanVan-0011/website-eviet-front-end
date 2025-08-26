@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import moment from 'moment';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
@@ -109,123 +110,189 @@ const PostDetail = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <div className="mt-4 mb-3">
-                        <h1 className="mt-4">Chi tiết bài viết</h1>
-                        <ol className="breadcrumb mb-4">
-                            <li className="breadcrumb-item"><Link to="/post">Danh sách bài viết</Link></li>
-                            <li className="breadcrumb-item active">Chi tiết bài viết</li>
-                        </ol>
+                    <div className="d-flex align-items-center justify-content-between mt-4 mb-2">
+                        <h2 className="mb-0">Chi tiết bài viết #{post.id}</h2>
                     </div>
-                    <div className="row g-4">
-                        <div className="col-md-5 d-flex" style={{ height: '75vh' }}>
-                            <div className="card shadow-sm flex-fill" style={{ height: '100%' }}>
-                                <div style={{ height: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-                                    {/* Ảnh đại diện lớn */}
-                                    {post.image_urls && post.image_urls.length > 0 ? (
-                                        (() => {
-                                            const featuredImg = post.image_urls.find(img => img.is_featured === 1);
-                                            return featuredImg ? (
-                                                <img
-                                                    key={featuredImg.id}
-                                                    src={urlImage + (featuredImg.main_url || featuredImg.thumb_url)}
-                                                    alt={post.title + '-featured'}
-                                                    className="img-thumbnail"
-                                                    style={{
-                                                        objectFit: 'contain',
-                                                        boxShadow: '0 0 12px #007bff55',
-                                                        cursor: 'pointer',
-                                                        maxWidth: '80%',
-                                                        maxHeight: '100%',
-                                                        borderRadius: 10,
-                                                        background: '#f8f9fa',
-                                                        border: '1px solid #eee',
-                                                        display: 'block',
-                                                        margin: '0 auto'
-                                                    }}
-                                                    title="Ảnh đại diện (bấm để xem lớn)"
-                                                    onClick={() => handleImgClick(featuredImg)}
-                                                />
-                                            ) : (
-                                                <div
-                                                    style={{
-                                                        width: '80%',
-                                                        height: '100%',
-                                                        borderRadius: 10,
-                                                        background: '#f8f9fa',
-                                                        border: '1px solid #eee',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        margin: '0 auto',
-                                                    }}
-                                                >
-                                                    <i className="fas fa-image" style={{ fontSize: 80, color: '#bbb' }}></i>
-                                                </div>
-                                            );
-                                        })()
-                                    ) : (
-                                        <div
-                                            style={{
-                                                width: '80%',
-                                                height: '100%',
-                                                borderRadius: 10,
-                                                background: '#f8f9fa',
-                                                border: '1px solid #eee',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                margin: '0 auto',
-                                            }}
-                                        >
-                                            <i className="fas fa-image" style={{ fontSize: 80, color: '#bbb' }}></i>
-                                        </div>
-                                    )}
+                    <ol className="breadcrumb mb-4">
+                        <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
+                        <li className="breadcrumb-item"><Link to="/post">Bài viết</Link></li>
+                        <li className="breadcrumb-item active">Chi tiết</li>
+                    </ol>
+
+                    <div className="row g-3">
+                        {/* Thông tin bài viết & hình ảnh */}
+                        <div className="col-lg-5">
+                            <div className="card shadow-sm border-0">
+                                <div className="card-header bg-primary text-white py-2">
+                                    <h6 className="mb-0 fw-bold">
+                                        <i className="fas fa-newspaper me-2"></i>Thông tin bài viết & hình ảnh
+                                    </h6>
                                 </div>
-                                <div className="card-body" style={{ height: '50%', overflowY: 'auto' }}>
-                                    <h4 className="card-title mb-2">{post.title}</h4>
-                                    <div className="mb-2">
-                                        {post.status === 1
-                                            ? <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Hiển thị</span>
-                                            : <span className="badge bg-secondary"><i className="fas fa-ban me-1"></i>Ẩn</span>
-                                        }
+                                <div className="card-body p-3">
+                                    {/* Hình ảnh bài viết */}
+                                    <div className="mb-3" style={{ height: '280px', display: 'flex', flexDirection: 'column' }}>
+                                        {post.image_urls && post.image_urls.length > 0 ? (
+                                            (() => {
+                                                const featuredImg = post.image_urls.find(img => img.is_featured === 1);
+                                                const otherImgs = post.image_urls.filter(img => img.is_featured !== 1);
+                                                return (
+                                                    <>
+                                                        {featuredImg ? (
+                                                            <>
+                                                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8, overflow: 'hidden' }}>
+                                                                    <img
+                                                                        key={featuredImg.id}
+                                                                        src={urlImage + (featuredImg.main_url || featuredImg.thumb_url)}
+                                                                        alt={post.title + '-featured'}
+                                                                        className="img-thumbnail"
+                                                                        style={{
+                                                                            objectFit: 'contain',
+                                                                            boxShadow: '0 0 8px #007bff33',
+                                                                            cursor: 'pointer',
+                                                                            maxWidth: '100%',
+                                                                            maxHeight: '100%',
+                                                                            borderRadius: 8,
+                                                                            background: '#f8f9fa',
+                                                                            border: '1px solid #dee2e6'
+                                                                        }}
+                                                                        title="Ảnh đại diện (bấm để xem lớn)"
+                                                                        onClick={() => handleImgClick(featuredImg)}
+                                                                    />
+                                                                </div>
+                                                                {/* Modal xem ảnh full */}
+                                                                {showModal && modalImg && (
+                                                                    <Modal show={showModal} onHide={handleCloseModal} centered>
+                                                                        <Modal.Body style={{ position: 'relative', padding: 0, background: 'transparent', border: 0 }}>
+                                                                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+                                                                                <img
+                                                                                    src={urlImage + (modalImg.main_url || modalImg.thumb_url)}
+                                                                                    alt={post.title + '-modal-full'}
+                                                                                    style={{
+                                                                                        maxWidth: '80vw',
+                                                                                        maxHeight: '80vh',
+                                                                                        objectFit: 'contain',
+                                                                                        display: 'block',
+                                                                                        margin: '0 auto',
+                                                                                        borderRadius: 8
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                        </Modal.Body>
+                                                                    </Modal>
+                                                                )}
+                                                            </>
+                                                        ) : null}
+                                                        {/* Các ảnh phụ */}
+                                                        {otherImgs.length > 0 && (
+                                                            <div className="d-flex flex-wrap gap-1 justify-content-center" style={{ maxHeight: 70, overflowY: 'auto', flexShrink: 0 }}>
+                                                                {otherImgs.map((img, idx) => (
+                                                                    <img
+                                                                        key={img.id}
+                                                                        src={urlImage + (img.main_url || img.thumb_url)}
+                                                                        alt={post.title + '-' + idx}
+                                                                        style={{
+                                                                            width: 45,
+                                                                            height: 45,
+                                                                            objectFit: 'cover',
+                                                                            cursor: 'pointer',
+                                                                            borderRadius: 6,
+                                                                            background: '#f8f9fa',
+                                                                            border: '1px solid #dee2e6',
+                                                                            flexShrink: 0
+                                                                        }}
+                                                                        className="img-thumbnail"
+                                                                        title="Ảnh bài viết (bấm để xem lớn)"
+                                                                        onClick={() => handleImgClick(img)}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()
+                                        ) : (
+                                            <div
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    borderRadius: 8,
+                                                    background: '#f8f9fa',
+                                                    border: '1px solid #dee2e6',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}
+                                            >
+                                                <i className="fas fa-image" style={{ fontSize: 60, color: '#adb5bd' }}></i>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold text-primary">Danh mục:</span> {post.categories && post.categories.length > 0 ? post.categories.map(cat => cat.name).join(', ') : <span className="text-muted">Chưa phân loại</span>}
-                                    </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">Ngày tạo:</span> {post.created_at}
-                                    </div>
-                                    <div>
-                                        <span className="fw-semibold">Cập nhật:</span> {post.updated_at}
+                                    
+                                    {/* Thông tin cơ bản - Compact */}
+                                    <div className="row g-2">
+                                        <div className="col-12">
+                                            <small className="text-muted d-block">Tiêu đề bài viết</small>
+                                            <h6 className="fw-bold mb-1">{post.title}</h6>
+                                        </div>
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Trạng thái</small>
+                                            {post.status === 1
+                                                ? <span className="badge bg-success small"><i className="fas fa-check-circle me-1"></i>Hiển thị</span>
+                                                : <span className="badge bg-secondary small"><i className="fas fa-ban me-1"></i>Ẩn</span>
+                                            }
+                                        </div>
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Ngày tạo</small>
+                                            <span className="small">{moment(post.created_at).format('HH:mm DD/MM/YYYY')}</span>
+                                        </div>
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Cập nhật</small>
+                                            <span className="small">{moment(post.updated_at).format('HH:mm DD/MM/YYYY')}</span>
+                                        </div>
+                                        <div className="col-12">
+                                            <small className="text-muted d-block">Danh mục</small>
+                                            <span className="small">{post.categories && post.categories.length > 0 
+                                                ? post.categories.map(cat => cat.name).join(', ') 
+                                                : 'Chưa phân loại'}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-7 mb-4 d-flex" style={{ height: '75vh' }}>
-                            <div className="card shadow-sm flex-fill d-flex flex-column" style={{ height: '100%' }}>
-                                <div className="card-header bg-light fw-bold">
-                                    <i className="fas fa-info-circle me-2"></i>Nội dung bài viết
+                        {/* Nội dung bài viết */}
+                        <div className="col-lg-7">
+                            <div className="card shadow-sm border-0 h-100">
+                                <div className="card-header bg-success text-white py-2">
+                                    <h6 className="mb-0 fw-bold">
+                                        <i className="fas fa-file-alt me-2"></i>Nội dung bài viết
+                                    </h6>
                                 </div>
-                                <div className="card-body flex-grow-1" style={{ minHeight: 200, overflowY: 'auto' }}>
+                                <div className="card-body p-3" style={{ overflowY: 'auto' }}>
                                     {post.content
                                         ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(post.content)) }} />
-                                        : <span className="text-muted fst-italic">Chưa có nội dung</span>
+                                        : <div className="text-center text-muted py-5">
+                                            <i className="fas fa-file-alt fa-3x mb-3 opacity-50"></i>
+                                            <p className="mb-0">Chưa có nội dung bài viết</p>
+                                        </div>
                                     }
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {/* Các nút thao tác nằm giữa bên dưới, ngoài các card */}
-                    <div className="d-flex justify-content-center gap-2 mt-3 mb-3">
-                        <Link className="btn btn-primary" to={`/post/${post.id}`}>
-                            <i className="fas fa-edit"></i> Sửa bài viết
-                        </Link>
-                        <button className="btn btn-danger" onClick={handleOpenDeleteModal}>
-                            <i className="fas fa-trash-alt"></i> Xóa bài viết
-                        </button>
-                        <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
-                            <i className="fas fa-arrow-left"></i> Quay lại
-                        </button>
+
+                    {/* Nút thao tác - Compact */}
+                    <div className="row mb-4">
+                        <div className="col-12 d-flex justify-content-center gap-2" style={{ marginTop: 20 }}>
+                            <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
+                                <i className="fas fa-arrow-left me-1"></i>Quay lại
+                            </button>
+                            <Link className="btn btn-primary btn-sm" to={`/post/${post.id}`}>
+                                <i className="fas fa-edit me-1"></i>Sửa bài viết
+                            </Link>
+                            <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
+                                <i className="fas fa-trash-alt me-1"></i>Xóa bài viết
+                            </button>
+                        </div>
                     </div>
                 </div>
             </main>

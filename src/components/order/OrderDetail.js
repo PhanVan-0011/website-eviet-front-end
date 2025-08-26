@@ -5,9 +5,29 @@ import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import { toast } from 'react-toastify';
 import requestApi from '../../helpers/api';
-import {formatVNDWithUnit } from '../../helpers/formatMoney';
+import {formatVNDWithUnit, formatVND } from '../../helpers/formatMoney';
 
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
+
+// Helper function để lấy ảnh featured từ API mới hoặc fallback về cấu trúc cũ
+const getProductImage = (product) => {
+    if (!product) return null;
+    
+    // Cấu trúc mới: image_urls array với is_featured
+    if (product.image_urls && Array.isArray(product.image_urls)) {
+        const featuredImage = product.image_urls.find(img => img.is_featured === 1);
+        if (featuredImage && featuredImage.thumb_url) {
+            return featuredImage.thumb_url;
+        }
+    }
+    
+    // Fallback về cấu trúc cũ
+    if (product.image_url) {
+        return product.image_url;
+    }
+    
+    return null;
+};
 
 const statusMap = {
     pending: { color: 'warning', text: 'Chờ xử lý' },
@@ -131,100 +151,113 @@ const OrderDetail = () => {
                         <li className="breadcrumb-item active">Chi tiết</li>
                     </ol>
 
-                    <div className="row g-4">
-                        {/* Thông tin đơn hàng + thanh toán chung 1 khối bên trái */}
-                        <div className="col-lg-4">
-                            <div className="card shadow-sm border-0 mb-3 h-100">
-                                <div className="card-header bg-white border-bottom-0 pb-0">
-                                    <h5 className="mb-0 fw-bold text-primary">
+                    <div className="row g-3">
+                        {/* Thông tin đơn hàng & thanh toán */}
+                        <div className="col-lg-5">
+                            <div className="card shadow-sm border-0">
+                                <div className="card-header bg-primary text-white py-2">
+                                    <h6 className="mb-0 fw-bold">
                                         <i className="fas fa-file-invoice me-2"></i>Thông tin đơn hàng & thanh toán
-                                    </h5>
+                                    </h6>
                                 </div>
-                                <div className="card-body">
-                                    {/* Thông tin đơn hàng */}
-                                    <div className="mb-3">
-                                        <div className="mb-2">
-                                            <span className="fw-semibold">Mã đơn:</span> #{order.order_code}
+                                <div className="card-body p-3">
+                                    {/* Thông tin đơn hàng - Compact */}
+                                    <div className="row g-2 mb-3">
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Mã đơn</small>
+                                            <span className="fw-semibold">#{order.order_code}</span>
                                         </div>
-                                        <div className="mb-2">
-                                            <span className="fw-semibold">Ngày đặt:</span> {moment(order.order_date).format('HH:mm DD/MM/YYYY')}
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Ngày đặt</small>
+                                            <span>{moment(order.order_date).format('HH:mm DD/MM/YYYY')}</span>
                                         </div>
-                                        <div className="mb-2">
-                                            <span className="fw-semibold">Trạng thái:</span>{' '}
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Trạng thái</small>
                                             <span className={`badge bg-${status.color}`}>{status.text}</span>
                                         </div>
-                                        <div className="mb-2">
-                                            <span className="fw-semibold">Tổng tiền:</span>{' '}
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Tổng tiền</small>
                                             <span className="fw-bold text-danger">{formatVNDWithUnit(order.total_amount)}</span>
                                         </div>
-                                        <div className="mb-2">
-                                            <span className="fw-semibold">Phí giao hàng:</span> {formatVNDWithUnit(order.shipping_fee)}
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Phí ship</small>
+                                            <span>{formatVNDWithUnit(order.shipping_fee)}</span>
                                         </div>
-                                        <div className="mb-2">
-                                            <span className="fw-semibold">Địa chỉ giao:</span> {order.shipping_address}
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Khách hàng</small>
+                                            <span>{order.client_name}</span>
                                         </div>
-                                        <div className="mb-2">
-                                            <span className="fw-semibold">Khách hàng:</span> {order.client_name}
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">SĐT</small>
+                                            <span>{order.client_phone}</span>
                                         </div>
-                                        <div className="mb-2">
-                                            <span className="fw-semibold">SĐT khách:</span> {order.client_phone}
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Người tạo</small>
+                                            <span>{order.user ? order.user.name : '-'}</span>
                                         </div>
-                                        <div className="mb-2">
-                                            <span className="fw-semibold">Người tạo:</span> {order.user ? order.user.name : ''}
+                                        <div className="col-12">
+                                            <small className="text-muted d-block">Địa chỉ giao</small>
+                                            <span className="small">{order.shipping_address}</span>
                                         </div>
                                     </div>
-                                    {/* Thông tin thanh toán */}
-                                    <div className="border-top pt-3 mt-2">
-                                        <h6 className="fw-bold text-info mb-3">
+                                    
+                                    {/* Thông tin thanh toán - Compact */}
+                                    <div className="border-top pt-3">
+                                        <h6 className="fw-bold text-info mb-2">
                                             <i className="fas fa-credit-card me-2"></i>Thanh toán
                                         </h6>
                                         {order.payment ? (
-                                            <>
-                                                <div className="mb-2">
-                                                    <span className="fw-semibold">Phương thức:</span> {order.payment.method.name}
+                                            <div className="row g-2">
+                                                <div className="col-6">
+                                                    <small className="text-muted d-block">Phương thức</small>
+                                                    <span className="small">{order.payment.method.name}</span>
                                                 </div>
-                                                {order.payment && (
-                                                    <div className="mb-2">
-                                                        <span className="fw-semibold">Trạng thái:</span> <span className={`badge bg-${paymentStatusColorMap[order.payment.status] || 'secondary'}`}>{paymentStatusMap[order.payment.status] || order.payment.status}</span>
-                                                    </div>
-                                                )}
-                                                <div className="mb-2">
-                                                    <span className="fw-semibold">Số tiền:</span> {formatVNDWithUnit(order.payment.amount)}
+                                                <div className="col-6">
+                                                    <small className="text-muted d-block">Trạng thái</small>
+                                                    <span className={`badge bg-${paymentStatusColorMap[order.payment.status] || 'secondary'} small`}>
+                                                        {paymentStatusMap[order.payment.status] || order.payment.status}
+                                                    </span>
                                                 </div>
-                                                <div className="mb-2">
-                                                    <span className="fw-semibold">Mã giao dịch:</span> {order.payment.transaction_id || 'Chưa có thông tin giao dịch'}
+                                                <div className="col-6">
+                                                    <small className="text-muted d-block">Số tiền</small>
+                                                    <span className="fw-bold text-danger">{formatVNDWithUnit(order.payment.amount)}</span>
                                                 </div>
-                                                <div className="mb-2">
-                                                    <span className="fw-semibold">Thanh toán lúc:</span> {order.payment.paid_at || 'Chưa có thời gian thanh toán'}
+                                                <div className="col-6">
+                                                    <small className="text-muted d-block">Thanh toán lúc</small>
+                                                    <span className="small">{order.payment.paid_at ? moment(order.payment.paid_at).format('HH:mm DD/MM/YYYY') : '-'}</span>
                                                 </div>
-                                            </>
+                                                <div className="col-12">
+                                                    <small className="text-muted d-block">Mã giao dịch</small>
+                                                    <span className="small">{order.payment.transaction_id || 'Chưa có thông tin giao dịch'}</span>
+                                                </div>
+                                            </div>
                                         ) : (
-                                            <div className="text-muted">Chưa có thông tin thanh toán</div>
+                                            <div className="text-muted small">Chưa có thông tin thanh toán</div>
                                         )}
                                     </div>
                                 </div>
                             </div>
                         </div>
                         {/* Danh sách sản phẩm */}
-                        <div className="col-lg-8">
-                            <div className="card shadow-sm border-0 mb-3 h-100 w-100">
-                                <div className="card-header bg-white border-bottom-0 pb-0">
-                                    <h5 className="mb-0 fw-bold text-success">
-                                        <i className="fas fa-box-open me-2"></i>Sản phẩm trong đơn
-                                    </h5>
+                        <div className="col-lg-7">
+                            <div className="card shadow-sm border-0">
+                                <div className="card-header bg-success text-white py-2">
+                                    <h6 className="mb-0 fw-bold">
+                                        <i className="fas fa-box-open me-2"></i>Sản phẩm trong đơn ({order.order_details?.length || 0} sản phẩm)
+                                    </h6>
                                 </div>
                                 <div className="card-body p-0">
                                     <div className="table-responsive">
-                                        <table className="table table-hover align-middle mb-0">
+                                        <table className="table table-hover align-middle mb-0 table-sm">
                                             <thead className="table-light">
                                                 <tr>
-                                                    <th style={{ width: 60 }}>#</th>
-                                                    <th style={{ width: 80 }}>Ảnh</th>
-                                                    <th>Tên sản phẩm</th>
-                                                    <th className="text-center" style={{ width: 100 }}>Đơn giá</th>
-                                                    <th className="text-center" style={{ width: 80 }}>SL</th>
-                                                    <th className="text-end" style={{ width: 120 }}>Thành tiền</th>
-                                                    <th className="text-center" style={{ width: 160 }}>Loại</th>
+                                                    <th style={{ width: 40 }}>#</th>
+                                                    <th style={{ width: 60 }}>Ảnh</th>
+                                                    <th>Sản phẩm</th>
+                                                    <th className="text-center" style={{ width: 80 }}>Giá</th>
+                                                    <th className="text-center" style={{ width: 50 }}>SL</th>
+                                                    <th className="text-end" style={{ width: 90 }}>Tổng</th>
+                                                    <th className="text-center" style={{ width: 100 }}>Loại</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -247,59 +280,61 @@ const OrderDetail = () => {
                                                             <tr key={item.id} style={{ borderLeft: borderStyle }}>
                                                                 <td>{idx + 1}</td>
                                                                 <td>
-                                                                    {item.product && item.product.image_url ? (
-                                                                        <img
-                                                                            src={item.product.image_url.startsWith('http')
-                                                                                ? item.product.image_url
-                                                                                : urlImage + item.product.image_url}
-                                                                            alt={item.product ? item.product.name : ''}
-                                                                            className="img-thumbnail"
-                                                                            style={{
-                                                                                width: 56,
-                                                                                height: 56,
-                                                                                objectFit: 'cover',
-                                                                                borderRadius: 8,
-                                                                                border: '1px solid #eee'
-                                                                            }}
-                                                                        />
-                                                                    ) : (
-                                                                        <div style={{ width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 8 }}>
-                                                                            <i className="fas fa-image" style={{ fontSize: 24, color: '#bbb' }}></i>
-                                                                        </div>
-                                                                    )}
+                                                                    {(() => {
+                                                                        const imageUrl = getProductImage(item.product);
+                                                                        return imageUrl ? (
+                                                                            <img
+                                                                                src={imageUrl.startsWith('http')
+                                                                                    ? imageUrl
+                                                                                    : urlImage + imageUrl}
+                                                                                alt={item.product ? item.product.name : ''}
+                                                                                className="img-thumbnail"
+                                                                                style={{
+                                                                                    width: 40,
+                                                                                    height: 40,
+                                                                                    objectFit: 'cover',
+                                                                                    borderRadius: 6,
+                                                                                    border: '1px solid #eee'
+                                                                                }}
+                                                                            />
+                                                                        ) : (
+                                                                            <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 6 }}>
+                                                                                <i className="fas fa-image" style={{ fontSize: 16, color: '#bbb' }}></i>
+                                                                            </div>
+                                                                        );
+                                                                    })()}
                                                                 </td>
                                                                 <td>
-                                                                    <div className="fw-semibold">{item.product ? item.product.name : ''}</div>
+                                                                    <div className="fw-semibold small">{item.product ? item.product.name : ''}</div>
                                                                     {item.product?.size && (
-                                                                        <span className="badge bg-secondary me-1">{item.product.size}</span>
+                                                                        <span className="badge bg-secondary small me-1">{item.product.size}</span>
                                                                     )}
-                                                                    <div className="text-muted small" dangerouslySetInnerHTML={{ __html: item.product ? item.product.name : '' }} />
                                                                 </td>
                                                                 <td className="text-center">
-                                                                    <span className="fw-bold text-primary">{formatVNDWithUnit(item.unit_price)}</span>
+                                                                    <span className="fw-bold text-primary small">{formatVND(item.unit_price)}</span>
                                                                 </td>
                                                                 <td className="text-center">
                                                                     <span className="fw-bold">{item.quantity}</span>
                                                                 </td>
                                                                 <td className="text-end fw-bold">
-                                                                    <span className="text-danger">{formatVNDWithUnit(item.unit_price * item.quantity)}</span>
+                                                                    <span className="text-danger small">{formatVND(item.unit_price * item.quantity)}</span>
                                                                 </td>
                                                                 <td className="text-center">
                                                                     <span
-                                                                        className={`badge bg-white border`}
+                                                                        className={`badge small`}
                                                                         style={{
-                                                                            borderColor: item.combo_id ? '#0d6efd' : '#198754',
-                                                                            color: item.combo_id ? '#0d6efd' : '#198754',
+                                                                            backgroundColor: item.combo_id ? '#e3f2fd' : '#e8f5e8',
+                                                                            color: item.combo_id ? '#1976d2' : '#2e7d32',
                                                                             fontWeight: 500,
-                                                                            fontSize: 12,
-                                                                            padding: '4px 10px'
+                                                                            fontSize: 10,
+                                                                            padding: '3px 6px'
                                                                         }}
                                                                     >
-                                                                        {item.combo_id ? 'Sản phẩm thuộc combo' : 'Sản phẩm thường'}
+                                                                        {item.combo_id ? 'Combo' : 'Thường'}
                                                                     </span>
                                                                     {/* Hiển thị tên combo nếu có */}
                                                                     {item.combo_id && item.combo && (
-                                                                        <div className="small mt-1 text-primary" style={{ fontSize: 12 }}>
+                                                                        <div className="small mt-1 text-primary" style={{ fontSize: 10 }}>
                                                                             <i className="fas fa-cubes me-1"></i>
                                                                             {item.combo.name}
                                                                         </div>
@@ -314,7 +349,7 @@ const OrderDetail = () => {
                                                     </tr>
                                                 )}
                                             </tbody>
-                                            <tfoot>
+                                            <tfoot className="table-light">
                                                 <tr>
                                                     <td colSpan={6} className="text-end fw-bold">Tổng cộng:</td>
                                                     <td className="text-end fw-bold text-danger">{formatVNDWithUnit(order.total_amount)}</td>
@@ -327,73 +362,64 @@ const OrderDetail = () => {
                         </div>
                     </div>
 
-                    {/* Nút thao tác nằm giữa giao diện */}
+                    {/* Nút thao tác - Compact */}
                     <div className="row mb-4">
-                        <div className="col-12 d-flex justify-content-center gap-3" style={{ marginTop: 32 }}>
-                            <button className="btn btn-outline-secondary" style={{ minWidth: 140, maxWidth: 180 }} onClick={() => navigate(-1)}>
-                                <i className="fas fa-arrow-left me-2"></i>Quay lại
+                        <div className="col-12 d-flex justify-content-center gap-2" style={{ marginTop: 20 }}>
+                            <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
+                                <i className="fas fa-arrow-left me-1"></i>Quay lại
                             </button>
                             {order.status === 'pending' && (
                                 <>
                                     <button
-                                        className="btn btn-danger"
-                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        className="btn btn-danger btn-sm"
                                         onClick={() => handleUpdateStatus(order.id, 'cancelled')}
                                         title="Hủy đơn hàng"
                                     >
                                         <i className="fas fa-times me-1"></i> Hủy
                                     </button>
                                     <button
-                                        className="btn btn-success"
-                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        className="btn btn-success btn-sm"
                                         onClick={() => handleUpdateStatus(order.id, 'processing')}
                                         title="Duyệt đơn hàng"
                                     >
                                         <i className="fas fa-check me-1"></i> Duyệt
                                     </button>
-                                    
                                 </>
                             )}
                             {order.status === 'processing' && (
                                 <>
                                     <button
-                                        className="btn btn-danger"
-                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        className="btn btn-danger btn-sm"
                                         onClick={() => handleUpdateStatus(order.id, 'cancelled')}
                                         title="Hủy đơn hàng"
                                     >
                                         <i className="fas fa-times me-1"></i> Hủy
                                     </button>
                                     <button
-                                        className="btn btn-warning"
-                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        className="btn btn-warning btn-sm"
                                         onClick={() => handleUpdateStatus(order.id, 'shipped')}
                                         title="Xác nhận đã gửi hàng"
                                     >
                                         <i className="fas fa-truck me-1"></i> Gửi hàng
                                     </button>
-                                    
                                 </>
                             )}
                             {order.status === 'shipped' && (
                                 <>
                                     <button
-                                        className="btn btn-danger"
-                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        className="btn btn-danger btn-sm"
                                         onClick={() => handleUpdateStatus(order.id, 'cancelled')}
                                         title="Hủy đơn hàng"
                                     >
                                         <i className="fas fa-times me-1"></i> Hủy
                                     </button>
                                     <button
-                                        className="btn btn-info"
-                                        style={{ minWidth: 140, maxWidth: 180 }}
+                                        className="btn btn-info btn-sm"
                                         onClick={() => handleUpdateStatus(order.id, 'delivered')}
                                         title="Xác nhận đã giao"
                                     >
                                         <i className="fas fa-box-open me-1"></i> Đã giao
                                     </button>
-                                    
                                 </>
                             )}
                         </div>

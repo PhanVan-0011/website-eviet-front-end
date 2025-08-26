@@ -117,177 +117,203 @@ const ProductDetail = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <div className="mt-4 mb-3">
-                        <h1 className="mt-4">Chi tiết sản phẩm</h1>
-                        <ol className="breadcrumb mb-4">
-                            <li className="breadcrumb-item"><Link to="/">Danh sách sản phẩm</Link></li>
-                            <li className="breadcrumb-item active">Chi tiết sản phẩm</li>
-                        </ol>
+                    <div className="d-flex align-items-center justify-content-between mt-4 mb-2">
+                        <h2 className="mb-0">Chi tiết sản phẩm #{product.id}</h2>
                     </div>
-                    <div className="row g-4">
-                        <div className="col-md-5 d-flex" style={{ height: '75vh' }}>
-                            <div className="card shadow-sm mb-4 flex-fill" style={{ height: '100%' }}>
-                                <div style={{ height: '50%', display: 'flex', flexDirection: 'column', padding: 16, overflow: 'hidden' }}>
-                                    {product.image_urls && product.image_urls.length > 0 ? (
-                                        (() => {
-                                            const featuredImg = product.image_urls.find(img => img.is_featured === 1);
-                                            const otherImgs = product.image_urls.filter(img => img.is_featured !== 1);
-                                            return (
-                                                <>
-                                                    {featuredImg ? (
-                                                        <>
-                                                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12, overflow: 'hidden' }}>
-                                                                <img
-                                                                    key={featuredImg.id}
-                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + (featuredImg.main_url || featuredImg.thumb_url)}
-                                                                    alt={product.name + '-featured'}
-                                                                    className="img-thumbnail"
-                                                                    style={{
-                                                                        objectFit: 'contain',
-                                                                        boxShadow: '0 0 12px #007bff55',
-                                                                        cursor: 'pointer',
-                                                                        maxWidth: '100%',
-                                                                        maxHeight: '100%',
-                                                                        borderRadius: 10,
-                                                                        background: '#f8f9fa',
-                                                                        border: '1px solid #eee'
-                                                                    }}
-                                                                    title="Ảnh đại diện (bấm để xem lớn)"
-                                                                    onClick={() => handleImgClick(featuredImg)}
-                                                                />
-                                                            </div>
-                                                            {/* Modal xem ảnh full */}
-                                                            {showModal && modalImg && (
-                                                                <Modal show={showModal} onHide={handleCloseModal} centered>
-                                                                    <Modal.Body style={{ position: 'relative', padding: 0, background: 'transparent', border: 0 }}>
-                                                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
-                                                                            <img
-                                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + (modalImg.main_url || modalImg.thumb_url)}
-                                                                                alt={product.name + '-modal-full'}
-                                                                                style={{
-                                                                                    maxWidth: '80vw',
-                                                                                    maxHeight: '80vh',
-                                                                                    objectFit: 'contain',
-                                                                                    display: 'block',
-                                                                                    margin: '0 auto',
-                                                                                    borderRadius: 8
-                                                                                }}
-                                                                            />
-                                                                        </div>
-                                                                        {/* Không có nút X đóng */}
-                                                                    </Modal.Body>
-                                                                </Modal>
-                                                            )}
-                                                        </>
-                                                    ) : null}
-                                                    {/* Các ảnh còn lại nhỏ hơn */}
-                                                    {otherImgs.length > 0 && (
-                                                        <div className="d-flex flex-wrap gap-2 justify-content-center align-items-center" style={{ maxHeight: 100, overflowY: 'auto', flexShrink: 0 }}>
-                                                            {otherImgs.map((img, idx) => (
-                                                                <img
-                                                                    key={img.id}
-                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + (img.main_url || img.thumb_url)}
-                                                                    alt={product.name + '-' + idx}
-                                                                    style={{
-                                                                        width: 60,
-                                                                        height: 60,
-                                                                        objectFit: 'cover',
-                                                                        cursor: 'pointer',
-                                                                        borderRadius: 8,
-                                                                        background: '#f8f9fa',
-                                                                        border: '1px solid #eee',
-                                                                        flexShrink: 0
-                                                                    }}
-                                                                    className="img-thumbnail"
-                                                                    title="Ảnh sản phẩm (bấm để xem lớn)"
-                                                                    onClick={() => handleImgClick(img)}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </>
-                                            );
-                                        })()
-                                    ) : (
-                                        <div
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                borderRadius: 10,
-                                                background: '#f8f9fa',
-                                                border: '1px solid #eee',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                            }}
-                                        >
-                                            <i className="fas fa-image" style={{ fontSize: 80, color: '#bbb' }}></i>
-                                        </div>
-                                    )}
+                    <ol className="breadcrumb mb-4">
+                        <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
+                        <li className="breadcrumb-item"><Link to="/product">Sản phẩm</Link></li>
+                        <li className="breadcrumb-item active">Chi tiết</li>
+                    </ol>
+
+                    <div className="row g-3">
+                        {/* Thông tin sản phẩm & hình ảnh */}
+                        <div className="col-lg-5">
+                            <div className="card shadow-sm border-0">
+                                <div className="card-header bg-primary text-white py-2">
+                                    <h6 className="mb-0 fw-bold">
+                                        <i className="fas fa-box me-2"></i>Thông tin sản phẩm & hình ảnh
+                                    </h6>
                                 </div>
-                                <div className="card-body" style={{ height: '50%', overflowY: 'auto' }}>
-                                    <h4 className="card-title mb-2">{product.name}</h4>
-                                    <div className="mb-2">
-                                        {product.status === 1
-                                            ? <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Đang bán</span>
-                                            : <span className="badge bg-secondary"><i className="fas fa-ban me-1"></i>Ngừng bán</span>
-                                        }
+                                <div className="card-body p-3">
+                                    {/* Hình ảnh sản phẩm */}
+                                    <div className="mb-3" style={{ height: '280px', display: 'flex', flexDirection: 'column' }}>
+                                        {product.image_urls && product.image_urls.length > 0 ? (
+                                            (() => {
+                                                const featuredImg = product.image_urls.find(img => img.is_featured === 1);
+                                                const otherImgs = product.image_urls.filter(img => img.is_featured !== 1);
+                                                return (
+                                                    <>
+                                                        {featuredImg ? (
+                                                            <>
+                                                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8, overflow: 'hidden' }}>
+                                                                    <img
+                                                                        key={featuredImg.id}
+                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + (featuredImg.main_url || featuredImg.thumb_url)}
+                                                                        alt={product.name + '-featured'}
+                                                                        className="img-thumbnail"
+                                                                        style={{
+                                                                            objectFit: 'contain',
+                                                                            boxShadow: '0 0 8px #007bff33',
+                                                                            cursor: 'pointer',
+                                                                            maxWidth: '100%',
+                                                                            maxHeight: '100%',
+                                                                            borderRadius: 8,
+                                                                            background: '#f8f9fa',
+                                                                            border: '1px solid #dee2e6'
+                                                                        }}
+                                                                        title="Ảnh đại diện (bấm để xem lớn)"
+                                                                        onClick={() => handleImgClick(featuredImg)}
+                                                                    />
+                                                                </div>
+                                                                {/* Modal xem ảnh full */}
+                                                                {showModal && modalImg && (
+                                                                    <Modal show={showModal} onHide={handleCloseModal} centered>
+                                                                        <Modal.Body style={{ position: 'relative', padding: 0, background: 'transparent', border: 0 }}>
+                                                                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+                                                                                <img
+                                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + (modalImg.main_url || modalImg.thumb_url)}
+                                                                                    alt={product.name + '-modal-full'}
+                                                                                    style={{
+                                                                                        maxWidth: '80vw',
+                                                                                        maxHeight: '80vh',
+                                                                                        objectFit: 'contain',
+                                                                                        display: 'block',
+                                                                                        margin: '0 auto',
+                                                                                        borderRadius: 8
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                        </Modal.Body>
+                                                                    </Modal>
+                                                                )}
+                                                            </>
+                                                        ) : null}
+                                                        {/* Các ảnh phụ */}
+                                                        {otherImgs.length > 0 && (
+                                                            <div className="d-flex flex-wrap gap-1 justify-content-center" style={{ maxHeight: 70, overflowY: 'auto', flexShrink: 0 }}>
+                                                                {otherImgs.map((img, idx) => (
+                                                                    <img
+                                                                        key={img.id}
+                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + (img.main_url || img.thumb_url)}
+                                                                        alt={product.name + '-' + idx}
+                                                                        style={{
+                                                                            width: 45,
+                                                                            height: 45,
+                                                                            objectFit: 'cover',
+                                                                            cursor: 'pointer',
+                                                                            borderRadius: 6,
+                                                                            background: '#f8f9fa',
+                                                                            border: '1px solid #dee2e6',
+                                                                            flexShrink: 0
+                                                                        }}
+                                                                        className="img-thumbnail"
+                                                                        title="Ảnh sản phẩm (bấm để xem lớn)"
+                                                                        onClick={() => handleImgClick(img)}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()
+                                        ) : (
+                                            <div
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    borderRadius: 8,
+                                                    background: '#f8f9fa',
+                                                    border: '1px solid #dee2e6',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}
+                                            >
+                                                <i className="fas fa-image" style={{ fontSize: 60, color: '#adb5bd' }}></i>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold text-primary">Danh mục:</span> {product.categories && product.categories.length > 0
-                                            ? product.categories.map(cat => cat.name).join(', ')
-                                            : <span className="text-muted">Chưa phân loại</span>}
-                                    </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold text-success">Giá gốc:</span> <span className="text-danger">{formatVNDWithUnit(product.original_price)}</span>
-                                    </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold text-warning">Giá bán:</span> <span className="text-danger">{formatVNDWithUnit(product.sale_price)}</span>
-                                    </div>
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">Số lượng:</span> {product.stock_quantity}
-                                    </div>
-                                    {product.size && (
-                                        <div className="mb-2">
-                                            <span className="fw-semibold">Kích thước:</span> {product.size}
+                                    
+                                    {/* Thông tin cơ bản - Compact */}
+                                    <div className="row g-2">
+                                        <div className="col-12">
+                                            <small className="text-muted d-block">Tên sản phẩm</small>
+                                            <h6 className="fw-bold mb-1">{product.name}</h6>
                                         </div>
-                                    )}
-                                    <div className="mb-2">
-                                        <span className="fw-semibold">Ngày tạo:</span> {formatDate(product.created_at)}
-                                    </div>
-                                    <div>
-                                        <span className="fw-semibold">Cập nhật:</span> {formatDate(product.updated_at)}
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Trạng thái</small>
+                                            {product.status === 1
+                                                ? <span className="badge bg-success small"><i className="fas fa-check-circle me-1"></i>Đang bán</span>
+                                                : <span className="badge bg-secondary small"><i className="fas fa-ban me-1"></i>Ngừng bán</span>
+                                            }
+                                        </div>
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Số lượng</small>
+                                            <span className="fw-semibold">{product.stock_quantity}</span>
+                                        </div>
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Giá gốc</small>
+                                            <span className="fw-bold text-info">{formatVNDWithUnit(product.original_price)}</span>
+                                        </div>
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Giá bán</small>
+                                            <span className="fw-bold text-danger">{formatVNDWithUnit(product.sale_price)}</span>
+                                        </div>
+                                        {product.size && (
+                                            <div className="col-6">
+                                                <small className="text-muted d-block">Kích thước</small>
+                                                <span className="badge bg-secondary">{product.size}</span>
+                                            </div>
+                                        )}
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Ngày tạo</small>
+                                            <span className="small">{formatDate(product.created_at)}</span>
+                                        </div>
+                                        <div className="col-12">
+                                            <small className="text-muted d-block">Danh mục</small>
+                                            <span className="small">{product.categories && product.categories.length > 0
+                                                ? product.categories.map(cat => cat.name).join(', ')
+                                                : 'Chưa phân loại'}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-7 mb-4 d-flex" style={{ height: '75vh' }}>
-                            <div className="card shadow-sm h-100 flex-fill d-flex flex-column" style={{ height: '100%' }}>
-                                <div className="card-header bg-light fw-bold">
-                                    <i className="fas fa-info-circle me-2"></i>Mô tả sản phẩm
+                        {/* Mô tả sản phẩm */}
+                        <div className="col-lg-7">
+                            <div className="card shadow-sm border-0 h-100">
+                                <div className="card-header bg-success text-white py-2">
+                                    <h6 className="mb-0 fw-bold">
+                                        <i className="fas fa-info-circle me-2"></i>Mô tả sản phẩm
+                                    </h6>
                                 </div>
-                                <div className="card-body flex-grow-1" style={{ minHeight: 200, overflowY: 'auto' }}>
+                                <div className="card-body p-3" style={{ overflowY: 'auto' }}>
                                     {product.description
                                         ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(product.description)) }} />
-                                        : <span className="text-muted fst-italic">Chưa có mô tả</span>
+                                        : <div className="text-center text-muted py-5">
+                                            <i className="fas fa-file-alt fa-3x mb-3 opacity-50"></i>
+                                            <p className="mb-0">Chưa có mô tả sản phẩm</p>
+                                        </div>
                                     }
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                {/* Di chuyển các button ra ngoài card, đặt bên dưới hai cột */}
-                <div className="row mb-4">
-                    <div className="col-12 d-flex justify-content-center gap-2">
-                        <Link className="btn btn-primary" to={`/product/${product.id}`}>
-                            <i className="fas fa-edit"></i> Sửa sản phẩm
-                        </Link>
-                        <button className="btn btn-danger" onClick={handleOpenDeleteModal}>
-                            <i className="fas fa-trash-alt"></i> Xóa sản phẩm
-                        </button>
-                        <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
-                            <i className="fas fa-arrow-left"></i> Quay lại
-                        </button>
+
+                    {/* Nút thao tác - Compact */}
+                    <div className="row mb-4">
+                        <div className="col-12 d-flex justify-content-center gap-2" style={{ marginTop: 20 }}>
+                            <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
+                                <i className="fas fa-arrow-left me-1"></i>Quay lại
+                            </button>
+                            <Link className="btn btn-primary btn-sm" to={`/product/${product.id}`}>
+                                <i className="fas fa-edit me-1"></i>Sửa sản phẩm
+                            </Link>
+                            <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
+                                <i className="fas fa-trash-alt me-1"></i>Xóa sản phẩm
+                            </button>
+                        </div>
                     </div>
                 </div>
             </main>
