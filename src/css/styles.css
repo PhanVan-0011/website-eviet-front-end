@@ -11471,3 +11471,7 @@ body {
 .react-select__menu {
   z-index: 9999 !important;
 }
+/*//Detail format*/
+.background-detail{
+  background-color: #e6f8ec;
+}
