@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTables from '../common/DataTables';
+import FilterPanel from '../common/FilterPanel';
 import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
@@ -10,9 +11,6 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { vi } from 'date-fns/locale';
 
 const formatVND = (value) => {
     if (typeof value !== 'number' && typeof value !== 'string') return '';
@@ -47,6 +45,9 @@ const OrderList = () => {
 
     // Thêm state cho phương thức thanh toán động
     const [paymentMethods, setPaymentMethods] = useState([]);
+    
+    // State cho việc ẩn/hiện filter panel
+    const [isFilterVisible, setIsFilterVisible] = useState(true);
 
     // Lấy danh sách đơn hàng với filter
     useEffect(() => {
@@ -391,113 +392,57 @@ const OrderList = () => {
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item active">Đơn hàng</li>
                     </ol>
-                    <div className='mb-3'>
+                    
+                    {/* Layout chính với FilterPanel và nội dung */}
+                    <div className="row g-0">
+                        {/* Filter Panel */}
+                        <FilterPanel
+                            filterStatus={filterStatus}
+                            setFilterStatus={setFilterStatus}
+                            filterPayment={filterPayment}
+                            setFilterPayment={setFilterPayment}
+                            filterOrderDateFrom={filterOrderDateFrom}
+                            setFilterOrderDateFrom={setFilterOrderDateFrom}
+                            filterOrderDateTo={filterOrderDateTo}
+                            setFilterOrderDateTo={setFilterOrderDateTo}
+                            paymentMethods={paymentMethods}
+                            isVisible={isFilterVisible}
+                            onToggleVisibility={() => setIsFilterVisible(!isFilterVisible)}
+                        />
 
-                        <Permission permission={PERMISSIONS.ORDERS_CREATE}>
-                            <Link className="btn btn-primary me-2 add-custom-btn" to="/order/add">
-                                <i className="fas fa-plus"></i> Thêm đơn hàng
-                            </Link>
-                        </Permission>
-                        
-                    </div>
-                    {/* Bộ lọc */}
-                    <div className="row mb-3 g-2 align-items-end">
-                        {/* Trạng thái */}
-                        <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold mb-1" htmlFor="filterStatus">
-                                <i className="fas fa-toggle-on me-1"></i>Trạng thái
-                            </label>
-                            <select
-                                id="filterStatus"
-                                className="form-select form-select-sm shadow-sm form-rounded-sm"
-                                style={{  }}
-                                value={filterStatus}
-                                onChange={e => setFilterStatus(e.target.value)}
-                            >
-                                <option value="">Tất cả</option>
-                                <option value="pending">Chờ xử lý</option>
-                                <option value="processing">Đang xử lý</option>
-                                <option value="shipped">Đã gửi hàng</option>
-                                <option value="delivered">Đã giao</option>
-                                <option value="cancelled">Đã hủy</option>
-                            </select>
-                        </div>
-                        {/* Phương thức thanh toán động */}
-                        <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold  mb-1" htmlFor="filterPayment">
-                                <i className="fas fa-credit-card me-1"></i>Phương thức thanh toán
-                            </label>
-                            <select
-                                id="filterPayment"
-                                className="form-select form-select-sm shadow-sm form-rounded-sm"
-                                value={filterPayment}
-                                onChange={e => setFilterPayment(e.target.value)}
-                            >
-                                <option value="">Tất cả</option>
-                                {paymentMethods.map(method => (
-                                    <option key={method.code} value={method.code}>
-                                        {method.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        {/* Bộ lọc ngày đặt hàng */}
-                        <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold mb-1" htmlFor="filterOrderDateFrom">
-                                <i className="fas fa-calendar-alt me-1"></i>Từ ngày
-                            </label>
-                            <DatePicker
-                                selected={filterOrderDateFrom}
-                                onChange={date => setFilterOrderDateFrom(date)}
-                                locale={vi}
-                                dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
-                                placeholderText="Chọn ngày bắt đầu"
-                                id="filterOrderDateFrom"
-                                autoComplete="off"
-                                isClearable
-                            />
-                        </div>
-                        <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold mb-1" htmlFor="filterOrderDateTo">
-                                <i className="fas fa-calendar-check me-1"></i>Đến ngày
-                            </label>
-                            <DatePicker
-                                selected={filterOrderDateTo}
-                                onChange={date => setFilterOrderDateTo(date)}
-                                locale={vi}
-                                dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
-                                placeholderText="Chọn ngày kết thúc"
-                                id="filterOrderDateTo"
-                                autoComplete="off"
-                                isClearable
-                            />
+                        {/* Nội dung chính */}
+                        <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
+                            {/* Header với nút thêm đơn hàng - căn chỉnh với filter */}
+                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
+                                <div>
+                                    <h4 className="mb-0 fw-bold text-primary">Danh sách đơn hàng</h4>
+                                </div>
+                                <div>
+                                    <Permission permission={PERMISSIONS.ORDERS_CREATE}>
+                                        <Link className="btn btn-primary" to="/order/add">
+                                            <i className="fas fa-plus me-1"></i> Thêm đơn hàng
+                                        </Link>
+                                    </Permission>
+                                </div>
+                            </div>
+                            
+                            <div className="flex-grow-1 overflow-auto">
+                                <div className="p-3">
+                                    <DataTables
+                                        columns={columns}
+                                        data={sortedOrders}
+                                        numOfPages={numOfPages}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                        setItemOfPage={setItemOfPage}
+                                        changeKeyword={setSearchText}
+                                        onSelectedRows={setSelectedRows}
+                                        hideSelected={true}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    {/* ...actions, DataTables... */}
-                    {/* <div className='mb-3'>
-                        <Link className="btn btn-primary me-2" to="/order/add">
-                            <i className="fas fa-plus"></i> Thêm đơn hàng
-                        </Link>
-                        {selectedRows.length > 0 && (
-                            <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
-                                <i className="fas fa-trash"></i> Xóa
-                            </button>
-                        )}
-                    </div> */}
-                    <DataTables
-                        name="Danh sách đơn hàng"
-                        columns={columns}
-                        data={sortedOrders}
-                        numOfPages={numOfPages}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        setItemOfPage={setItemOfPage}
-                        changeKeyword={setSearchText}
-                        onSelectedRows={setSelectedRows}
-                        hideSelected={true}
-                    />
                 </div>
             </main>
             {/* ...modal... */}
