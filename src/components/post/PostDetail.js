@@ -121,9 +121,9 @@ const PostDetail = () => {
 
                     <div className="row g-3">
                         {/* Thông tin bài viết & hình ảnh */}
-                        <div className="col-lg-5">
+                        <div className="col-lg-12">
                             <div className="card shadow-sm border-0">
-                                <div className="card-header bg-primary text-white py-2">
+                                <div className="card-header background-detail py-2">
                                     <h6 className="mb-0 fw-bold">
                                         <i className="fas fa-newspaper me-2"></i>Thông tin bài viết & hình ảnh
                                     </h6>
@@ -235,6 +235,12 @@ const PostDetail = () => {
                                             <h6 className="fw-bold mb-1">{post.title}</h6>
                                         </div>
                                         <div className="col-6">
+                                            <small className="text-muted d-block">Danh mục</small>
+                                            <span className="small">{post.categories && post.categories.length > 0 
+                                                ? post.categories.map(cat => cat.name).join(', ') 
+                                                : 'Chưa phân loại'}</span>
+                                        </div>
+                                        <div className="col-6">
                                             <small className="text-muted d-block">Trạng thái</small>
                                             {post.status === 1
                                                 ? <span className="badge bg-success small"><i className="fas fa-check-circle me-1"></i>Hiển thị</span>
@@ -249,20 +255,11 @@ const PostDetail = () => {
                                             <small className="text-muted d-block">Cập nhật</small>
                                             <span className="small">{moment(post.updated_at).format('HH:mm DD/MM/YYYY')}</span>
                                         </div>
-                                        <div className="col-12">
-                                            <small className="text-muted d-block">Danh mục</small>
-                                            <span className="small">{post.categories && post.categories.length > 0 
-                                                ? post.categories.map(cat => cat.name).join(', ') 
-                                                : 'Chưa phân loại'}</span>
-                                        </div>
+                                       
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        {/* Nội dung bài viết */}
-                        <div className="col-lg-7">
-                            <div className="card shadow-sm border-0 h-100">
-                                <div className="card-header bg-success text-white py-2">
+                                <div className="card shadow-sm border-0 h-100">
+                                <div className="card-header py-2">
                                     <h6 className="mb-0 fw-bold">
                                         <i className="fas fa-file-alt me-2"></i>Nội dung bài viết
                                     </h6>
@@ -277,7 +274,11 @@ const PostDetail = () => {
                                     }
                                 </div>
                             </div>
+                            </div>
                         </div>
+                        {/* Nội dung bài viết
+                        <div className="col-lg-12">
+                        </div> */}
                     </div>
 
                     {/* Nút thao tác - Compact */}

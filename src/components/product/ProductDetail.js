@@ -128,9 +128,9 @@ const ProductDetail = () => {
 
                     <div className="row g-3">
                         {/* Thông tin sản phẩm & hình ảnh */}
-                        <div className="col-lg-5">
+                        <div className="col-lg-6">
                             <div className="card shadow-sm border-0">
-                                <div className="card-header bg-primary text-white py-2">
+                                <div className="card-header py-2 background-detail">
                                     <h6 className="mb-0 fw-bold">
                                         <i className="fas fa-box me-2"></i>Thông tin sản phẩm & hình ảnh
                                     </h6>
@@ -237,9 +237,15 @@ const ProductDetail = () => {
                                     
                                     {/* Thông tin cơ bản - Compact */}
                                     <div className="row g-2">
-                                        <div className="col-12">
+                                        <div className="col-6">
                                             <small className="text-muted d-block">Tên sản phẩm</small>
                                             <h6 className="fw-bold mb-1">{product.name}</h6>
+                                        </div>
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Danh mục</small>
+                                            <span className="small">{product.categories && product.categories.length > 0
+                                                ? product.categories.map(cat => cat.name).join(', ')
+                                                : 'Chưa phân loại'}</span>
                                         </div>
                                         <div className="col-6">
                                             <small className="text-muted d-block">Trạng thái</small>
@@ -270,20 +276,19 @@ const ProductDetail = () => {
                                             <small className="text-muted d-block">Ngày tạo</small>
                                             <span className="small">{formatDate(product.created_at)}</span>
                                         </div>
-                                        <div className="col-12">
-                                            <small className="text-muted d-block">Danh mục</small>
-                                            <span className="small">{product.categories && product.categories.length > 0
-                                                ? product.categories.map(cat => cat.name).join(', ')
-                                                : 'Chưa phân loại'}</span>
+                                        <div className="col-6">
+                                            <small className="text-muted d-block">Ngày cập nhật</small>
+                                            <span className="small">{formatDate(product.updated_at)}</span>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
                         </div>
                         {/* Mô tả sản phẩm */}
-                        <div className="col-lg-7">
+                        <div className="col-lg-6">
                             <div className="card shadow-sm border-0 h-100">
-                                <div className="card-header bg-success text-white py-2">
+                                <div className="card-header py-2 background-detail">
                                     <h6 className="mb-0 fw-bold">
                                         <i className="fas fa-info-circle me-2"></i>Mô tả sản phẩm
                                     </h6>

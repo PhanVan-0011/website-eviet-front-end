@@ -151,11 +151,11 @@ const OrderDetail = () => {
                         <li className="breadcrumb-item active">Chi tiết</li>
                     </ol>
 
-                    <div className="row g-3">
+                    <div className="row g-3 align-items-stretch">
                         {/* Thông tin đơn hàng & thanh toán */}
-                        <div className="col-lg-5">
-                            <div className="card shadow-sm border-0">
-                                <div className="card-header bg-primary text-white py-2">
+                        <div className="col-lg-6 d-flex">
+                            <div className="card shadow-sm border-0 flex-fill ">
+                                <div className="card-header py-2 background-detail">
                                     <h6 className="mb-0 fw-bold">
                                         <i className="fas fa-file-invoice me-2"></i>Thông tin đơn hàng & thanh toán
                                     </h6>
@@ -239,9 +239,9 @@ const OrderDetail = () => {
                             </div>
                         </div>
                         {/* Danh sách sản phẩm */}
-                        <div className="col-lg-7">
-                            <div className="card shadow-sm border-0">
-                                <div className="card-header bg-success text-white py-2">
+                        <div className="col-lg-6 d-flex">
+                            <div className="card shadow-sm border-0 flex-fill">
+                                <div className="card-header py-2 background-detail">
                                     <h6 className="mb-0 fw-bold">
                                         <i className="fas fa-box-open me-2"></i>Sản phẩm trong đơn ({order.order_details?.length || 0} sản phẩm)
                                     </h6>

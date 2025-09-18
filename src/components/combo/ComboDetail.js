@@ -131,9 +131,9 @@ const ComboDetail = () => {
 
                     <div className="row g-3">
                         {/* Thông tin combo & hình ảnh */}
-                        <div className="col-lg-5">
+                        <div className="col-lg-4">
                             <div className="card shadow-sm border-0">
-                                <div className="card-header bg-primary text-white py-2">
+                                <div className="card-header background-detail py-2">
                                     <h6 className="mb-0 fw-bold">
                                         <i className="fas fa-cubes me-2"></i>Thông tin combo & hình ảnh
                                     </h6>
@@ -276,23 +276,10 @@ const ComboDetail = () => {
                             </div>
                         </div>
                         {/* Mô tả & Sản phẩm trong combo */}
-                        <div className="col-lg-7">
+                        <div className="col-lg-8">
                             <div className="card shadow-sm border-0 h-100 d-flex flex-column">
-                                <div className="card-header bg-success text-white py-2">
-                                    <h6 className="mb-0 fw-bold">
-                                        <i className="fas fa-info-circle me-2"></i>Mô tả combo
-                                    </h6>
-                                </div>
-                                <div className="card-body p-3" style={{ maxHeight: '150px', overflowY: 'auto' }}>
-                                    {combo.description
-                                        ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(combo.description)) }} />
-                                        : <div className="text-center text-muted py-3">
-                                            <i className="fas fa-file-alt fa-2x mb-2 opacity-50"></i>
-                                            <p className="mb-0 small">Chưa có mô tả combo</p>
-                                        </div>
-                                    }
-                                </div>
-                                <div className="card-header bg-warning text-dark py-2 border-top">
+                               
+                                <div className="card-header background-detail py-2 border-top">
                                     <h6 className="mb-0 fw-bold">
                                         <i className="fas fa-box-open me-2"></i>Sản phẩm trong combo ({combo.items ? combo.items.length : 0})
                                     </h6>
@@ -378,6 +365,20 @@ const ComboDetail = () => {
                                             </tbody>
                                         </table>
                                     </div>
+                                </div>
+                                <div className="card-header background-detail py-2">
+                                    <h6 className="mb-0 fw-bold">
+                                        <i className="fas fa-info-circle me-2"></i>Mô tả combo
+                                    </h6>
+                                </div>
+                                <div className="card-body p-3" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                                    {combo.description
+                                        ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(combo.description)) }} />
+                                        : <div className="text-center text-muted py-3">
+                                            <i className="fas fa-file-alt fa-2x mb-2 opacity-50"></i>
+                                            <p className="mb-0 small">Chưa có mô tả combo</p>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         </div>

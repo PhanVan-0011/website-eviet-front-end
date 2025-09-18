@@ -406,11 +406,11 @@ const ProductAdd = () => {
                                                 Mô tả sản phẩm</label>
                                             <CustomEditor
                                                 folder='products'                                      
-                                                onReady={() => register('description', {'required': "Mô tả sản phẩm là bắt buộc"})} // hoặc truyền state nếu muốn hiển thị lại khi sửa
+                                                onReady={() => register('description')} // hoặc truyền state nếu muốn hiển thị lại khi sửa
                                                 onChange={data => setValue('description', data)}
-                                                trigger={() => trigger('description')} // Gọi trigger để kiểm tra validation
+                                                // trigger={() => trigger('description')} // Gọi trigger để kiểm tra validation
                                             />
-                                            {errors.description && <div className="text-danger">{errors.description.message}</div>}
+                                            {/* {errors.description && <div className="text-danger">{errors.description.message}</div>} */}
                                         </div>
                                     </div>
                                 

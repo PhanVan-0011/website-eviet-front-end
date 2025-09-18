@@ -83,7 +83,7 @@ const PromotionDetail = () => {
         return (
             <div className="container-fluid px-4">
                 <div className="mt-4 mb-3">
-                    <h1 className="mt-4">Chi tiết khuyến mãi</h1>
+                    <h2 className="">Chi tiết khuyến mãi</h2>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/promotion">Danh sách khuyến mãi</Link></li>
                         <li className="breadcrumb-item active">Chi tiết khuyến mãi</li>
@@ -140,14 +140,14 @@ const PromotionDetail = () => {
             <main>
                 <div className="container-fluid px-4">
                     <div className="mt-4 mb-3">
-                        <h1 className="mt-4">Chi tiết khuyến mãi</h1>
+                        <h2 className="">Chi tiết khuyến mãi</h2>
                         <ol className="breadcrumb mb-4">
                             <li className="breadcrumb-item"><Link to="/promotion">Danh sách khuyến mãi</Link></li>
                             <li className="breadcrumb-item active">Chi tiết khuyến mãi</li>
                         </ol>
                     </div>
                     <div className="row g-4">
-                        <div className="col-md-5 d-flex" style={{ height: '75vh' }}>
+                        <div className="col-md-6 d-flex" style={{ height: '75vh' }}>
                             <div className="card shadow-sm mb-4 flex-fill" style={{ height: '100%' }}>
                                 <div style={{ height: '50%', display: 'flex', flexDirection: 'column', padding: 16, overflow: 'hidden' }}>
                                     {promotion.image && promotion.image.main_url ? (
@@ -249,7 +249,7 @@ const PromotionDetail = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-7 mb-4 d-flex" style={{ height: '75vh' }}>
+                        <div className="col-md-6 mb-4 d-flex" style={{ height: '75vh' }}>
                             <div className="card shadow-sm h-100 flex-fill d-flex flex-column" style={{ height: '100%' }}>
                                 <div className="card-header bg-light fw-bold">
                                     <i className="fas fa-globe-asia me-2"></i>Điều kiện và giới hạn
