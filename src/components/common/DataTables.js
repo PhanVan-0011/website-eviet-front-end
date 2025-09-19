@@ -5,7 +5,7 @@ import { useRef } from 'react';
 
 const DataTables = (props) => {
     console.log("DataTables props: ", props);
-   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, filterHeader, hideSelected, isLoading = false } = props;
+   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, filterHeader, hideSelected, hideSearch = false, isLoading = false } = props;
    const [selectedRows, setSelectedRows] = useState([]);
    // --- Lấy trạng thái cột hiển thị từ localStorage khi component mount ---
    const [visibleColumns, setVisibleColumns] = useState(() => {
@@ -299,10 +299,12 @@ const DataTables = (props) => {
                         </select>
                         <span className="ms-2">mục</span>
                     </div>
-                    <div className="col-md-6 d-flex justify-content-end">
-                        <label className="me-2 mb-0" htmlFor="searchBox">Tìm kiếm:</label>
-                        <LiveSearch changeKeyword={changeKeyword}/>
-                    </div>
+                    {!hideSearch && (
+                        <div className="col-md-6 d-flex justify-content-end">
+                            <label className="me-2 mb-0" htmlFor="searchBox">Tìm kiếm:</label>
+                            <LiveSearch changeKeyword={changeKeyword}/>
+                        </div>
+                    )}
                 </div>
                 {/* Bọc bảng trong div để hỗ trợ scroll ngang */}
                 <div style={{ width: '100%', overflowX: 'auto' }}>
