@@ -150,49 +150,54 @@ const UserUpdate = () => {
                               <form onSubmit={handleSubmit(handleSubmitForm)}>
                                 <div className="row mb-3">
                                     <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
+                                        <div className="mb-3">
+                                            <label htmlFor="inputName" className="form-label fw-semibold">
+                                                Tên khách hàng <span style={{color: 'red'}}>*</span>
+                                            </label>
                                             <input
                                                 className="form-control"
                                                 id="inputName"
                                                 {...register('name', { required: 'Tên khách hàng là bắt buộc' })}
                                                 placeholder="Nhập tên khách hàng"
                                             />
-                                            <label htmlFor="inputName">
-                                                Tên khách hàng <span style={{color: 'red'}}>*</span>
-                                            </label>
-                                            {errors.name && <div className="text-danger">{errors.name.message}</div>}
+                                            {errors.name && <div className="text-danger mt-1">{errors.name.message}</div>}
                                         </div>
                                     </div>
                                     <div className="col-md-6">
-                                        <div className="form-floating">
+                                        <div className="mb-3">
+                                            <label htmlFor="inputAddress" className="form-label fw-semibold">
+                                                Địa chỉ <span style={{color: 'red'}}>*</span>
+                                            </label>
                                             <input
                                                 className="form-control"
                                                 id="inputAddress"
                                                 {...register('address', { required: 'Địa chỉ là bắt buộc' })}
                                                 placeholder="Nhập địa chỉ"
                                             />
-                                            <label htmlFor="inputAddress">Địa chỉ <span style={{color: 'red'}}>*</span></label>
-                                            {errors.address && <div className="text-danger">{errors.address.message}</div>}
+                                            {errors.address && <div className="text-danger mt-1">{errors.address.message}</div>}
                                         </div>
                                     </div>
                                 </div>
                                 <div className="row mb-3">
                                     <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
+                                        <div className="mb-3">
+                                            <label htmlFor="inputPhone" className="form-label fw-semibold">
+                                                Số điện thoại <span style={{color: 'red'}}>*</span>
+                                            </label>
                                             <input
                                                 className="form-control"
                                                 id="inputPhone"
                                                 {...register('phone', { required: 'Số điện thoại là bắt buộc' })}
                                                 placeholder="Nhập số điện thoại"
                                             />
-                                            <label htmlFor="inputPhone">
-                                                Số điện thoại <span style={{color: 'red'}}>*</span>
-                                            </label>
-                                            {errors.phone && <div className="text-danger">{errors.phone.message}</div>}
+                                            {errors.phone && <div className="text-danger mt-1">{errors.phone.message}</div>}
                                         </div>
                                     </div>
                                     <div className="col-md-6">
-                                        <div className="form-floating">
+                                        <div className="mb-3">
+                                            <label htmlFor="inputEmail" className="form-label fw-semibold">
+                                                Email <span style={{color: 'red'}}>*</span>
+                                            </label>
                                             <input
                                                 className="form-control"
                                                 id="inputEmail"
@@ -200,16 +205,16 @@ const UserUpdate = () => {
                                                 {...register('email', { required: 'Email là bắt buộc' })}
                                                 placeholder="Nhập email"
                                             />
-                                            <label htmlFor="inputEmail">
-                                                Email <span style={{color: 'red'}}>*</span>
-                                            </label>
-                                            {errors.email && <div className="text-danger">{errors.email.message}</div>}
+                                            {errors.email && <div className="text-danger mt-1">{errors.email.message}</div>}
                                         </div>
                                     </div>
                                 </div>
                                 <div className="row mb-3">
                                     <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
+                                        <div className="mb-3">
+                                            <label htmlFor="inputGender" className="form-label fw-semibold">
+                                                Giới tính <span style={{ color: 'red' }}>*</span>
+                                            </label>
                                             <select
                                                 className="form-select"
                                                 id="inputGender"
@@ -221,18 +226,18 @@ const UserUpdate = () => {
                                                 <option value="female">Nữ</option>
                                                 <option value="other">Khác</option>
                                             </select>
-                                            <label htmlFor="inputGender">
-                                                Giới tính <span style={{ color: 'red' }}>*</span>
-                                            </label>
+                                            {errors.gender && <div className="text-danger mt-1">{errors.gender.message}</div>}
                                         </div>
                                     </div>
                                     <div className="col-md-6">
-                                        <div className="form-floating mb-3 mb-md-0">
+                                        <div className="mb-3">
+                                            <label htmlFor="is_active" className="form-label fw-semibold">
+                                                Trạng thái
+                                            </label>
                                             <select className="form-select" id="is_active" {...register('is_active', { required: true })}>
                                                 <option value="1">Hoạt động</option>
                                                 <option value="0">Không Hoạt động</option>
                                             </select>
-                                            <label htmlFor="is_active">Trạng thái</label>
                                         </div>
                                     </div>
                                 </div>
