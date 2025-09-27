@@ -13,6 +13,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { vi } from 'date-fns/locale';
 import { format } from 'date-fns';
 import Select from 'react-select';
+import { selectStyles } from '../common/FilterComponents';
 
 const PromotionUpdate = () => {
     const params = useParams();
@@ -313,45 +314,49 @@ const PromotionUpdate = () => {
                                     <div className="card-body pt-2">
                                         <div className="row mb-3">
                                             <div className="col-md-6">
-                                                <div className="form-floating mb-3 mb-md-0">
+                                                <div className="mb-3">
+                                                    <label htmlFor="inputName" className="form-label fw-semibold">
+                                                        Tên khuyến mãi <span style={{ color: 'red' }}>*</span>
+                                                    </label>
                                                     <input
                                                         className="form-control"
                                                         id="inputName"
                                                         {...register('name', { required: 'Tên khuyến mãi là bắt buộc' })}
                                                         placeholder="Nhập tên khuyến mãi"
                                                     />
-                                                    <label htmlFor="inputName">
-                                                        Tên khuyến mãi <span style={{ color: 'red' }}>*</span>
-                                                    </label>
-                                                    {errors.name && <div className="text-danger">{errors.name.message}</div>}
+                                                    {errors.name && <div className="text-danger mt-1">{errors.name.message}</div>}
                                                 </div>
                                             </div>
                                             <div className="col-md-6">
-                                                <div className="form-floating mb-3 mb-md-0">
+                                                <div className="mb-3">
+                                                    <label htmlFor="inputCode" className="form-label fw-semibold">
+                                                        Mã khuyến mãi <span style={{ color: 'red' }}>*</span>
+                                                    </label>
                                                     <input
                                                         className="form-control"
                                                         id="inputCode"
                                                         {...register('code', { required: 'Mã khuyến mãi là bắt buộc' })}
                                                         placeholder="Nhập mã khuyến mãi"
                                                     />
-                                                    <label htmlFor="inputCode">
-                                                        Mã khuyến mãi <span style={{ color: 'red' }}>*</span>
-                                                    </label>
-                                                    {errors.code && <div className="text-danger">{errors.code.message}</div>}
+                                                    {errors.code && <div className="text-danger mt-1">{errors.code.message}</div>}
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="row mb-3">
                                             <div className="col-md-12">
-                                                <label htmlFor="description">Mô tả khuyến mãi <span style={{ color: 'red' }}>*</span></label>
-                                                <CustomEditor
-                                                    data={watch('description')}
+                                                <div className="mb-3">
+                                                    <label htmlFor="description" className="form-label fw-semibold">
+                                                        Mô tả khuyến mãi <span style={{ color: 'red' }}>*</span>
+                                                    </label>
+                                                    <CustomEditor
+                                                        data={watch('description')}
                                                     onReady={() => register('description', { required: "Mô tả khuyến mãi là bắt buộc" })}
                                                     onChange={data => setValue('description', data)}
                                                     trigger={() => trigger('description')}
                                                     folder='promotions'
-                                                />
-                                                {errors.description && <div className="text-danger">{errors.description.message}</div>}
+                                                    />
+                                                    {errors.description && <div className="text-danger mt-1">{errors.description.message}</div>}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -479,6 +484,7 @@ const PromotionUpdate = () => {
                                                             onChange={opts => handleSelectChange('products', opts ? opts.map(opt => opt.value) : [])}
                                                             placeholder="Tìm kiếm & chọn sản phẩm..."
                                                             classNamePrefix="react-select"
+                                                            styles={selectStyles}
                                                         />
                                                         {errors.selectedProducts && <div className="text-danger mt-1 small">{errors.selectedProducts.message}</div>}
                                                     </div>
@@ -493,6 +499,7 @@ const PromotionUpdate = () => {
                                                             onChange={opts => handleSelectChange('categories', opts ? opts.map(opt => opt.value) : [])}
                                                             placeholder="Tìm kiếm & chọn danh mục..."
                                                             classNamePrefix="react-select"
+                                                            styles={selectStyles}
                                                         />
                                                         {errors.selectedCategories && <div className="text-danger mt-1 small">{errors.selectedCategories.message}</div>}
                                                     </div>
@@ -507,6 +514,7 @@ const PromotionUpdate = () => {
                                                             onChange={opts => handleSelectChange('combos', opts ? opts.map(opt => opt.value) : [])}
                                                             placeholder="Tìm kiếm & chọn combo..."
                                                             classNamePrefix="react-select"
+                                                            styles={selectStyles}
                                                         />
                                                         {errors.selectedCombos && <div className="text-danger mt-1 small">{errors.selectedCombos.message}</div>}
                                                     </div>

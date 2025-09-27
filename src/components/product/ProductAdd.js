@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import CustomEditor from '../common/CustomEditor';
 import Select from 'react-select';
+import { selectStyles } from '../common/FilterComponents';
 
 
 const ProductAdd = () => {
@@ -173,22 +174,25 @@ const ProductAdd = () => {
                                 <form onSubmit={handleSubmit(handleSubmitForm)}>
                                     <div className="row mb-3">
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputName" className="form-label fw-semibold">
+                                                    Tên sản phẩm <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputName"
                                                     {...register('name', { required: 'Tên sản phẩm là bắt buộc' })}
                                                     placeholder="Nhập tên sản phẩm"
                                                 />
-                                                <label htmlFor="inputName">
-                                                    Tên sản phẩm <span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                {errors.name && <div className="text-danger">{errors.name.message}</div>}
+                                                {errors.name && <div className="text-danger mt-1">{errors.name.message}</div>}
                                             </div>
                                         </div>
                                       
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputStock" className="form-label fw-semibold">
+                                                    Số lượng <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputStock"
@@ -196,18 +200,16 @@ const ProductAdd = () => {
                                                     {...register('stock_quantity', { required: 'Số lượng là bắt buộc' })}
                                                     placeholder="Nhập số lượng"
                                                 />
-                                                <label htmlFor="inputStock">
-                                                    Số lượng <span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                {errors.stock_quantity && <div className="text-danger">{errors.stock_quantity.message}</div>}
+                                                {errors.stock_quantity && <div className="text-danger mt-1">{errors.stock_quantity.message}</div>}
                                             </div>
-                                     
-                                        
-                                    </div>
+                                        </div>
                                     </div>
                                     <div className="row mb-3">
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputOriginalPrice" className="form-label fw-semibold">
+                                                    Giá gốc (VNĐ) <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputOriginalPrice"
@@ -222,14 +224,14 @@ const ProductAdd = () => {
                                                     }}
                                                     placeholder="Nhập giá gốc (VND)"
                                                 />
-                                                <label htmlFor="inputOriginalPrice">
-                                                    Giá gốc (VNĐ) <span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                {errors.original_price && <div className="text-danger">{errors.original_price.message}</div>}
+                                                {errors.original_price && <div className="text-danger mt-1">{errors.original_price.message}</div>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="form-floating">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputSalePrice" className="form-label fw-semibold">
+                                                    Giá bán (VNĐ) <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputSalePrice"
@@ -244,19 +246,17 @@ const ProductAdd = () => {
                                                     }}
                                                     placeholder="Nhập giá bán (VND)"
                                                 />
-                                                <label htmlFor="inputSalePrice">
-                                                    Giá bán (VNĐ)<span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                {errors.sale_price && <div className="text-danger">{errors.sale_price.message}</div>}
+                                                {errors.sale_price && <div className="text-danger mt-1">{errors.sale_price.message}</div>}
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div className="row mb-4">
-                                        
                                         <div className="col-md-6">
-                                           
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputStatus" className="form-label fw-semibold">
+                                                    Trạng thái <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <select
                                                     className="form-select"
                                                     id="inputStatus"
@@ -266,21 +266,21 @@ const ProductAdd = () => {
                                                     <option value="1">Đang bán</option>
                                                     <option value="0">Ngừng bán</option>
                                                 </select>
-                                                <label htmlFor="inputStatus">Trạng thái <span style={{color: 'red'}}>*</span></label>
-                                                {errors.status && <div className="text-danger">{errors.status.message}</div>}
+                                                {errors.status && <div className="text-danger mt-1">{errors.status.message}</div>}
                                             </div>
-                                        
                                         </div>
-                                                  <div className="col-md-6">
-                                                <div className="form-floating mb-3 mb-md-0">
-                                                    <input
-                                                        className="form-control"
-                                                        id="inputSize"
-                                                        {...register('size')}
-                                                        placeholder="Nhập kích thước (nếu có)"
-                                                    />
-                                                    <label htmlFor="inputSize">Kích thước</label>
-                                                </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputSize" className="form-label fw-semibold">
+                                                    Kích thước
+                                                </label>
+                                                <input
+                                                    className="form-control"
+                                                    id="inputSize"
+                                                    {...register('size')}
+                                                    placeholder="Nhập kích thước (nếu có)"
+                                                />
+                                            </div>
                                         </div> 
                                     </div>
                                     
@@ -385,6 +385,7 @@ const ProductAdd = () => {
                                                     }}
                                                     placeholder="Tìm kiếm & chọn danh mục..."
                                                     classNamePrefix="react-select"
+                                                    styles={selectStyles}
                                                     onBlur={() => trigger('category_ids')}
                                                 />
                                                 <input
@@ -399,18 +400,16 @@ const ProductAdd = () => {
                                     </div>
                                     <div className="row mb-3">
                                         <div className="col-md-12">
-                                            <label htmlFor="description"  style={{
-                                                        paddingBottom: 8,
-                                                        
-                                                    }}>
-                                                Mô tả sản phẩm</label>
-                                            <CustomEditor
-                                                folder='products'                                      
-                                                onReady={() => register('description')} // hoặc truyền state nếu muốn hiển thị lại khi sửa
-                                                onChange={data => setValue('description', data)}
-                                                // trigger={() => trigger('description')} // Gọi trigger để kiểm tra validation
-                                            />
-                                            {/* {errors.description && <div className="text-danger">{errors.description.message}</div>} */}
+                                            <div className="mb-3">
+                                                <label htmlFor="description" className="form-label fw-semibold">
+                                                    Mô tả sản phẩm
+                                                </label>
+                                                <CustomEditor
+                                                    folder='products'                                      
+                                                    onReady={() => register('description')}
+                                                    onChange={data => setValue('description', data)}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 

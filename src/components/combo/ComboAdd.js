@@ -12,6 +12,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { vi } from 'date-fns/locale';
 import { format } from 'date-fns';
 import Select from 'react-select';
+import { selectStyles } from '../common/FilterComponents';
 
 const ComboAdd = () => {
     const navigation = useNavigate();
@@ -193,62 +194,58 @@ const ComboAdd = () => {
                                     </div>
                                     <div className="card-body pt-2">
                                         <div className="mb-3">
-                                            <div className="form-floating">
-                                                <input
-                                                    className="form-control"
-                                                    id="inputName"
-                                                    {...register('name', { required: 'Tên combo là bắt buộc' })}
-                                                    placeholder="Nhập tên combo"
-                                                />
-                                                <label htmlFor="inputName">
-                                                    Tên combo <span className="text-danger">*</span>
-                                                </label>
-                                                {errors.name && <div className="text-danger mt-1 small">{errors.name.message}</div>}
-                                            </div>
+                                            <label htmlFor="inputName" className="form-label fw-semibold">
+                                                Tên combo <span className="text-danger">*</span>
+                                            </label>
+                                            <input
+                                                className="form-control"
+                                                id="inputName"
+                                                {...register('name', { required: 'Tên combo là bắt buộc' })}
+                                                placeholder="Nhập tên combo"
+                                            />
+                                            {errors.name && <div className="text-danger mt-1 small">{errors.name.message}</div>}
                                         </div>
                                         <div className="mb-3">
-                                            <div className="form-floating">
-                                                <input
-                                                    className="form-control"
-                                                    id="inputPrice"
-                                                    type="text"
-                                                    inputMode="numeric"
-                                                    autoComplete="off"
-                                                    value={price}
-                                                    {...register('price', {
-                                                        required: 'Giá combo là bắt buộc',
-                                                        validate: {
-                                                            isNumber: v => v && !isNaN(Number(v.replace(/\./g, ''))) || 'Giá phải là số',
-                                                            min: v => Number(v.replace(/\./g, '')) >= 0 || 'Giá phải lớn hơn hoặc bằng 0'
-                                                        }
-                                                    })}
-                                                    onChange={e => {
-                                                        const formatted = formatVND(e.target.value);
-                                                        setPrice(formatted);
-                                                        setValue('price', formatted, { shouldValidate: true });
-                                                    }}
-                                                    placeholder="Nhập giá Combo (VND)"
-                                                />
-                                                <label htmlFor="inputPrice">
-                                                    Giá Combo (VNĐ) <span className="text-danger">*</span>
-                                                </label>
-                                                {errors.price && <div className="text-danger mt-1 small">{errors.price.message}</div>}
-                                            </div>
+                                            <label htmlFor="inputPrice" className="form-label fw-semibold">
+                                                Giá Combo (VNĐ) <span className="text-danger">*</span>
+                                            </label>
+                                            <input
+                                                className="form-control"
+                                                id="inputPrice"
+                                                type="text"
+                                                inputMode="numeric"
+                                                autoComplete="off"
+                                                value={price}
+                                                {...register('price', {
+                                                    required: 'Giá combo là bắt buộc',
+                                                    validate: {
+                                                        isNumber: v => v && !isNaN(Number(v.replace(/\./g, ''))) || 'Giá phải là số',
+                                                        min: v => Number(v.replace(/\./g, '')) >= 0 || 'Giá phải lớn hơn hoặc bằng 0'
+                                                    }
+                                                })}
+                                                onChange={e => {
+                                                    const formatted = formatVND(e.target.value);
+                                                    setPrice(formatted);
+                                                    setValue('price', formatted, { shouldValidate: true });
+                                                }}
+                                                placeholder="Nhập giá Combo (VND)"
+                                            />
+                                            {errors.price && <div className="text-danger mt-1 small">{errors.price.message}</div>}
                                         </div>
                                         <div className="mb-3">
-                                            <div className="form-floating">
-                                                <select
-                                                    className="form-select"
-                                                    id="inputStatus"
-                                                    {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
-                                                    defaultValue="1"
-                                                >
-                                                    <option value="1">Hiển thị</option>
-                                                    <option value="0">Ẩn</option>
-                                                </select>
-                                                <label htmlFor="inputStatus">Trạng thái <span className="text-danger">*</span></label>
-                                                {errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
-                                            </div>
+                                            <label htmlFor="inputStatus" className="form-label fw-semibold">
+                                                Trạng thái <span className="text-danger">*</span>
+                                            </label>
+                                            <select
+                                                className="form-select"
+                                                id="inputStatus"
+                                                {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
+                                                defaultValue="1"
+                                            >
+                                                <option value="1">Hiển thị</option>
+                                                <option value="0">Ẩn</option>
+                                            </select>
+                                            {errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
                                         </div>
                                         {/* Ngày bắt đầu và kết thúc cùng 1 hàng */}
                                         <div className="row mb-3">
@@ -397,6 +394,7 @@ const ComboAdd = () => {
                                                         onChange={opt => handleChangeItem(idx, 'product_id', opt ? opt.value : '')}
                                                         placeholder="Tìm kiếm & chọn sản phẩm..."
                                                         classNamePrefix="react-select"
+                                                        styles={selectStyles}
                                                     />
                                                 </div>
                                                 <div className="col-md-3 d-flex align-items-center">

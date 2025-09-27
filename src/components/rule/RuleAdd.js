@@ -85,7 +85,10 @@ const RuleAdd = () => {
                             <form className="flex-grow-1 d-flex flex-column mb-0" onSubmit={handleSubmit(handleSubmitForm)}>
                                 <div className="row mb-3 align-items-stretch flex-grow-1">
                                     <div className="col-md-6 h-100 d-flex flex-column">
-                                        <div className="form-floating mb-3 mb-md-0 h-100">
+                                        <div className="mb-3 h-100">
+                                            <label htmlFor="inputName" className="form-label fw-semibold">
+                                                Tên vai trò <span className="text-danger">*</span>
+                                            </label>
                                             <input
                                                 className="form-control"
                                                 id="inputName"
@@ -94,25 +97,22 @@ const RuleAdd = () => {
                                                 })}
                                                 placeholder="Nhập tên vai trò"
                                             />
-                                            <label htmlFor="inputName">
-                                                Tên vai trò <span className="text-danger">*</span>
-                                            </label>
-                                            {errors.name && <div className="text-danger">{errors.name.message}</div>}
+                                            {errors.name && <div className="text-danger mt-1">{errors.name.message}</div>}
                                             <small className="text-muted">Ví dụ: admin, content-editor, sales-manager</small>
                                         </div>
                                     </div>
                                     <div className="col-md-6 h-100 d-flex flex-column">
-                                        <div className="form-floating mb-3 mb-md-0 h-100">
+                                        <div className="mb-3 h-100">
+                                            <label htmlFor="inputDisplayName" className="form-label fw-semibold">
+                                                Tên hiển thị <span className="text-danger">*</span>
+                                            </label>
                                             <input
                                                 className="form-control"
                                                 id="inputDisplayName"
                                                 {...register('display_name', { required: 'Tên hiển thị là bắt buộc' })}
                                                 placeholder="Nhập tên hiển thị"
                                             />
-                                            <label htmlFor="inputDisplayName">
-                                                Tên hiển thị <span className="text-danger">*</span>
-                                            </label>
-                                            {errors.display_name && <div className="text-danger">{errors.display_name.message}</div>}
+                                            {errors.display_name && <div className="text-danger mt-1">{errors.display_name.message}</div>}
                                             <small className="text-muted">Ví dụ: Kế toán, Quản trị viên...</small>
                                         </div>
                                     </div>

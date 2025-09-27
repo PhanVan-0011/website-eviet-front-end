@@ -77,34 +77,39 @@ const CategoryAdd = () => {
                                 <form onSubmit={handleSubmit(handleSubmitForm)}>
                                     <div className="row mb-3">
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputName" className="form-label fw-semibold">
+                                                    Tên danh mục <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputName"
                                                     {...register('name', { required: 'Tên danh mục là bắt buộc' })}
                                                     placeholder="Nhập tên danh mục"
                                                 />
-                                                <label htmlFor="inputName">
-                                                    Tên danh mục <span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                {errors.name && <div className="text-danger">{errors.name.message}</div>}
+                                                {errors.name && <div className="text-danger mt-1">{errors.name.message}</div>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="form-floating">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputDescription" className="form-label fw-semibold">
+                                                    Mô tả
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputDescription"
                                                     {...register('description')}
                                                     placeholder="Nhập mô tả"
                                                 />
-                                                <label htmlFor="inputDescription">Mô tả</label>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="row mb-3">
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputStatus" className="form-label fw-semibold">
+                                                    Trạng thái <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <select
                                                     className="form-select"
                                                     id="inputStatus"
@@ -114,8 +119,7 @@ const CategoryAdd = () => {
                                                     <option value="1">Hiển thị</option>
                                                     <option value="0">Ẩn</option>
                                                 </select>
-                                                <label htmlFor="inputStatus">Trạng thái <span style={{color: 'red'}}>*</span></label>
-                                                {errors.status && <div className="text-danger">{errors.status.message}</div>}
+                                                {errors.status && <div className="text-danger mt-1">{errors.status.message}</div>}
                                             </div>
                                         </div>
                                         {/* <div className="col-md-6">

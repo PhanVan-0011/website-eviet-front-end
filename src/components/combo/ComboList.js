@@ -8,11 +8,15 @@ import { Modal, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import ImageList from '../common/ImageList';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { vi } from 'date-fns/locale';
 import moment from 'moment';
 import { cleanHtml } from '../../helpers/formatData';
+import {
+    FilterSelectSingle,
+    FilterSelectMulti,
+    FilterButtonGroup,
+    FilterDateRange,
+    FilterToggleButton
+} from '../common/FilterComponents';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const ComboList = () => {
@@ -22,38 +26,56 @@ const ComboList = () => {
     const [itemOfPage, setItemOfPage] = useState(25);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('');
+    const [debouncedSearchText, setDebouncedSearchText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
     const [itemDelete, setItemDelete] = useState(null);
     const [typeDelete, setTypeDelete] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [refresh, setRefresh] = useState(Date.now());
 
-    // Bộ lọc
-    const [filterStatus, setFilterStatus] = useState('');
-    const [filterStartDateFrom, setFilterStartDateFrom] = useState(() => {
-        const now = new Date();
-        return new Date(now.getFullYear(), 0, 1);
+    // Filter states
+    const [filterValues, setFilterValues] = useState({
+        status: 'all',
+        priceRange: 'all',
+        dateRange: { from: null, to: null }
     });
-    const [filterEndDateTo, setFilterEndDateTo] =  useState(() => {
-        const now = new Date();
-        return new Date(now.getFullYear(), 11, 31); // Ngày cuối năm (31/12)
-    });
-    const [filterPriceRange, setFilterPriceRange] = useState('');
+    const [isFilterVisible, setIsFilterVisible] = useState(true);
+    const [isPulsing, setIsPulsing] = useState(false);
 
     // Sort states
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
 
+    // Debounce search text
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            setDebouncedSearchText(searchText);
+        }, 500);
+        return () => clearTimeout(delayDebounce);
+    }, [searchText]);
+
+    const updateFilter = (key, value) => {
+        setFilterValues(prev => ({ ...prev, [key]: value }));
+    };
+
+    const toggleFilterVisibility = () => {
+        setIsFilterVisible(prev => !prev);
+    };
+
     // Lấy danh sách combo với filter
     useEffect(() => {
-        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
-        if (filterStatus !== '') query += `&is_active=${filterStatus}`;
-
-        if (filterStartDateFrom) query += `&start_date=${moment(filterStartDateFrom).format('YYYY-MM-DD')}`;
-        if (filterEndDateTo) query += `&end_date=${moment(filterEndDateTo).format('YYYY-MM-DD')}`;
-
-        if (filterPriceRange) {
-            const [min, max] = filterPriceRange.split('-');
+        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${debouncedSearchText}`;
+        
+        // New filter panel filters
+        if (filterValues.status && filterValues.status !== 'all') {
+            query += `&is_active=${filterValues.status}`;
+        }
+        if (filterValues.dateRange?.from && filterValues.dateRange?.to) {
+            query += `&start_date=${moment(filterValues.dateRange.from).format('YYYY-MM-DD')}`;
+            query += `&end_date=${moment(filterValues.dateRange.to).format('YYYY-MM-DD')}`;
+        }
+        if (filterValues.priceRange && filterValues.priceRange !== 'all') {
+            const [min, max] = filterValues.priceRange.split('-');
             if (min) query += `&min_price=${min}`;
             if (max) query += `&max_price=${max}`;
         }
@@ -66,19 +88,7 @@ const ComboList = () => {
         }).catch(() => {
             dispatch(actions.controlLoading(false));
         });
-    }, [
-        currentPage,
-        itemOfPage,
-        searchText,
-        filterStatus,
-
-        filterStartDateFrom,
-        filterEndDateTo,
-
-        filterPriceRange,
-        refresh,
-        dispatch
-    ]);
+    }, [currentPage, itemOfPage, debouncedSearchText, filterValues, refresh, dispatch]);
 
     // Sort logic
     const sortedCombos = [...combos].sort((a, b) => {
@@ -182,7 +192,11 @@ const ComboList = () => {
             width: "12%"
         },
         {
-            title: "Trạng thái",
+            title: () => (
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('is_active')}>
+                    Trạng thái {renderSortIcon('is_active')}
+                </span>
+            ),
             element: row => row.is_active
                 ? <span className="badge bg-success">Hiển thị</span>
                 : <span className="badge bg-secondary">Không hiển thị</span>,
@@ -265,106 +279,193 @@ const ComboList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Danh sách combo</h1>
+                    <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
-                        <li className="breadcrumb-item active">Combo</li>
+                        <li className="breadcrumb-item active">Danh sách combo</li>
                     </ol>
-                    <div className='mb-3'>
-                        <Link className="btn btn-primary me-2 add-custom-btn" to="/combo/add">
-                            <i className="fas fa-plus"></i> Thêm combo
-                        </Link>
-                        {selectedRows.length > 0 && (
-                            <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}>
-                                <i className="fas fa-trash"></i> Xóa ({selectedRows.length})
-                            </button>
-                        )}
-                    </div>
-                    {/* Bộ lọc */}
-                    <div className="row mb-3 g-1 align-items-end">
-                        {/* Trạng thái */}
-                        <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold text-info mb-1 " htmlFor="filterStatus">
-                                <i className="fas fa-toggle-on me-1"></i>Trạng thái
-                            </label>
-                            <select
-                                id="filterStatus"
-                                className="form-select form-select-sm border-info shadow-sm form-rounded-sm"
-                                value={filterStatus}
-                                onChange={e => setFilterStatus(e.target.value)}
-                            >
-                                <option value="">Tất cả</option>
-                                <option value="true">Hiển thị</option>
-                                <option value="false">Không hiển thị</option>
-                            </select>
-                        </div>
-                        {/* Giá tối thiểu */}
-                        <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold mb-1" htmlFor="filterPriceRange">
-                                <i className="fas fa-money-bill-wave me-1"></i>Khoảng giá
-                            </label>
-                            <select
-                                id="filterPriceRange"
-                                className="form-select form-select-sm shadow-sm form-rounded-sm"
-                                value={filterPriceRange}
-                                onChange={e => setFilterPriceRange(e.target.value)}
-                            >
-                                <option value="">Tất cả</option>
-                                <option value="0-10000">Dưới 10.000 ₫</option>
-                                <option value="10000-20000">10.000 ₫ - 20.000 ₫</option>
-                                <option value="20000-40000">20.000 ₫ - 40.000 ₫</option>
-                                <option value="40000-70000">40.000 ₫ - 70.000 ₫</option>
-                                <option value="70000-100000">70.000 ₫ - 100.000 ₫</option>
-                                <option value="100000-200000">100.000 ₫ - 200.000 ₫</option>
-                                <option value="200000-">Trên 200.000 ₫</option>
-                            </select>
-                        </div>
-                        {/* Khoảng ngày bắt đầu và kết thúc chia làm 4 cột riêng biệt */}
-                        <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold mb-1">
-                                <i className="fas fa-calendar-alt me-1"></i>Từ ngày
-                            </label>
-                            <DatePicker
-                                selected={filterStartDateFrom}
-                                onChange={date => setFilterStartDateFrom(date)}
-                                locale={vi}
-                                dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
+                    
+                    {/* Layout chính với FilterPanel và nội dung */}
+                    <div className="row g-0">
+                        {/* Filter Panel */}
+                        <div className={`position-relative filter-panel ${isFilterVisible ? 'col-md-2' : 'col-md-0'} transition-all d-flex flex-column`}>
+                            {isFilterVisible && (
+                                <div className="p-3 filter-content">
+                                    {/* <h6 className="fw-bold mb-3 text-primary text-center" style={{ fontSize: '0.9rem' }}>
+                                        <i className="fas fa-layer-group me-1"></i>
+                                        Combo
+                                    </h6> */}
 
-                                placeholderText="Chọn ngày: dd/mm/yyyy"
-                                id="filterStartDateFrom"
-                                isClearable
-                            />
+                                    {/* Trạng thái */}
+                                    <FilterSelectSingle
+                                        label="Trạng thái"
+                                        value={filterValues.status ? {
+                                            value: filterValues.status,
+                                            label: filterValues.status === 'all' ? 'Tất cả' : 
+                                                   filterValues.status === 'true' ? 'Hiển thị' : 'Không hiển thị'
+                                        } : null}
+                                        onChange={(selected) => updateFilter('status', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            { value: 'true', label: 'Hiển thị' },
+                                            { value: 'false', label: 'Không hiển thị' }
+                                        ]}
+                                        placeholder="Chọn trạng thái"
+                                    />
+
+                                    {/* Khoảng giá */}
+                                    <FilterSelectSingle
+                                        label="Khoảng giá"
+                                        value={filterValues.priceRange ? {
+                                            value: filterValues.priceRange,
+                                            label: filterValues.priceRange === 'all' ? 'Tất cả' : 
+                                                   filterValues.priceRange === '0-10000' ? 'Dưới 10.000 ₫' :
+                                                   filterValues.priceRange === '10000-20000' ? '10.000 ₫ - 20.000 ₫' :
+                                                   filterValues.priceRange === '20000-40000' ? '20.000 ₫ - 40.000 ₫' :
+                                                   filterValues.priceRange === '40000-70000' ? '40.000 ₫ - 70.000 ₫' :
+                                                   filterValues.priceRange === '70000-100000' ? '70.000 ₫ - 100.000 ₫' :
+                                                   filterValues.priceRange === '100000-200000' ? '100.000 ₫ - 200.000 ₫' :
+                                                   filterValues.priceRange === '200000-' ? 'Trên 200.000 ₫' : filterValues.priceRange
+                                        } : null}
+                                        onChange={(selected) => updateFilter('priceRange', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            { value: '0-10000', label: 'Dưới 10.000 ₫' },
+                                            { value: '10000-20000', label: '10.000 ₫ - 20.000 ₫' },
+                                            { value: '20000-40000', label: '20.000 ₫ - 40.000 ₫' },
+                                            { value: '40000-70000', label: '40.000 ₫ - 70.000 ₫' },
+                                            { value: '70000-100000', label: '70.000 ₫ - 100.000 ₫' },
+                                            { value: '100000-200000', label: '100.000 ₫ - 200.000 ₫' },
+                                            { value: '200000-', label: 'Trên 200.000 ₫' }
+                                        ]}
+                                        placeholder="Chọn khoảng giá"
+                                    />
+
+                                    {/* Thời gian áp dụng */}
+                                    <FilterDateRange
+                                        label="Thời gian áp dụng"
+                                        value={filterValues.dateRange || { from: null, to: null }}
+                                        onChange={(dateRange) => updateFilter('dateRange', dateRange)}
+                                    />
+                                </div>
+                            )}
                         </div>
-            
-                        <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold mb-1">
-                                <i className="fas fa-calendar-check me-1"></i>Đến ngày
-                            </label>
-                            <DatePicker
-                                selected={filterEndDateTo}
-                                onChange={date => setFilterEndDateTo(date)}
-                                locale={vi}
-                                dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
-                                
-                                placeholderText="Chọn ngày: dd/mm/yyyy"
-                                id="filterEndDateTo"
-                                isClearable
-                            />
+
+                        {/* Nội dung chính */}
+                        <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
+                            {/* Header với nút thêm combo */}
+                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
+                                <div className="d-flex align-items-center gap-2">
+                                    <h4 className="mb-0 fw-bold text-primary">Danh sách combo</h4>
+                                    {/* Filter Toggle Button */}
+                                    <FilterToggleButton
+                                        key={`toggle-${isFilterVisible}`}
+                                        isVisible={isFilterVisible}
+                                        onToggle={() => {
+                                            setIsPulsing(true);
+                                            setTimeout(() => setIsPulsing(false), 600);
+                                            toggleFilterVisibility();
+                                        }}
+                                        isPulsing={isPulsing}
+                                    />
+                                </div>
+                                <div className="d-flex gap-2">
+                                    {/* Nút tạo mới */}
+                                    <Link className="btn btn-primary" to="/combo/add">
+                                        <i className="fas fa-plus me-1"></i> Tạo mới
+                                    </Link>
+                                    
+                                    {/* Nút xóa nhiều */}
+                                    {selectedRows.length > 0 && (
+                                        <button className="btn btn-danger" onClick={multiDelete}>
+                                            <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
+                                        </button>
+                                    )}
+                                    
+                                    {/* Các nút khác */}
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-upload me-1"></i> Import file
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-download me-1"></i> Xuất file
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-cog"></i>
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-question-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Search bar */}
+                            <div className="p-3 border-bottom bg-light search-bar">
+                                <div className="row align-items-center">
+                                    <div className="col-md-4">
+                                        <div className="input-group">
+                                            <span className="input-group-text">
+                                                <i className="fas fa-search"></i>
+                                            </span>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Tìm kiếm theo tên combo, mô tả..."
+                                                value={searchText}
+                                                onChange={(e) => setSearchText(e.target.value)}
+                                            />
+                                            {searchText && (
+                                                <button 
+                                                    className="btn btn-outline-secondary btn-sm"
+                                                    type="button"
+                                                    onClick={() => setSearchText('')}
+                                                    title="Xóa tìm kiếm"
+                                                    style={{
+                                                        borderLeft: 'none',
+                                                        borderRadius: '0 0.375rem 0.375rem 0',
+                                                        backgroundColor: '#f8f9fa',
+                                                        color: '#6c757d'
+                                                    }}
+                                                >
+                                                    <i className="fas fa-times"></i>
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="col-md-4 text-end">
+                                        {/* Có thể thêm các nút khác ở đây nếu cần */}
+                                    </div>
+                                </div>
+
+                                {/* Search results info */}
+                                {searchText && (
+                                    <div className="search-results-info">
+                                        <small>
+                                            <i className="fas fa-info-circle me-1"></i>
+                                            Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {sortedCombos.length} kết quả
+                                        </small>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Data Table */}
+                            <div className="flex-grow-1 overflow-auto">
+                                <div className="p-3">
+                                    <DataTables
+                                        name="Danh sách combo"
+                                        columns={columns}
+                                        data={sortedCombos}
+                                        numOfPages={numOfPages}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                        setItemOfPage={setItemOfPage}
+                                        onSelectedRows={setSelectedRows}
+                                        hideSearch={true}
+                                        showSummary={false}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <DataTables
-                        name="Dữ liệu combo"
-                        columns={columns}
-                        data={sortedCombos}
-                        numOfPages={numOfPages}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        setItemOfPage={setItemOfPage}
-                        changeKeyword={setSearchText}
-                        onSelectedRows={setSelectedRows}
-                    />
                 </div>
             </main>
             <Modal show={showModal} onHide={() => { setShowModal(false); setItemDelete(null); setTypeDelete(null); }}>

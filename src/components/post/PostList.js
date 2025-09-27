@@ -9,6 +9,13 @@ import { toast } from 'react-toastify';
 import moment from 'moment';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import ImageList from '../common/ImageList';
+import {
+    FilterSelectSingle,
+    FilterSelectMulti,
+    FilterButtonGroup,
+    FilterDateRange,
+    FilterToggleButton
+} from '../common/FilterComponents';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const PostList = () => {
@@ -18,6 +25,7 @@ const PostList = () => {
     const [itemOfPage, setItemOfPage] = useState(25);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('');
+    const [debouncedSearchText, setDebouncedSearchText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
     const [itemDelete, setItemDelete] = useState(null);
     const [typeDelete, setTypeDelete] = useState(null);
@@ -25,13 +33,35 @@ const PostList = () => {
     const [refresh, setRefresh] = useState(Date.now());
 
     // Filter states
+    const [filterValues, setFilterValues] = useState({
+        category: 'all',
+        status: 'all'
+    });
+    const [isFilterVisible, setIsFilterVisible] = useState(true);
+    const [isPulsing, setIsPulsing] = useState(false);
+
+    // Data for filters
     const [categories, setCategories] = useState([]);
-    const [filterCategory, setFilterCategory] = useState('');
-    const [filterStatus, setFilterStatus] = useState('');
 
     // Sort states
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
+
+    // Debounce search text
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            setDebouncedSearchText(searchText);
+        }, 500);
+        return () => clearTimeout(delayDebounce);
+    }, [searchText]);
+
+    const updateFilter = (key, value) => {
+        setFilterValues(prev => ({ ...prev, [key]: value }));
+    };
+
+    const toggleFilterVisibility = () => {
+        setIsFilterVisible(prev => !prev);
+    };
 
     // Lấy danh mục cho filter
     useEffect(() => {
@@ -42,9 +72,16 @@ const PostList = () => {
 
     // Lấy danh sách bài viết
     useEffect(() => {
-        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
-        if (filterCategory) query += `&category_id=${filterCategory}`;
-        if (filterStatus !== '') query += `&status=${filterStatus}`;
+        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${debouncedSearchText}`;
+        
+        // New filter panel filters
+        if (filterValues.category && filterValues.category !== 'all') {
+            query += `&category_id=${filterValues.category}`;
+        }
+        if (filterValues.status && filterValues.status !== 'all') {
+            query += `&status=${filterValues.status}`;
+        }
+
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/posts${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
@@ -53,14 +90,7 @@ const PostList = () => {
         }).catch(() => {
             dispatch(actions.controlLoading(false));
         });
-    }, [
-        currentPage,
-        itemOfPage,
-        searchText,
-        filterCategory,
-        filterStatus,
-        refresh
-    ]);
+    }, [currentPage, itemOfPage, debouncedSearchText, filterValues, refresh, dispatch]);
 
     // Sắp xếp
     const sortedPosts = [...posts].sort((a, b) => {
@@ -138,7 +168,11 @@ const PostList = () => {
             width: "18%"
         },
         {
-            title: "Trạng thái",
+            title: () => (
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('status')}>
+                    Trạng thái {renderSortIcon('status')}
+                </span>
+            ),
             element: row =>
                 row.status === 1
                     ? <span className="badge bg-success">Hiển thị</span>
@@ -246,60 +280,172 @@ const PostList = () => {
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item active">Danh sách bài viết</li>
                     </ol>
-                    <div className='mb-3'>
-                        <Link className="btn btn-primary me-2 add-custom-btn" to="/post/add">
-                            <i className="fas fa-plus"></i> Thêm bài viết
-                        </Link>
-                        {selectedRows.length > 0 && (
-                            <button className="btn btn-danger add-custom-btn" onClick={multiDelete}>
-                                <i className="fas fa-trash"></i> Xóa ({selectedRows.length})
-                            </button>
-                        )}
-                    </div>
-                    <div className="row mb-3 g-2 align-items-end">
-                        <div className="col-md-3">
-                            <label className="form-label fw-semibold mb-1" htmlFor="filterCategory">
-                                <i className="fas fa-list me-1"></i>Danh mục
-                            </label>
-                            <select
-                                id="filterCategory"
-                                className="form-select form-select-sm shadow-sm form-rounded-sm"
-                                value={filterCategory}
-                                onChange={e => setFilterCategory(e.target.value)}
-                            >
-                                <option value="">Tất cả danh mục</option>
-                                {categories.map(cat => (
-                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                ))}
-                            </select>
+                    
+                    {/* Layout chính với FilterPanel và nội dung */}
+                    <div className="row g-0">
+                        {/* Filter Panel */}
+                        <div className={`position-relative filter-panel ${isFilterVisible ? 'col-md-2' : 'col-md-0'} transition-all d-flex flex-column`}>
+                            {isFilterVisible && (
+                                <div className="p-3 filter-content">
+                                    {/* <h6 className="fw-bold mb-3 text-primary text-center" style={{ fontSize: '0.9rem' }}>
+                                        <i className="fas fa-newspaper me-1"></i>
+                                        Bài viết
+                                    </h6> */}
+
+                                    {/* Danh mục */}
+                                    <FilterSelectSingle
+                                        label="Danh mục"
+                                        value={filterValues.category ? {
+                                            value: filterValues.category,
+                                            label: filterValues.category === 'all' ? 'Tất cả' : 
+                                                   categories.find(cat => cat.id == filterValues.category)?.name || filterValues.category
+                                        } : null}
+                                        onChange={(selected) => updateFilter('category', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            ...categories.map(cat => ({
+                                                value: cat.id,
+                                                label: cat.name
+                                            }))
+                                        ]}
+                                        placeholder="Chọn danh mục"
+                                    />
+
+                                    {/* Trạng thái */}
+                                    <FilterSelectSingle
+                                        label="Trạng thái"
+                                        value={filterValues.status ? {
+                                            value: filterValues.status,
+                                            label: filterValues.status === 'all' ? 'Tất cả' : 
+                                                   filterValues.status === '1' ? 'Hiển thị' : 'Ẩn'
+                                        } : null}
+                                        onChange={(selected) => updateFilter('status', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            { value: '1', label: 'Hiển thị' },
+                                            { value: '0', label: 'Ẩn' }
+                                        ]}
+                                        placeholder="Chọn trạng thái"
+                                    />
+                                </div>
+                            )}
                         </div>
-                        <div className="col-md-3">
-                            <label className="form-label fw-semibold mb-1" htmlFor="filterStatus">
-                                <i className="fas fa-toggle-on me-1"></i>Trạng thái
-                            </label>
-                            <select
-                                id="filterStatus"
-                                className="form-select form-select-sm shadow-sm form-rounded-sm"
-                                value={filterStatus}
-                                onChange={e => setFilterStatus(e.target.value)}
-                            >
-                                <option value="">Tất cả</option>
-                                <option value="1">Hiển thị</option>
-                                <option value="0">Ẩn</option>
-                            </select>
+
+                        {/* Nội dung chính */}
+                        <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
+                            {/* Header với nút thêm bài viết */}
+                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
+                                <div className="d-flex align-items-center gap-2">
+                                    <h4 className="mb-0 fw-bold text-primary">Danh sách bài viết</h4>
+                                    {/* Filter Toggle Button */}
+                                    <FilterToggleButton
+                                        key={`toggle-${isFilterVisible}`}
+                                        isVisible={isFilterVisible}
+                                        onToggle={() => {
+                                            setIsPulsing(true);
+                                            setTimeout(() => setIsPulsing(false), 600);
+                                            toggleFilterVisibility();
+                                        }}
+                                        isPulsing={isPulsing}
+                                    />
+                                </div>
+                                <div className="d-flex gap-2">
+                                    {/* Nút tạo mới */}
+                                    <Link className="btn btn-primary" to="/post/add">
+                                        <i className="fas fa-plus me-1"></i> Tạo mới
+                                    </Link>
+                                    
+                                    {/* Nút xóa nhiều */}
+                                    {selectedRows.length > 0 && (
+                                        <button className="btn btn-danger" onClick={multiDelete}>
+                                            <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
+                                        </button>
+                                    )}
+                                    
+                                    {/* Các nút khác */}
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-upload me-1"></i> Import file
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-download me-1"></i> Xuất file
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-cog"></i>
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-question-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Search bar */}
+                            <div className="p-3 border-bottom bg-light search-bar">
+                                <div className="row align-items-center">
+                                    <div className="col-md-4">
+                                        <div className="input-group">
+                                            <span className="input-group-text">
+                                                <i className="fas fa-search"></i>
+                                            </span>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Tìm kiếm theo tiêu đề, nội dung..."
+                                                value={searchText}
+                                                onChange={(e) => setSearchText(e.target.value)}
+                                            />
+                                            {searchText && (
+                                                <button 
+                                                    className="btn btn-outline-secondary btn-sm"
+                                                    type="button"
+                                                    onClick={() => setSearchText('')}
+                                                    title="Xóa tìm kiếm"
+                                                    style={{
+                                                        borderLeft: 'none',
+                                                        borderRadius: '0 0.375rem 0.375rem 0',
+                                                        backgroundColor: '#f8f9fa',
+                                                        color: '#6c757d'
+                                                    }}
+                                                >
+                                                    <i className="fas fa-times"></i>
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="col-md-4 text-end">
+                                        {/* Có thể thêm các nút khác ở đây nếu cần */}
+                                    </div>
+                                </div>
+
+                                {/* Search results info */}
+                                {searchText && (
+                                    <div className="search-results-info">
+                                        <small>
+                                            <i className="fas fa-info-circle me-1"></i>
+                                            Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {sortedPosts.length} kết quả
+                                        </small>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Data Table */}
+                            <div className="flex-grow-1 overflow-auto">
+                                <div className="p-3">
+                                    <DataTables
+                                        name="Danh sách bài viết"
+                                        columns={columns}
+                                        data={sortedPosts}
+                                        numOfPages={numOfPages}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                        setItemOfPage={setItemOfPage}
+                                        onSelectedRows={setSelectedRows}
+                                        hideSearch={true}
+                                        showSummary={false}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <DataTables
-                        name="Danh sách bài viết"
-                        columns={columns}
-                        data={sortedPosts}
-                        numOfPages={numOfPages}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        setItemOfPage={setItemOfPage}
-                        changeKeyword={(keyword) => setSearchText(keyword)}
-                        onSelectedRows={selectedRows => setSelectedRows(selectedRows)}
-                    />
                 </div>
             </main>
             <Modal show={showModal} onHide={() => { setShowModal(false); setItemDelete(null); setTypeDelete(null); }}>

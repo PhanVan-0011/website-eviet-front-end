@@ -137,54 +137,50 @@ const SliderAdd = () => {
                                     </div>
                                     <div className="card-body pt-2">
                                         <div className="mb-3">
-                                            <div className="form-floating">
-                                                <input
-                                                    className="form-control"
-                                                    id="inputTitle"
-                                                    {...register('title', { required: 'Tiêu đề là bắt buộc' })}
-                                                    placeholder="Nhập tiêu đề slider"
-                                                />
-                                                <label htmlFor="inputTitle">
-                                                    Tiêu đề slider <span className="text-danger">*</span>
-                                                </label>
-                                                {errors.title && <div className="text-danger mt-1 small">{errors.title.message}</div>}
-                                            </div>
+                                            <label htmlFor="inputTitle" className="form-label fw-semibold">
+                                                Tiêu đề slider <span className="text-danger">*</span>
+                                            </label>
+                                            <input
+                                                className="form-control"
+                                                id="inputTitle"
+                                                {...register('title', { required: 'Tiêu đề là bắt buộc' })}
+                                                placeholder="Nhập tiêu đề slider"
+                                            />
+                                            {errors.title && <div className="text-danger mt-1 small">{errors.title.message}</div>}
                                         </div>
                                         <div className="mb-3">
-                                            <div className="form-floating">
-                                                <input
-                                                    className="form-control"
-                                                    id="inputDisplayOrder"
-                                                    type="number"
-                                                    min={1}
-                                                    {...register('display_order')}
-                                                    value={displayOrder}
-                                                    onChange={e => {
-                                                        setDisplayOrder(e.target.value);
-                                                        setValue('display_order', e.target.value);
-                                                    }}
-                                                    placeholder="Nhập thứ tự hiển thị"
-                                                />
-                                                <label htmlFor="inputDisplayOrder">
-                                                    Thứ tự hiển thị
-                                                </label>
-                                                {errors.display_order && <div className="text-danger mt-1 small">{errors.display_order.message}</div>}
-                                            </div>
+                                            <label htmlFor="inputDisplayOrder" className="form-label fw-semibold">
+                                                Thứ tự hiển thị
+                                            </label>
+                                            <input
+                                                className="form-control"
+                                                id="inputDisplayOrder"
+                                                type="number"
+                                                min={1}
+                                                {...register('display_order')}
+                                                value={displayOrder}
+                                                onChange={e => {
+                                                    setDisplayOrder(e.target.value);
+                                                    setValue('display_order', e.target.value);
+                                                }}
+                                                placeholder="Nhập thứ tự hiển thị"
+                                            />
+                                            {errors.display_order && <div className="text-danger mt-1 small">{errors.display_order.message}</div>}
                                         </div>
                                         <div className="mb-3">
-                                            <div className="form-floating">
-                                                <select
-                                                    className="form-select"
-                                                    id="inputStatus"
-                                                    {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
-                                                    defaultValue="1"
-                                                >
-                                                    <option value="1">Hiển thị</option>
-                                                    <option value="0">Ẩn</option>
-                                                </select>
-                                                <label htmlFor="inputStatus">Trạng thái <span className="text-danger">*</span></label>
-                                                {errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
-                                            </div>
+                                            <label htmlFor="inputStatus" className="form-label fw-semibold">
+                                                Trạng thái <span className="text-danger">*</span>
+                                            </label>
+                                            <select
+                                                className="form-select"
+                                                id="inputStatus"
+                                                {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
+                                                defaultValue="1"
+                                            >
+                                                <option value="1">Hiển thị</option>
+                                                <option value="0">Ẩn</option>
+                                            </select>
+                                            {errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
                                         </div>
                                     </div>
                                 </div>
@@ -264,7 +260,10 @@ const SliderAdd = () => {
                                     <div className="card-body pt-2">
                                         <div className="row mb-3">
                                             <div className="col-md-6">
-                                                <div className="form-floating">
+                                                <div className="mb-3">
+                                                    <label htmlFor="inputLinkType" className="form-label fw-semibold">
+                                                        Loại liên kết
+                                                    </label>
                                                     <select
                                                         className="form-select"
                                                         id="inputLinkType"
@@ -277,13 +276,15 @@ const SliderAdd = () => {
                                                         <option value="combo">Combo</option>
                                                         <option value="post">Khuyến mãi</option>
                                                     </select>
-                                                    <label htmlFor="inputLinkType">Loại liên kết</label>
                                                     {errors.link_type && <div className="text-danger mt-1 small">{errors.link_type.message}</div>}
                                                 </div>
                                             </div>
                                             <div className="col-md-6">
                                                 {linkType === "product" && (
-                                                    <div className="form-floating">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="inputLinkIdProduct" className="form-label fw-semibold">
+                                                            Sản phẩm liên kết
+                                                        </label>
                                                         <select
                                                             className="form-select"
                                                             id="inputLinkIdProduct"
@@ -299,12 +300,14 @@ const SliderAdd = () => {
                                                                 <option key={prod.id} value={prod.id}>{prod.name}</option>
                                                             ))}
                                                         </select>
-                                                        <label htmlFor="inputLinkIdProduct">Sản phẩm liên kết</label>
                                                         {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
                                                     </div>
                                                 )}
                                                 {linkType === "combo" && (
-                                                    <div className="form-floating">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="inputLinkIdCombo" className="form-label fw-semibold">
+                                                            Combo liên kết
+                                                        </label>
                                                         <select
                                                             className="form-select"
                                                             id="inputLinkIdCombo"
@@ -320,12 +323,14 @@ const SliderAdd = () => {
                                                                 <option key={combo.id} value={combo.id}>{combo.name}</option>
                                                             ))}
                                                         </select>
-                                                        <label htmlFor="inputLinkIdCombo">Combo liên kết</label>
                                                         {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
                                                     </div>
                                                 )}
                                                 {linkType === "post" && (
-                                                    <div className="form-floating">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="inputLinkIdPost" className="form-label fw-semibold">
+                                                            Khuyến mãi liên kết
+                                                        </label>
                                                         <select
                                                             className="form-select"
                                                             id="inputLinkIdPost"
@@ -341,7 +346,6 @@ const SliderAdd = () => {
                                                                 <option key={post.id} value={post.id}>{post.name}</option>
                                                             ))}
                                                         </select>
-                                                        <label htmlFor="inputLinkIdPost">Khuyến mãi liên kết</label>
                                                         {errors.link_id && <div className="text-danger mt-1 small">{errors.link_id.message}</div>}
                                                     </div>
                                                 )}
@@ -364,13 +368,18 @@ const SliderAdd = () => {
                                         <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-align-left me-2"></i>Mô tả slider</h5>
                                     </div>
                                     <div className="card-body pt-2">
-                                        <textarea
-                                            className="form-control"
-                                            id="description"
-                                            rows={4}
-                                            {...register('description')}
-                                            placeholder="Nhập mô tả chi tiết cho slider..."
-                                        />
+                                        <div className="mb-3">
+                                            <label htmlFor="description" className="form-label fw-semibold">
+                                                Mô tả slider
+                                            </label>
+                                            <textarea
+                                                className="form-control"
+                                                id="description"
+                                                rows={4}
+                                                {...register('description')}
+                                                placeholder="Nhập mô tả chi tiết cho slider..."
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -11569,6 +11569,46 @@ body {
     background: rgba(0, 0, 0, 0.3);
 }
 
+/* Search suggestion popup styles */
+.search-suggestion-popup {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    background: white;
+    z-index: 1000;
+}
+
+.search-suggestion-item {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.search-suggestion-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.search-suggestion-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 0.25rem;
+}
+
+.search-suggestion-placeholder {
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 20px;
+}
+
 /* DatePicker fixes for filter panel */
 .react-datepicker-popper {
     z-index: 9999 !important;
@@ -11727,6 +11767,8 @@ body {
     border-radius: 0.375rem;
     border: 1px solid #ced4da;
     font-size: 0.875rem;
+    height: 38px !important;
+    min-height: 38px !important;
 }
 
 .filter-panel .form-select:focus,
@@ -11965,6 +12007,72 @@ body {
 
 .react-select__menu {
   z-index: 9999 !important;
+}
+
+/* Đảm bảo react-select có chiều cao thống nhất */
+.filter-panel .react-select-container .react-select__control {
+    height: 38px !important;
+    min-height: 38px !important;
+}
+
+.filter-panel .react-select-container .react-select__value-container {
+    height: 36px !important;
+    min-height: 36px !important;
+}
+
+.filter-panel .react-select-container .react-select__input-container {
+    height: 36px !important;
+    min-height: 36px !important;
+}
+
+.filter-panel .react-select-container .react-select__placeholder {
+    line-height: 36px !important;
+}
+
+.filter-panel .react-select-container .react-select__single-value {
+    line-height: 36px !important;
+}
+
+/* Đồng bộ chiều cao cho tất cả form controls trong form Add/Edit */
+.form-floating > .form-control,
+.form-floating > .form-select {
+    height: 38px !important;
+    min-height: 38px !important;
+}
+
+.form-floating > label {
+    padding: 0.5rem 0.75rem;
+}
+
+/* Đảm bảo react-select trong form Add/Edit cũng có chiều cao thống nhất */
+.react-select-container .react-select__control {
+    height: 38px !important;
+    min-height: 38px !important;
+}
+
+.react-select-container .react-select__value-container {
+    height: 36px !important;
+    min-height: 36px !important;
+}
+
+.react-select-container .react-select__input-container {
+    height: 36px !important;
+    min-height: 36px !important;
+}
+
+.react-select-container .react-select__placeholder {
+    line-height: 36px !important;
+}
+
+.react-select-container .react-select__single-value {
+    line-height: 36px !important;
+}
+
+/* Đảm bảo tất cả form controls có chiều cao thống nhất */
+.form-control:not(.form-floating > .form-control),
+.form-select:not(.form-floating > .form-select) {
+    height: 38px !important;
+    min-height: 38px !important;
 }
 /*//Detail format*/
 .background-detail{

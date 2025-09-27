@@ -9,11 +9,15 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { vi } from 'date-fns/locale';
 import moment from 'moment';
 import ImageList from '../common/ImageList';
+import {
+    FilterSelectSingle,
+    FilterSelectMulti,
+    FilterButtonGroup,
+    FilterDateRange,
+    FilterToggleButton
+} from '../common/FilterComponents';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const PromotionList = () => {
@@ -23,36 +27,61 @@ const PromotionList = () => {
     const [itemOfPage, setItemOfPage] = useState(25);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('');
+    const [debouncedSearchText, setDebouncedSearchText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
     const [itemDelete, setItemDelete] = useState(null);
     const [typeDelete, setTypeDelete] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [refresh, setRefresh] = useState(Date.now());
 
-    // Bộ lọc
-    const [filterStatus, setFilterStatus] = useState('');
-    const [filterType, setFilterType] = useState('');
-    const [filterStartDate, setFilterStartDate] = useState(() => {
-        const now = new Date();
-        return new Date(now.getFullYear(), 0, 1); // Ngày đầu năm
+    // Filter states
+    const [filterValues, setFilterValues] = useState({
+        status: 'all',
+        type: 'all',
+        applicationType: 'all',
+        dateRange: { from: null, to: null }
     });
-    const [filterEndDate, setFilterEndDate] = useState(() => {
-        const now = new Date();
-        return new Date(now.getFullYear(), 11, 31); // Ngày cuối năm (31/12)
-    });
+    const [isFilterVisible, setIsFilterVisible] = useState(true);
+    const [isPulsing, setIsPulsing] = useState(false);
 
     // Sort states
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
 
+    // Debounce search text
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            setDebouncedSearchText(searchText);
+        }, 500);
+        return () => clearTimeout(delayDebounce);
+    }, [searchText]);
+
+    const updateFilter = (key, value) => {
+        setFilterValues(prev => ({ ...prev, [key]: value }));
+    };
+
+    const toggleFilterVisibility = () => {
+        setIsFilterVisible(prev => !prev);
+    };
+
     // Lấy danh sách promotion với filter
     useEffect(() => {
-        let query = `?limit=${itemOfPage}&page=${currentPage}`;
-        if (searchText) query += `&keyword=${searchText}`;
-        if (filterStatus !== '') query += `&is_active=${filterStatus}`;
-        if (filterType) query += `&type=${filterType}`;
-        if (filterStartDate) query += `&start_date=${moment(filterStartDate).format('YYYY-MM-DD')}`;
-        if (filterEndDate) query += `&end_date=${moment(filterEndDate).format('YYYY-MM-DD')}`;
+        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${debouncedSearchText}`;
+        
+        // New filter panel filters
+        if (filterValues.status && filterValues.status !== 'all') {
+            query += `&is_active=${filterValues.status}`;
+        }
+        if (filterValues.type && filterValues.type !== 'all') {
+            query += `&type=${filterValues.type}`;
+        }
+        if (filterValues.applicationType && filterValues.applicationType !== 'all') {
+            query += `&application_type=${filterValues.applicationType}`;
+        }
+        if (filterValues.dateRange?.from && filterValues.dateRange?.to) {
+            query += `&start_date=${moment(filterValues.dateRange.from).format('YYYY-MM-DD')}`;
+            query += `&end_date=${moment(filterValues.dateRange.to).format('YYYY-MM-DD')}`;
+        }
 
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/promotions${query}`, 'GET', []).then((response) => {
@@ -62,7 +91,7 @@ const PromotionList = () => {
         }).catch(() => {
             dispatch(actions.controlLoading(false));
         });
-    }, [currentPage, itemOfPage, searchText, filterStatus, filterType, filterStartDate, filterEndDate, refresh, dispatch]);
+    }, [currentPage, itemOfPage, debouncedSearchText, filterValues, refresh, dispatch]);
 
     // Sort logic
     const sortedPromotions = [...promotions].sort((a, b) => {
@@ -73,6 +102,21 @@ const PromotionList = () => {
         if (sortField === 'value') {
             aValue = Number(aValue);
             bValue = Number(bValue);
+        } else if (sortField === 'name') {
+            aValue = a.name || '';
+            bValue = b.name || '';
+        } else if (sortField === 'code') {
+            aValue = a.code || '';
+            bValue = b.code || '';
+        } else if (sortField === 'application_type') {
+            aValue = a.application_type || '';
+            bValue = b.application_type || '';
+        } else if (sortField === 'type') {
+            aValue = a.type || '';
+            bValue = b.type || '';
+        } else if (sortField === 'is_active') {
+            aValue = a.is_active ? 1 : 0;
+            bValue = b.is_active ? 1 : 0;
         } else {
             if (typeof aValue === 'string') aValue = aValue.toLowerCase();
             if (typeof bValue === 'string') bValue = bValue.toLowerCase();
@@ -101,9 +145,12 @@ const PromotionList = () => {
 
     // Columns
     const columns = [
-        
         {
-            title: "Tên khuyến mãi",
+            title: () => (
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('name')}>
+                    Tên khuyến mãi {renderSortIcon('name')}
+                </span>
+            ),
             element: row => row.name,
             width: "14%"
         },
@@ -119,12 +166,20 @@ const PromotionList = () => {
             width: "8%"
         },
         {
-            title: "Mã code",
+            title: () => (
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('code')}>
+                    Mã code {renderSortIcon('code')}
+                </span>
+            ),
             element: row => <span className="badge bg-info text-dark">{row.code}</span>,
             width: "10%"
         },
         {
-            title: "Áp dụng cho",
+            title: () => (
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('application_type')}>
+                    Áp dụng cho {renderSortIcon('application_type')}
+                </span>
+            ),
             element: row => {
                 if (row.application_type === "orders") return <span className="badge bg-secondary">Đơn hàng</span>;
                 if (row.application_type === "products") return <span className="badge bg-primary">Sản phẩm</span>;
@@ -135,7 +190,11 @@ const PromotionList = () => {
             width: "12%"
         },
         {
-            title: "Hình thức",
+            title: () => (
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('type')}>
+                    Hình thức {renderSortIcon('type')}
+                </span>
+            ),
             element: row => {
                 if (row.type === 'percentage') return <span className="badge bg-success">%</span>;
                 if (row.type === 'fixed_amount') return <span className="badge bg-info text-dark">VNĐ</span>;
@@ -145,10 +204,14 @@ const PromotionList = () => {
             width: "10%"
         },
         {
-            title: "Giá trị",
+            title: () => (
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('value')}>
+                    Giá trị {renderSortIcon('value')}
+                </span>
+            ),
             element: row => {
                 if (row.type === 'percentage') return `${row.value}%`;
-                if (row.type === 'fixed_amount') return row.value?.toLocaleString() + ' ₫';
+                if (row.type === 'fixed_amount') return <span className="fw-bold text-danger">{row.value?.toLocaleString()} ₫</span>;
                 if (row.type === 'free_shipping') return <span className="text-success">Miễn phí vận chuyển</span>;
                 return '-';
             },
@@ -171,7 +234,11 @@ const PromotionList = () => {
             width: "16%"
         },
         {
-            title: "Trạng thái",
+            title: () => (
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('is_active')}>
+                    Trạng thái {renderSortIcon('is_active')}
+                </span>
+            ),
             element: row => row.is_active
                 ? <span className="badge bg-success">Hiển thị</span>
                 : <span className="badge bg-secondary">Ẩn</span>,
@@ -269,103 +336,208 @@ const PromotionList = () => {
                     <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
-                        <li className="breadcrumb-item active">Khuyến mãi</li>
+                        <li className="breadcrumb-item active">Danh sách khuyến mãi</li>
                     </ol>
-                    <div className='mb-3'>
-                        <Permission permission={PERMISSIONS.PROMOTIONS_CREATE}>
-                            <Link className="btn btn-primary me-2 add-custom-btn" to="/promotion/add">
-                                <i className="fas fa-plus"></i> Thêm khuyến mãi
-                            </Link>
-                        </Permission>
-                        <Permission permission={PERMISSIONS.PROMOTIONS_DELETE}>
-                            {selectedRows.length > 0 && (
-                                <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}>
-                                    <i className="fas fa-trash"></i> Xóa ({selectedRows.length})
-                                </button>
+                    
+                    {/* Layout chính với FilterPanel và nội dung */}
+                    <div className="row g-0">
+                        {/* Filter Panel */}
+                        <div className={`position-relative filter-panel ${isFilterVisible ? 'col-md-2' : 'col-md-0'} transition-all d-flex flex-column`}>
+                            {isFilterVisible && (
+                                <div className="p-3 filter-content">
+                                    {/* <h6 className="fw-bold mb-3 text-primary text-center" style={{ fontSize: '0.9rem' }}>
+                                        <i className="fas fa-percent me-1"></i>
+                                        Khuyến mãi
+                                    </h6> */}
+
+                                    {/* Trạng thái khuyến mãi */}
+                                    <FilterSelectSingle
+                                        label="Trạng thái"
+                                        value={filterValues.status ? {
+                                            value: filterValues.status,
+                                            label: filterValues.status === 'all' ? 'Tất cả' : 
+                                                   filterValues.status === 'true' ? 'Hiển thị' : 'Ẩn'
+                                        } : null}
+                                        onChange={(selected) => updateFilter('status', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            { value: 'true', label: 'Hiển thị' },
+                                            { value: 'false', label: 'Ẩn' }
+                                        ]}
+                                        placeholder="Chọn trạng thái"
+                                    />
+
+                                    {/* Loại khuyến mãi */}
+                                    <FilterSelectSingle
+                                        label="Loại khuyến mãi"
+                                        value={filterValues.type ? {
+                                            value: filterValues.type,
+                                            label: filterValues.type === 'all' ? 'Tất cả' : 
+                                                   filterValues.type === 'percentage' ? 'Phần trăm (%)' :
+                                                   filterValues.type === 'fixed_amount' ? 'Tiền cố định (VNĐ)' :
+                                                   filterValues.type === 'free_shipping' ? 'Miễn phí ship' : filterValues.type
+                                        } : null}
+                                        onChange={(selected) => updateFilter('type', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            { value: 'percentage', label: 'Phần trăm (%)' },
+                                            { value: 'fixed_amount', label: 'Tiền cố định (VNĐ)' },
+                                            { value: 'free_shipping', label: 'Miễn phí ship' }
+                                        ]}
+                                        placeholder="Chọn loại"
+                                    />
+
+                                    {/* Áp dụng cho */}
+                                    <FilterSelectSingle
+                                        label="Áp dụng cho"
+                                        value={filterValues.applicationType ? {
+                                            value: filterValues.applicationType,
+                                            label: filterValues.applicationType === 'all' ? 'Tất cả' : 
+                                                   filterValues.applicationType === 'orders' ? 'Đơn hàng' :
+                                                   filterValues.applicationType === 'products' ? 'Sản phẩm' :
+                                                   filterValues.applicationType === 'categories' ? 'Danh mục' :
+                                                   filterValues.applicationType === 'combos' ? 'Combo' : filterValues.applicationType
+                                        } : null}
+                                        onChange={(selected) => updateFilter('applicationType', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            { value: 'orders', label: 'Đơn hàng' },
+                                            { value: 'products', label: 'Sản phẩm' },
+                                            { value: 'categories', label: 'Danh mục' },
+                                            { value: 'combos', label: 'Combo' }
+                                        ]}
+                                        placeholder="Chọn loại áp dụng"
+                                    />
+
+                                    {/* Thời gian áp dụng */}
+                                    <FilterDateRange
+                                        label="Thời gian áp dụng"
+                                        value={filterValues.dateRange || { from: null, to: null }}
+                                        onChange={(dateRange) => updateFilter('dateRange', dateRange)}
+                                    />
+                                </div>
                             )}
-                        </Permission>
+                        </div>
+
+                        {/* Nội dung chính */}
+                        <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
+                            {/* Header với nút thêm khuyến mãi */}
+                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
+                                <div className="d-flex align-items-center gap-2">
+                                    <h4 className="mb-0 fw-bold text-primary">Danh sách khuyến mãi</h4>
+                                    {/* Filter Toggle Button */}
+                                    <FilterToggleButton
+                                        key={`toggle-${isFilterVisible}`}
+                                        isVisible={isFilterVisible}
+                                        onToggle={() => {
+                                            setIsPulsing(true);
+                                            setTimeout(() => setIsPulsing(false), 600);
+                                            toggleFilterVisibility();
+                                        }}
+                                        isPulsing={isPulsing}
+                                    />
+                                </div>
+                                <div className="d-flex gap-2">
+                                    {/* Nút tạo mới */}
+                                    <Permission permission={PERMISSIONS.PROMOTIONS_CREATE}>
+                                        <Link className="btn btn-primary" to="/promotion/add">
+                                            <i className="fas fa-plus me-1"></i> Tạo mới
+                                        </Link>
+                                    </Permission>
+                                    
+                                    {/* Nút xóa nhiều */}
+                                    {selectedRows.length > 0 && (
+                                        <Permission permission={PERMISSIONS.PROMOTIONS_DELETE}>
+                                            <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
+                                                <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
+                                            </button>
+                                        </Permission>
+                                    )}
+                                    
+                                    {/* Các nút khác */}
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-upload me-1"></i> Import file
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-download me-1"></i> Xuất file
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-cog"></i>
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-question-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Search bar */}
+                            <div className="p-3 border-bottom bg-light search-bar">
+                                <div className="row align-items-center">
+                                    <div className="col-md-4">
+                                        <div className="input-group">
+                                            <span className="input-group-text">
+                                                <i className="fas fa-search"></i>
+                                            </span>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Tìm kiếm theo tên, mã khuyến mãi..."
+                                                value={searchText}
+                                                onChange={(e) => setSearchText(e.target.value)}
+                                            />
+                                            {searchText && (
+                                                <button 
+                                                    className="btn btn-outline-secondary btn-sm"
+                                                    type="button"
+                                                    onClick={() => setSearchText('')}
+                                                    title="Xóa tìm kiếm"
+                                                    style={{
+                                                        borderLeft: 'none',
+                                                        borderRadius: '0 0.375rem 0.375rem 0',
+                                                        backgroundColor: '#f8f9fa',
+                                                        color: '#6c757d'
+                                                    }}
+                                                >
+                                                    <i className="fas fa-times"></i>
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="col-md-4 text-end">
+                                        {/* Có thể thêm các nút khác ở đây nếu cần */}
+                                    </div>
+                                </div>
+
+                                {/* Search results info */}
+                                {searchText && (
+                                    <div className="search-results-info">
+                                        <small>
+                                            <i className="fas fa-info-circle me-1"></i>
+                                            Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {sortedPromotions.length} kết quả
+                                        </small>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Data Table */}
+                            <div className="flex-grow-1 overflow-auto">
+                                <div className="p-3">
+                                    <DataTables
+                                        name="Danh sách khuyến mãi"
+                                        columns={columns}
+                                        data={sortedPromotions}
+                                        numOfPages={numOfPages}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                        setItemOfPage={setItemOfPage}
+                                        onSelectedRows={setSelectedRows}
+                                        hideSearch={true}
+                                        showSummary={true}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    {/* Bộ lọc */}
-                    <div className="row mb-3 g-2 align-items-end">
-                        {/* Loại khuyến mãi */}
-                        <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold  mb-1" htmlFor="filterType">
-                                <i className="fas fa-percent me-1"></i>Loại khuyến mãi
-                            </label>
-                            <select
-                                id="filterType"
-                                className="form-select form-select-sm  shadow-sm form-rounded-sm"
-                                value={filterType}
-                                onChange={e => setFilterType(e.target.value)}
-                            >
-                                <option value="">Tất cả</option>
-                                <option value="percentage">Phần trăm (%)</option>
-                                <option value="fixed_amount">Tiền cố định (VNĐ)</option>
-                            </select>
-                        </div>
-                             {/* Trạng thái */}
-                             <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold  mb-1" htmlFor="filterStatus">
-                                <i className="fas fa-toggle-on me-1"></i>Trạng thái
-                            </label>
-                            <select
-                                id="filterStatus"
-                                className="form-select form-select-sm shadow-sm form-rounded-sm"
-                                value={filterStatus}
-                                onChange={e => setFilterStatus(e.target.value)}
-                            >
-                                <option value="">Tất cả</option>
-                                <option value="true">Hiển thị</option>
-                                <option value="false">Không hiển thị</option>
-                            </select>
-                        </div>
-                        {/* Ngày bắt đầu */}
-                        <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold mb-1" htmlFor="filterStartDate">
-                                <i className="fas fa-calendar-alt me-1"></i>Từ ngày
-                            </label>
-                            <DatePicker
-                                selected={filterStartDate}
-                                onChange={date => setFilterStartDate(date)}
-                                locale={vi}
-                                dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
-        
-                                placeholderText="Chọn ngày: dd/mm/yyyy"
-                                id="filterStartDate"
-                                autoComplete="off"
-                                isClearable
-                            />
-                        </div>
-                        {/* Ngày kết thúc */}
-                        <div className="col-3 d-flex flex-column">
-                            <label className="form-label fw-semibold mb-1" htmlFor="filterEndDate">
-                                <i className="fas fa-calendar-check me-1"></i>Đến ngày
-                            </label>
-                            <DatePicker
-                                selected={filterEndDate}
-                                onChange={date => setFilterEndDate(date)}
-                                locale={vi}
-                                dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm shadow-sm select-date-custom form-rounded-sm"
-                                placeholderText="Chọn ngày: dd/mm/yyyy"
-                                id="filterEndDate"
-                                isClearable
-                            />
-                        </div>
-                   
-                    </div>
-                    <DataTables
-                        name="Danh sách khuyến mãi"
-                        columns={columns}
-                        data={sortedPromotions}
-                        numOfPages={numOfPages}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        setItemOfPage={setItemOfPage}
-                        changeKeyword={setSearchText}
-                        onSelectedRows={setSelectedRows}
-                    />
                 </div>
             </main>
             <Modal show={showModal} onHide={() => { setShowModal(false); setItemDelete(null); setTypeDelete(null); }}>
@@ -376,7 +548,7 @@ const PromotionList = () => {
                     {typeDelete === 'single' ? (
                         <p>Bạn có chắc chắn muốn xóa khuyến mãi này?</p>
                     ) : (
-                        <p>Bạn có chắc chắn muốn xóa các sản phẩm này?</p>
+                        <p>Bạn có chắc chắn muốn xóa các khuyến mãi này?</p>
                     )}
                 </Modal.Body>
                 <Modal.Footer>

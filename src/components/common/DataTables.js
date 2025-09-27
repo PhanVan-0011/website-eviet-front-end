@@ -5,7 +5,7 @@ import { useRef } from 'react';
 
 const DataTables = (props) => {
     console.log("DataTables props: ", props);
-   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, filterHeader, hideSelected, hideSearch = false, isLoading = false } = props;
+   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, filterHeader, hideSelected, hideSearch = false, isLoading = false, showSummary = false } = props;
    const [selectedRows, setSelectedRows] = useState([]);
    // --- Lấy trạng thái cột hiển thị từ localStorage khi component mount ---
    const [visibleColumns, setVisibleColumns] = useState(() => {
@@ -77,6 +77,52 @@ const DataTables = (props) => {
         if (!w) return 0;
         if (typeof w === 'string' && w.endsWith('%')) return parseFloat(w);
         return Number(w) || 0;
+    };
+
+    // Helper để tính tổng cho các cột có thể tính tổng
+    const calculateSummary = () => {
+        if (!showSummary || !data || data.length === 0) return {};
+        
+        const summary = {};
+        columns.forEach((col, index) => {
+            const title = typeof col.title === "function" ? col.title() : col.title;
+            const titleStr = typeof title === 'string' ? title : '';
+            
+            // Kiểm tra xem cột có phải là cột số có thể tính tổng không
+            const isSummableColumn = titleStr.toLowerCase().includes('tổng') || 
+                                   titleStr.toLowerCase().includes('nợ') || 
+                                   titleStr.toLowerCase().includes('giá') || 
+                                   titleStr.toLowerCase().includes('tiền') ||
+                                   titleStr.toLowerCase().includes('số lượng') ||
+                                   titleStr.toLowerCase().includes('tồn') ||
+                                   col.summarizable === true;
+            
+            if (isSummableColumn) {
+                let total = 0;
+                data.forEach(row => {
+                    const value = col.element(row);
+                    let number = 0;
+                    
+                    // Lấy giá trị số từ element (có thể là JSX)
+                    if (typeof value === 'object' && value.props && value.props.children) {
+                        const text = value.props.children.toString();
+                        // Xử lý format tiền Việt Nam: "9.729,514 ₫" -> 9729514
+                        number = parseFloat(text.replace(/[^\d]/g, ''));
+                    } else if (typeof value === 'number') {
+                        number = value;
+                    } else if (typeof value === 'string') {
+                        // Xử lý format tiền Việt Nam: "9.729,514 ₫" -> 9729514
+                        number = parseFloat(value.replace(/[^\d]/g, ''));
+                    }
+                    
+                    if (!isNaN(number)) {
+                        total += number;
+                    }
+                });
+                summary[index] = total;
+            }
+        });
+        return summary;
     };
 
     // Helper để tính toán width cho cột
@@ -159,6 +205,85 @@ const DataTables = (props) => {
                 ))}
             </tr>
         );
+    };
+
+    const renderSummaryRow = () => {
+        if (!showSummary) return null;
+        
+        const summary = calculateSummary();
+        const { visibleIdx, newWidths } = calculateColumnWidths();
+        let widthIdx = 0;
+        
+        return (
+            <tr className="table-info fw-bold" style={{ backgroundColor: '#e3f2fd' }}>
+                {!hideSelected && (
+                    <td style={{ width: '1%' }}>
+                    </td>
+                )}
+                {columns.map((col, colIndex) => {
+                    if (!visibleColumns.includes(colIndex)) return null;
+                    
+                    const title = typeof col.title === "function" ? col.title() : col.title;
+                    const titleStr = typeof title === 'string' ? title : '';
+                    const isSummableColumn = titleStr.toLowerCase().includes('tổng') || 
+                                           titleStr.toLowerCase().includes('nợ') || 
+                                           titleStr.toLowerCase().includes('giá') || 
+                                           titleStr.toLowerCase().includes('tiền') ||
+                                           titleStr.toLowerCase().includes('số lượng') ||
+                                           titleStr.toLowerCase().includes('tồn') ||
+                                           col.summarizable === true;
+                    
+                    return (
+                        <td
+                            key={colIndex}
+                            style={col.tdClass ? { ...col.tdClass, width: newWidths[widthIdx++] } : { width: newWidths[widthIdx++] }}
+                            className={col.tdClass || ""}
+                        >
+                            {isSummableColumn && summary[colIndex] !== undefined ? (
+                                // Sử dụng cùng format với cột gốc nhưng in đậm
+                                <div className="fw-bold">
+                                    {formatSummaryValue(summary[colIndex], col, titleStr)}
+                                </div>
+                            ) : (
+                                ''
+                            )}
+                        </td>
+                    );
+                })}
+            </tr>
+        );
+    };
+
+    // Helper để format giá trị tổng theo format của cột gốc
+    const formatSummaryValue = (value, col, titleStr) => {
+        // Kiểm tra format thực tế từ dữ liệu mẫu
+        if (data && data.length > 0) {
+            const sampleValue = col.element(data[0]);
+            
+            // Kiểm tra xem có chứa ký hiệu tiền tệ không
+            if (typeof sampleValue === 'object' && sampleValue.props && sampleValue.props.children) {
+                const text = sampleValue.props.children.toString();
+                if (text.includes('₫')) {
+                    // Format tiền tệ với ký hiệu ₫
+                    return `${new Intl.NumberFormat('vi-VN').format(value)} ₫`;
+                }
+            } else if (typeof sampleValue === 'string' && sampleValue.includes('₫')) {
+                // Format tiền tệ với ký hiệu ₫
+                return `${new Intl.NumberFormat('vi-VN').format(value)} ₫`;
+            }
+        }
+        
+        // Fallback: Kiểm tra theo tên cột
+        if (titleStr.toLowerCase().includes('giá') || titleStr.toLowerCase().includes('tiền')) {
+            // Format tiền tệ
+            return `${new Intl.NumberFormat('vi-VN').format(value)} ₫`;
+        } else if (titleStr.toLowerCase().includes('tồn') || titleStr.toLowerCase().includes('số lượng')) {
+            // Format số nguyên
+            return new Intl.NumberFormat('vi-VN').format(Math.round(value));
+        } else {
+            // Format mặc định
+            return new Intl.NumberFormat('vi-VN').format(value);
+        }
     };
 
     const renderTableData = () => {
@@ -351,7 +476,10 @@ const DataTables = (props) => {
                                     </td>
                                 </tr>
                             ) : (
-                                renderTableData()
+                                <>
+                                    {renderSummaryRow()}
+                                    {renderTableData()}
+                                </>
                             )}
                         </tbody>
                     </table>

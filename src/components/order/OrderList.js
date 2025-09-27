@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTables from '../common/DataTables';
-import FilterPanel from '../common/FilterPanel';
 import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
@@ -11,6 +10,13 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
+import {
+    FilterSelectSingle,
+    FilterSelectMulti,
+    FilterButtonGroup,
+    FilterDateRange,
+    FilterToggleButton
+} from '../common/FilterComponents';
 
 const formatVND = (value) => {
     if (typeof value !== 'number' && typeof value !== 'string') return '';
@@ -26,37 +32,91 @@ const OrderList = () => {
     const [itemOfPage, setItemOfPage] = useState(25);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('');
+    const [debouncedSearchText, setDebouncedSearchText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
     const [refresh, setRefresh] = useState(Date.now());
 
-    // Bộ lọc mới
-    const [filterStatus, setFilterStatus] = useState('');
-    const [filterPayment, setFilterPayment] = useState('');
-    // Thêm state cho filter ngày đặt hàng (kiểu Date)
-    const [filterOrderDateFrom, setFilterOrderDateFrom] = useState(() => {
-        const now = new Date();
-        return new Date(now.getFullYear(), 0, 1); // 1/1/yyyy
+    // Filter states
+    const [filterValues, setFilterValues] = useState({
+        status: 'all',
+        paymentMethod: 'all',
+        orderDate: { from: null, to: null },
+        customer: 'all'
     });
-    const [filterOrderDateTo, setFilterOrderDateTo] = useState(() => new Date());
+    const [isFilterVisible, setIsFilterVisible] = useState(true);
+    const [isPulsing, setIsPulsing] = useState(false);
 
     // Sort states
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
 
-    // Thêm state cho phương thức thanh toán động
+    // Data for filters
     const [paymentMethods, setPaymentMethods] = useState([]);
-    
-    // State cho việc ẩn/hiện filter panel
-    const [isFilterVisible, setIsFilterVisible] = useState(true);
+    const [customers, setCustomers] = useState([]);
+
+    // Debounce search text
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            setDebouncedSearchText(searchText);
+        }, 500);
+        return () => clearTimeout(delayDebounce);
+    }, [searchText]);
+
+    const updateFilter = (key, value) => {
+        setFilterValues(prev => ({ ...prev, [key]: value }));
+    };
+
+    const toggleFilterVisibility = () => {
+        setIsFilterVisible(prev => !prev);
+    };
+
+    // Load filter data
+    useEffect(() => {
+        // Load payment methods
+        requestApi('api/admin/payment-methods?limit=1000', 'GET', []).then((response) => {
+            if (response.data && response.data.data) {
+                setPaymentMethods(response.data.data);
+            }
+        }).catch(() => {
+            setPaymentMethods([
+                { id: 1, name: 'Tiền mặt' },
+                { id: 2, name: 'Chuyển khoản' },
+                { id: 3, name: 'Thẻ tín dụng' }
+            ]);
+        });
+
+        // Load customers
+        requestApi('api/admin/customers?limit=1000', 'GET', []).then((response) => {
+            if (response.data && response.data.data) {
+                setCustomers(response.data.data);
+            }
+        }).catch(() => {
+            setCustomers([
+                { id: 1, name: 'Khách lẻ' },
+                { id: 2, name: 'Khách VIP' }
+            ]);
+        });
+    }, []);
 
     // Lấy danh sách đơn hàng với filter
     useEffect(() => {
-        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
-        // console.log('Fetching orders with query:', query);
-        if (filterStatus) query += `&status=${filterStatus}`;
-        if (filterPayment) query += `&payment_method_code=${filterPayment}`;
-        if (filterOrderDateFrom) query += `&start_date=${moment(filterOrderDateFrom).format('YYYY-MM-DD')}`;
-        if (filterOrderDateTo) query += `&end_date=${moment(filterOrderDateTo).format('YYYY-MM-DD')}`;
+        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${debouncedSearchText}`;
+        
+        // New filter panel filters
+        if (filterValues.status && filterValues.status !== 'all') {
+            query += `&status=${filterValues.status}`;
+        }
+        if (filterValues.paymentMethod && filterValues.paymentMethod !== 'all') {
+            query += `&payment_method_code=${filterValues.paymentMethod}`;
+        }
+        if (filterValues.orderDate?.from && filterValues.orderDate?.to) {
+            query += `&start_date=${moment(filterValues.orderDate.from).format('YYYY-MM-DD')}`;
+            query += `&end_date=${moment(filterValues.orderDate.to).format('YYYY-MM-DD')}`;
+        }
+        if (filterValues.customer && filterValues.customer !== 'all') {
+            query += `&customer_id=${filterValues.customer}`;
+        }
+
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/orders${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
@@ -65,7 +125,7 @@ const OrderList = () => {
         }).catch(() => {
             dispatch(actions.controlLoading(false));
         });
-    }, [currentPage, itemOfPage, searchText, filterStatus, filterPayment, filterOrderDateFrom, filterOrderDateTo, refresh]);
+    }, [currentPage, itemOfPage, debouncedSearchText, filterValues, refresh]);
 
     // Sort logic
     const sortedOrders = [...orders].sort((a, b) => {
@@ -139,7 +199,8 @@ const OrderList = () => {
             element: row => (
                 <span className="fw-bold text-danger">{formatVND(row.total_amount)} ₫</span>
             ),
-            width: "12%"
+            width: "12%",
+            summarizable: true
         },
         {
             title: () => (
@@ -390,54 +451,197 @@ const OrderList = () => {
                     <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
-                        <li className="breadcrumb-item active">Đơn hàng</li>
+                        <li className="breadcrumb-item active">Danh sách đơn hàng</li>
                     </ol>
                     
                     {/* Layout chính với FilterPanel và nội dung */}
                     <div className="row g-0">
                         {/* Filter Panel */}
-                        <FilterPanel
-                            filterStatus={filterStatus}
-                            setFilterStatus={setFilterStatus}
-                            filterPayment={filterPayment}
-                            setFilterPayment={setFilterPayment}
-                            filterOrderDateFrom={filterOrderDateFrom}
-                            setFilterOrderDateFrom={setFilterOrderDateFrom}
-                            filterOrderDateTo={filterOrderDateTo}
-                            setFilterOrderDateTo={setFilterOrderDateTo}
-                            paymentMethods={paymentMethods}
-                            isVisible={isFilterVisible}
-                            onToggleVisibility={() => setIsFilterVisible(!isFilterVisible)}
-                        />
+                        <div className={`position-relative filter-panel ${isFilterVisible ? 'col-md-2' : 'col-md-0'} transition-all d-flex flex-column`}>
+                            {isFilterVisible && (
+                                <div className="p-3 filter-content">
+                                    {/* <h6 className="fw-bold mb-3 text-primary text-center" style={{ fontSize: '0.9rem' }}>
+                                        <i className="fas fa-filter me-1"></i>
+                                        Đơn hàng
+                                    </h6> */}
+
+                                    {/* Trạng thái đơn hàng */}
+                                    <FilterSelectSingle
+                                        label="Trạng thái đơn hàng"
+                                        value={filterValues.status ? {
+                                            value: filterValues.status,
+                                            label: filterValues.status === 'all' ? 'Tất cả' : 
+                                                   filterValues.status === 'pending' ? 'Chờ xử lý' :
+                                                   filterValues.status === 'processing' ? 'Đang xử lý' :
+                                                   filterValues.status === 'shipped' ? 'Đã gửi hàng' :
+                                                   filterValues.status === 'delivered' ? 'Đã giao' :
+                                                   filterValues.status === 'cancelled' ? 'Đã hủy' : filterValues.status
+                                        } : null}
+                                        onChange={(selected) => updateFilter('status', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            { value: 'pending', label: 'Chờ xử lý' },
+                                            { value: 'processing', label: 'Đang xử lý' },
+                                            { value: 'shipped', label: 'Đã gửi hàng' },
+                                            { value: 'delivered', label: 'Đã giao' },
+                                            { value: 'cancelled', label: 'Đã hủy' }
+                                        ]}
+                                        placeholder="Chọn trạng thái"
+                                    />
+
+                                    {/* Phương thức thanh toán */}
+                                    <FilterSelectSingle
+                                        label="Phương thức thanh toán"
+                                        value={filterValues.paymentMethod ? {
+                                            value: filterValues.paymentMethod,
+                                            label: filterValues.paymentMethod === 'all' ? 'Tất cả' : 
+                                                   paymentMethods.find(pm => pm.id == filterValues.paymentMethod)?.name || filterValues.paymentMethod
+                                        } : null}
+                                        onChange={(selected) => updateFilter('paymentMethod', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            ...paymentMethods.map(pm => ({
+                                                value: pm.id,
+                                                label: pm.name
+                                            }))
+                                        ]}
+                                        placeholder="Chọn phương thức"
+                                    />
+
+                                    {/* Thời gian đặt hàng */}
+                                    <FilterDateRange
+                                        label="Thời gian đặt hàng"
+                                        value={filterValues.orderDate || { from: null, to: null }}
+                                        onChange={(dateRange) => updateFilter('orderDate', dateRange)}
+                                    />
+
+                                    {/* Khách hàng */}
+                                    <FilterSelectSingle
+                                        label="Khách hàng"
+                                        value={filterValues.customer ? {
+                                            value: filterValues.customer,
+                                            label: filterValues.customer === 'all' ? 'Tất cả' : 
+                                                   customers.find(c => c.id == filterValues.customer)?.name || filterValues.customer
+                                        } : null}
+                                        onChange={(selected) => updateFilter('customer', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            ...customers.map(customer => ({
+                                                value: customer.id,
+                                                label: customer.name
+                                            }))
+                                        ]}
+                                        placeholder="Chọn khách hàng"
+                                    />
+                                </div>
+                            )}
+                        </div>
 
                         {/* Nội dung chính */}
                         <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
-                            {/* Header với nút thêm đơn hàng - căn chỉnh với filter */}
+                            {/* Header với nút thêm đơn hàng */}
                             <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
-                                <div>
+                                <div className="d-flex align-items-center gap-2">
                                     <h4 className="mb-0 fw-bold text-primary">Danh sách đơn hàng</h4>
+                                    {/* Filter Toggle Button */}
+                                    <FilterToggleButton
+                                        key={`toggle-${isFilterVisible}`}
+                                        isVisible={isFilterVisible}
+                                        onToggle={() => {
+                                            setIsPulsing(true);
+                                            setTimeout(() => setIsPulsing(false), 600);
+                                            toggleFilterVisibility();
+                                        }}
+                                        isPulsing={isPulsing}
+                                    />
                                 </div>
-                                <div>
+                                <div className="d-flex gap-2">
+                                    {/* Nút tạo mới */}
                                     <Permission permission={PERMISSIONS.ORDERS_CREATE}>
                                         <Link className="btn btn-primary" to="/order/add">
-                                            <i className="fas fa-plus me-1"></i> Thêm đơn hàng
+                                            <i className="fas fa-plus me-1"></i> Tạo mới
                                         </Link>
                                     </Permission>
+                                    
+                                    {/* Các nút khác */}
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-upload me-1"></i> Import file
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-download me-1"></i> Xuất file
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-cog"></i>
+                                    </button>
+                                    <button className="btn btn-outline-secondary">
+                                        <i className="fas fa-question-circle"></i>
+                                    </button>
                                 </div>
                             </div>
-                            
+
+                            {/* Search bar */}
+                            <div className="p-3 border-bottom bg-light search-bar">
+                                <div className="row align-items-center">
+                                    <div className="col-md-4">
+                                        <div className="input-group">
+                                            <span className="input-group-text">
+                                                <i className="fas fa-search"></i>
+                                            </span>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Tìm kiếm theo mã đơn hàng, tên khách hàng..."
+                                                value={searchText}
+                                                onChange={(e) => setSearchText(e.target.value)}
+                                            />
+                                            {searchText && (
+                                                <button 
+                                                    className="btn btn-outline-secondary btn-sm"
+                                                    type="button"
+                                                    onClick={() => setSearchText('')}
+                                                    title="Xóa tìm kiếm"
+                                                    style={{
+                                                        borderLeft: 'none',
+                                                        borderRadius: '0 0.375rem 0.375rem 0',
+                                                        backgroundColor: '#f8f9fa',
+                                                        color: '#6c757d'
+                                                    }}
+                                                >
+                                                    <i className="fas fa-times"></i>
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="col-md-4 text-end">
+                                        {/* Có thể thêm các nút khác ở đây nếu cần */}
+                                    </div>
+                                </div>
+
+                                {/* Search results info */}
+                                {searchText && (
+                                    <div className="search-results-info">
+                                        <small>
+                                            <i className="fas fa-info-circle me-1"></i>
+                                            Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {sortedOrders.length} kết quả
+                                        </small>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Data Table */}
                             <div className="flex-grow-1 overflow-auto">
                                 <div className="p-3">
                                     <DataTables
+                                        name="Danh sách đơn hàng"
                                         columns={columns}
                                         data={sortedOrders}
                                         numOfPages={numOfPages}
                                         currentPage={currentPage}
                                         setCurrentPage={setCurrentPage}
                                         setItemOfPage={setItemOfPage}
-                                        changeKeyword={setSearchText}
                                         onSelectedRows={setSelectedRows}
-                                        hideSelected={true}
+                                        hideSearch={true}
+                                        showSummary={true}
                                     />
                                 </div>
                             </div>
@@ -445,7 +649,6 @@ const OrderList = () => {
                     </div>
                 </div>
             </main>
-            {/* ...modal... */}
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import DataTables from '../common/DataTables'
 import requestApi from '../../helpers/api';
@@ -11,7 +11,14 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
-import ProductFilterPanel from './ProductFilterPanel';
+import {
+    FilterSelectSingle,
+    FilterSelectMulti,
+    FilterButtonGroup,
+    FilterDateRange,
+    FilterToggleButton
+} from '../common/FilterComponents';
+import CategoryModal from '../common/CategoryModal';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 
@@ -40,17 +47,43 @@ const ProductList = () => {
     const [categories, setCategories] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
     const [brands, setBrands] = useState([]);
-    const [isFilterVisible, setIsFilterVisible] = useState(true);
    
-    // New filter states for ProductFilterPanel
-    const [selectedCategories, setSelectedCategories] = useState([]);
-    const [selectedSuppliers, setSelectedSuppliers] = useState([]);
-    const [selectedBrands, setSelectedBrands] = useState([]);
-    const [creationTimeFilter, setCreationTimeFilter] = useState('all');
-    const [customDateFrom, setCustomDateFrom] = useState(null);
-    const [customDateTo, setCustomDateTo] = useState(null);
-    const [productStatus, setProductStatus] = useState('all');
-    const [directSale, setDirectSale] = useState('all');
+    // Filter states
+    const [filterValues, setFilterValues] = useState({
+        categories: [],
+        suppliers: [],
+        brands: [],
+        creationTime: { from: null, to: null },
+        productStatus: 'all',
+        directSale: 'all'
+    });
+    const [isFilterVisible, setIsFilterVisible] = useState(true);
+    const [isPulsing, setIsPulsing] = useState(false);
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
+
+
+    const updateFilter = (key, value) => {
+        setFilterValues(prev => ({ ...prev, [key]: value }));
+    };
+
+    const toggleFilterVisibility = () => {
+        setIsFilterVisible(prev => !prev);
+    };
+
+    // Handle category creation
+    const handleCreateCategory = () => {
+        setShowCategoryModal(true);
+    };
+
+    const handleCategorySuccess = () => {
+        // Reload categories after successful creation
+        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
+            if (response.data && response.data.data) {
+                setCategories(response.data.data);
+            }
+        });
+    };
+
 
     // Legacy filter states (keep for backward compatibility)
     const [filterOriginalPrice, setFilterOriginalPrice] = useState('');
@@ -130,28 +163,28 @@ const ProductList = () => {
         if (filterStock) query += `&stock_quantity=${filterStock}`;
         if (filterStatus !== '') query += `&status=${filterStatus}`;
 
-        // New filter panel filters
-        if (selectedCategories.length > 0) {
-            const categoryIds = selectedCategories.map(cat => cat.value).join(',');
+        // New filter panel filters using filterValues
+        if (filterValues.categories && filterValues.categories.length > 0) {
+            const categoryIds = filterValues.categories.map(cat => cat.value).join(',');
             query += `&category_ids=${categoryIds}`;
         }
-        if (selectedSuppliers.length > 0) {
-            const supplierIds = selectedSuppliers.map(supplier => supplier.value).join(',');
+        if (filterValues.suppliers && filterValues.suppliers.length > 0) {
+            const supplierIds = filterValues.suppliers.map(supplier => supplier.value).join(',');
             query += `&supplier_ids=${supplierIds}`;
         }
-        if (selectedBrands.length > 0) {
-            const brandIds = selectedBrands.map(brand => brand.value).join(',');
+        if (filterValues.brands && filterValues.brands.length > 0) {
+            const brandIds = filterValues.brands.map(brand => brand.value).join(',');
             query += `&brand_ids=${brandIds}`;
         }
-        if (creationTimeFilter === 'custom' && customDateFrom && customDateTo) {
-            query += `&created_from=${customDateFrom.toISOString().split('T')[0]}`;
-            query += `&created_to=${customDateTo.toISOString().split('T')[0]}`;
+        if (filterValues.creationTime?.from && filterValues.creationTime?.to) {
+            query += `&created_from=${filterValues.creationTime.from.toISOString().split('T')[0]}`;
+            query += `&created_to=${filterValues.creationTime.to.toISOString().split('T')[0]}`;
         }
-        if (productStatus !== 'all') {
-            query += `&product_status=${productStatus}`;
+        if (filterValues.productStatus && filterValues.productStatus !== 'all') {
+            query += `&product_status=${filterValues.productStatus}`;
         }
-        if (directSale !== 'all') {
-            query += `&direct_sale=${directSale}`;
+        if (filterValues.directSale && filterValues.directSale !== 'all') {
+            query += `&direct_sale=${filterValues.directSale}`;
         }
 
         dispatch(actions.controlLoading(true));
@@ -171,18 +204,11 @@ const ProductList = () => {
         filterSalePrice,
         filterStock,
         filterStatus,
-        selectedCategories,
-        selectedSuppliers,
-        selectedBrands,
-        creationTimeFilter,
-        customDateFrom,
-        customDateTo,
-        productStatus,
-        directSale,
+        filterValues,
         refresh
     ]);
 
-    // 4. Không cần filteredProducts, dùng trực tiếp products cho sortedProducts
+    // 4. Sort products (API đã filter rồi, chỉ cần sort)
     const sortedProducts = [...products].sort((a, b) => {
         if (!sortField) return 0;
         let aValue = a[sortField];
@@ -282,7 +308,8 @@ const ProductList = () => {
                 </span>
             ),
             element: row => row.stock_quantity,
-            width: "7%"
+            width: "7%",
+            summarizable: true
         },
         {
             title: () => (
@@ -295,7 +322,8 @@ const ProductList = () => {
                     {formatVND(parseInt(row.original_price))} ₫
                 </div>
             ),
-            width: "11%"
+            width: "11%",
+            summarizable: true
         },
         {
             title: () => (
@@ -308,7 +336,8 @@ const ProductList = () => {
                     {formatVND(parseInt(row.sale_price))} ₫
                 </div>
             ),
-            width: "11%"
+            width: "11%",
+            summarizable: true
         },
         { 
             
@@ -461,46 +490,118 @@ const ProductList = () => {
                     {/* Layout chính với FilterPanel và nội dung */}
                     <div className="row g-0">
                         {/* Filter Panel */}
-                        <ProductFilterPanel
-                            categories={categories}
-                            suppliers={suppliers}
-                            brands={brands}
-                            selectedCategories={selectedCategories}
-                            setSelectedCategories={setSelectedCategories}
-                            selectedSuppliers={selectedSuppliers}
-                            setSelectedSuppliers={setSelectedSuppliers}
-                            selectedBrands={selectedBrands}
-                            setSelectedBrands={setSelectedBrands}
-                            creationTimeFilter={creationTimeFilter}
-                            setCreationTimeFilter={setCreationTimeFilter}
-                            customDateFrom={customDateFrom}
-                            setCustomDateFrom={setCustomDateFrom}
-                            customDateTo={customDateTo}
-                            setCustomDateTo={setCustomDateTo}
-                            productStatus={productStatus}
-                            setProductStatus={setProductStatus}
-                            directSale={directSale}
-                            setDirectSale={setDirectSale}
-                            isVisible={isFilterVisible}
-                            onToggleVisibility={() => setIsFilterVisible(!isFilterVisible)}
-                        />
+                        <div className={`position-relative filter-panel ${isFilterVisible ? 'col-md-2' : 'col-md-0'} transition-all d-flex flex-column`}>
+                            {isFilterVisible && (
+                                <div className="p-3 filter-content">
+                                    {/* <h6 className="fw-bold mb-3 text-primary text-center" style={{ fontSize: '0.9rem' }}>
+                                        <i className="fas fa-filter me-1"></i>
+                                        Sản phẩm
+                                    </h6> */}
+
+                                    {/* Nhóm hàng */}
+                                    <FilterSelectMulti
+                                        label="Nhóm hàng"
+                                        value={filterValues.categories || []}
+                                        onChange={(selected) => updateFilter('categories', selected || [])}
+                                        options={categories.map(cat => ({
+                                            value: cat.id,
+                                            label: cat.name
+                                        }))}
+                                        placeholder="Chọn nhóm hàng"
+                                        onCreateNew={handleCreateCategory}
+                                        createNewLabel="Tạo mới"
+                                    />
+
+                                    {/* Thời gian tạo */}
+                                    <FilterDateRange
+                                        label="Thời gian tạo"
+                                        value={filterValues.creationTime || { from: null, to: null }}
+                                        onChange={(dateRange) => updateFilter('creationTime', dateRange)}
+                                    />
+
+                                    {/* Nhà cung cấp */}
+                                    <FilterSelectMulti
+                                        label="Nhà cung cấp"
+                                        value={filterValues.suppliers || []}
+                                        onChange={(selected) => updateFilter('suppliers', selected || [])}
+                                        options={suppliers.map(supplier => ({
+                                            value: supplier.id,
+                                            label: supplier.name
+                                        }))}
+                                        placeholder="Chọn nhà cung cấp"
+                                    />
+
+                                    {/* Thương hiệu */}
+                                    <FilterSelectMulti
+                                        label="Thương hiệu"
+                                        value={filterValues.brands || []}
+                                        onChange={(selected) => updateFilter('brands', selected || [])}
+                                        options={brands.map(brand => ({
+                                            value: brand.id,
+                                            label: brand.name
+                                        }))}
+                                        placeholder="Chọn thương hiệu"
+                                    />
+
+                                    {/* Trạng thái hàng hóa */}
+                                    <FilterSelectSingle
+                                        label="Trạng thái hàng hóa"
+                                        value={filterValues.productStatus ? {
+                                            value: filterValues.productStatus,
+                                            label: filterValues.productStatus === 'all' ? 'Tất cả' : 
+                                                   filterValues.productStatus === 'active' ? 'Đang kinh doanh' : 'Ngừng kinh doanh'
+                                        } : null}
+                                        onChange={(selected) => updateFilter('productStatus', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            { value: 'active', label: 'Đang kinh doanh' },
+                                            { value: 'inactive', label: 'Ngừng kinh doanh' }
+                                        ]}
+                                        placeholder="Chọn trạng thái"
+                                    />
+
+                                    {/* Bán trực tiếp */}
+                                    <FilterButtonGroup
+                                        label="Bán trực tiếp"
+                                        value={filterValues.directSale || 'all'}
+                                        onChange={(value) => updateFilter('directSale', value)}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            { value: 'yes', label: 'Có' },
+                                            { value: 'no', label: 'Không' }
+                                        ]}
+                                    />
+                                </div>
+                            )}
+                        </div>
 
                         {/* Nội dung chính */}
                         <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
                             {/* Header với nút thêm sản phẩm */}
                             <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
-                                <div>
+                                <div className="d-flex align-items-center gap-2">
                                     <h4 className="mb-0 fw-bold text-primary">Danh sách sản phẩm</h4>
+                                    {/* Filter Toggle Button */}
+                                    <FilterToggleButton
+                                        key={`toggle-${isFilterVisible}`}
+                                        isVisible={isFilterVisible}
+                                        onToggle={() => {
+                                            setIsPulsing(true);
+                                            setTimeout(() => setIsPulsing(false), 600);
+                                            toggleFilterVisibility();
+                                        }}
+                                        isPulsing={isPulsing}
+                                    />
                                 </div>
                                 <div className="d-flex gap-2">
                                     {/* Nút xóa khi có sản phẩm được chọn */}
-                                    <Permission permission={PERMISSIONS.PRODUCTS_DELETE}>
-                                        {selectedRows.length > 0 && (
+                        <Permission permission={PERMISSIONS.PRODUCTS_DELETE}>
+                            {selectedRows.length > 0 && (
                                             <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
                                                 <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
-                                            </button>
-                                        )}
-                                    </Permission>
+                                </button>
+                            )}
+                        </Permission>
                                     
                                     {/* Nút tạo mới */}
                                     <Permission permission={PERMISSIONS.PRODUCTS_CREATE}>
@@ -523,7 +624,7 @@ const ProductList = () => {
                                         <i className="fas fa-question-circle"></i>
                                     </button>
                                 </div>
-                            </div>
+                    </div>
 
                             {/* Search bar */}
                             <div className="p-3 border-bottom bg-light search-bar">
@@ -556,11 +657,11 @@ const ProductList = () => {
                                                     <i className="fas fa-times"></i>
                                                 </button>
                                             )}
-                                        </div>
-                                    </div>
+                        </div>
+                        </div>
                                     <div className="col-md-4 text-end">
                                         {/* Có thể thêm các nút khác ở đây nếu cần */}
-                                    </div>
+                        </div>
                     </div>
 
                                 {/* Search results info */}
@@ -568,7 +669,7 @@ const ProductList = () => {
                                     <div className="search-results-info">
                                         <small>
                                             <i className="fas fa-info-circle me-1"></i>
-                                            Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {products.length} kết quả
+                                            Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {sortedProducts.length} kết quả
                                         </small>
                         </div>
                                 )}
@@ -577,17 +678,18 @@ const ProductList = () => {
                             {/* Data Table */}
                             <div className="flex-grow-1 overflow-auto">
                                 <div className="p-3">
-                                    <DataTables
-                                        name="Danh sách sản phẩm"
-                                        columns={columns}
-                                        data={sortedProducts}
-                                        numOfPages={numOfPages}
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
-                                        setItemOfPage={setItemOfPage}
-                                        onSelectedRows={selectedRows => setSelectedRows(selectedRows)}
-                                        hideSearch={true}
-                                    />
+                    <DataTables
+                        name="Danh sách sản phẩm"
+                        columns={columns}
+                        data={sortedProducts}
+                        numOfPages={numOfPages}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        setItemOfPage={setItemOfPage}
+                        onSelectedRows={selectedRows => setSelectedRows(selectedRows)}
+                        hideSearch={true}
+                        showSummary={true}
+                    />
                                 </div>
                             </div>
                         </div>
@@ -614,6 +716,13 @@ const ProductList = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+
+            {/* Category Modal */}
+            <CategoryModal
+                show={showCategoryModal}
+                onHide={() => setShowCategoryModal(false)}
+                onSuccess={handleCategorySuccess}
+            />
         </div>
     )
 }

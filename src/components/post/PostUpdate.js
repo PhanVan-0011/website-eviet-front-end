@@ -9,6 +9,7 @@ import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import CustomEditor from '../common/CustomEditor';
 import { Modal, Button } from 'react-bootstrap';
 import Select from 'react-select';
+import { selectStyles } from '../common/FilterComponents';
 
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
@@ -196,21 +197,24 @@ const PostUpdate = () => {
                                 <form onSubmit={handleSubmit(handleSubmitForm)}>
                                     <div className="row mb-4">
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputTitle" className="form-label fw-semibold">
+                                                    Tiêu đề <span style={{ color: 'red' }}>*</span>
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputTitle"
                                                     {...register('title', { required: 'Tiêu đề là bắt buộc' })}
                                                     placeholder="Nhập tiêu đề bài viết"
                                                 />
-                                                <label htmlFor="inputTitle">
-                                                    Tiêu đề <span style={{ color: 'red' }}>*</span>
-                                                </label>
-                                                {errors.title && <div className="text-danger">{errors.title.message}</div>}
+                                                {errors.title && <div className="text-danger mt-1">{errors.title.message}</div>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputStatus" className="form-label fw-semibold">
+                                                    Trạng thái <span style={{ color: 'red' }}>*</span>
+                                                </label>
                                                 <select
                                                     className="form-select"
                                                     id="inputStatus"
@@ -220,8 +224,7 @@ const PostUpdate = () => {
                                                     <option value="1">Hiển thị</option>
                                                     <option value="0">Ẩn</option>
                                                 </select>
-                                                <label htmlFor="inputStatus">Trạng thái <span style={{ color: 'red' }}>*</span></label>
-                                                {errors.status && <div className="text-danger">{errors.status.message}</div>}
+                                                {errors.status && <div className="text-danger mt-1">{errors.status.message}</div>}
                                             </div>
                                         </div>
                                     </div>
@@ -242,6 +245,7 @@ const PostUpdate = () => {
                                                     }}
                                                     placeholder="Tìm kiếm & chọn danh mục..."
                                                     classNamePrefix="react-select"
+                                                    styles={selectStyles}
                                                     onBlur={() => trigger('category_ids')}
                                                 />
                                                 <input

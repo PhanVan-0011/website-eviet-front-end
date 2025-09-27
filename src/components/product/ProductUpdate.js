@@ -9,6 +9,7 @@ import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import CustomEditor from '../common/CustomEditor';
 import { Modal, Button } from 'react-bootstrap';
 import Select from 'react-select';
+import { selectStyles } from '../common/FilterComponents';
 
 const ProductUpdate = () => {
     const params = useParams();
@@ -307,21 +308,24 @@ const ProductUpdate = () => {
                                 <form onSubmit={handleSubmit(handleSubmitForm)}>
                                     <div className="row mb-3">
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputName" className="form-label fw-semibold">
+                                                    Tên sản phẩm <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputName"
                                                     {...register('name', { required: 'Tên sản phẩm là bắt buộc' })}
                                                     placeholder="Nhập tên sản phẩm"
                                                 />
-                                                <label htmlFor="inputName">
-                                                    Tên sản phẩm <span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                {errors.name && <div className="text-danger">{errors.name.message}</div>}
+                                                {errors.name && <div className="text-danger mt-1">{errors.name.message}</div>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputStock" className="form-label fw-semibold">
+                                                    Số lượng <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputStock"
@@ -329,16 +333,16 @@ const ProductUpdate = () => {
                                                     {...register('stock_quantity', { required: 'Số lượng là bắt buộc' })}
                                                     placeholder="Nhập số lượng"
                                                 />
-                                                <label htmlFor="inputStock">
-                                                    Số lượng <span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                {errors.stock_quantity && <div className="text-danger">{errors.stock_quantity.message}</div>}
+                                                {errors.stock_quantity && <div className="text-danger mt-1">{errors.stock_quantity.message}</div>}
                                             </div>
                                         </div>
                                     </div>
                                     <div className="row mb-3">
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputOriginalPrice" className="form-label fw-semibold">
+                                                    Giá gốc (VNĐ) <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputOriginalPrice"
@@ -353,14 +357,14 @@ const ProductUpdate = () => {
                                                     }}
                                                     placeholder="Nhập giá gốc (VND)"
                                                 />
-                                                <label htmlFor="inputOriginalPrice">
-                                                    Giá gốc (VNĐ) <span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                {errors.original_price && <div className="text-danger">{errors.original_price.message}</div>}
+                                                {errors.original_price && <div className="text-danger mt-1">{errors.original_price.message}</div>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="form-floating">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputSalePrice" className="form-label fw-semibold">
+                                                    Giá bán (VNĐ) <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputSalePrice"
@@ -375,16 +379,16 @@ const ProductUpdate = () => {
                                                     }}
                                                     placeholder="Nhập giá bán (VND)"
                                                 />
-                                                <label htmlFor="inputSalePrice">
-                                                    Giá bán (VNĐ)<span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                {errors.sale_price && <div className="text-danger">{errors.sale_price.message}</div>}
+                                                {errors.sale_price && <div className="text-danger mt-1">{errors.sale_price.message}</div>}
                                             </div>
                                         </div>
                                     </div>
                                     <div className="row mb-4">
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputStatus" className="form-label fw-semibold">
+                                                    Trạng thái <span style={{color: 'red'}}>*</span>
+                                                </label>
                                                 <select
                                                     className="form-select"
                                                     id="inputStatus"
@@ -394,19 +398,20 @@ const ProductUpdate = () => {
                                                     <option value="1">Đang bán</option>
                                                     <option value="0">Ngừng bán</option>
                                                 </select>
-                                                <label htmlFor="inputStatus">Trạng thái <span style={{color: 'red'}}>*</span></label>
-                                                {errors.status && <div className="text-danger">{errors.status.message}</div>}
+                                                {errors.status && <div className="text-danger mt-1">{errors.status.message}</div>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="form-floating mb-3 mb-md-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputSize" className="form-label fw-semibold">
+                                                    Kích thước
+                                                </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputSize"
                                                     {...register('size')}
                                                     placeholder="Nhập kích thước (nếu có)"
                                                 />
-                                                <label htmlFor="inputSize">Kích thước</label>
                                             </div>
                                         </div>
                                     </div>
@@ -514,6 +519,7 @@ const ProductUpdate = () => {
                                                     }}
                                                     placeholder="Tìm kiếm & chọn danh mục..."
                                                     classNamePrefix="react-select"
+                                                    styles={selectStyles}
                                                     onBlur={() => trigger('category_ids')}
                                                 />
                                                 <input

@@ -7,6 +7,7 @@ import requestApi from '../../helpers/api';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Select from 'react-select';
+import { selectStyles } from '../common/FilterComponents';
 
 const OrderAdd = () => {
     const navigation = useNavigate();
@@ -171,21 +172,24 @@ const OrderAdd = () => {
                             <form onSubmit={handleSubmit(handleSubmitForm)}>
                                 <div className="row mb-3">
                                     <div className="col-md-4">
-                                        <div className="form-floating mb-3 mb-md-0">
+                                        <div className="mb-3">
+                                            <label htmlFor="inputClientName" className="form-label fw-semibold">
+                                                Tên khách hàng <span style={{ color: 'red' }}>*</span>
+                                            </label>
                                             <input
                                                 className="form-control"
                                                 id="inputClientName"
                                                 {...register('client_name', { required: 'Tên khách hàng là bắt buộc' })}
                                                 placeholder="Nhập tên khách hàng"
                                             />
-                                            <label htmlFor="inputClientName">
-                                                Tên khách hàng <span style={{ color: 'red' }}>*</span>
-                                            </label>
-                                            {errors.client_name && <div className="text-danger">{errors.client_name.message}</div>}
+                                            {errors.client_name && <div className="text-danger mt-1">{errors.client_name.message}</div>}
                                         </div>
                                     </div>
                                     <div className="col-md-4">
-                                        <div className="form-floating mb-3 mb-md-0">
+                                        <div className="mb-3">
+                                            <label htmlFor="inputClientPhone" className="form-label fw-semibold">
+                                                Số điện thoại <span style={{ color: 'red' }}>*</span>
+                                            </label>
                                             <input
                                                 className="form-control"
                                                 id="inputClientPhone"
@@ -198,14 +202,14 @@ const OrderAdd = () => {
                                                 })}
                                                 placeholder="Nhập số điện thoại"
                                             />
-                                            <label htmlFor="inputClientPhone">
-                                                Số điện thoại <span style={{ color: 'red' }}>*</span>
-                                            </label>
-                                            {errors.client_phone && <div className="text-danger">{errors.client_phone.message}</div>}
+                                            {errors.client_phone && <div className="text-danger mt-1">{errors.client_phone.message}</div>}
                                         </div>
                                     </div>
                                     <div className="col-md-4">
-                                        <div className="form-floating mb-3 mb-md-0">
+                                        <div className="mb-3">
+                                            <label htmlFor="inputShippingFee" className="form-label fw-semibold">
+                                                Phí vận chuyển (VNĐ)
+                                            </label>
                                             <input
                                                 className="form-control"
                                                 id="inputShippingFee"
@@ -220,26 +224,22 @@ const OrderAdd = () => {
                                                 }}
                                                 placeholder="Phí vận chuyển"
                                             />
-                                            <label htmlFor="inputShippingFee">
-                                                Phí vận chuyển (VNĐ)
-                                            </label>
                                         </div>
-                                        
                                     </div>
                                 </div>
                                 <div className="row mb-3">
                                     <div className="col-md-12">
-                                        <div className="form-floating mb-3 mb-md-0">
+                                        <div className="mb-3">
+                                            <label htmlFor="inputShippingAddress" className="form-label fw-semibold">
+                                                Địa chỉ giao hàng <span style={{ color: 'red' }}>*</span>
+                                            </label>
                                             <input
                                                 className="form-control"
                                                 id="inputShippingAddress"
                                                 {...register('shipping_address', { required: 'Địa chỉ giao hàng là bắt buộc' })}
                                                 placeholder="Nhập địa chỉ giao hàng"
                                             />
-                                            <label htmlFor="inputShippingAddress">
-                                                Địa chỉ giao hàng <span style={{ color: 'red' }}>*</span>
-                                            </label>
-                                            {errors.shipping_address && <div className="text-danger">{errors.shipping_address.message}</div>}
+                                            {errors.shipping_address && <div className="text-danger mt-1">{errors.shipping_address.message}</div>}
                                         </div>
                                     </div>
                                 </div>
@@ -289,8 +289,8 @@ const OrderAdd = () => {
                                                             value={(item.type === 'product' ? productOptions : comboOptions).find(opt => String(opt.value) === String(item.id)) || null}
                                                             onChange={opt => handleChangeItem(idx, 'id', opt ? opt.value : '')}
                                                             placeholder={item.type === 'product' ? 'Chọn sản phẩm...' : 'Chọn combo...'}
-                                                            
                                                             classNamePrefix="react-select"
+                                                            styles={selectStyles}
                                                         />
                                                     </div>
                                                 </div>
