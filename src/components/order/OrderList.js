@@ -539,47 +539,7 @@ const OrderList = () => {
 
                         {/* Nội dung chính */}
                         <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
-                            {/* Header với nút thêm đơn hàng */}
-                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
-                                <div className="d-flex align-items-center gap-2">
-                                    <h4 className="mb-0 fw-bold text-primary">Danh sách đơn hàng</h4>
-                                    {/* Filter Toggle Button */}
-                                    <FilterToggleButton
-                                        key={`toggle-${isFilterVisible}`}
-                                        isVisible={isFilterVisible}
-                                        onToggle={() => {
-                                            setIsPulsing(true);
-                                            setTimeout(() => setIsPulsing(false), 600);
-                                            toggleFilterVisibility();
-                                        }}
-                                        isPulsing={isPulsing}
-                                    />
-                                </div>
-                                <div className="d-flex gap-2">
-                                    {/* Nút tạo mới */}
-                                    <Permission permission={PERMISSIONS.ORDERS_CREATE}>
-                                        <Link className="btn btn-primary" to="/order/add">
-                                            <i className="fas fa-plus me-1"></i> Tạo mới
-                                        </Link>
-                                    </Permission>
-                                    
-                                    {/* Các nút khác */}
-                                    <button className="btn btn-outline-secondary">
-                                        <i className="fas fa-upload me-1"></i> Import file
-                                    </button>
-                                    <button className="btn btn-outline-secondary">
-                                        <i className="fas fa-download me-1"></i> Xuất file
-                                    </button>
-                                    <button className="btn btn-outline-secondary">
-                                        <i className="fas fa-cog"></i>
-                                    </button>
-                                    <button className="btn btn-outline-secondary">
-                                        <i className="fas fa-question-circle"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Search bar */}
+                            {/* Search bar với các nút action */}
                             <div className="p-3 border-bottom bg-light search-bar">
                                 <div className="row align-items-center">
                                     <div className="col-md-4">
@@ -612,8 +572,29 @@ const OrderList = () => {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="col-md-4 text-end">
-                                        {/* Có thể thêm các nút khác ở đây nếu cần */}
+                                    <div className="col-md-8">
+                                        <div className="d-flex justify-content-end gap-2">
+                                            {/* Nút tạo mới */}
+                                            <Permission permission={PERMISSIONS.ORDERS_CREATE}>
+                                                <Link className="btn btn-primary" to="/order/add">
+                                                    <i className="fas fa-plus me-1"></i> Tạo mới
+                                                </Link>
+                                            </Permission>
+                                            
+                                            {/* Các nút khác */}
+                                            <button className="btn btn-secondary">
+                                                <i className="fas fa-upload me-1"></i> Import file
+                                            </button>
+                                            <button className="btn btn-secondary">
+                                                <i className="fas fa-download me-1"></i> Xuất file
+                                            </button>
+                                            <button className="btn btn-secondary">
+                                                <i className="fas fa-cog"></i>
+                                            </button>
+                                            <button className="btn btn-secondary">
+                                                <i className="fas fa-question-circle"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -626,6 +607,24 @@ const OrderList = () => {
                                         </small>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Header với tiêu đề */}
+                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
+                                <div className="d-flex align-items-center gap-2">
+                                    <h4 className="mb-0 fw-bold text-primary">Danh sách đơn hàng</h4>
+                                    {/* Filter Toggle Button */}
+                                    <FilterToggleButton
+                                        key={`toggle-${isFilterVisible}`}
+                                        isVisible={isFilterVisible}
+                                        onToggle={() => {
+                                            setIsPulsing(true);
+                                            setTimeout(() => setIsPulsing(false), 600);
+                                            toggleFilterVisibility();
+                                        }}
+                                        isPulsing={isPulsing}
+                                    />
+                                </div>
                             </div>
 
                             {/* Data Table */}

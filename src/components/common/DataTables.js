@@ -185,7 +185,7 @@ const DataTables = (props) => {
                     key={index}
                     scope="col"
                     style={col.thClass ? { ...col.thClass, width: newWidths[widthIdx++] } : { width: newWidths[widthIdx++] }}
-                    className={col.thClass || ""}
+                    className={`text-dark fw-bold ${col.thClass || ""}`}
                 >
                     {typeof col.title === "function" ? col.title() : col.title}
                 </th>
@@ -199,7 +199,7 @@ const DataTables = (props) => {
             <tr>
                 <td></td>
                 {filterHeader.map((filter, idx) => (
-                    <th key={idx} style={columns[idx] && columns[idx].width ? { width: columns[idx].width } : {}}>
+                    <th key={idx} style={columns[idx] && columns[idx].width ? { width: columns[idx].width } : {}} className="text-dark fw-bold">
                         {filter}
                     </th>
                 ))}
@@ -435,11 +435,11 @@ const DataTables = (props) => {
                 <div style={{ width: '100%', overflowX: 'auto' }}>
                     <table className="table table-bordered table-hover " id="datatablesSimple" style={{minWidth: tableMinWidth, width: '100%'}} cellSpacing="0">
                         {data.length > 0 && (
-                            <thead className="custom-table">
+                            <thead className="custom-table" style={{ backgroundColor: '#f8f9fa' }}>
                                 {renderFilterHeader()}
                                 <tr>
                                     {!hideSelected && (
-                                        <th style={{ width: '1%' }}>
+                                        <th style={{ width: '1%' }} className="text-dark fw-bold">
                                             <input type="checkbox" checked={data.length === selectedRows.length && data.length > 0 ? true : false} className="form-check-input" onChange={handleCheckedAll}/>
                                         </th>
                                     )}

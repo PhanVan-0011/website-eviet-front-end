@@ -157,21 +157,104 @@ const CategoriesList = () => {
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
                         <li className="breadcrumb-item active">Danh sách danh mục</li>
                     </ol>
-                    <div className='mb-3'>
-                        <Link className="btn btn-primary me-2 add-custom-btn" to="/category/add"><i className="fas fa-plus"></i> Thêm danh mục</Link>
-                        {selectedRows.length > 0 && <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa ({selectedRows.length})</button>}
+                    {/* Search bar với các nút action */}
+                    <div className="p-3 border-bottom bg-light search-bar">
+                        <div className="row align-items-center">
+                            <div className="col-md-4">
+                                <div className="input-group">
+                                    <span className="input-group-text">
+                                        <i className="fas fa-search"></i>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder="Tìm kiếm theo tên danh mục..."
+                                        value={searchText}
+                                        onChange={(e) => setSearchText(e.target.value)}
+                                    />
+                                    {searchText && (
+                                        <button 
+                                            className="btn btn-outline-secondary btn-sm"
+                                            type="button"
+                                            onClick={() => setSearchText('')}
+                                            title="Xóa tìm kiếm"
+                                            style={{
+                                                borderLeft: 'none',
+                                                borderRadius: '0 0.375rem 0.375rem 0',
+                                                backgroundColor: '#f8f9fa',
+                                                color: '#6c757d'
+                                            }}
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="col-md-8">
+                                <div className="d-flex justify-content-end gap-2">
+                                    {/* Nút tạo mới */}
+                                    <Link className="btn btn-primary" to="/category/add">
+                                        <i className="fas fa-plus me-1"></i> Tạo mới
+                                    </Link>
+                                    
+                                    {/* Nút xóa nhiều */}
+                                    {selectedRows.length > 0 && (
+                                        <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
+                                            <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
+                                        </button>
+                                    )}
+                                    
+                                    {/* Các nút khác */}
+                                    <button className="btn btn-secondary">
+                                        <i className="fas fa-upload me-1"></i> Import file
+                                    </button>
+                                    <button className="btn btn-secondary">
+                                        <i className="fas fa-download me-1"></i> Xuất file
+                                    </button>
+                                    <button className="btn btn-secondary">
+                                        <i className="fas fa-cog"></i>
+                                    </button>
+                                    <button className="btn btn-secondary">
+                                        <i className="fas fa-question-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Search results info */}
+                        {searchText && (
+                            <div className="search-results-info">
+                                <small>
+                                    <i className="fas fa-info-circle me-1"></i>
+                                    Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {categories.length} kết quả
+                                </small>
+                            </div>
+                        )}
                     </div>
-                    <DataTables 
-                        name="Danh sách danh mục"
-                        columns={columns}
-                        data={categories}
-                        numOfPages={numOfPages}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        setItemOfPage={setItemOfPage}
-                        changeKeyword={(keyword) => setSearchText(keyword)}
-                        onSelectedRows={ (selectedRows) => setSelectedRows(selectedRows)}
-                    />
+
+                    {/* Header với tiêu đề */}
+                    <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
+                        <div className="d-flex align-items-center gap-2">
+                            <h4 className="mb-0 fw-bold text-primary">Danh sách danh mục</h4>
+                        </div>
+                    </div>
+
+                    {/* Data Table */}
+                    <div className="flex-grow-1 overflow-auto">
+                        <div className="p-3">
+                            <DataTables 
+                                name="Danh sách danh mục"
+                                columns={columns}
+                                data={categories}
+                                numOfPages={numOfPages}
+                                currentPage={currentPage}
+                                setCurrentPage={setCurrentPage}
+                                setItemOfPage={setItemOfPage}
+                                hideSearch={true}
+                                onSelectedRows={ (selectedRows) => setSelectedRows(selectedRows)}
+                            />
+                        </div>
+                    </div>
                 </div>
             </main>
             <Modal show={showModal} onHide={() => {setShowModal(false); setItemDelete(null); setTypeDelete(null)}}>

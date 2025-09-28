@@ -577,56 +577,7 @@ const ProductList = () => {
 
                         {/* Nội dung chính */}
                         <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
-                            {/* Header với nút thêm sản phẩm */}
-                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
-                                <div className="d-flex align-items-center gap-2">
-                                    <h4 className="mb-0 fw-bold text-primary">Danh sách sản phẩm</h4>
-                                    {/* Filter Toggle Button */}
-                                    <FilterToggleButton
-                                        key={`toggle-${isFilterVisible}`}
-                                        isVisible={isFilterVisible}
-                                        onToggle={() => {
-                                            setIsPulsing(true);
-                                            setTimeout(() => setIsPulsing(false), 600);
-                                            toggleFilterVisibility();
-                                        }}
-                                        isPulsing={isPulsing}
-                                    />
-                                </div>
-                                <div className="d-flex gap-2">
-                                    {/* Nút xóa khi có sản phẩm được chọn */}
-                        <Permission permission={PERMISSIONS.PRODUCTS_DELETE}>
-                            {selectedRows.length > 0 && (
-                                            <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
-                                                <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
-                                </button>
-                            )}
-                        </Permission>
-                                    
-                                    {/* Nút tạo mới */}
-                                    <Permission permission={PERMISSIONS.PRODUCTS_CREATE}>
-                                        <Link className="btn btn-primary" to="/product/add">
-                                            <i className="fas fa-plus me-1"></i> Tạo mới
-                                        </Link>
-                                    </Permission>
-                                    
-                                    {/* Các nút khác */}
-                                    <button className="btn btn-outline-secondary">
-                                        <i className="fas fa-upload me-1"></i> Import file
-                                    </button>
-                                    <button className="btn btn-outline-secondary">
-                                        <i className="fas fa-download me-1"></i> Xuất file
-                                    </button>
-                                    <button className="btn btn-outline-secondary">
-                                        <i className="fas fa-cog"></i>
-                                    </button>
-                                    <button className="btn btn-outline-secondary">
-                                        <i className="fas fa-question-circle"></i>
-                                    </button>
-                                </div>
-                    </div>
-
-                            {/* Search bar */}
+                            {/* Search bar với các nút action */}
                             <div className="p-3 border-bottom bg-light search-bar">
                                 <div className="row align-items-center">
                                     <div className="col-md-4">
@@ -657,12 +608,42 @@ const ProductList = () => {
                                                     <i className="fas fa-times"></i>
                                                 </button>
                                             )}
-                        </div>
-                        </div>
-                                    <div className="col-md-4 text-end">
-                                        {/* Có thể thêm các nút khác ở đây nếu cần */}
-                        </div>
-                    </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-8">
+                                        <div className="d-flex justify-content-end gap-2">
+                                            {/* Nút xóa khi có sản phẩm được chọn */}
+                                            <Permission permission={PERMISSIONS.PRODUCTS_DELETE}>
+                                                {selectedRows.length > 0 && (
+                                                    <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
+                                                        <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
+                                                    </button>
+                                                )}
+                                            </Permission>
+                                            
+                                            {/* Nút tạo mới */}
+                                            <Permission permission={PERMISSIONS.PRODUCTS_CREATE}>
+                                                <Link className="btn btn-primary" to="/product/add">
+                                                    <i className="fas fa-plus me-1"></i> Tạo mới
+                                                </Link>
+                                            </Permission>
+                                            
+                                            {/* Các nút khác */}
+                                            <button className="btn btn-secondary">
+                                                <i className="fas fa-upload me-1"></i> Import file
+                                            </button>
+                                            <button className="btn btn-secondary">
+                                                <i className="fas fa-download me-1"></i> Xuất file
+                                            </button>
+                                            <button className="btn btn-secondary">
+                                                <i className="fas fa-cog"></i>
+                                            </button>
+                                            <button className="btn btn-secondary">
+                                                <i className="fas fa-question-circle"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 {/* Search results info */}
                                 {searchText && (
@@ -671,9 +652,27 @@ const ProductList = () => {
                                             <i className="fas fa-info-circle me-1"></i>
                                             Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {sortedProducts.length} kết quả
                                         </small>
-                        </div>
+                                    </div>
                                 )}
-                    </div>
+                            </div>
+
+                            {/* Header với tiêu đề */}
+                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
+                                <div className="d-flex align-items-center gap-2">
+                                    <h4 className="mb-0 fw-bold text-primary">Danh sách sản phẩm</h4>
+                                    {/* Filter Toggle Button */}
+                                    <FilterToggleButton
+                                        key={`toggle-${isFilterVisible}`}
+                                        isVisible={isFilterVisible}
+                                        onToggle={() => {
+                                            setIsPulsing(true);
+                                            setTimeout(() => setIsPulsing(false), 600);
+                                            toggleFilterVisibility();
+                                        }}
+                                        isPulsing={isPulsing}
+                                    />
+                                </div>
+                            </div>
 
                             {/* Data Table */}
                             <div className="flex-grow-1 overflow-auto">
