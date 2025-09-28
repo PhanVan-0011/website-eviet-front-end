@@ -11611,7 +11611,7 @@ body {
 
 /* DatePicker fixes for filter panel */
 .react-datepicker-popper {
-    z-index: 9999 !important;
+    z-index: 99999 !important;
     position: fixed !important;
 }
 
@@ -11623,11 +11623,52 @@ body {
     margin-bottom: 8px;
 }
 
+.react-datepicker-popper[data-placement^="right"] {
+    margin-left: 8px;
+}
+
+.react-datepicker-popper[data-placement^="left"] {
+    margin-right: 8px;
+}
+
+/* Đặc biệt cho datepicker trong filter panel */
+.filter-panel .react-datepicker-popper[data-placement^="right"] {
+    margin-left: 12px !important;
+    transform: translateY(0) !important;
+}
+
+/* Đảm bảo datepicker hiển thị về phía bên phải */
+.filter-panel .react-datepicker-popper[data-placement="right-start"] {
+    margin-left: 8px !important;
+    margin-top: 0 !important;
+}
+
+.filter-panel .react-datepicker-popper[data-placement="right-end"] {
+    margin-left: 8px !important;
+    margin-top: 0 !important;
+}
+
 .react-datepicker {
     border: 1px solid #ced4da;
     border-radius: 0.375rem;
     box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
     font-family: inherit;
+}
+
+/* Đảm bảo datepicker trong filter panel hiển thị đúng vị trí */
+.filter-panel .react-datepicker-popper {
+    z-index: 99999 !important;
+    position: fixed !important;
+}
+
+.filter-panel .react-datepicker-popper[data-placement^="right"] {
+    transform: translateX(0) !important;
+}
+
+/* Đảm bảo datepicker không bị che khuất bởi filter panel */
+.filter-panel .react-datepicker {
+    z-index: 99999 !important;
+    position: relative !important;
 }
 
 .react-datepicker__header {
@@ -12077,4 +12118,21 @@ body {
 /*//Detail format*/
 .background-detail{
   background-color: #e6f8ec;
+}
+
+/* Đảm bảo datepicker hiển thị phía dưới */
+.filter-panel .react-datepicker-popper[data-placement="bottom-start"] {
+    margin-top: 8px !important;
+    margin-left: 0 !important;
+}
+
+.filter-panel .react-datepicker-popper[data-placement="bottom-end"] {
+    margin-top: 8px !important;
+    margin-left: 0 !important;
+}
+
+/* Đảm bảo datepicker nổi lên trên tất cả */
+.filter-panel .react-datepicker-popper[data-placement^="bottom"] {
+    z-index: 99999 !important;
+    position: fixed !important;
 }

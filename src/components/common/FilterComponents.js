@@ -1,6 +1,7 @@
 import React from 'react';
 import Select from 'react-select';
 import DatePicker from 'react-datepicker';
+import { createPortal } from 'react-dom';
 import 'react-datepicker/dist/react-datepicker.css';
 import { vi } from 'date-fns/locale';
 
@@ -264,6 +265,7 @@ export const FilterDateRange = ({
                         className="form-control"
                         style={{ height: '38px' }}
                         popperPlacement="bottom-start"
+                        popperContainer={({ children }) => createPortal(children, document.body)}
                         showMonthDropdown
                         showYearDropdown
                         dropdownMode="select"
@@ -284,6 +286,7 @@ export const FilterDateRange = ({
                         className="form-control"
                         style={{ height: '38px' }}
                         popperPlacement="bottom-end"
+                        popperContainer={({ children }) => createPortal(children, document.body)}
                         showMonthDropdown
                         showYearDropdown
                         dropdownMode="select"
