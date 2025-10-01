@@ -17,6 +17,9 @@ export const ROUTE_PERMISSIONS = {
   '/category/add': PERMISSIONS.CATEGORIES_MANAGE,
   '/category/:id': PERMISSIONS.CATEGORIES_MANAGE,
 
+  // Chi nhánh - không cần check quyền
+  // '/branch': PERMISSIONS.BRANCHES_MANAGE,
+
   // Sản phẩm
   '/product': PERMISSIONS.PRODUCTS_VIEW,
   '/product/add': PERMISSIONS.PRODUCTS_CREATE,

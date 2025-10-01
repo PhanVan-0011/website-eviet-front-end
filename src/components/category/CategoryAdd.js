@@ -18,6 +18,21 @@ const CategoryAdd = () => {
     const dispatch = useDispatch();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categories, setCategories] = useState([]);
+    const [iconFile, setIconFile] = useState(null);
+    const [iconPreview, setIconPreview] = useState(null);
+
+    // Hàm xử lý khi chọn icon
+    const onChangeIcon = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setIconFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setIconPreview(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     // Lấy danh sách danh mục cha
     // useEffect(() => {
@@ -34,9 +49,25 @@ const CategoryAdd = () => {
         if (data.parent_id === "" || data.parent_id === "null") {
             data.parent_id = null;
         }
+        
+        // Tạo FormData để gửi file
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('description', data.description || '');
+        formData.append('status', data.status);
+        if (iconFile) {
+            formData.append('icon', iconFile);
+        }
+        
         try {
             dispatch(actions.controlLoading(true));
-            const response = await requestApi('api/admin/categories', 'POST', data);
+            const response = await requestApi(
+                'api/admin/categories',
+                'POST',
+                formData,
+                'json',
+                'multipart/form-data'
+            );
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm danh mục thành công!",toastSuccessConfig);
@@ -120,6 +151,67 @@ const CategoryAdd = () => {
                                                     <option value="0">Ẩn</option>
                                                 </select>
                                                 {errors.status && <div className="text-danger mt-1">{errors.status.message}</div>}
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <div className="form-label fw-semibold">
+                                                    Icon danh mục
+                                                </div>
+                                                <div className="row g-3">
+                                                    <div className="col-2 d-flex flex-column align-items-center">
+                                                        <div
+                                                            className={`w-100 border border-2 ${iconPreview ? 'border-primary' : 'border-secondary'} border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center`}
+                                                            style={{ aspectRatio: '1/1', minHeight: 0, height: 'auto', maxWidth: '100%' }}
+                                                        >
+                                                            {iconPreview ? (
+                                                                <>
+                                                                    <img
+                                                                        src={iconPreview}
+                                                                        alt="Icon preview"
+                                                                        className="w-100 h-100 rounded position-absolute top-0 start-0"
+                                                                        style={{ objectFit: 'contain', aspectRatio: '1/1' }}
+                                                                    />
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 m-1 d-flex align-items-center justify-content-center no-hover"
+                                                                        style={{ zIndex: 2, width: 24, height: 24, padding: 0, background: '#fff' }}
+                                                                        aria-label="Xóa icon"
+                                                                        onClick={() => {
+                                                                            setIconFile(null);
+                                                                            setIconPreview(null);
+                                                                            document.getElementById('inputIcon').value = '';
+                                                                        }}
+                                                                    >
+                                                                        <i className="fas fa-times"></i>
+                                                                    </button>
+                                                                </>
+                                                            ) : (
+                                                                <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                                                    <i className="fas fa-image fs-1 text-secondary"></i>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
+                                                    <label htmlFor="inputIcon" className="form-label btn btn-secondary mb-0">
+                                                        <i className="fas fa-upload"></i> Thêm icon danh mục
+                                                    </label>
+                                                    <div className="d-flex flex-column gap-1">
+                                                        <span className="text-muted small">
+                                                            Chỉ chọn 1 icon, định dạng: jpg, png, svg...
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <input
+                                                    className="form-control"
+                                                    id="inputIcon"
+                                                    type="file"
+                                                    accept="image/*,.svg"
+                                                    style={{ display: 'none' }}
+                                                    onChange={onChangeIcon}
+                                                />
                                             </div>
                                         </div>
                                         {/* <div className="col-md-6">

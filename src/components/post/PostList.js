@@ -16,6 +16,7 @@ import {
     FilterDateRange,
     FilterToggleButton
 } from '../common/FilterComponents';
+import LiveSearch from '../common/LiveSearch';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const PostList = () => {
@@ -25,7 +26,6 @@ const PostList = () => {
     const [itemOfPage, setItemOfPage] = useState(25);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('');
-    const [debouncedSearchText, setDebouncedSearchText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
     const [itemDelete, setItemDelete] = useState(null);
     const [typeDelete, setTypeDelete] = useState(null);
@@ -47,13 +47,6 @@ const PostList = () => {
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
 
-    // Debounce search text
-    useEffect(() => {
-        const delayDebounce = setTimeout(() => {
-            setDebouncedSearchText(searchText);
-        }, 500);
-        return () => clearTimeout(delayDebounce);
-    }, [searchText]);
 
     const updateFilter = (key, value) => {
         setFilterValues(prev => ({ ...prev, [key]: value }));
@@ -72,7 +65,7 @@ const PostList = () => {
 
     // Lấy danh sách bài viết
     useEffect(() => {
-        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${debouncedSearchText}`;
+        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
         
         // New filter panel filters
         if (filterValues.category && filterValues.category !== 'all') {
@@ -90,7 +83,7 @@ const PostList = () => {
         }).catch(() => {
             dispatch(actions.controlLoading(false));
         });
-    }, [currentPage, itemOfPage, debouncedSearchText, filterValues, refresh, dispatch]);
+    }, [currentPage, itemOfPage, searchText, filterValues, refresh, dispatch]);
 
     // Sắp xếp
     const sortedPosts = [...posts].sort((a, b) => {
@@ -341,29 +334,10 @@ const PostList = () => {
                                             <span className="input-group-text">
                                                 <i className="fas fa-search"></i>
                                             </span>
-                                            <input
-                                                type="text"
-                                                className="form-control"
+                                            <LiveSearch 
+                                                changeKeyword={setSearchText}
                                                 placeholder="Tìm kiếm theo tiêu đề, nội dung..."
-                                                value={searchText}
-                                                onChange={(e) => setSearchText(e.target.value)}
                                             />
-                                            {searchText && (
-                                                <button 
-                                                    className="btn btn-outline-secondary btn-sm"
-                                                    type="button"
-                                                    onClick={() => setSearchText('')}
-                                                    title="Xóa tìm kiếm"
-                                                    style={{
-                                                        borderLeft: 'none',
-                                                        borderRadius: '0 0.375rem 0.375rem 0',
-                                                        backgroundColor: '#f8f9fa',
-                                                        color: '#6c757d'
-                                                    }}
-                                                >
-                                                    <i className="fas fa-times"></i>
-                                                </button>
-                                            )}
                                         </div>
                                     </div>
                                     <div className="col-md-8">

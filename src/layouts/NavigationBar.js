@@ -22,6 +22,8 @@ const NavigationBar = () => {
     PERMISSIONS.POSTS_MANAGE,
     PERMISSIONS.SLIDERS_MANAGE,
     PERMISSIONS.COMBOS_MANAGE,
+    PERMISSIONS.BRANCHES_MANAGE,
+    PERMISSIONS.GROUP_SUPPLIERS_MANAGE,
   ];
   const systemPermissions = [PERMISSIONS.USERS_MANAGE, PERMISSIONS.ROLES_MANAGE];
 
@@ -119,6 +121,38 @@ const NavigationBar = () => {
               </div>
             </>
           )}
+
+          {/* Menu chi nhánh - dropdown riêng */}
+          <div className="nav-item dropdown">
+            <a className="nav-link dropdown-toggle px-4 py-2 d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i className="fas fa-building me-2"></i>
+              Chi nhánh
+            </a>
+            <ul className="dropdown-menu">
+              <li>
+                <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/branch">
+                  <i className="fas fa-building me-2"></i>
+                  Quản lý chi nhánh
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Menu nhóm nhà cung cấp - dropdown riêng */}
+          <div className="nav-item dropdown">
+            <a className="nav-link dropdown-toggle px-4 py-2 d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i className="fas fa-users me-2"></i>
+              Nhóm nhà cung cấp
+            </a>
+            <ul className="dropdown-menu">
+              <li>
+                <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/group-supplier">
+                  <i className="fas fa-users me-2"></i>
+                  Quản lý nhóm nhà cung cấp
+                </Link>
+              </li>
+            </ul>
+          </div>
 
           {hasAnyPermission(systemPermissions) && (
             <>

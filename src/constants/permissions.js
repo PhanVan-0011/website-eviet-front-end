@@ -28,6 +28,8 @@ export const PERMISSIONS = {
     COMBOS_MANAGE: 'combos.manage',
     SLIDERS_MANAGE: 'sliders.manage',
     POSTS_MANAGE: 'posts.manage',
+    BRANCHES_MANAGE: 'branches.manage',
+    GROUP_SUPPLIERS_MANAGE: 'group_suppliers.manage',
   
     // Hệ thống
     USERS_MANAGE: 'users.manage',

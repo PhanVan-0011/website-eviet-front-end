@@ -18,6 +18,7 @@ import {
     FilterDateRange,
     FilterToggleButton
 } from '../common/FilterComponents';
+import LiveSearch from '../common/LiveSearch';
 import CategoryModal from '../common/CategoryModal';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
@@ -36,7 +37,6 @@ const ProductList = () => {
     const [itemOfPage, setItemOfPage] = useState(25);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('');
-    const [debouncedSearchText, setDebouncedSearchText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
     const [itemDelete, setItemDelete] = useState(null);
     const [typeDelete, setTypeDelete] = useState(null);
@@ -100,13 +100,6 @@ const ProductList = () => {
     const categoryIdParam = params.get('category_id') || '';
     const [filterCategory, setFilterCategory] = useState(categoryIdParam);
 
-    // Debounce search text (giống logic trong LiveSearch)
-    useEffect(() => {
-        const delayDebounce = setTimeout(() => {
-            setDebouncedSearchText(searchText);
-        }, 500);
-        return () => clearTimeout(delayDebounce);
-    }, [searchText]);
 
 
     // Lấy dữ liệu cho filter
@@ -146,7 +139,7 @@ const ProductList = () => {
     // 3. Gọi lại API khi filter thay đổi
     useEffect(() => {
         // Tạo query string cho filter
-        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${debouncedSearchText}`;
+        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
         
         // Legacy filters
         if (filterCategory) query += `&category_id=${filterCategory}`;
@@ -198,7 +191,7 @@ const ProductList = () => {
     }, [
         currentPage,
         itemOfPage,
-        debouncedSearchText,
+        searchText,
         filterCategory,
         filterOriginalPrice,
         filterSalePrice,
@@ -585,29 +578,10 @@ const ProductList = () => {
                                             <span className="input-group-text">
                                                 <i className="fas fa-search"></i>
                                             </span>
-                                            <input
-                                                type="text"
-                                                className="form-control"
+                                            <LiveSearch 
+                                                changeKeyword={setSearchText}
                                                 placeholder="Tìm kiếm theo mã sản phẩm, tên sản phẩm..."
-                                                value={searchText}
-                                                onChange={(e) => setSearchText(e.target.value)}
                                             />
-                                            {searchText && (
-                                                <button 
-                                                    className="btn btn-outline-secondary btn-sm"
-                                                    type="button"
-                                                    onClick={() => setSearchText('')}
-                                                    title="Xóa tìm kiếm"
-                                                    style={{
-                                                        borderLeft: 'none',
-                                                        borderRadius: '0 0.375rem 0.375rem 0',
-                                                        backgroundColor: '#f8f9fa',
-                                                        color: '#6c757d'
-                                                    }}
-                                                >
-                                                    <i className="fas fa-times"></i>
-                                                </button>
-                                            )}
                                         </div>
                                     </div>
                                     <div className="col-md-8">

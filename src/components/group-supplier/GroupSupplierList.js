@@ -8,17 +8,10 @@ import { Modal, Button } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
-import {
-    FilterButtonGroup,
-    FilterDateRange,
-    FilterToggleButton
-} from '../common/FilterComponents';
-import ImageList from '../common/ImageList';
 import LiveSearch from '../common/LiveSearch';
-const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
-const CategoriesList = () => {
-    const [categories, setCategories] = useState([]);
+const GroupSupplierList = () => {
+    const [groupSuppliers, setGroupSuppliers] = useState([]);
     const [numOfPages, setNumOfPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemOfPage, setItemOfPage] = useState(25);
@@ -30,87 +23,42 @@ const CategoriesList = () => {
     const [showModal, setShowModal] = useState(false);
     const [refresh, setRefresh] = useState(Date.now());
 
-    // Filter states
-    const [filterValues, setFilterValues] = useState({
-        status: 'all',
-        dateRange: { from: null, to: null }
-    });
-    const [isFilterVisible, setIsFilterVisible] = useState(true);
-    const [isPulsing, setIsPulsing] = useState(false);
-
-    const updateFilter = (key, value) => {
-        setFilterValues(prev => ({ ...prev, [key]: value }));
-    };
-
-    const toggleFilterVisibility = () => {
-        setIsFilterVisible(prev => !prev);
-    };
-
     const columns = [
-        // { title: "ID", element: row => row.id },
         { 
-            title: "Tên danh mục", 
+            title: "Tên nhóm nhà cung cấp", 
             element: row => row.name,
-            width: "18%"
-        },
-        { 
-            title: "Icon", 
-            element: row => {
-                // Kiểm tra xem có icon không (API trả về trường 'icon' chứ không phải 'icon_url')
-                if (row.icon) {
-                    return <ImageList src={urlImage + row.icon} alt={row.name} />;
-                } else {
-                    return <ImageList icon alt="Không có icon" />;
-                }
-            },
-            width: "10%"
+            width: "25%"
         },
         { 
             title: "Mô tả", 
-            element: row => row.description,
-            width: "20%"
+            element: row => row.description || 'Không có mô tả',
+            width: "30%"
         },
-        // { title: "Danh mục cha", element: row => row.parent ? row.parent.name : "" },
         { 
             title: "Ngày tạo", 
             element: row => formatDate(row.created_at),
-            width: "12%"
+            width: "15%"
         },
         { 
             title: "Ngày cập nhật", 
             element: row => formatDate(row.updated_at),
-            width: "12%"
-        },
-        {
-            title: () => (
-                <span style={{ cursor: 'pointer' }}>
-                    Sản phẩm
-                </span>
-            ),
-            element: row => (
-                <Link
-                    to={`/product?category_id=${row.id}`}
-                    className="text-decoration-underline text-primary"
-                    title="Xem danh sách sản phẩm"
-                    style={{ cursor: 'pointer' }}
-                >
-                    {row.products_count} sản phẩm
-                </Link>
-            ),
-            width: "12%"
+            width: "15%"
         },
         {
             title: "Trạng thái",
             element: row => row.status === 1
-                ? <span className="badge bg-success">Hiển thị</span>
-                : <span className="badge bg-secondary">Ẩn</span>,
+                ? <span className="badge bg-success">Hoạt động</span>
+                : <span className="badge bg-secondary">Không hoạt động</span>,
             width: "10%"
         },
         {
             title: "Hành động", 
             element: row => (
                 <div className="d-flex gap-1">
-                    <Link className="btn btn-primary btn-sm" to={`/category/${row.id}`} title="Chỉnh sửa">
+                    <Link className="btn btn-info btn-sm" to={`/group-supplier/${row.id}`} title="Xem chi tiết">
+                        <i className="fas fa-eye"></i>
+                    </Link>
+                    <Link className="btn btn-primary btn-sm" to={`/group-supplier/${row.id}/edit`} title="Chỉnh sửa">
                         <i className="fas fa-edit"></i>
                     </Link>
                     <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)} title="Xóa">
@@ -118,7 +66,7 @@ const CategoriesList = () => {
                     </button>
                 </div>
             ),
-            width: "12%"
+            width: "15%"
         }
     ];
 
@@ -137,14 +85,14 @@ const CategoriesList = () => {
     const requestApiDelete = () => {
         dispatch(actions.controlLoading(true));
         if(typeDelete === 'single'){
-            requestApi(`api/admin/categories/${itemDelete}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/supplier-groups/${itemDelete}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa danh mục thành công!", toastSuccessConfig);
+                    toast.success(response.data.message || "Xóa nhóm nhà cung cấp thành công!", toastSuccessConfig);
                     setRefresh(Date.now());
                 } else {
-                    toast.error(response.data.message || "Xóa danh mục thất bại", toastErrorConfig);
+                    toast.error(response.data.message || "Xóa nhóm nhà cung cấp thất bại", toastErrorConfig);
                 }
             }).catch((e) => {
                 dispatch(actions.controlLoading(false));
@@ -156,14 +104,14 @@ const CategoriesList = () => {
                 }
             });
         } else {
-            requestApi(`api/admin/categories/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/supplier-groups/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa danh mục thành công!", toastSuccessConfig);
+                    toast.success(response.data.message || "Xóa nhóm nhà cung cấp thành công!", toastSuccessConfig);
                     setRefresh(Date.now());
                 } else {
-                    toast.error(response.data.message || "Xóa danh mục thất bại", toastErrorConfig);
+                    toast.error(response.data.message || "Xóa nhóm nhà cung cấp thất bại", toastErrorConfig);
                 }
             }).catch((e) => {
                 dispatch(actions.controlLoading(false));
@@ -180,27 +128,15 @@ const CategoriesList = () => {
     useEffect(() => {
         let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
         
-        // Thêm filter status
-        if (filterValues.status !== 'all') {
-            query += `&status=${filterValues.status === 'active' ? '1' : '0'}`;
-        }
-        
-        // Thêm filter date range
-        if (filterValues.dateRange.from && filterValues.dateRange.to) {
-            const startDate = filterValues.dateRange.from.toISOString().split('T')[0];
-            const endDate = filterValues.dateRange.to.toISOString().split('T')[0];
-            query += `&start_date=${startDate}&end_date=${endDate}`;
-        }
-        
         dispatch(actions.controlLoading(true));
-        requestApi(`api/admin/categories${query}`, 'GET', []).then((response) => {
+        requestApi(`api/admin/supplier-groups${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
-            setCategories(response.data.data);
+            setGroupSuppliers(response.data.data);
             setNumOfPages(response.data.pagination.last_page);
         }).catch((error) => {
             dispatch(actions.controlLoading(false));
         });
-    }, [currentPage, itemOfPage, searchText, refresh, filterValues]);
+    }, [currentPage, itemOfPage, searchText, refresh]);
 
     return (
         <div id="layoutSidenav_content">
@@ -209,39 +145,13 @@ const CategoriesList = () => {
                     <h1 className="mt-4"></h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
-                        <li className="breadcrumb-item active">Danh sách danh mục</li>
+                        <li className="breadcrumb-item active">Danh sách nhóm nhà cung cấp</li>
                     </ol>
                     
-                    {/* Layout chính với FilterPanel và nội dung */}
+                    {/* Layout chính */}
                     <div className="row g-0">
-                        {/* Filter Panel */}
-                        <div className={`position-relative filter-panel ${isFilterVisible ? 'col-md-2' : 'col-md-0'} transition-all d-flex flex-column`}>
-                            {isFilterVisible && (
-                                <div className="p-3 filter-content">
-                                    {/* Trạng thái */}
-                                    <FilterButtonGroup
-                                        label="Trạng thái"
-                                        value={filterValues.status || 'all'}
-                                        onChange={(value) => updateFilter('status', value)}
-                                        options={[
-                                            { value: 'all', label: 'Tất cả' },
-                                            { value: 'active', label: 'Hiển thị' },
-                                            { value: 'inactive', label: 'Không hiển thị' }
-                                        ]}
-                                    />
-
-                                    {/* Thời gian tạo */}
-                                    <FilterDateRange
-                                        label="Thời gian tạo"
-                                        value={filterValues.dateRange || { from: null, to: null }}
-                                        onChange={(dateRange) => updateFilter('dateRange', dateRange)}
-                                    />
-                                </div>
-                            )}
-                        </div>
-
                         {/* Nội dung chính */}
-                        <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
+                        <div className="col-md-12 d-flex flex-column">
                             {/* Search bar với các nút action */}
                     <div className="p-3 border-bottom bg-light search-bar">
                         <div className="row align-items-center">
@@ -252,14 +162,14 @@ const CategoriesList = () => {
                                     </span>
                                     <LiveSearch 
                                         changeKeyword={setSearchText}
-                                        placeholder="Tìm kiếm theo tên danh mục..."
+                                        placeholder="Tìm kiếm theo tên nhóm nhà cung cấp..."
                                     />
                                 </div>
                             </div>
                             <div className="col-md-8">
                                 <div className="d-flex justify-content-end gap-2">
                                     {/* Nút tạo mới */}
-                                    <Link className="btn btn-primary" to="/category/add">
+                                    <Link className="btn btn-primary" to="/group-supplier/add">
                                         <i className="fas fa-plus me-1"></i> Tạo mới
                                     </Link>
                                     
@@ -292,7 +202,7 @@ const CategoriesList = () => {
                             <div className="search-results-info">
                                 <small>
                                     <i className="fas fa-info-circle me-1"></i>
-                                    Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {categories.length} kết quả
+                                    Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {groupSuppliers.length} kết quả
                                 </small>
                             </div>
                         )}
@@ -301,18 +211,7 @@ const CategoriesList = () => {
                             {/* Header với tiêu đề */}
                             <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
                                 <div className="d-flex align-items-center gap-2">
-                                    <h4 className="mb-0 fw-bold text-dark">Danh sách danh mục</h4>
-                                    {/* Filter Toggle Button */}
-                                    <FilterToggleButton
-                                        key={`toggle-${isFilterVisible}`}
-                                        isVisible={isFilterVisible}
-                                        onToggle={() => {
-                                            setIsPulsing(true);
-                                            setTimeout(() => setIsPulsing(false), 600);
-                                            toggleFilterVisibility();
-                                        }}
-                                        isPulsing={isPulsing}
-                                    />
+                                    <h4 className="mb-0 fw-bold text-dark">Danh sách nhóm nhà cung cấp</h4>
                                 </div>
                             </div>
 
@@ -320,9 +219,9 @@ const CategoriesList = () => {
                             <div className="flex-grow-1 overflow-auto">
                                 <div className="p-3">
                                     <DataTables 
-                                        name="Danh sách danh mục"
+                                        name="Danh sách nhóm nhà cung cấp"
                                         columns={columns}
-                                        data={categories}
+                                        data={groupSuppliers}
                                         numOfPages={numOfPages}
                                         currentPage={currentPage}
                                         setCurrentPage={setCurrentPage}
@@ -342,9 +241,9 @@ const CategoriesList = () => {
                 </Modal.Header>
                 <Modal.Body>
                     {typeDelete === 'single' ? (
-                        <p>Bạn có chắc chắn muốn xóa danh mục này?</p>
+                        <p>Bạn có chắc chắn muốn xóa nhóm nhà cung cấp này?</p>
                     ) : (
-                        <p>Bạn có chắc chắn muốn xóa các danh mục này?</p>
+                        <p>Bạn có chắc chắn muốn xóa các nhóm nhà cung cấp này?</p>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
@@ -360,4 +259,4 @@ const CategoriesList = () => {
     )
 }
 
-export default CategoriesList
+export default GroupSupplierList

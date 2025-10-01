@@ -28,6 +28,7 @@ const Sidebar = () => {
     PERMISSIONS.POSTS_MANAGE,
     PERMISSIONS.SLIDERS_MANAGE,
     PERMISSIONS.COMBOS_MANAGE,
+    PERMISSIONS.BRANCHES_MANAGE,
   ];
   const systemPermissions = [PERMISSIONS.USERS_MANAGE, PERMISSIONS.ROLES_MANAGE];
 
@@ -49,6 +50,13 @@ const Sidebar = () => {
                 </Permission>
               </>
             )}
+
+            {/* Menu chi nhánh - hiển thị ngay sau phần chính */}
+            <div className="sb-sidenav-menu-heading">Quản lý chi nhánh</div>
+            <Link className={`nav-link ${isActive('/branch') ? 'active' : ''}`} to="/branch">
+              <div className="sb-nav-link-icon"><i className="fas fa-building"></i></div>
+              Quản lý chi nhánh
+            </Link>
 
             {hasAnyPermission(salePermissions) && (
               <>

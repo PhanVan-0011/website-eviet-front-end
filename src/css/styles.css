@@ -1,4 +1,180 @@
 @charset "UTF-8";
+
+/* Custom styles for Group Supplier textarea */
+textarea.form-control[rows="12"] {
+    height: 100px !important;
+    min-height: 100px !important;
+}
+
+/* More specific selector */
+div.mb-3 textarea.form-control[rows="12"] {
+    height: 100px !important;
+    min-height: 100px !important;
+}
+
+/* Even more specific with custom class */
+textarea.form-control.large-textarea {
+    height: 100px !important;
+    min-height: 100px !important;
+}
+
+/* Filter Panel Styling */
+.filter-panel {
+    border: 1px solid #dee2e6 !important;
+    border-top: none !important;
+    border-radius: 0 0 8px 8px !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.filter-panel .card-header {
+    background-color: #f8f9fa !important;
+    border-bottom: 1px solid #dee2e6 !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+}
+
+.filter-panel .card-body {
+    padding: 1.5rem !important;
+}
+
+/* Filter form controls */
+.filter-panel .form-control,
+.filter-panel .form-select {
+    border: 1px solid #ced4da !important;
+    border-radius: 6px !important;
+}
+
+/* Căn giữa text theo chiều cao chỉ cho form-select (dropdown) */
+.filter-panel .form-select {
+    text-align: left !important;
+    line-height: 38px !important;
+    height: 38px !important;
+    padding: 0 0.75rem !important;
+    vertical-align: middle !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Căn giữa cho option và placeholder */
+.filter-panel .form-select option {
+    text-align: left !important;
+    line-height: 38px !important;
+    padding: 0.5rem !important;
+}
+
+/* Đảm bảo text được căn trái ngay từ đầu */
+.filter-panel .form-select:first-child {
+    text-align: left !important;
+    line-height: 38px !important;
+}
+
+/* CSS với độ ưu tiên cao hơn để override Bootstrap */
+div.filter-panel select.form-select {
+    text-align: left !important;
+    line-height: 38px !important;
+    height: 38px !important;
+    padding: 0 0.75rem !important;
+    vertical-align: middle !important;
+}
+
+/* Force left alignment for all states */
+div.filter-panel select.form-select,
+div.filter-panel select.form-select:focus,
+div.filter-panel select.form-select:active {
+    text-align: left !important;
+    line-height: 38px !important;
+}
+
+/* Giữ nguyên form-control (input date) như cũ */
+.filter-panel .form-control {
+    padding: 0.375rem 0.75rem !important;
+}
+
+
+.filter-panel .form-control:focus,
+.filter-panel .form-select:focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* Filter labels */
+.filter-panel .form-label {
+    font-weight: 600 !important;
+    color: #495057 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Fix border and shadow issues */
+.card {
+    border: 1px solid #dee2e6 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.form-control {
+    border: 1px solid #ced4da !important;
+}
+
+.form-control:focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+.btn {
+    border: 1px solid #dee2e6 !important;
+}
+
+.btn-primary {
+    border-color: #0d6efd !important;
+}
+
+.btn-success {
+    border-color: #198754 !important;
+}
+
+.btn-info {
+    border-color: #0dcaf0 !important;
+}
+
+/* Target the main content area in order list page */
+.row .col-md-10,
+.row .col-md-12 {
+    border-right: 1px solid #dee2e6 !important;
+    border-left: 1px solid #dee2e6 !important; /* Add left border when filter is closed */
+}
+
+/* Target the main content card specifically */
+.row .col-md-10 .card,
+.row .col-md-12 .card {
+    border-right: 1px solid #dee2e6 !important;
+    border-left: 1px solid #dee2e6 !important; /* Add left border when filter is closed */
+}
+
+/* Restore left border for main content when filter is visible */
+.row .col-md-10 {
+    border-left: 1px solid #dee2e6 !important;
+}
+
+.row .col-md-10 .card {
+    border-left: 1px solid #dee2e6 !important;
+}
+
+/* Ensure filter panel doesn't get the border */
+.filter-panel {
+    border-right: none !important;
+}
+
+.btn-warning {
+    border-color: #ffc107 !important;
+}
+
+.btn-danger {
+    border-color: #dc3545 !important;
+}
+
+.btn-secondary {
+    border-color: #6c757d !important;
+}
 /*!
 * Start Bootstrap - SB Admin v7.0.7 (https://startbootstrap.com/template/sb-admin)
 * Copyright 2013-2023 Start Bootstrap
@@ -7053,7 +7229,7 @@ textarea.form-control-lg {
 }
 
 .shadow {
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
 }
 
 .shadow-sm {
@@ -11490,7 +11666,6 @@ body {
     backdrop-filter: blur(15px);
     border-right: 1px solid rgba(222, 226, 230, 0.3);
     overflow: hidden;
-    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08), 0 -2px 12px rgba(0, 0, 0, 0.08);
     z-index: 10;
     position: sticky;
     top: 0;
@@ -11612,7 +11787,7 @@ body {
 /* DatePicker fixes for filter panel */
 .react-datepicker-popper {
     z-index: 99999 !important;
-    position: fixed !important;
+    position: absolute !important;
 }
 
 .react-datepicker-popper[data-placement^="bottom"] {
@@ -11658,7 +11833,7 @@ body {
 /* Đảm bảo datepicker trong filter panel hiển thị đúng vị trí */
 .filter-panel .react-datepicker-popper {
     z-index: 99999 !important;
-    position: fixed !important;
+    position: absolute !important;
 }
 
 .filter-panel .react-datepicker-popper[data-placement^="right"] {
@@ -11845,7 +12020,6 @@ body {
     justify-content: center;
     background-color: white;
     border: 2px solid #e9ecef;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translateY(-50%);
     cursor: pointer;
@@ -11856,7 +12030,6 @@ body {
     border-color: #0d6efd;
     color: white;
     transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.3), 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .filter-toggle-btn:active {
@@ -11880,22 +12053,18 @@ body {
 @keyframes pulse {
     0% {
         transform: translateY(-50%) scale(1);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1);
     }
     50% {
         transform: translateY(-50%) scale(1.15);
-        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4), 0 4px 8px rgba(0,0,0,0.2);
     }
     100% {
         transform: translateY(-50%) scale(1);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1);
     }
 }
 
 /* Main content area responsive */
 .main-content-area {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: -2px 0 12px rgba(0, 0, 0, 0.08), 0 -2px 12px rgba(0, 0, 0, 0.08);
     background-color: white;
     z-index: 5;
     height: 100vh;
@@ -11937,7 +12106,6 @@ body {
     overflow: hidden;
     height: 100vh;
     border-top: 1px solid #dee2e6;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Ensure proper scrolling behavior */
@@ -11949,19 +12117,9 @@ body {
     overflow-x: hidden;
 }
 
-/* Enhanced shadow effects */
+/* Enhanced effects */
 .filter-panel {
     position: relative;
-}
-
-.filter-panel::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 1px;
-    height: 100%;
-    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.1), transparent);
 }
 
 /* Table scroll area styling */
@@ -12005,26 +12163,71 @@ body {
 /* Enhanced Table Styling */
 .table {
     border-radius: 8px;
+    overflow: visible;
+    box-shadow: none;
+    border: 1px solid #dee2e6 !important;
+}
+
+/* Alternative approach - wrap table in container */
+.table-container {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 0;
+}
+
+.table-container .table {
+    border: none;
+    margin: 0;
+}
+
+.table-bordered {
+    border: 1px solid #dee2e6 !important;
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid #dee2e6 !important;
 }
 
 .table thead th {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border: none;
+    background-color: #f8f9fa;
     font-weight: 600;
     color: #0d6efd;
     padding: 1rem 0.75rem;
+    border-bottom: 2px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+}
+
+.table thead th:last-child {
+    border-right: none;
+}
+
+.table tbody tr {
+    background-color: #ffffff;
 }
 
 .table tbody tr:hover {
     background-color: #f8f9fa;
 }
 
+.table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.table tbody tr:nth-child(even):hover {
+    background-color: #f0f0f0;
+}
+
 .table tbody td {
     padding: 1rem 0.75rem;
-    border-top: 1px solid #f1f3f4;
+    border-top: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
     vertical-align: middle;
+}
+
+.table tbody td:last-child {
+    border-right: none;
 }
 
 /* Enhanced Badge Styling */
@@ -12046,33 +12249,7 @@ body {
     font-size: 0.875rem;
 }
 
-.react-select__menu {
-  z-index: 9999 !important;
-}
 
-/* Đảm bảo react-select có chiều cao thống nhất */
-.filter-panel .react-select-container .react-select__control {
-    height: 38px !important;
-    min-height: 38px !important;
-}
-
-.filter-panel .react-select-container .react-select__value-container {
-    height: 36px !important;
-    min-height: 36px !important;
-}
-
-.filter-panel .react-select-container .react-select__input-container {
-    height: 36px !important;
-    min-height: 36px !important;
-}
-
-.filter-panel .react-select-container .react-select__placeholder {
-    line-height: 36px !important;
-}
-
-.filter-panel .react-select-container .react-select__single-value {
-    line-height: 36px !important;
-}
 
 /* Đồng bộ chiều cao cho tất cả form controls trong form Add/Edit */
 .form-floating > .form-control,
@@ -12085,29 +12262,6 @@ body {
     padding: 0.5rem 0.75rem;
 }
 
-/* Đảm bảo react-select trong form Add/Edit cũng có chiều cao thống nhất */
-.react-select-container .react-select__control {
-    height: 38px !important;
-    min-height: 38px !important;
-}
-
-.react-select-container .react-select__value-container {
-    height: 36px !important;
-    min-height: 36px !important;
-}
-
-.react-select-container .react-select__input-container {
-    height: 36px !important;
-    min-height: 36px !important;
-}
-
-.react-select-container .react-select__placeholder {
-    line-height: 36px !important;
-}
-
-.react-select-container .react-select__single-value {
-    line-height: 36px !important;
-}
 
 /* Đảm bảo tất cả form controls có chiều cao thống nhất */
 .form-control:not(.form-floating > .form-control),
@@ -12134,5 +12288,5 @@ body {
 /* Đảm bảo datepicker nổi lên trên tất cả */
 .filter-panel .react-datepicker-popper[data-placement^="bottom"] {
     z-index: 99999 !important;
-    position: fixed !important;
+    position: absolute !important;
 }

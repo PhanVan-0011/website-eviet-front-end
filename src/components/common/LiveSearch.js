@@ -1,13 +1,15 @@
 
 import React, { useEffect, useState } from 'react'
-const LiveSearch = ({changeKeyword}) => {
+const LiveSearch = ({changeKeyword, placeholder = "Gõ để tìm..."}) => {
     const [searchText, setSearchText] = useState('')
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
-            changeKeyword(searchText)
+            if (changeKeyword && typeof changeKeyword === 'function') {
+                changeKeyword(searchText)
+            }
         }, 500);
         return () => clearTimeout(delayDebounce)
-    }, [searchText])
+    }, [searchText, changeKeyword])
 
     console.log("Change keyword: ", changeKeyword)
 
@@ -22,8 +24,8 @@ const LiveSearch = ({changeKeyword}) => {
         value={searchText}
         type="search"
         id="searchBox"
-        className="form-control form-control-sm ms-1 w-auto"
-        placeholder="Gõ để tìm..."
+        className="form-control"
+        placeholder={placeholder}
     />
   )
 }

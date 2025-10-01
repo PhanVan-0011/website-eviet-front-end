@@ -47,6 +47,13 @@ import AdminList from './components/admin/AdminList';
 import AdminAdd from './components/admin/AdminAdd';
 import AdminUpdate from './components/admin/AdminUpdate';
 import AdminDetail from './components/admin/AdminDetail';
+import BranchList from './components/branch/BranchList';
+import BranchAdd from './components/branch/BranchAdd';
+import BranchUpdate from './components/branch/BranchUpdate';
+import GroupSupplierList from './components/group-supplier/GroupSupplierList';
+import GroupSupplierAdd from './components/group-supplier/GroupSupplierAdd';
+import GroupSupplierUpdate from './components/group-supplier/GroupSupplierUpdate';
+import GroupSupplierDetail from './components/group-supplier/GroupSupplierDetail';
 function App() {
   return (
     <Routes>
@@ -92,6 +99,13 @@ function App() {
             <Route path="/rule" element={<RuleList />} />
             <Route path="/rule/add" element={<RuleAdd />} />
             <Route path="/rule/:id" element={<RuleUpdate />} />
+            <Route path="/branch" element={<BranchList />} />
+            <Route path="/branch/add" element={<BranchAdd />} />
+            <Route path="/branch/:id" element={<BranchUpdate />} />
+            <Route path="/group-supplier" element={<GroupSupplierList />} />
+            <Route path="/group-supplier/add" element={<GroupSupplierAdd />} />
+            <Route path="/group-supplier/:id" element={<GroupSupplierDetail />} />
+            <Route path="/group-supplier/:id/edit" element={<GroupSupplierUpdate />} />
           </Route>
         </Route>
         <Route element={<PublicRoutes />}>

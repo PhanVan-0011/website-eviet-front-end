@@ -17,6 +17,7 @@ import {
     FilterDateRange,
     FilterToggleButton
 } from '../common/FilterComponents';
+import LiveSearch from '../common/LiveSearch';
 
 const formatVND = (value) => {
     if (typeof value !== 'number' && typeof value !== 'string') return '';
@@ -32,7 +33,6 @@ const OrderList = () => {
     const [itemOfPage, setItemOfPage] = useState(25);
     const dispatch = useDispatch();
     const [searchText, setSearchText] = useState('');
-    const [debouncedSearchText, setDebouncedSearchText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
     const [refresh, setRefresh] = useState(Date.now());
 
@@ -54,13 +54,6 @@ const OrderList = () => {
     const [paymentMethods, setPaymentMethods] = useState([]);
     const [customers, setCustomers] = useState([]);
 
-    // Debounce search text
-    useEffect(() => {
-        const delayDebounce = setTimeout(() => {
-            setDebouncedSearchText(searchText);
-        }, 500);
-        return () => clearTimeout(delayDebounce);
-    }, [searchText]);
 
     const updateFilter = (key, value) => {
         setFilterValues(prev => ({ ...prev, [key]: value }));
@@ -100,7 +93,7 @@ const OrderList = () => {
 
     // Lấy danh sách đơn hàng với filter
     useEffect(() => {
-        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${debouncedSearchText}`;
+        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
         
         // New filter panel filters
         if (filterValues.status && filterValues.status !== 'all') {
@@ -125,7 +118,7 @@ const OrderList = () => {
         }).catch(() => {
             dispatch(actions.controlLoading(false));
         });
-    }, [currentPage, itemOfPage, debouncedSearchText, filterValues, refresh]);
+    }, [currentPage, itemOfPage, searchText, filterValues, refresh]);
 
     // Sort logic
     const sortedOrders = [...orders].sort((a, b) => {
@@ -470,13 +463,13 @@ const OrderList = () => {
                                         label="Trạng thái đơn hàng"
                                         value={filterValues.status ? {
                                             value: filterValues.status,
-                                            label: filterValues.status === 'all' ? 'Tất cả' : 
+                                            label: filterValues.status === 'all' ? 'Tất cả' :
                                                    filterValues.status === 'pending' ? 'Chờ xử lý' :
                                                    filterValues.status === 'processing' ? 'Đang xử lý' :
                                                    filterValues.status === 'shipped' ? 'Đã gửi hàng' :
                                                    filterValues.status === 'delivered' ? 'Đã giao' :
                                                    filterValues.status === 'cancelled' ? 'Đã hủy' : filterValues.status
-                                        } : null}
+                                        } : { value: 'all', label: 'Tất cả' }}
                                         onChange={(selected) => updateFilter('status', selected ? selected.value : 'all')}
                                         options={[
                                             { value: 'all', label: 'Tất cả' },
@@ -496,7 +489,7 @@ const OrderList = () => {
                                             value: filterValues.paymentMethod,
                                             label: filterValues.paymentMethod === 'all' ? 'Tất cả' : 
                                                    paymentMethods.find(pm => pm.id == filterValues.paymentMethod)?.name || filterValues.paymentMethod
-                                        } : null}
+                                        } : { value: 'all', label: 'Tất cả' }}
                                         onChange={(selected) => updateFilter('paymentMethod', selected ? selected.value : 'all')}
                                         options={[
                                             { value: 'all', label: 'Tất cả' },
@@ -522,7 +515,7 @@ const OrderList = () => {
                                             value: filterValues.customer,
                                             label: filterValues.customer === 'all' ? 'Tất cả' : 
                                                    customers.find(c => c.id == filterValues.customer)?.name || filterValues.customer
-                                        } : null}
+                                        } : { value: 'all', label: 'Tất cả' }}
                                         onChange={(selected) => updateFilter('customer', selected ? selected.value : 'all')}
                                         options={[
                                             { value: 'all', label: 'Tất cả' },
@@ -547,29 +540,10 @@ const OrderList = () => {
                                             <span className="input-group-text">
                                                 <i className="fas fa-search"></i>
                                             </span>
-                                            <input
-                                                type="text"
-                                                className="form-control"
+                                            <LiveSearch 
+                                                changeKeyword={setSearchText}
                                                 placeholder="Tìm kiếm theo mã đơn hàng, tên khách hàng..."
-                                                value={searchText}
-                                                onChange={(e) => setSearchText(e.target.value)}
                                             />
-                                            {searchText && (
-                                                <button 
-                                                    className="btn btn-outline-secondary btn-sm"
-                                                    type="button"
-                                                    onClick={() => setSearchText('')}
-                                                    title="Xóa tìm kiếm"
-                                                    style={{
-                                                        borderLeft: 'none',
-                                                        borderRadius: '0 0.375rem 0.375rem 0',
-                                                        backgroundColor: '#f8f9fa',
-                                                        color: '#6c757d'
-                                                    }}
-                                                >
-                                                    <i className="fas fa-times"></i>
-                                                </button>
-                                            )}
                                         </div>
                                     </div>
                                     <div className="col-md-8">

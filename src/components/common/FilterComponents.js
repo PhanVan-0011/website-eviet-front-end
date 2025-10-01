@@ -5,53 +5,16 @@ import { createPortal } from 'react-dom';
 import 'react-datepicker/dist/react-datepicker.css';
 import { vi } from 'date-fns/locale';
 
-// Custom styles cho react-select
+// Custom styles cho react-select - đơn giản hóa để tránh conflict
 export const selectStyles = {
     control: (provided, state) => ({
         ...provided,
         minHeight: '38px',
-        height: '38px',
         border: '1px solid #ced4da',
         borderRadius: '0.375rem',
         boxShadow: state.isFocused ? '0 0 0 0.25rem rgba(13, 110, 253, 0.25)' : '0 1px 2px rgba(0, 0, 0, 0.05)',
         '&:hover': {
             borderColor: '#86b7fe'
-        }
-    }),
-    valueContainer: (provided) => ({
-        ...provided,
-        height: '36px',
-        minHeight: '36px'
-    }),
-    inputContainer: (provided) => ({
-        ...provided,
-        height: '36px',
-        minHeight: '36px'
-    }),
-    placeholder: (provided) => ({
-        ...provided,
-        lineHeight: '36px'
-    }),
-    singleValue: (provided) => ({
-        ...provided,
-        lineHeight: '36px'
-    }),
-    multiValue: (provided) => ({
-        ...provided,
-        backgroundColor: '#0d6efd',
-        borderRadius: '0.25rem'
-    }),
-    multiValueLabel: (provided) => ({
-        ...provided,
-        color: 'white',
-        fontSize: '0.875rem'
-    }),
-    multiValueRemove: (provided) => ({
-        ...provided,
-        color: 'white',
-        '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            color: 'white'
         }
     }),
     option: (provided, state) => ({
@@ -223,13 +186,14 @@ export const FilterButtonGroup = ({
             <label className="form-label fw-bold mb-2" style={{ fontSize: '0.875rem' }}>
                 {label}
             </label>
-            <div className="d-flex gap-2">
+            <div className="d-flex gap-2 flex-wrap">
                 {options.map((option) => (
                     <button
                         key={option.value}
                         type="button"
-                        className={`btn btn-sm flex-fill ${value === option.value ? 'btn-primary' : 'btn-outline-secondary'}`}
+                        className={`btn btn-sm ${value === option.value ? 'btn-primary' : 'btn-outline-secondary'}`}
                         onClick={() => onChange(option.value)}
+                        style={{ flex: '0 0 auto', minWidth: 'fit-content' }}
                     >
                         {option.label}
                     </button>

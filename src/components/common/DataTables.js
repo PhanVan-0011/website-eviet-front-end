@@ -100,11 +100,12 @@ const DataTables = (props) => {
             if (isSummableColumn) {
                 let total = 0;
                 data.forEach(row => {
+                    if (!row) return;
                     const value = col.element(row);
                     let number = 0;
                     
                     // Lấy giá trị số từ element (có thể là JSX)
-                    if (typeof value === 'object' && value.props && value.props.children) {
+                    if (typeof value === 'object' && value && value.props && value.props.children) {
                         const text = value.props.children.toString();
                         // Xử lý format tiền Việt Nam: "9.729,514 ₫" -> 9729514
                         number = parseFloat(text.replace(/[^\d]/g, ''));
@@ -257,11 +258,11 @@ const DataTables = (props) => {
     // Helper để format giá trị tổng theo format của cột gốc
     const formatSummaryValue = (value, col, titleStr) => {
         // Kiểm tra format thực tế từ dữ liệu mẫu
-        if (data && data.length > 0) {
+        if (data && data.length > 0 && data[0]) {
             const sampleValue = col.element(data[0]);
             
             // Kiểm tra xem có chứa ký hiệu tiền tệ không
-            if (typeof sampleValue === 'object' && sampleValue.props && sampleValue.props.children) {
+            if (typeof sampleValue === 'object' && sampleValue && sampleValue.props && sampleValue.props.children) {
                 const text = sampleValue.props.children.toString();
                 if (text.includes('₫')) {
                     // Format tiền tệ với ký hiệu ₫
@@ -291,9 +292,10 @@ const DataTables = (props) => {
         
         return (
             data.map((row, index) => {
+                if (!row) return null;
                 let widthIdx = 0;
                 return (
-                    <tr key={row.id}>
+                    <tr key={row.id || index}>
                         {!hideSelected && (
                             <td style={{ width: '1%' }}>
                                 <input
@@ -312,7 +314,7 @@ const DataTables = (props) => {
                                     style={col.tdClass ? { ...col.tdClass, width: newWidths[widthIdx++] } : { width: newWidths[widthIdx++] }}
                                     className={col.tdClass || ""}
                                 >
-                                    {col.element(row)}
+                                    {col.element ? col.element(row) : ''}
                                 </td>
                             )
                         )}
