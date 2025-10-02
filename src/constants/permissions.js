@@ -30,6 +30,12 @@ export const PERMISSIONS = {
     POSTS_MANAGE: 'posts.manage',
     BRANCHES_MANAGE: 'branches.manage',
     GROUP_SUPPLIERS_MANAGE: 'group_suppliers.manage',
+    
+    // Nhà cung cấp
+    SUPPLIERS_VIEW: 'suppliers.view',
+    SUPPLIERS_CREATE: 'suppliers.create',
+    SUPPLIERS_UPDATE: 'suppliers.update',
+    SUPPLIERS_DELETE: 'suppliers.delete',
   
     // Hệ thống
     USERS_MANAGE: 'users.manage',

@@ -54,6 +54,11 @@ import GroupSupplierList from './components/group-supplier/GroupSupplierList';
 import GroupSupplierAdd from './components/group-supplier/GroupSupplierAdd';
 import GroupSupplierUpdate from './components/group-supplier/GroupSupplierUpdate';
 import GroupSupplierDetail from './components/group-supplier/GroupSupplierDetail';
+import SupplierList from './components/supplier/SupplierList';
+import SupplierAdd from './components/supplier/SupplierAdd';
+import SupplierUpdate from './components/supplier/SupplierUpdate';
+import SupplierDetail from './components/supplier/SupplierDetail';
+import Import from './components/import/Import';
 function App() {
   return (
     <Routes>
@@ -106,6 +111,11 @@ function App() {
             <Route path="/group-supplier/add" element={<GroupSupplierAdd />} />
             <Route path="/group-supplier/:id" element={<GroupSupplierDetail />} />
             <Route path="/group-supplier/:id/edit" element={<GroupSupplierUpdate />} />
+            <Route path="/supplier" element={<SupplierList />} />
+            <Route path="/supplier/add" element={<SupplierAdd />} />
+            <Route path="/supplier/:id" element={<SupplierUpdate />} />
+            <Route path="/supplier/detail/:id" element={<SupplierDetail />} />
+            <Route path="/import" element={<Import />} />
           </Route>
         </Route>
         <Route element={<PublicRoutes />}>

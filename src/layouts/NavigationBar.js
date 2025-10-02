@@ -23,9 +23,18 @@ const NavigationBar = () => {
     PERMISSIONS.SLIDERS_MANAGE,
     PERMISSIONS.COMBOS_MANAGE,
     PERMISSIONS.BRANCHES_MANAGE,
+  ];
+  const supplierPermissions = [
+    PERMISSIONS.SUPPLIERS_VIEW,
     PERMISSIONS.GROUP_SUPPLIERS_MANAGE,
   ];
-  const systemPermissions = [PERMISSIONS.USERS_MANAGE, PERMISSIONS.ROLES_MANAGE];
+  const systemPermissions = [
+    PERMISSIONS.USERS_MANAGE, 
+    PERMISSIONS.ROLES_MANAGE,
+    PERMISSIONS.BRANCHES_MANAGE,
+    PERMISSIONS.SUPPLIERS_VIEW,
+    PERMISSIONS.GROUP_SUPPLIERS_MANAGE,
+  ];
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
@@ -122,37 +131,6 @@ const NavigationBar = () => {
             </>
           )}
 
-          {/* Menu chi nhánh - dropdown riêng */}
-          <div className="nav-item dropdown">
-            <a className="nav-link dropdown-toggle px-4 py-2 d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i className="fas fa-building me-2"></i>
-              Chi nhánh
-            </a>
-            <ul className="dropdown-menu">
-              <li>
-                <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/branch">
-                  <i className="fas fa-building me-2"></i>
-                  Quản lý chi nhánh
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Menu nhóm nhà cung cấp - dropdown riêng */}
-          <div className="nav-item dropdown">
-            <a className="nav-link dropdown-toggle px-4 py-2 d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i className="fas fa-users me-2"></i>
-              Nhóm nhà cung cấp
-            </a>
-            <ul className="dropdown-menu">
-              <li>
-                <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/group-supplier">
-                  <i className="fas fa-users me-2"></i>
-                  Quản lý nhóm nhà cung cấp
-                </Link>
-              </li>
-            </ul>
-          </div>
 
           {hasAnyPermission(systemPermissions) && (
             <>
@@ -162,6 +140,40 @@ const NavigationBar = () => {
                   Hệ thống
                 </a>
                 <ul className="dropdown-menu">
+                  {/* Chi nhánh - hiển thị luôn không cần permission */}
+                  <li>
+                    <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/branch">
+                      <i className="fas fa-building me-2"></i>
+                      Quản lý chi nhánh
+                    </Link>
+                  </li>
+                  
+                  {/* Nhà cung cấp - hiển thị luôn không cần permission */}
+                  <li>
+                    <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/supplier">
+                      <i className="fas fa-truck me-2"></i>
+                      Nhà cung cấp
+                    </Link>
+                  </li>
+                  
+                  {/* Nhóm nhà cung cấp - hiển thị luôn không cần permission */}
+                  <li>
+                    <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/group-supplier">
+                      <i className="fas fa-users me-2"></i>
+                      Nhóm nhà cung cấp
+                    </Link>
+                  </li>
+                  
+                  {/* Nhập hàng */}
+                  <li>
+                    <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/import">
+                      <i className="fas fa-box-open me-2"></i>
+                      Nhập hàng
+                    </Link>
+                  </li>
+                  
+                  <li><hr className="dropdown-divider" /></li>
+                  
                   <Permission permission={PERMISSIONS.USERS_MANAGE}>
                     <li>
                       <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/user">

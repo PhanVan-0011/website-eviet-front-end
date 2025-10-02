@@ -19,12 +19,14 @@ const GroupSupplierUpdate = () => {
     } = useForm();
     const dispatch = useDispatch();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
 
     // Lấy thông tin nhóm nhà cung cấp cần sửa
     useEffect(() => {
         const fetchGroupSupplierData = async () => {
             try {
+                dispatch(actions.controlLoading(true));
                 const response = await requestApi(`api/admin/supplier-groups/${params.id}`, 'GET');
                 const data = response.data.data;
                 setValue('name', data.name);
@@ -32,10 +34,13 @@ const GroupSupplierUpdate = () => {
                 setValue('status', data.status ? String(data.status) : "1");
             } catch (error) {
                 console.error("Error fetching group supplier data: ", error);
+            } finally {
+                dispatch(actions.controlLoading(false));
+                setIsLoading(false);
             }
         };
         fetchGroupSupplierData();
-    }, [params.id, setValue]);
+    }, [params.id, setValue, dispatch]);
 
     const handleSubmitForm = async (data) => {
         setIsSubmitting(true);

@@ -18,6 +18,107 @@ textarea.form-control.large-textarea {
     min-height: 100px !important;
 }
 
+/* ===== SPECIFIC BORDER OVERRIDE SYSTEM ===== */
+/* 
+ * Chỉ override border cho những chỗ cụ thể cần thiết
+ * KHÔNG ảnh hưởng đến CSS gốc cho các trang khác
+ */
+
+/* 1. OVERRIDE CHO FORM CONTAINERS - Chỉ xóa border cho form elements */
+.row .col-md-10 .mb-3,
+.row .col-md-12 .mb-3 {
+    border-left: none !important;
+    border-right: none !important;
+}
+
+/* 2. OVERRIDE CỤ THỂ CHO TEXTAREA CONTAINERS */
+.row .col-md-10:has(textarea),
+.row .col-md-12:has(textarea) {
+    border-left: none !important;
+    border-right: none !important;
+}
+
+/* 3. OVERRIDE CỤ THỂ CHO INPUT NAME CONTAINERS */
+.row .col-md-10 .mb-3:has(input[id="inputName"]),
+.row .col-md-12 .mb-3:has(input[id="inputName"]) {
+    border-left: none !important;
+    border-right: none !important;
+}
+
+/* 4. OVERRIDE CHO CUSTOM EDITOR WRAPPER */
+.row .col-md-10 .custom-editor-wrapper,
+.row .col-md-12 .custom-editor-wrapper {
+    border-left: none !important;
+    border-right: none !important;
+}
+
+/* 5. OVERRIDE CHO PARENT DIV CHỨA CUSTOM EDITOR WRAPPER */
+.row .col-md-10 .mb-3:has(.custom-editor-wrapper),
+.row .col-md-12 .mb-3:has(.custom-editor-wrapper) {
+    border-left: none !important;
+    border-right: none !important;
+}
+
+/* 6. OVERRIDE CHO COL-MD-12 CÓ CẤU TRÚC: col-md-12 > mb-3 > custom-editor-wrapper */
+.row .col-md-10:has(.mb-3 .custom-editor-wrapper),
+.row .col-md-12:has(.mb-3 .custom-editor-wrapper){
+    border-left: none !important;
+    border-right: none !important;
+}
+
+/* Custom tabs styling for supplier detail */
+.custom-tabs {
+    display: flex;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0;
+    margin: 0;
+}
+
+.custom-tab {
+    background: none;
+    border: none;
+    padding: 12px 24px;
+    color: #6c757d;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+    margin: 0;
+}
+
+.custom-tab:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.custom-tab.active {
+    background-color: #ffffff;
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+.custom-tab.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: #0d6efd;
+}
+
+.custom-tab:first-child {
+    border-top-left-radius: 0.375rem;
+}
+
+.custom-tab:last-child {
+    border-top-right-radius: 0.375rem;
+}
+
 /* Filter Panel Styling */
 .filter-panel {
     border: 1px solid #dee2e6 !important;

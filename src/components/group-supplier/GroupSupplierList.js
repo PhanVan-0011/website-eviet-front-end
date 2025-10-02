@@ -9,6 +9,8 @@ import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import LiveSearch from '../common/LiveSearch';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 
 const GroupSupplierList = () => {
     const [groupSuppliers, setGroupSuppliers] = useState([]);
@@ -42,14 +44,7 @@ const GroupSupplierList = () => {
         { 
             title: "Ngày cập nhật", 
             element: row => formatDate(row.updated_at),
-            width: "15%"
-        },
-        {
-            title: "Trạng thái",
-            element: row => row.status === 1
-                ? <span className="badge bg-success">Hoạt động</span>
-                : <span className="badge bg-secondary">Không hoạt động</span>,
-            width: "10%"
+            width: "20%"
         },
         {
             title: "Hành động", 
