@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { toastErrorConfig } from '../../tools/toastConfig';
 import requestApi from '../../helpers/api';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
@@ -14,9 +14,9 @@ const SupplierDetail = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { id } = useParams();
+    const isLoading = useSelector(state => state.globalLoading.isLoading);
     
     const [supplier, setSupplier] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('info');
     const [importHistory, setImportHistory] = useState([
         {
@@ -54,10 +54,8 @@ const SupplierDetail = () => {
                 if (response.data && response.data.data) {
                     setSupplier(response.data.data);
                 }
-                setIsLoading(false);
             }).catch((error) => {
                 dispatch(actions.controlLoading(false));
-                setIsLoading(false);
                 if (error.response && error.response.data && error.response.data.message) {
                     toast.error(error.response.data.message, toastErrorConfig);
                 } else {
@@ -95,20 +93,7 @@ const SupplierDetail = () => {
     if (!supplier) {
         return (
             <div id="layoutSidenav_content">
-                <main>
-                    <div className="container-fluid px-4">
-                        <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
-                            <div className="text-center">
-                                <i className="fas fa-exclamation-triangle text-warning mb-3" style={{ fontSize: '3rem' }}></i>
-                                <h4>Không tìm thấy nhà cung cấp</h4>
-                                <p className="text-muted">Nhà cung cấp bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</p>
-                                <button className="btn btn-primary" onClick={handleBack}>
-                                    Quay lại danh sách
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </main>
+                
             </div>
         );
     }

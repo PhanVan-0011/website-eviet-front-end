@@ -46,9 +46,7 @@ const Import = () => {
     payable_amount: 0,
     paid_amount: 0,
     payment_method: 'Tiền mặt',
-    debt_amount: 0,
-    other_cost: 0,
-    notes: ''
+    debt_amount: 0
   });
 
   useEffect(() => {
@@ -57,7 +55,7 @@ const Import = () => {
     fetchUsers();
     calculateTotals();
     setDefaultUser(); // Set default user
-  }, [importItems, formData.discount, formData.supplier_return_cost, formData.other_cost]);
+  }, [importItems, formData.discount, formData.supplier_return_cost]);
 
   // Set người nhập mặc định là người dùng hiện tại
   const setDefaultUser = () => {
@@ -287,9 +285,7 @@ const Import = () => {
       payable_amount: 0,
       paid_amount: 0,
       payment_method: 'Tiền mặt',
-      debt_amount: 0,
-      other_cost: 0,
-      notes: ''
+      debt_amount: 0
     });
     setSelectedSupplier(null);
   };
@@ -583,17 +579,10 @@ const Import = () => {
                         <td>
                           <input
                             type="text"
-                            className="form-control form-control-sm mb-1"
+                            className="form-control form-control-sm"
                             value={item.name}
                             onChange={(e) => handleItemChange(item.id, 'name', e.target.value)}
                             placeholder="Tên sản phẩm"
-                          />
-                          <textarea
-                            className="form-control form-control-sm"
-                            rows="1"
-                            placeholder="Ghi chú..."
-                            value={item.notes}
-                            onChange={(e) => handleItemChange(item.id, 'notes', e.target.value)}
                           />
                         </td>
                         <td>
@@ -899,39 +888,6 @@ const Import = () => {
                 </div>
               </div>
 
-              {/* Chi phí nhập khác */}
-              <div className="row mb-3">
-                <label className="col-sm-4 col-form-label fw-semibold">Chi phí khác</label>
-                <div className="col-sm-8">
-                <input
-                  type="number"
-                    className="form-control text-end"
-                  value={formData.other_cost}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      if (value >= 0) {
-                        handleFormChange('other_cost', value);
-                      }
-                    }}
-                    placeholder="0"
-                    min="0"
-                  />
-                </div>
-              </div>
-
-              {/* Ghi chú */}
-              <div className="row mb-4">
-                <label className="col-sm-4 col-form-label fw-semibold">Ghi chú</label>
-                <div className="col-sm-8">
-                <textarea
-                  className="form-control"
-                  rows="4"
-                  value={formData.notes}
-                  onChange={(e) => handleFormChange('notes', e.target.value)}
-                    placeholder="Nhập ghi chú cho phiếu nhập..."
-                />
-        </div>
-      </div>
 
       {/* Nút hành động */}
               <div className="d-flex gap-2">

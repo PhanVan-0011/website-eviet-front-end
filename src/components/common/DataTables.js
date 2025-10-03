@@ -22,19 +22,19 @@ const DataTables = (props) => {
        onSelectedRows(selectedRows);
     }, [selectedRows]);
 
-    // Clear selected rows when data changes (e.g., after delete)
-    useEffect(() => {
-        if (data && data.length === 0) {
-            setSelectedRows([]);
-        } else if (data && selectedRows.length > 0) {
-            // Remove selected rows that no longer exist in data
-            const existingIds = data.map(row => String(row.id));
-            const validSelectedRows = selectedRows.filter(id => existingIds.includes(id));
-            if (validSelectedRows.length !== selectedRows.length) {
-                setSelectedRows(validSelectedRows);
-            }
-        }
-    }, [data, selectedRows]);
+    // // Clear selected rows when data changes (e.g., after delete)
+    // useEffect(() => {
+    //     if (data && data.length === 0) {
+    //         setSelectedRows([]);
+    //     } else if (data && selectedRows.length > 0) {
+    //         // Remove selected rows that no longer exist in data
+    //         const existingIds = data.map(row => String(row.id));
+    //         const validSelectedRows = selectedRows.filter(id => existingIds.includes(id));
+    //         if (validSelectedRows.length !== selectedRows.length) {
+    //             setSelectedRows(validSelectedRows);
+    //         }
+    //     }
+    // }, [data, selectedRows]);
 
     // --- Lưu trạng thái cột hiển thị vào localStorage mỗi khi visibleColumns thay đổi ---
     useEffect(() => {

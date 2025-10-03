@@ -43,7 +43,8 @@ const SupplierList = () => {
     const [filterValues, setFilterValues] = useState({
         group: 'all',
         creationTime: { from: null, to: null },
-        status: 'all'
+        status: 'all',
+        balanceDue: 'all'
     });
     const [isFilterVisible, setIsFilterVisible] = useState(true);
     const [isPulsing, setIsPulsing] = useState(false);
@@ -87,6 +88,15 @@ const SupplierList = () => {
         if (filterValues.status && filterValues.status !== 'all') {
             query += `&active=${filterValues.status === 'active' ? 1 : 0}`;
         }
+        if (filterValues.balanceDue && filterValues.balanceDue !== 'all') {
+            if (filterValues.balanceDue === 'has_debt') {
+                query += `&balance_due_min=1`;
+            } else if (filterValues.balanceDue === 'no_debt') {
+                query += `&balance_due_max=0`;
+            } else if (filterValues.balanceDue === 'overdue') {
+                query += `&balance_due_min=1000000`; // Nợ trên 1 triệu
+            }
+        }
 
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/suppliers${query}`, 'GET', []).then((response) => {
@@ -109,7 +119,7 @@ const SupplierList = () => {
         let bValue = b[sortField];
 
         // Xử lý sort cho các field đặc biệt
-        if (sortField === 'total_purchase_amount') {
+        if (sortField === 'total_purchase_amount' || sortField === 'balance_due') {
             aValue = Number(aValue) || 0;
             bValue = Number(bValue) || 0;
         } else if (sortField === 'created_at') {
@@ -150,7 +160,7 @@ const SupplierList = () => {
                 </span>
             ),
             element: row => row?.code || "",
-            width: "10%"
+            width: "8%"
         },
         {
             title: () => (
@@ -159,27 +169,27 @@ const SupplierList = () => {
                 </span>
             ),
             element: row => row?.name || "",
-            width: "20%"
+            width: "16%"
         },
         {
             title: "Nhóm",
             element: row => row?.group?.name || "Chưa phân nhóm",
-            width: "12%"
+            width: "9%"
         },
         {
             title: "Số điện thoại",
             element: row => row?.phone_number || "",
-            width: "12%"
+            width: "9%"
         },
         {
             title: "Email",
             element: row => row?.email || "",
-            width: "15%"
+            width: "11%"
         },
         {
             title: "Mã số thuế",
             element: row => row?.tax_code || "",
-            width: "10%"
+            width: "7%"
         },
         {
             title: () => (
@@ -191,7 +201,21 @@ const SupplierList = () => {
                 if (!row || !row.total_purchase_amount) return <span>0 ₫</span>;
                 return <span>{formatVND(parseInt(row.total_purchase_amount))} ₫</span>;
             },
-            width: "10%",
+            width: "12%",
+            summarizable: true
+        },
+        {
+            title: () => (
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('balance_due')}>
+                    Nợ cần trả {renderSortIcon('balance_due')}
+                </span>
+            ),
+            element: row => {
+                if (!row || !row.balance_due) return <span>0 ₫</span>;
+                const amount = parseInt(row.balance_due);
+                return <span>{formatVND(amount)} ₫</span>;
+            },
+            width: "12%",
             summarizable: true
         },
         {
@@ -204,7 +228,7 @@ const SupplierList = () => {
                 if (!row || !row.created_at) return <span>-</span>;
                 return <span>{moment(row.created_at).format('DD/MM/YYYY')}</span>;
             },
-            width: "10%"
+            width: "8%"
         },
         {
             title: "Trạng thái",
@@ -214,14 +238,14 @@ const SupplierList = () => {
                     ? <span className="badge bg-success">Hoạt động</span>
                     : <span className="badge bg-secondary">Không hoạt động</span>;
             },
-            width: "10%"
+            width: "7%"
         },
         {
             title: "Hành động",
             element: row => {
                 if (!row || !row.id) return <div></div>;
                 return (
-                    <div className="d-flex align-items-center gap-2">
+                    <div className="d-flex align-items-center gap-1">
                         <Link
                             className="btn btn-info btn-sm px-2 py-1"
                             to={`/supplier/detail/${row.id}`}
@@ -246,7 +270,7 @@ const SupplierList = () => {
                     </div>
                 );
             },
-            width: "10%"
+            width: "12%"
         }
     ];
 
@@ -362,6 +386,25 @@ const SupplierList = () => {
                                             { value: 'inactive', label: 'Không hoạt động' }
                                         ]}
                                         placeholder="Chọn trạng thái"
+                                    />
+
+                                    {/* Nợ cần trả */}
+                                    <FilterSelectSingle
+                                        label="Nợ cần trả"
+                                        value={filterValues.balanceDue ? {
+                                            value: filterValues.balanceDue,
+                                            label: filterValues.balanceDue === 'all' ? 'Tất cả' : 
+                                                   filterValues.balanceDue === 'has_debt' ? 'Có nợ' :
+                                                   filterValues.balanceDue === 'no_debt' ? 'Không nợ' : 'Nợ lớn (>1M)'
+                                        } : { value: 'all', label: 'Tất cả' }}
+                                        onChange={(selected) => updateFilter('balanceDue', selected ? selected.value : 'all')}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            { value: 'has_debt', label: 'Có nợ' },
+                                            { value: 'no_debt', label: 'Không nợ' },
+                                            { value: 'overdue', label: 'Nợ lớn (>1M)' }
+                                        ]}
+                                        placeholder="Chọn mức nợ"
                                     />
                                 </div>
                             )}

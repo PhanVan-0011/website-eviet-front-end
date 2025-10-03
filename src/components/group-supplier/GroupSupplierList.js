@@ -50,9 +50,10 @@ const GroupSupplierList = () => {
             title: "Hành động", 
             element: row => (
                 <div className="d-flex gap-1">
-                    <Link className="btn btn-info btn-sm" to={`/group-supplier/${row.id}`} title="Xem chi tiết">
+                    {/* Ẩn nút xem chi tiết */}
+                    {/* <Link className="btn btn-info btn-sm" to={`/group-supplier/${row.id}`} title="Xem chi tiết">
                         <i className="fas fa-eye"></i>
-                    </Link>
+                    </Link> */}
                     <Link className="btn btn-primary btn-sm" to={`/group-supplier/${row.id}/edit`} title="Chỉnh sửa">
                         <i className="fas fa-edit"></i>
                     </Link>
