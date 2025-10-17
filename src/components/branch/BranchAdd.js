@@ -94,23 +94,7 @@ const BranchAdd = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="row mb-3">
-                                        <div className="col-md-12">
-                                            <div className="mb-3">
-                                                <label htmlFor="inputAddress" className="form-label fw-semibold">
-                                                    Địa chỉ <span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                <textarea
-                                                    className="form-control"
-                                                    id="inputAddress"
-                                                    rows="3"
-                                                    {...register('address', { required: 'Địa chỉ là bắt buộc' })}
-                                                    placeholder="Nhập địa chỉ chi nhánh"
-                                                />
-                                                {errors.address && <div className="text-danger mt-1">{errors.address.message}</div>}
-                                            </div>
-                                        </div>
-                                    </div>
+
                                     <div className="row mb-3">
                                         <div className="col-md-6">
                                             <div className="mb-3">
@@ -180,7 +164,23 @@ const BranchAdd = () => {
                                             </div>
                                         </div>
                                     </div>
-
+                                    <div className="row mb-3">
+                                        <div className="col-md-12">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputAddress" className="form-label fw-semibold">
+                                                    Địa chỉ <span style={{color: 'red'}}>*</span>
+                                                </label>
+                                                <textarea
+                                                    className="form-control"
+                                                    id="inputAddress"
+                                                    rows="3"
+                                                    {...register('address', { required: 'Địa chỉ là bắt buộc' })}
+                                                    placeholder="Nhập địa chỉ chi nhánh"
+                                                />
+                                                {errors.address && <div className="text-danger mt-1">{errors.address.message}</div>}
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div className="mt-4 mb-0">
                                         <div className="d-flex justify-content-center gap-2">
                                             <button
