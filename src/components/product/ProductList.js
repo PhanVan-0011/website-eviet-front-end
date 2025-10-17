@@ -139,45 +139,35 @@ const ProductList = () => {
     // 3. Gọi lại API khi filter thay đổi
     useEffect(() => {
         // Tạo query string cho filter
-        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
+        let query = `?page=${currentPage}&limit=${itemOfPage}`;
         
-        // Legacy filters
-        if (filterCategory) query += `&category_id=${filterCategory}`;
-        if (filterOriginalPrice) {
-            const [min, max] = filterOriginalPrice.split('-');
-            if (min) query += `&original_price_from=${min}`;
-            if (max) query += `&original_price_to=${max}`;
-        }
-        if (filterSalePrice) {
-            const [min, max] = filterSalePrice.split('-');
-            if (min) query += `&sale_price_from=${min}`;
-            if (max) query += `&sale_price_to=${max}`;
-        }
-        if (filterStock) query += `&stock_quantity=${filterStock}`;
-        if (filterStatus !== '') query += `&status=${filterStatus}`;
-
-        // New filter panel filters using filterValues
+        // Tìm kiếm keyword
+        if (searchText) query += `&keyword=${searchText}`;
+        
+        // Lọc danh mục
         if (filterValues.categories && filterValues.categories.length > 0) {
-            const categoryIds = filterValues.categories.map(cat => cat.value).join(',');
-            query += `&category_ids=${categoryIds}`;
+            query += `&category_id=${filterValues.categories[0].value}`;
         }
+        
+        // Lọc nhà cung cấp
         if (filterValues.suppliers && filterValues.suppliers.length > 0) {
-            const supplierIds = filterValues.suppliers.map(supplier => supplier.value).join(',');
-            query += `&supplier_ids=${supplierIds}`;
+            query += `&supplier_id=${filterValues.suppliers[0].value}`;
         }
-        if (filterValues.brands && filterValues.brands.length > 0) {
-            const brandIds = filterValues.brands.map(brand => brand.value).join(',');
-            query += `&brand_ids=${brandIds}`;
-        }
-        if (filterValues.creationTime?.from && filterValues.creationTime?.to) {
-            query += `&created_from=${filterValues.creationTime.from.toISOString().split('T')[0]}`;
-            query += `&created_to=${filterValues.creationTime.to.toISOString().split('T')[0]}`;
-        }
+        
+        // Lọc trạng thái sản phẩm
         if (filterValues.productStatus && filterValues.productStatus !== 'all') {
-            query += `&product_status=${filterValues.productStatus}`;
+            query += `&status=${filterValues.productStatus === 'active' ? 1 : 0}`;
         }
+        
+        // Lọc bán trực tiếp
         if (filterValues.directSale && filterValues.directSale !== 'all') {
-            query += `&direct_sale=${filterValues.directSale}`;
+            query += `&is_sales_unit=${filterValues.directSale === 'yes' ? 1 : 0}`;
+        }
+        
+        // Lọc khoảng ngày tạo
+        if (filterValues.creationTime?.from && filterValues.creationTime?.to) {
+            query += `&start_date=${filterValues.creationTime.from.toISOString().split('T')[0]}`;
+            query += `&end_date=${filterValues.creationTime.to.toISOString().split('T')[0]}`;
         }
 
         dispatch(actions.controlLoading(true));
@@ -192,11 +182,6 @@ const ProductList = () => {
         currentPage,
         itemOfPage,
         searchText,
-        filterCategory,
-        filterOriginalPrice,
-        filterSalePrice,
-        filterStock,
-        filterStatus,
         filterValues,
         refresh
     ]);
@@ -285,34 +270,34 @@ const ProductList = () => {
         },
         { 
             title: () => (
-                <span style={{cursor: 'pointer'}} onClick={() => handleSort('category')}>
-                    Danh mục {renderSortIcon('category')}
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('categories')}>
+                    Danh mục {renderSortIcon('categories')}
                 </span>
             ),
             element: row => Array.isArray(row.categories)
                 ? row.categories.map(cat => cat.name).join(', ')
-                : (row.categories && row.categories.name ? row.categories.name : ""),
+                : "Không có",
             width: "12%"
         },
         { 
             title: () => (
-                <span style={{cursor: 'pointer'}} onClick={() => handleSort('stock_quantity')}>
-                    Tồn kho{renderSortIcon('stock_quantity')}
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('total_stock_quantity')}>
+                    Tồn kho{renderSortIcon('total_stock_quantity')}
                 </span>
             ),
-            element: row => row.stock_quantity,
+            element: row => row.total_stock_quantity,
             width: "7%",
             summarizable: true
         },
         {
             title: () => (
-                <span style={{cursor: 'pointer'}} onClick={() => handleSort('original_price')}>
-                    Giá gốc {renderSortIcon('original_price')}
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('cost_price')}>
+                    Giá vốn {renderSortIcon('cost_price')}
                 </span>
             ),
             element: row => (
                 <div>
-                    {formatVND(parseInt(row.original_price))} ₫
+                    {formatVND(parseInt(row.cost_price))} ₫
                 </div>
             ),
             width: "11%",
@@ -320,17 +305,59 @@ const ProductList = () => {
         },
         {
             title: () => (
-                <span style={{cursor: 'pointer'}} onClick={() => handleSort('sale_price')}>
-                    Giá bán {renderSortIcon('sale_price')}
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('base_store_price')}>
+                    Giá cửa hàng {renderSortIcon('base_store_price')}
                 </span>
             ),
             element: row => (
                 <div>
-                    {formatVND(parseInt(row.sale_price))} ₫
+                    {formatVND(parseInt(row.base_store_price))} ₫
                 </div>
             ),
             width: "11%",
             summarizable: true
+        },
+        { 
+            title: () => (
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('base_app_price')}>
+                    Giá App {renderSortIcon('base_app_price')}
+                </span>
+            ),
+            element: row => (
+                <div>
+                    {formatVND(parseInt(row.base_app_price))} ₫
+                </div>
+            ),
+            width: "11%",
+            summarizable: true
+        },
+        { 
+            title: "Đơn vị",
+            element: row => row.base_unit || "---",
+            width: "8%"
+        },
+        { 
+            title: "Bán trực tiếp",
+            element: row => row.is_sales_unit 
+                ? <span className="badge bg-info">Có</span>
+                : <span className="badge bg-light text-dark">Không</span>,
+            width: "8%"
+        },
+        { 
+            title: "Chi nhánh",
+            element: row => Array.isArray(row.branches)
+                ? row.branches.map(b => b.name).join(', ')
+                : "---",
+            width: "12%"
+        },
+        { 
+            title: () => (
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('created_at')}>
+                    Ngày tạo {renderSortIcon('created_at')}
+                </span>
+            ),
+            element: row => formatDate(row.created_at),
+            width: "12%"
         },
         { 
             
@@ -524,31 +551,19 @@ const ProductList = () => {
                                         placeholder="Chọn nhà cung cấp"
                                     />
 
-                                    {/* Thương hiệu */}
-                                    <FilterSelectMulti
-                                        label="Thương hiệu"
-                                        value={filterValues.brands || []}
-                                        onChange={(selected) => updateFilter('brands', selected || [])}
-                                        options={brands.map(brand => ({
-                                            value: brand.id,
-                                            label: brand.name
-                                        }))}
-                                        placeholder="Chọn thương hiệu"
-                                    />
-
-                                    {/* Trạng thái hàng hóa */}
+                                    {/* Trạng thái sản phẩm */}
                                     <FilterSelectSingle
-                                        label="Trạng thái hàng hóa"
+                                        label="Trạng thái sản phẩm"
                                         value={filterValues.productStatus ? {
                                             value: filterValues.productStatus,
                                             label: filterValues.productStatus === 'all' ? 'Tất cả' : 
-                                                   filterValues.productStatus === 'active' ? 'Đang kinh doanh' : 'Ngừng kinh doanh'
+                                                   filterValues.productStatus === 'active' ? 'Đang bán' : 'Ngừng bán'
                                         } : null}
                                         onChange={(selected) => updateFilter('productStatus', selected ? selected.value : 'all')}
                                         options={[
                                             { value: 'all', label: 'Tất cả' },
-                                            { value: 'active', label: 'Đang kinh doanh' },
-                                            { value: 'inactive', label: 'Ngừng kinh doanh' }
+                                            { value: 'active', label: 'Đang bán' },
+                                            { value: 'inactive', label: 'Ngừng bán' }
                                         ]}
                                         placeholder="Chọn trạng thái"
                                     />
@@ -659,6 +674,7 @@ const ProductList = () => {
                         currentPage={currentPage}
                         setCurrentPage={setCurrentPage}
                         setItemOfPage={setItemOfPage}
+                        selectedRows={selectedRows}
                         onSelectedRows={selectedRows => setSelectedRows(selectedRows)}
                         hideSearch={true}
                         showSummary={true}

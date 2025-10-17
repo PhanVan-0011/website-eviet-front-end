@@ -17,66 +17,130 @@ const ProductUpdate = () => {
     const dispatch = useDispatch();
     const { register, handleSubmit, setValue, trigger, formState: { errors, isSubmitted }, watch } = useForm();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [activeTab, setActiveTab] = useState('thong-tin');
+    const [showModal, setShowModal] = useState(false);
+    
+    // State cho tab Thông tin
     const [categories, setCategories] = useState([]);
-    const [originalPrice, setOriginalPrice] = useState('');
-    const [salePrice, setSalePrice] = useState('');
-    const [oldImages, setOldImages] = useState([]); // ảnh cũ từ API
-    const [imagePreviews, setImagePreviews] = useState([]); // preview ảnh mới
-    const [removedOldImageIds, setRemovedOldImageIds] = useState([]); // id ảnh cũ bị xóa
+    const [branches, setBranches] = useState([]);
+    const [productCode, setProductCode] = useState('');
+    const [costPrice, setCostPrice] = useState('');
+    const [baseStorePrice, setBaseStorePrice] = useState('');
+    const [baseAppPrice, setBaseAppPrice] = useState('');
+    const [oldImages, setOldImages] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
+    const [removedOldImageIds, setRemovedOldImageIds] = useState([]);
     const [featuredImageIndex, setFeaturedImageIndex] = useState(0);
     const [selectedCategories, setSelectedCategories] = useState([]);
-    const [description, setDescription] = useState('');
-    const [showModal, setShowModal] = useState(false);
+    const [isSalesUnit, setIsSalesUnit] = useState(true);
     const [imageFiles, setImageFiles] = useState([]);
+    const [description, setDescription] = useState('');
+    const [stockQuantity, setStockQuantity] = useState(0);
+    
+    // State cho tab Chi nhánh
+    const [applyToAllBranches, setApplyToAllBranches] = useState(false);
+    const [selectedBranches, setSelectedBranches] = useState([]);
+    const [branchPrices, setBranchPrices] = useState([]);
+    
+    // State cho unit conversions
+    const [unitConversions, setUnitConversions] = useState([]);
+    
+    // State cho attributes
+    const [attributes, setAttributes] = useState([]);
 
-    // Gộp lấy danh mục và lấy thông tin sản phẩm cần sửa
+    // Lấy dữ liệu sản phẩm và danh mục, chi nhánh
     useEffect(() => {
         const fetchData = async () => {
             try {
                 dispatch(actions.controlLoading(true));
-                const [catRes, prodRes] = await Promise.all([
+                const [catRes, branchRes, prodRes] = await Promise.all([
                     requestApi('api/admin/categories?limit=1000', 'GET', []),
+                    requestApi('api/admin/branches?limit=1000', 'GET', []),
                     requestApi(`api/admin/products/${params.id}`, 'GET')
                 ]);
+                
                 // Xử lý danh mục
                 if (catRes.data && catRes.data.data) {
                     setCategories(catRes.data.data);
                 }
+                
+                // Xử lý chi nhánh
+                if (branchRes.data && branchRes.data.data) {
+                    setBranches(branchRes.data.data);
+                }
+                
                 // Xử lý sản phẩm
                 const data = prodRes.data.data;
                 setValue('name', data.name);
                 setValue('description', data.description);
-                setValue('original_price', data.original_price);
-                setValue('sale_price', data.sale_price);
-                setValue('stock_quantity', data.stock_quantity);
-                setValue('size', data.size || '');
                 setValue('status', String(data.status));
-                setOriginalPrice(formatVND(parseInt(data.original_price, 10)));
-                setSalePrice(formatVND(parseInt(data.sale_price, 10)));
-                setValue('original_price', formatVND(parseInt(data.original_price, 10)));
-                setValue('sale_price', formatVND(parseInt(data.sale_price, 10)));
+                setValue('base_unit', data.base_unit || '');
+                
+                setProductCode(data.product_code || '');
+                setCostPrice(formatVND(parseInt(data.cost_price || 0, 10)));
+                setBaseStorePrice(formatVND(parseInt(data.base_store_price || 0, 10)));
+                setBaseAppPrice(formatVND(parseInt(data.base_app_price || 0, 10)));
+                setIsSalesUnit(data.is_sales_unit === true || data.is_sales_unit === 1);
+                setStockQuantity(data.total_stock_quantity || 0);
+                
                 // Xử lý ảnh cũ
-                const imgs = data.image_urls || [];
+                const imgs = data.images || [];
                 setOldImages(imgs);
                 setImageFiles([]);
                 setImagePreviews(imgs.map(img => process.env.REACT_APP_API_URL + 'api/images/' + (img.thumb_url || img.main_url)));
-                // Xác định featuredImageIndex
-                let featuredIdx = 0;
-                if (data.featured_image && data.featured_image.id) {
-                    featuredIdx = imgs.findIndex(img => img.id === data.featured_image.id);
-                } else {
-                    featuredIdx = imgs.findIndex(img => img.is_featured === 1);
-                }
+                
+                // Xác định featuredImageIndex từ is_featured
+                let featuredIdx = imgs.findIndex(img => img.is_featured === 1);
                 setFeaturedImageIndex(featuredIdx >= 0 ? featuredIdx : 0);
                 setDescription(data.description || '');
+                
                 // Danh mục
                 const catIds = (data.categories || []).map(cat => cat.id);
                 setSelectedCategories(catIds);
                 setValue('category_ids', catIds);
+                
+                // Unit conversions - xử lý từ array hoặc JSON
+                if (data.unit_conversions && data.unit_conversions.length > 0) {
+                    const formatted = data.unit_conversions.map(unit => ({
+                        ...unit,
+                        store_price: unit.store_price ? formatVND(parseInt(unit.store_price)) : '',
+                        app_price: unit.app_price ? formatVND(parseInt(unit.app_price)) : ''
+                    }));
+                    setUnitConversions(formatted);
+                }
+                
+                // Attributes - xử lý từ array hoặc JSON
+                if (data.attributes && data.attributes.length > 0) {
+                    const formatted = data.attributes.map(attr => ({
+                        id: attr.id,
+                        name: attr.name,
+                        type: attr.type,
+                        values: (attr.values || []).map(val => ({
+                            id: val.id,
+                            value: val.value,
+                            price_adjustment: val.price_adjustment ? formatVND(parseInt(val.price_adjustment)) : '0',
+                            is_default: val.is_default === true || val.is_default === 1 // Lấy từ API thay vì idx
+                        }))
+                    }));
+                    setAttributes(formatted);
+                }
+                
+                // Chi nhánh - lấy từ branches array
+                if (data.branches && data.branches.length > 0) {
+                    // Nếu có branches thì set applyToAllBranches = false và chọn các branches này
+                    const branchIds = data.branches.map(branch => branch.id);
+                    setApplyToAllBranches(false);
+                    setSelectedBranches(branchIds);
+                } else {
+                    // Nếu không có branches thì áp dụng cho toàn hệ thống
+                    setApplyToAllBranches(true);
+                    setSelectedBranches([]);
+                }
+                
                 dispatch(actions.controlLoading(false));
             } catch (error) {
                 dispatch(actions.controlLoading(false));
-                toast.error("Không lấy được dữ liệu sản phẩm hoặc danh mục", toastErrorConfig);
+                toast.error("Không lấy được dữ liệu sản phẩm", toastErrorConfig);
             }
         };
         fetchData();
@@ -101,8 +165,6 @@ const ProductUpdate = () => {
         if (!value) return '';
         return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
-    
-
 
     // Hàm xử lý khi chọn nhiều ảnh mới
     const onChangeImages = (e) => {
@@ -110,19 +172,12 @@ const ProductUpdate = () => {
         const validFiles = [];
         let hasLargeFile = false;
         newFiles.forEach(file => {
-            // if (!file.type.startsWith('image/')) {
-            //     hasInvalidType = true;
-            //     return;
-            // }
             if (file.size > 2 * 1024 * 1024) {
                 hasLargeFile = true;
             } else {
                 validFiles.push(file);
             }
         });
-        // if (hasInvalidType) {
-        //     toast.error('Mỗi file tải lên phải là hình ảnh.', toastErrorConfig);
-        // }
         if (hasLargeFile) {
             toast.error('Ảnh phải nhỏ hơn 2MB!', toastErrorConfig);
         }
@@ -130,13 +185,10 @@ const ProductUpdate = () => {
             e.target.value = "";
             return;
         }
-        // Nối file mới vào sau ảnh cũ và ảnh mới đã có
         let combinedFiles = [...imageFiles, ...validFiles];
-        // Loại bỏ file trùng tên và size
         combinedFiles = combinedFiles.filter(
             (file, idx, arr) => arr.findIndex(f => f.name === file.name && f.size === file.size) === idx
         );
-        // Chỉ cho phép tối đa 4 ảnh (bao gồm cả ảnh cũ và mới)
         const maxFiles = 4 - oldImages.length;
         if (combinedFiles.length > maxFiles) {
             toast.error('Chỉ được chọn tối đa 4 ảnh!', toastErrorConfig);
@@ -144,13 +196,11 @@ const ProductUpdate = () => {
         }
         setImageFiles(combinedFiles);
         setValue('imageFiles', combinedFiles, { shouldValidate: true });
-        // Tạo preview mới: ảnh cũ (link) + ảnh mới (file)
         const previews = [
             ...oldImages.map(img => process.env.REACT_APP_API_URL + 'api/images/' + (img.thumb_url || img.main_url)),
             ...combinedFiles.map(file => URL.createObjectURL(file))
         ];
         setImagePreviews(previews);
-        // Đảm bảo featuredImageIndex hợp lệ
         if (previews.length === 0) {
             setFeaturedImageIndex(-1);
         } else if (featuredImageIndex >= previews.length) {
@@ -163,19 +213,16 @@ const ProductUpdate = () => {
     // Hàm xóa ảnh
     const handleRemoveImage = (idx) => {
         if (idx < oldImages.length) {
-            // Xóa ảnh cũ
             const removed = oldImages[idx];
             setRemovedOldImageIds([...removedOldImageIds, removed.id]);
             const newOld = oldImages.filter((_, i) => i !== idx);
             setOldImages(newOld);
-            // Cập nhật preview và files
             const previews = [
                 ...newOld.map(img => process.env.REACT_APP_API_URL + 'api/images/' + (img.thumb_url || img.main_url)),
                 ...imageFiles.map(file => URL.createObjectURL(file))
             ];
             setImagePreviews(previews);
             setValue('imageFiles', imageFiles, { shouldValidate: true });
-            // Đảm bảo featuredImageIndex hợp lệ
             if (previews.length === 0) {
                 setFeaturedImageIndex(-1);
             } else if (featuredImageIndex === idx || featuredImageIndex >= previews.length) {
@@ -185,18 +232,15 @@ const ProductUpdate = () => {
             }
             trigger('imageFiles');
         } else {
-            // Xóa ảnh mới
             const newIdx = idx - oldImages.length;
             const newFiles = imageFiles.filter((_, i) => i !== newIdx);
             setImageFiles(newFiles);
-            // Cập nhật preview
             const previews = [
                 ...oldImages.map(img => process.env.REACT_APP_API_URL + 'api/images/' + (img.thumb_url || img.main_url)),
                 ...newFiles.map(file => URL.createObjectURL(file))
             ];
             setImagePreviews(previews);
             setValue('imageFiles', newFiles, { shouldValidate: true });
-            // Đảm bảo featuredImageIndex hợp lệ
             if (previews.length === 0) {
                 setFeaturedImageIndex(-1);
             } else if (featuredImageIndex === idx || featuredImageIndex >= previews.length) {
@@ -208,55 +252,177 @@ const ProductUpdate = () => {
         }
     };
 
-    // // Sửa lại chọn ảnh đại diện: lưu id ảnh cũ hoặc null nếu là ảnh mới
-    // const handleSetFeaturedImage = (idx) => {
-    //     if (idx < oldImages.length) {
-    //         setFeaturedImageId(oldImages[idx].id);
-    //     } else {
-    //         setFeaturedImageId(null); // Ảnh mới không có id
-    //     }
-    //     setFeaturedImageIndex(idx);
-    // };
+    // Hàm thêm unit conversion
+    const addUnitConversion = () => {
+        setUnitConversions([...unitConversions, {
+            unit_name: '',
+            unit_code: '',
+            conversion_factor: 1,
+            store_price: '',
+            app_price: '',
+            is_sales_unit: true
+        }]);
+    };
 
-    // Chọn danh mục
-    const handleCategoryChange = (e) => {
-        const value = parseInt(e.target.value);
-        let newSelected = [...selectedCategories];
-        if (e.target.checked) {
-            if (!newSelected.includes(value)) newSelected.push(value);
+    // Hàm xóa unit conversion
+    const removeUnitConversion = (index) => {
+        setUnitConversions(unitConversions.filter((_, i) => i !== index));
+    };
+
+    // Hàm thêm attribute
+    const addAttribute = () => {
+        setAttributes([...attributes, {
+            name: '',
+            type: 'select',
+            values: []
+        }]);
+    };
+
+    // Hàm xóa attribute
+    const removeAttribute = (index) => {
+        setAttributes(attributes.filter((_, i) => i !== index));
+    };
+
+    // Hàm thêm giá trị cho attribute
+    const addAttributeValue = (attrIndex) => {
+        const newAttributes = [...attributes];
+        const isFirstValue = newAttributes[attrIndex].values.length === 0;
+        newAttributes[attrIndex].values.push({
+            value: '',
+            price_adjustment: 0,
+            is_default: isFirstValue
+        });
+        setAttributes(newAttributes);
+    };
+
+    // Hàm xóa giá trị attribute
+    const removeAttributeValue = (attrIndex, valueIndex) => {
+        const newAttributes = [...attributes];
+        newAttributes[attrIndex].values.splice(valueIndex, 1);
+        setAttributes(newAttributes);
+    };
+
+    // Hàm xử lý chọn chi nhánh
+    const handleBranchSelection = (branchId) => {
+        if (selectedBranches.includes(branchId)) {
+            setSelectedBranches(selectedBranches.filter(id => id !== branchId));
+            setBranchPrices(branchPrices.filter(bp => bp.branch_id !== branchId));
         } else {
-            newSelected = newSelected.filter(id => id !== value);
+            setSelectedBranches([...selectedBranches, branchId]);
+            setBranchPrices([...branchPrices, {
+                branch_id: branchId,
+                price_type: 'store_price',
+                price: '',
+                unit_of_measure: ''
+            }]);
         }
-        setSelectedCategories(newSelected);
-        setValue('category_ids', newSelected, { shouldValidate: true });
     };
 
     // Submit
     const handleSubmitForm = async (data) => {
         const valid = await trigger(['imageFiles', 'category_ids']);
         if (!valid) return;
+        
+        // Validate unit conversions
+        for (let unit of unitConversions) {
+            if (!unit.unit_name || !unit.store_price || !unit.app_price) {
+                return;
+            }
+        }
+        
+        // Validate attributes
+        for (let attr of attributes) {
+            if (!attr.name) {
+                return;
+            }
+            // Validate attribute values if type is select or checkbox
+            if ((attr.type === 'select' || attr.type === 'checkbox') && attr.values.length > 0) {
+                for (let value of attr.values) {
+                    if (!value.value) {
+                        return;
+                    }
+                }
+            }
+        }
+        
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
             const formData = new FormData();
+            
+            // Thông tin cơ bản
+            formData.append('product_code', productCode);
             formData.append('name', data.name);
             formData.append('description', data.description || '');
-            formData.append('original_price', Number(data.original_price.replace(/\./g, '')));
-            formData.append('sale_price', Number(data.sale_price.replace(/\./g, '')));
-            formData.append('stock_quantity', data.stock_quantity);
-            formData.append('size', data.size || '');
             formData.append('status', data.status);
-            (selectedCategories.length > 0 ? selectedCategories : []).forEach(id => formData.append('category_ids[]', id));
-
-            // Gửi file ảnh thật sự
+            formData.append('base_unit', data.base_unit || '');
+            formData.append('cost_price', Number(costPrice.replace(/\./g, '')) || 0);
+            formData.append('base_store_price', Number(baseStorePrice.replace(/\./g, '')) || 0);
+            formData.append('base_app_price', Number(baseAppPrice.replace(/\./g, '')) || 0);
+            formData.append('is_sales_unit', isSalesUnit ? 1 : 0);
+            formData.append('stock_quantity', stockQuantity);
+            
+            // Danh mục
+            if (selectedCategories.length > 0) {
+                selectedCategories.forEach(id => formData.append('category_ids[]', id));
+            }
+            
+            // Ảnh
             imageFiles.forEach(file => formData.append('image_url[]', file));
-            // Gửi deleted_image_ids[]
             removedOldImageIds.forEach(id => formData.append('deleted_image_ids[]', id));
-            // Chỉ gửi featured_image_index nếu còn ảnh
             if (imageFiles.length > 0 || oldImages.length > 0) {
                 formData.append('featured_image_index', featuredImageIndex);
             }
             
+            // Unit conversions
+            const unitConversionsFormatted = unitConversions.map(unit => ({
+                ...unit,
+                store_price: typeof unit.store_price === 'string' ? Number(unit.store_price.replace(/\./g, '')) : Number(unit.store_price) || 0,
+                app_price: typeof unit.app_price === 'string' ? Number(unit.app_price.replace(/\./g, '')) : Number(unit.app_price) || 0,
+            }));
+            formData.append('unit_conversions_json', JSON.stringify(unitConversionsFormatted));
+            
+            // Attributes
+            const attributesFormatted = attributes.map(attr => ({
+                ...attr,
+                values: attr.values.map(val => ({
+                    ...val,
+                    price_adjustment: typeof val.price_adjustment === 'string' ? Number(val.price_adjustment.replace(/\./g, '')) : Number(val.price_adjustment) || 0,
+                }))
+            }));
+            formData.append('attributes_json', JSON.stringify(attributesFormatted));
+            
+            // Chi nhánh
+            formData.append('apply_to_all_branches', applyToAllBranches ? 1 : 0);
+            if (!applyToAllBranches && selectedBranches.length > 0) {
+                selectedBranches.forEach(id => formData.append('branch_ids[]', id));
+            }
+            formData.append('branch_prices_json', JSON.stringify(branchPrices));
+
+            // Log dữ liệu trước khi gửi
+            const reviewData = {
+                productCode,
+                name: data.name,
+                description: data.description || '',
+                status: data.status,
+                baseUnit: data.base_unit || '',
+                costPrice: Number(costPrice.replace(/\./g, '')) || 0,
+                baseStorePrice: Number(baseStorePrice.replace(/\./g, '')) || 0,
+                baseAppPrice: Number(baseAppPrice.replace(/\./g, '')) || 0,
+                isSalesUnit,
+                stockQuantity,
+                selectedCategories,
+                newImageFiles: imageFiles.map(f => ({name: f.name, size: f.size})),
+                oldImages: oldImages.length,
+                removedOldImageIds,
+                featuredImageIndex,
+                unitConversions,
+                attributes,
+                applyToAllBranches,
+                selectedBranches,
+                branchPrices
+            };
+            console.log('=== PRODUCT DATA BEFORE UPDATE ===', reviewData);
 
             const response = await requestApi(
                 `api/admin/products/${params.id}`,
@@ -268,9 +434,7 @@ const ProductUpdate = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Cập nhật sản phẩm thành công!", toastSuccessConfig);
-                
                 navigation('/product');
-                
             } else {
                 toast.error(response.data.message || "Cập nhật sản phẩm thất bại", toastErrorConfig);
             }
@@ -279,6 +443,7 @@ const ProductUpdate = () => {
             if (e.response && e.response.data && e.response.data.message) {
                 toast.error(e.response.data.message, toastErrorConfig);
             } else {
+                console.log(e);
                 toast.error("Lỗi khi cập nhật sản phẩm", toastErrorConfig);
             }
         } finally {
@@ -288,6 +453,7 @@ const ProductUpdate = () => {
 
     // Tạo options cho react-select
     const categoryOptions = categories.map(cat => ({ value: cat.id, label: cat.name }));
+    const branchOptions = branches.map(branch => ({ value: branch.id, label: branch.name }));
 
     return (
         <div id="layoutSidenav_content">
@@ -306,7 +472,84 @@ const ProductUpdate = () => {
                         <div className='card-body'>
                             <div className='mb-3 row'>
                                 <form onSubmit={handleSubmit(handleSubmitForm)}>
+                                    {/* Tab Navigation */}
+                                    <ul className="nav nav-tabs mb-4" id="productTabs" role="tablist">
+                                        <li className="nav-item" role="presentation">
+                                            <button
+                                                className={`nav-link ${activeTab === 'thong-tin' ? 'active' : ''}`}
+                                                type="button"
+                                                onClick={() => setActiveTab('thong-tin')}
+                                                style={{ 
+                                                    color: activeTab === 'thong-tin' ? '#007bff' : '#6c757d',
+                                                    borderBottomColor: activeTab === 'thong-tin' ? '#007bff' : 'transparent',
+                                                    borderBottomWidth: activeTab === 'thong-tin' ? '2px' : '1px',
+                                                    textDecoration: 'none',
+                                                    backgroundColor: 'transparent !important',
+                                                   
+                                                }}
+                                                
+                                            >
+                                                Thông tin
+                                            </button>
+                                        </li>
+                                        <li className="nav-item" role="presentation">
+                                            <button
+                                                className={`nav-link ${activeTab === 'mo-ta' ? 'active' : ''}`}
+                                                type="button"
+                                                onClick={() => setActiveTab('mo-ta')}
+                                                style={{ 
+                                                    color: activeTab === 'mo-ta' ? '#007bff' : '#6c757d',
+                                                    borderBottomColor: activeTab === 'mo-ta' ? '#007bff' : 'transparent',
+                                                    borderBottomWidth: activeTab === 'mo-ta' ? '2px' : '1px',
+                                                    textDecoration: 'none',
+                                                    backgroundColor: 'transparent !important',
+                                                    
+                                                }}
+                                                
+                                            >
+                                                Mô tả chi tiết
+                                            </button>
+                                        </li>
+                                        <li className="nav-item" role="presentation">
+                                            <button
+                                                className={`nav-link ${activeTab === 'chi-nhanh' ? 'active' : ''}`}
+                                                type="button"
+                                                onClick={() => setActiveTab('chi-nhanh')}
+                                                style={{ 
+                                                    color: activeTab === 'chi-nhanh' ? '#007bff' : '#6c757d',
+                                                    borderBottomColor: activeTab === 'chi-nhanh' ? '#007bff' : 'transparent',
+                                                    borderBottomWidth: activeTab === 'chi-nhanh' ? '2px' : '1px',
+                                                    textDecoration: 'none',
+                                                    backgroundColor: 'transparent !important',
+                                                   
+                                                }}
+                                               
+                                            >
+                                                Chi nhánh kinh doanh
+                                            </button>
+                                        </li>
+                                    </ul>
+
+                                    {/* Tab Content */}
+                                    <div className="tab-content">
+                                        {/* Tab Thông tin */}
+                                        {activeTab === 'thong-tin' && (
+                                            <div className="tab-pane fade show active">
                                     <div className="row mb-3">
+                                                    <div className="col-md-6">
+                                                        <div className="mb-3">
+                                                            <label htmlFor="inputProductCode" className="form-label fw-semibold">
+                                                                Mã sản phẩm
+                                                            </label>
+                                                            <input
+                                                                className="form-control"
+                                                                id="inputProductCode"
+                                                                value={productCode}
+                                                                onChange={e => setProductCode(e.target.value)}
+                                                                placeholder="Mã sản phẩm tự động"
+                                                            />
+                                                        </div>
+                                                    </div>
                                         <div className="col-md-6">
                                             <div className="mb-3">
                                                 <label htmlFor="inputName" className="form-label fw-semibold">
@@ -318,72 +561,121 @@ const ProductUpdate = () => {
                                                     {...register('name', { required: 'Tên sản phẩm là bắt buộc' })}
                                                     placeholder="Nhập tên sản phẩm"
                                                 />
-                                                {errors.name && <div className="text-danger mt-1">{errors.name.message}</div>}
+                                                {isSubmitted && errors.name && <div className="text-danger mt-1">{errors.name.message}</div>}
                                             </div>
                                         </div>
-                                        <div className="col-md-6">
+                                                </div>
+
+                                                <div className="row mb-3">
+                                                    <div className="col-md-4">
                                             <div className="mb-3">
-                                                <label htmlFor="inputStock" className="form-label fw-semibold">
-                                                    Số lượng <span style={{color: 'red'}}>*</span>
+                                                            <label htmlFor="inputCostPrice" className="form-label fw-semibold">
+                                                                Giá vốn (VNĐ)
                                                 </label>
                                                 <input
                                                     className="form-control"
-                                                    id="inputStock"
-                                                    type="number"
-                                                    {...register('stock_quantity', { required: 'Số lượng là bắt buộc' })}
-                                                    placeholder="Nhập số lượng"
+                                                                id="inputCostPrice"
+                                                                type="text"
+                                                                value={costPrice}
+                                                                onChange={e => {
+                                                                    const formatted = formatVND(e.target.value);
+                                                                    setCostPrice(formatted);
+                                                                }}
+                                                                placeholder="Nhập giá vốn"
+                                                            />
+                                            </div>
+                                        </div>
+                                                    <div className="col-md-4">
+                                            <div className="mb-3">
+                                                            <label htmlFor="inputBaseStorePrice" className="form-label fw-semibold">
+                                                                Giá bán tại cửa hàng (VNĐ)
+                                                </label>
+                                                <input
+                                                    className="form-control"
+                                                                id="inputBaseStorePrice"
+                                                    type="text"
+                                                                value={baseStorePrice}
+                                                    onChange={e => {
+                                                        const formatted = formatVND(e.target.value);
+                                                                    setBaseStorePrice(formatted);
+                                                    }}
+                                                                placeholder="Nhập giá bán cửa hàng"
                                                 />
-                                                {errors.stock_quantity && <div className="text-danger mt-1">{errors.stock_quantity.message}</div>}
+                                            </div>
+                                        </div>
+                                                    <div className="col-md-4">
+                                            <div className="mb-3">
+                                                            <label htmlFor="inputBaseAppPrice" className="form-label fw-semibold">
+                                                                Giá bán trên App (VNĐ)
+                                                </label>
+                                                <input
+                                                    className="form-control"
+                                                                id="inputBaseAppPrice"
+                                                    type="text"
+                                                                value={baseAppPrice}
+                                                    onChange={e => {
+                                                        const formatted = formatVND(e.target.value);
+                                                                    setBaseAppPrice(formatted);
+                                                    }}
+                                                                placeholder="Nhập giá bán App"
+                                                />
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="row mb-3">
-                                        <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label htmlFor="inputOriginalPrice" className="form-label fw-semibold">
-                                                    Giá gốc (VNĐ) <span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                <input
-                                                    className="form-control"
-                                                    id="inputOriginalPrice"
-                                                    type="text"
-                                                    inputMode="numeric"
-                                                    autoComplete="off"
-                                                    value={originalPrice}
-                                                    onChange={e => {
-                                                        const formatted = formatVND(e.target.value);
-                                                        setOriginalPrice(formatted);
-                                                        setValue('original_price', formatted);
-                                                    }}
-                                                    placeholder="Nhập giá gốc (VND)"
-                                                />
-                                                {errors.original_price && <div className="text-danger mt-1">{errors.original_price.message}</div>}
-                                            </div>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label htmlFor="inputSalePrice" className="form-label fw-semibold">
-                                                    Giá bán (VNĐ) <span style={{color: 'red'}}>*</span>
-                                                </label>
-                                                <input
-                                                    className="form-control"
-                                                    id="inputSalePrice"
-                                                    type="text"
-                                                    inputMode="numeric"
-                                                    autoComplete="off"
-                                                    value={salePrice}
-                                                    onChange={e => {
-                                                        const formatted = formatVND(e.target.value);
-                                                        setSalePrice(formatted);
-                                                        setValue('sale_price', formatted);
-                                                    }}
-                                                    placeholder="Nhập giá bán (VND)"
-                                                />
-                                                {errors.sale_price && <div className="text-danger mt-1">{errors.sale_price.message}</div>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="row mb-4">
+
+                                                <div className="row mb-3">
+                                                    <div className="col-md-4">
+                                                        <div className="mb-3">
+                                                            <label htmlFor="inputBaseUnit" className="form-label fw-semibold">
+                                                                Đơn vị cơ bản <span style={{color: 'red'}}>*</span>
+                                                            </label>
+                                                            <input
+                                                                className="form-control"
+                                                                id="inputBaseUnit"
+                                                                {...register('base_unit', { required: 'Đơn vị cơ bản là bắt buộc' })}
+                                                                placeholder="Nhập đơn vị cơ bản"
+                                                            />
+                                                            {isSubmitted && errors.base_unit && <div className="text-danger mt-1">{errors.base_unit.message}</div>}
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-md-4">
+                                                        <div className="mb-3">
+                                                            <label htmlFor="inputStock" className="form-label fw-semibold">
+                                                                Tồn kho
+                                                            </label>
+                                                            <input
+                                                                className="form-control"
+                                                                id="inputStock"
+                                                                type="number"
+                                                                value={stockQuantity}
+                                                                onChange={e => setStockQuantity(parseInt(e.target.value) || 0)}
+                                                                placeholder="Nhập số lượng tồn kho"
+                                                                disabled
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-md-4">
+                                                        <div className="mb-3">
+                                                            <label className="form-label fw-semibold">
+                                                                Bán trực tiếp
+                                                            </label>
+                                                            <div className="form-check">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="checkbox"
+                                                                    id="isSalesUnit"
+                                                                    checked={isSalesUnit}
+                                                                    onChange={e => setIsSalesUnit(e.target.checked)}
+                                                                />
+                                                                <label className="form-check-label" htmlFor="isSalesUnit">
+                                                                    Có
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="row mb-3">
                                         <div className="col-md-6">
                                             <div className="mb-3">
                                                 <label htmlFor="inputStatus" className="form-label fw-semibold">
@@ -398,32 +690,51 @@ const ProductUpdate = () => {
                                                     <option value="1">Đang bán</option>
                                                     <option value="0">Ngừng bán</option>
                                                 </select>
-                                                {errors.status && <div className="text-danger mt-1">{errors.status.message}</div>}
+                                                {isSubmitted && errors.status && <div className="text-danger mt-1">{errors.status.message}</div>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
                                             <div className="mb-3">
-                                                <label htmlFor="inputSize" className="form-label fw-semibold">
-                                                    Kích thước
+                                                            <label className="form-label fw-semibold">
+                                                                Danh mục <span style={{ color: 'red' }}>*</span>
                                                 </label>
-                                                <input
-                                                    className="form-control"
-                                                    id="inputSize"
-                                                    {...register('size')}
-                                                    placeholder="Nhập kích thước (nếu có)"
-                                                />
+                                                            <Select
+                                                                options={categoryOptions}
+                                                                isMulti
+                                                                value={categoryOptions.filter(opt => selectedCategories.includes(opt.value))}
+                                                                onChange={opts => {
+                                                                    const values = opts ? opts.map(opt => opt.value) : [];
+                                                                    setSelectedCategories(values);
+                                                                    setValue('category_ids', values, { shouldValidate: true });
+                                                                }}
+                                                                placeholder="Tìm kiếm & chọn danh mục..."
+                                                                classNamePrefix="react-select"
+                                                                styles={selectStyles}
+                                                                onBlur={() => trigger('category_ids')}
+                                                            />
+                                                                <input
+                                                                    type="hidden"
+                                                                    {...register('category_ids', {
+                                                                        validate: value => (value && value.length > 0) || 'Phải chọn ít nhất 1 danh mục!'
+                                                                    })}
+                                                                />
+                                                                {isSubmitted && errors.category_ids && <div className="text-danger">{errors.category_ids.message}</div>}
                                             </div>
                                         </div>
                                     </div>
+
+                                                {/* Hình ảnh sản phẩm */}
                                     <div className="row mb-3">
-                                        <div className="col-md-6 input-file">
+                                                    <div className="col-md-12">
                                             <div className="mb-3">
                                                 <div className="form-label fw-semibold">
                                                     Hình ảnh sản phẩm
                                                 </div>
                                                 <div className="row g-3">
+                                                                <div className="col-6">
+                                                                    <div className="row g-2">
                                                     {[0, 1, 2, 3].map(idx => (
-                                                        <div key={idx} className="col-3 p-2 d-flex flex-column align-items-center">
+                                                                            <div key={idx} className="col-3 d-flex flex-column align-items-center">
                                                             <div
                                                                 className="w-100 border border-2 border-secondary border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center"
                                                                 style={{ aspectRatio: '1/1', minHeight: 0, height: 'auto', maxWidth: '100%' }}
@@ -453,7 +764,6 @@ const ProductUpdate = () => {
                                                                     </div>
                                                                 )}
                                                             </div>
-                                                            {/* Nút chọn ảnh đại diện nằm ngoài khung */}
                                                             {imagePreviews[idx] && (
                                                                 <div className="form-check mt-2">
                                                                     <input
@@ -470,6 +780,8 @@ const ProductUpdate = () => {
                                                             )}
                                                         </div>
                                                     ))}
+                                                                    </div>
+                                                                </div>
                                                 </div>
                                                 <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
                                                     <label htmlFor="inputImages" className="form-label btn btn-secondary mb-0">
@@ -483,7 +795,6 @@ const ProductUpdate = () => {
                                                         <b>Giữ Ctrl hoặc Shift để chọn nhiều ảnh cùng lúc.</b>
                                                     </span>
                                                     </div>
-                                        
                                                 </div>
                                                 <input
                                                     className="form-control"
@@ -503,38 +814,322 @@ const ProductUpdate = () => {
                                                 {isSubmitted && errors.imageFiles && <div className="text-danger">{errors.imageFiles.message}</div>}
                                             </div>
                                         </div>
-                                        <div className="col-md-6 input-file">
-                                            <div className="mb-3 px-3">
-                                                <label className="form-label fw-semibold">
-                                                    Danh mục <span style={{ color: 'red' }}>*</span>
-                                                </label>
-                                                <Select
-                                                    options={categoryOptions}
-                                                    isMulti
-                                                    value={categoryOptions.filter(opt => selectedCategories.includes(opt.value) || selectedCategories.includes(String(opt.value)))}
-                                                    onChange={opts => {
-                                                        const values = opts ? opts.map(opt => opt.value) : [];
-                                                        setSelectedCategories(values);
-                                                        setValue('category_ids', values, { shouldValidate: true });
-                                                    }}
-                                                    placeholder="Tìm kiếm & chọn danh mục..."
-                                                    classNamePrefix="react-select"
-                                                    styles={selectStyles}
-                                                    onBlur={() => trigger('category_ids')}
-                                                />
-                                                <input
-                                                    type="hidden"
-                                                    {...register('category_ids', {
-                                                        validate: value => (value && value.length > 0) || 'Phải chọn ít nhất 1 danh mục!'
-                                                    })}
-                                                />
-                                                {errors.category_ids && <div className="text-danger">{errors.category_ids.message}</div>}
-                                            </div>
+                                                </div>
+
+                                                {/* Unit Conversions */}
+                                                <div className="row mb-3">
+                                                    <div className="col-md-12">
+                                                        <div className="card">
+                                                            <div className="card-header d-flex justify-content-between align-items-center">
+                                                                <h6 className="mb-0">Đơn vị tính</h6>
+                                                                <button type="button" className="btn btn-sm btn-primary" onClick={addUnitConversion}>
+                                                                    + Thêm đơn vị
+                                                                </button>
+                                                            </div>
+                                                            <div className="card-body">
+                                                                {/* Bảng đơn vị chuyển đổi */}
+                                                                {unitConversions.length > 0 && (
+                                                                    <div className="row mb-3">
+                                                                        <div className="col-md-12">
+                                                                            <div className="table-responsive">
+                                                                                <table className="table table-bordered">
+                                                                                    <thead>
+                                                                                        <tr>
+                                                                                            <th>Tên đơn vị</th>
+                                                                                            <th>Giá trị quy đổi</th>
+                                                                                            <th>Giá cửa hàng</th>
+                                                                                            <th>Giá App</th>
+                                                                                            <th>Mã hàng</th>
+                                                                                            <th>Bán trực tiếp</th>
+                                                                                            <th>Thao tác</th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                        {unitConversions.map((unit, index) => (
+                                                                                            <tr key={index}>
+                                                                                                <td>
+                                                                                                    <input
+                                                                                                        type="text"
+                                                                                                        className={`form-control ${isSubmitted && !unit.unit_name ? 'is-invalid' : ''}`}
+                                                                                                        value={unit.unit_name}
+                                                                                                        onChange={e => {
+                                                                                                            const newUnits = [...unitConversions];
+                                                                                                            newUnits[index].unit_name = e.target.value;
+                                                                                                            setUnitConversions(newUnits);
+                                                                                                        }}
+                                                                                                        placeholder="Nhập tên đơn vị"
+                                                                                                    />
+                                                                                                    <div className="invalid-feedback d-block small" style={{visibility: isSubmitted && !unit.unit_name ? 'visible' : 'hidden'}}>
+                                                                                                        Tên đơn vị là bắt buộc
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <input
+                                                                                                        type="number"
+                                                                                                        className="form-control"
+                                                                                                        value={unit.conversion_factor}
+                                                                                                        onChange={e => {
+                                                                                                            const newUnits = [...unitConversions];
+                                                                                                            const val = parseInt(e.target.value);
+                                                                                                            newUnits[index].conversion_factor = val < 1 ? 1 : (isNaN(val) ? 1 : val);
+                                                                                                            setUnitConversions(newUnits);
+                                                                                                        }}
+                                                                                                        min="1"
+                                                                                                        required
+                                                                                                    />
+                                                                                                    <div className="invalid-feedback d-block small" style={{visibility: 'hidden'}}>
+                                                                                                        &nbsp;
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <input
+                                                                                                        type="text"
+                                                                                                        className={`form-control ${isSubmitted && !unit.store_price ? 'is-invalid' : ''}`}
+                                                                                                        value={unit.store_price}
+                                                                                                        onChange={e => {
+                                                                                                            const newUnits = [...unitConversions];
+                                                                                                            const formatted = formatVND(e.target.value);
+                                                                                                            newUnits[index].store_price = formatted;
+                                                                                                            setUnitConversions(newUnits);
+                                                                                                        }}
+                                                                                                        placeholder="Giá cửa hàng"
+                                                                                                    />
+                                                                                                    <div className="invalid-feedback d-block small" style={{visibility: isSubmitted && !unit.store_price ? 'visible' : 'hidden'}}>
+                                                                                                        Giá cửa hàng là bắt buộc
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <input
+                                                                                                        type="text"
+                                                                                                        className={`form-control ${isSubmitted && !unit.app_price ? 'is-invalid' : ''}`}
+                                                                                                        value={unit.app_price}
+                                                                                                        onChange={e => {
+                                                                                                            const newUnits = [...unitConversions];
+                                                                                                            const formatted = formatVND(e.target.value);
+                                                                                                            newUnits[index].app_price = formatted;
+                                                                                                            setUnitConversions(newUnits);
+                                                                                                        }}
+                                                                                                        placeholder="Giá App"
+                                                                                                    />
+                                                                                                    <div className="invalid-feedback d-block small" style={{visibility: isSubmitted && !unit.app_price ? 'visible' : 'hidden'}}>
+                                                                                                        Giá App là bắt buộc
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <input
+                                                                                                        type="text"
+                                                                                                        className="form-control"
+                                                                                                        value={unit.unit_code}
+                                                                                                        onChange={e => {
+                                                                                                            const newUnits = [...unitConversions];
+                                                                                                            newUnits[index].unit_code = e.target.value;
+                                                                                                            setUnitConversions(newUnits);
+                                                                                                        }}
+                                                                                                        placeholder="Mã hàng tự động"
+                                                                                                    />
+                                                                                                    <div className="invalid-feedback d-block small" style={{visibility: 'hidden'}}>
+                                                                                                        &nbsp;
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <div className="form-check">
+                                                                                                        <input
+                                                                                                            className="form-check-input"
+                                                                                                            type="checkbox"
+                                                                                                            checked={unit.is_sales_unit}
+                                                                                                            onChange={e => {
+                                                                                                const newUnits = [...unitConversions];
+                                                                                                newUnits[index].is_sales_unit = e.target.checked;
+                                                                                                setUnitConversions(newUnits);
+                                                                                            }}
+                                                                                                        />
+                                                                                                        <label className="form-check-label">Bán trực tiếp</label>
+                                                                                            </div>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        className="btn btn-sm btn-danger"
+                                                                                                        onClick={() => removeUnitConversion(index)}
+                                                                                                    >
+                                                                                                        <i className="fas fa-trash"></i>
+                                                                                                    </button>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        ))}
+                                                                                    </tbody>
+                                                                                </table>
                                         </div>
                                     </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Attributes */}
                                     <div className="row mb-3">
                                         <div className="col-md-12">
-                                            <label htmlFor="description">Mô tả sản phẩm</label>
+                                                        <div className="card">
+                                                            <div className="card-header d-flex justify-content-between align-items-center">
+                                                                <h6 className="mb-0">Thuộc tính sản phẩm</h6>
+                                                                <button type="button" className="btn btn-sm btn-primary" onClick={addAttribute}>
+                                                                    + Thêm thuộc tính
+                                                                </button>
+                                                            </div>
+                                                            <div className="card-body">
+                                                                {attributes.map((attr, attrIndex) => (
+                                                                    <div key={attrIndex} className="mb-4 border-bottom pb-3">
+                                                                        <div className="row mb-3">
+                                                                            <div className="col-md-6">
+                                                                                <label className="form-label fw-semibold">Thuộc tính <span style={{color: 'red'}}>*</span></label>
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className={`form-control ${isSubmitted && !attr.name ? 'is-invalid' : ''}`}
+                                                                                    value={attr.name}
+                                                                                    onChange={e => {
+                                                                                        const newAttrs = [...attributes];
+                                                                                        newAttrs[attrIndex].name = e.target.value;
+                                                                                        setAttributes(newAttrs);
+                                                                                    }}
+                                                                                    placeholder="Nhập tên thuộc tính"
+                                                                                />
+                                                                                {isSubmitted && !attr.name && <div className="invalid-feedback d-block">Tên thuộc tính là bắt buộc</div>}
+                                                                            </div>
+                                                                            <div className="col-md-4">
+                                                                                <label className="form-label">Loại thuộc tính</label>
+                                                                                <select
+                                                                                    className="form-select"
+                                                                                    value={attr.type}
+                                                                                    onChange={e => {
+                                                                                        const newAttrs = [...attributes];
+                                                                                        newAttrs[attrIndex].type = e.target.value;
+                                                                                        setAttributes(newAttrs);
+                                                                                    }}
+                                                                                >
+                                                                                    <option value="select">Một lựa chọn (Radio)</option>
+                                                                                    <option value="checkbox">Nhiều lựa chọn (Checkbox)</option>
+                                                                                    <option value="text">Ghi chú (Text Input)</option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div className="col-md-2 d-flex align-items-end">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    className="btn btn-sm btn-danger"
+                                                                                    onClick={() => removeAttribute(attrIndex)}
+                                                                                >
+                                                                                    <i className="fas fa-trash"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        {/* Hiển thị giá trị cho select và checkbox */}
+                                                                        {(attr.type === 'select' || attr.type === 'checkbox') && (
+                                                                            <div className="row mb-3">
+                                                                                <div className="col-md-12">
+                                                                                    <div className="mb-2">
+                                                                                        <label className="form-label">Giá trị</label>
+                                                                                    </div>
+                                                                                    {attr.values.map((value, valueIndex) => (
+                                                                                        <div key={valueIndex} className="row mb-2">
+                                                                                            <div className="col-md-4">
+                                                                                                <input
+                                                                                                    type="text"
+                                                                                                    className={`form-control ${isSubmitted && !value.value ? 'is-invalid' : ''}`}
+                                                                                                    value={value.value}
+                                                                                                    onChange={e => {
+                                                                                                        const newAttrs = [...attributes];
+                                                                                                        newAttrs[attrIndex].values[valueIndex].value = e.target.value;
+                                                                                                        setAttributes(newAttrs);
+                                                                                                    }}
+                                                                                                    placeholder="Nhập giá trị"
+                                                                                                    
+                                                                                                />
+                                                                                                {isSubmitted && !value.value && <div className="invalid-feedback d-block">Giá trị là bắt buộc</div>}
+                                                                                            </div>
+                                                                                            <div className="col-md-2">
+                                                                                                <input
+                                                                                                    type="text"
+                                                                                                    className="form-control"
+                                                                                                    value={value.price_adjustment}
+                                                                                                    onChange={e => {
+                                                                                                        const newAttrs = [...attributes];
+                                                                                                        const formatted = formatVND(e.target.value);
+                                                                                                        newAttrs[attrIndex].values[valueIndex].price_adjustment = formatted;
+                                                                                                        setAttributes(newAttrs);
+                                                                                                    }}
+                                                                                                    placeholder="Phụ thu"
+                                                                                                />
+                                                                                            </div>
+                                                                                            <div className="col-md-2">
+                                                                                                <div className="form-check">
+                                                                                                    <input
+                                                                                                        className="form-check-input"
+                                                                                                        type="radio"
+                                                                                                        name={`default_${attrIndex}`}
+                                                                                                        checked={value.is_default}
+                                                                                                        onChange={e => {
+                                                                                                            const newAttrs = [...attributes];
+                                                                                                            // Reset all other values to false
+                                                                                                            newAttrs[attrIndex].values.forEach((v, i) => {
+                                                                                                                v.is_default = (i === valueIndex);
+                                                                                                            });
+                                                                                                            setAttributes(newAttrs);
+                                                                                                        }}
+                                                                                                    />
+                                                                                                    <label className="form-check-label">Mặc định</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div className="col-md-2">
+                                                                                                <button
+                                                                                                    type="button"
+                                                                                                    className="btn btn-sm btn-danger"
+                                                                                                    onClick={() => removeAttributeValue(attrIndex, valueIndex)}
+                                                                                                >
+                                                                                                    <i className="fas fa-trash"></i>
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                    <div className="mt-2">
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            className="btn btn-sm btn-secondary"
+                                                                                            onClick={() => addAttributeValue(attrIndex)}
+                                                                                        >
+                                                                                            + Thêm giá trị
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                        
+                                                                        {/* Hiển thị thông báo cho text type */}
+                                                                        {attr.type === 'text' && (
+                                                                            <div className="alert alert-info">
+                                                                                <i className="fas fa-info-circle me-2"></i>
+                                                                                Thuộc tính dạng text cho phép khách hàng nhập ghi chú tự do
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Tab Mô tả */}
+                                        {activeTab === 'mo-ta' && (
+                                            <div className="tab-pane fade show active">
+                                                <div className="row mb-3">
+                                                    <div className="col-md-12">
+                                                        <div className="mb-3">
+                                                            <label htmlFor="description" className="form-label fw-semibold">
+                                                                Mô tả sản phẩm
+                                                            </label>
                                             <CustomEditor
                                                 folder='products'
                                                 data={description}
@@ -545,6 +1140,93 @@ const ProductUpdate = () => {
                                             {errors.description && <div className="text-danger">{errors.description.message}</div>}
                                         </div>
                                     </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Tab Chi nhánh */}
+                                        {activeTab === 'chi-nhanh' && (
+                                            <div className="tab-pane fade show active">
+                                                <div className="row mb-3">
+                                                    <div className="col-md-12">
+                                                        <div className="mb-3">
+                                                            <label className="form-label fw-semibold">Áp dụng cho</label>
+                                                            <div className="form-check">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="radio"
+                                                                    name="applyToAll"
+                                                                    id="applyToAll"
+                                                                    checked={applyToAllBranches}
+                                                                    onChange={() => {
+                                                                        setApplyToAllBranches(true);
+                                                                        setSelectedBranches([]);
+                                                                        setBranchPrices([]);
+                                                                    }}
+                                                                />
+                                                                <label className="form-check-label" htmlFor="applyToAll">
+                                                                    Toàn hệ thống
+                                                                </label>
+                                                            </div>
+                                                            <div className="form-check">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="radio"
+                                                                    name="applyToAll"
+                                                                    id="applyToSpecific"
+                                                                    checked={!applyToAllBranches}
+                                                                    onChange={() => setApplyToAllBranches(false)}
+                                                                />
+                                                                <label className="form-check-label" htmlFor="applyToSpecific">
+                                                                    Chi nhánh
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {!applyToAllBranches && (
+                                                    <div className="row mb-3">
+                                                        <div className="col-md-12">
+                                                            <div className="mb-3">
+                                                                <label className="form-label fw-semibold">Chọn chi nhánh</label>
+                                                                <Select
+                                                                    options={branchOptions}
+                                                                    isMulti
+                                                                    value={branchOptions.filter(opt => selectedBranches.includes(opt.value))}
+                                                                    onChange={opts => {
+                                                                        const values = opts ? opts.map(opt => opt.value) : [];
+                                                                        setSelectedBranches(values);
+                                                                        // Cập nhật branchPrices
+                                                                        const newBranchPrices = [];
+                                                                        values.forEach(branchId => {
+                                                                            const existingPrice = branchPrices.find(bp => bp.branch_id === branchId);
+                                                                            if (existingPrice) {
+                                                                                newBranchPrices.push(existingPrice);
+                                                                            } else {
+                                                                                newBranchPrices.push({
+                                                                                    branch_id: branchId,
+                                                                                    price_type: 'store_price',
+                                                                                    price: '',
+                                                                                    unit_of_measure: ''
+                                                                                });
+                                                                            }
+                                                                        });
+                                                                        setBranchPrices(newBranchPrices);
+                                                                    }}
+                                                                    placeholder="Tìm kiếm & chọn chi nhánh..."
+                                                                    classNamePrefix="react-select"
+                                                                    styles={selectStyles}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                            </div>
+                                        )}
+                                    </div>
+
                                     <div className="mt-4 mb-0">
                                         <div className="d-flex justify-content-center gap-2">
                                             <button
@@ -599,9 +1281,7 @@ const ProductUpdate = () => {
                                 dispatch(actions.controlLoading(false));
                                 if (response.data && response.data.success) {
                                     toast.success(response.data.message || "Xóa sản phẩm thành công!", toastSuccessConfig);
-                                    
                                     navigation('/product');
-                                    
                                 } else {
                                     toast.error(response.data.message || "Xóa sản phẩm thất bại", toastErrorConfig);
                                 }

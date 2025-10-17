@@ -377,6 +377,7 @@ const AdminList = () => {
                 setShowModal(false);
                 if (response.data && response.data.success) {
                     toast.success(response.data.message || "Xóa nhân viên thành công!", toastSuccessConfig);
+                    setSelectedRows([]); // Clear selected rows after successful deletion
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa nhân viên thất bại", toastErrorConfig);
@@ -511,17 +512,17 @@ const AdminList = () => {
                                 </div>
                                 <div className="col-md-8">
                                     <div className="d-flex justify-content-end gap-2">
-                                        {/* Nút tạo mới */}
-                                        <Link className="btn btn-primary" to="/admin/add">
-                                            <i className="fas fa-plus me-1"></i> Tạo mới
-                                        </Link>
-                                        
                                         {/* Nút xóa nhiều */}
                                         {selectedRows.length > 0 && (
                                             <button className="btn btn-danger" onClick={multiDelete}>
                                                 <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
                                             </button>
                                         )}
+                                        
+                                        {/* Nút tạo mới */}
+                                        <Link className="btn btn-primary" to="/admin/add">
+                                            <i className="fas fa-plus me-1"></i> Tạo mới
+                                        </Link>
                                         
                                         {/* Các nút khác */}
                                         <button className="btn btn-secondary">
@@ -580,6 +581,7 @@ const AdminList = () => {
                                     currentPage={currentPage}
                                     setCurrentPage={setCurrentPage}
                                     setItemOfPage={setItemOfPage}
+                                    selectedRows={selectedRows}
                                     onSelectedRows={setSelectedRows}
                                     hideSearch={true}
                                     showSummary={false}

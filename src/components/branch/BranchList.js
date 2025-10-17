@@ -134,6 +134,7 @@ const BranchList = () => {
                 setShowModal(false);
                 if (response.data && response.data.success) {
                     toast.success(response.data.message || "Xóa chi nhánh thành công!", toastSuccessConfig);
+                    setSelectedRows([]); // Clear selected rows after successful deletion
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa chi nhánh thất bại", toastErrorConfig);
@@ -231,17 +232,17 @@ const BranchList = () => {
                                     </div>
                                     <div className="col-md-8">
                                         <div className="d-flex justify-content-end gap-2">
-                                            {/* Nút tạo mới */}
-                                            <Link className="btn btn-primary" to="/branch/add">
-                                                <i className="fas fa-plus me-1"></i> Tạo mới
-                                            </Link>
-                                            
                                             {/* Nút xóa nhiều */}
                                             {selectedRows.length > 0 && (
                                                 <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
                                                     <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
                                                 </button>
                                             )}
+                                            
+                                            {/* Nút tạo mới */}
+                                            <Link className="btn btn-primary" to="/branch/add">
+                                                <i className="fas fa-plus me-1"></i> Tạo mới
+                                            </Link>
                                             
                                             {/* Các nút khác */}
                                             <button className="btn btn-secondary">
@@ -301,6 +302,7 @@ const BranchList = () => {
                                         setCurrentPage={setCurrentPage}
                                         setItemOfPage={setItemOfPage}
                                         hideSearch={true}
+                                        selectedRows={selectedRows}
                                         onSelectedRows={ (selectedRows) => setSelectedRows(selectedRows)}
                                     />
                                 </div>

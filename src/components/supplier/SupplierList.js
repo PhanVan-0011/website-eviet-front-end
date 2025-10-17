@@ -313,6 +313,7 @@ const SupplierList = () => {
                 setShowModal(false);
                 if (response.data && response.data.success) {
                     toast.success(response.data.message || "Xóa nhà cung cấp thành công!", toastSuccessConfig);
+                    setSelectedRows([]); // Clear selected rows after successful deletion
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa nhà cung cấp thất bại", toastErrorConfig);
@@ -497,6 +498,7 @@ const SupplierList = () => {
                                         currentPage={currentPage}
                                         setCurrentPage={setCurrentPage}
                                         setItemOfPage={setItemOfPage}
+                                        selectedRows={selectedRows}
                                         onSelectedRows={setSelectedRows}
                                         hideSearch={true}
                                         showSummary={true}

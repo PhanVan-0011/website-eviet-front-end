@@ -5,8 +5,17 @@ import { useRef } from 'react';
 
 const DataTables = (props) => {
     console.log("DataTables props: ", props);
-   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, filterHeader, hideSelected, hideSearch = false, isLoading = false, showSummary = false } = props;
+   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, selectedRows: externalSelectedRows, filterHeader, hideSelected, hideSearch = false, isLoading = false, showSummary = false } = props;
    const [selectedRows, setSelectedRows] = useState([]);
+   const isFirstRender = useRef(true);
+   
+   // Đồng bộ selectedRows từ props (controlled component)
+   useEffect(() => {
+       if (Array.isArray(externalSelectedRows)) {
+           setSelectedRows(externalSelectedRows);
+       }
+   }, [externalSelectedRows]);
+   
    // --- Lấy trạng thái cột hiển thị từ localStorage khi component mount ---
    const [visibleColumns, setVisibleColumns] = useState(() => {
         // Nếu có trạng thái đã lưu thì lấy ra, không thì hiển thị tất cả cột
@@ -19,7 +28,12 @@ const DataTables = (props) => {
 
    useEffect(() => {
        console.log("Selected rows: ", selectedRows);
-       onSelectedRows(selectedRows);
+       // Tránh gọi onSelectedRows lần đầu tiên khi component mount
+       if (isFirstRender.current) {
+           isFirstRender.current = false;
+       } else {
+           onSelectedRows(selectedRows);
+       }
     }, [selectedRows]);
 
     // // Clear selected rows when data changes (e.g., after delete)

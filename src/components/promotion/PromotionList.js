@@ -313,6 +313,7 @@ const PromotionList = () => {
                 setShowModal(false);
                 if (response.data && response.data.success) {
                     toast.success(response.data.message || "Xóa khuyến mãi thành công!", toastSuccessConfig);
+                    setSelectedRows([]); // Clear selected rows after successful deletion
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa khuyến mãi thất bại", toastErrorConfig);
@@ -456,13 +457,6 @@ const PromotionList = () => {
                                     </div>
                                     <div className="col-md-8">
                                         <div className="d-flex justify-content-end gap-2">
-                                            {/* Nút tạo mới */}
-                                            <Permission permission={PERMISSIONS.PROMOTIONS_CREATE}>
-                                                <Link className="btn btn-primary" to="/promotion/add">
-                                                    <i className="fas fa-plus me-1"></i> Tạo mới
-                                                </Link>
-                                            </Permission>
-                                            
                                             {/* Nút xóa nhiều */}
                                             {selectedRows.length > 0 && (
                                                 <Permission permission={PERMISSIONS.PROMOTIONS_DELETE}>
@@ -471,6 +465,13 @@ const PromotionList = () => {
                                                     </button>
                                                 </Permission>
                                             )}
+                                            
+                                            {/* Nút tạo mới */}
+                                            <Permission permission={PERMISSIONS.PROMOTIONS_CREATE}>
+                                                <Link className="btn btn-primary" to="/promotion/add">
+                                                    <i className="fas fa-plus me-1"></i> Tạo mới
+                                                </Link>
+                                            </Permission>
                                             
                                             {/* Các nút khác */}
                                             <button className="btn btn-secondary">
@@ -529,6 +530,7 @@ const PromotionList = () => {
                                         currentPage={currentPage}
                                         setCurrentPage={setCurrentPage}
                                         setItemOfPage={setItemOfPage}
+                                        selectedRows={selectedRows}
                                         onSelectedRows={setSelectedRows}
                                         hideSearch={true}
                                         showSummary={true}

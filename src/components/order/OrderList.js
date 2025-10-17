@@ -50,9 +50,14 @@ const OrderList = () => {
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
 
-    // Data for filters
-    const [paymentMethods, setPaymentMethods] = useState([]);
-    const [customers, setCustomers] = useState([]);
+    // Data for filters - Phương thức thanh toán cố định
+    const paymentMethods = [
+        { id: 'COD', name: 'COD' },
+        { id: 'VNPAY', name: 'VNPAY' },
+        { id: 'MOMO', name: 'MOMO' },
+        { id: 'ZALOPAY', name: 'ZALOPAY' }
+    ];
+    // const [customers, setCustomers] = useState([]);
 
 
     const updateFilter = (key, value) => {
@@ -63,32 +68,19 @@ const OrderList = () => {
         setIsFilterVisible(prev => !prev);
     };
 
-    // Load filter data
+    // Load filter data - Không cần load payment methods nữa vì đã cố định
     useEffect(() => {
-        // Load payment methods
-        requestApi('api/admin/payment-methods?limit=1000', 'GET', []).then((response) => {
-            if (response.data && response.data.data) {
-                setPaymentMethods(response.data.data);
-            }
-        }).catch(() => {
-            setPaymentMethods([
-                { id: 1, name: 'Tiền mặt' },
-                { id: 2, name: 'Chuyển khoản' },
-                { id: 3, name: 'Thẻ tín dụng' }
-            ]);
-        });
-
-        // Load customers
-        requestApi('api/admin/customers?limit=1000', 'GET', []).then((response) => {
-            if (response.data && response.data.data) {
-                setCustomers(response.data.data);
-            }
-        }).catch(() => {
-            setCustomers([
-                { id: 1, name: 'Khách lẻ' },
-                { id: 2, name: 'Khách VIP' }
-            ]);
-        });
+        // // Load customers
+        // requestApi('api/admin/customers?limit=1000', 'GET', []).then((response) => {
+        //     if (response.data && response.data.data) {
+        //         setCustomers(response.data.data);
+        //     }
+        // }).catch(() => {
+        //     // setCustomers([
+        //     //     { id: 1, name: 'Khách lẻ' },
+        //     //     { id: 2, name: 'Khách VIP' }
+        //     // ]);
+        // });
     }, []);
 
     // Lấy danh sách đơn hàng với filter
@@ -106,9 +98,9 @@ const OrderList = () => {
             query += `&start_date=${moment(filterValues.orderDate.from).format('YYYY-MM-DD')}`;
             query += `&end_date=${moment(filterValues.orderDate.to).format('YYYY-MM-DD')}`;
         }
-        if (filterValues.customer && filterValues.customer !== 'all') {
-            query += `&customer_id=${filterValues.customer}`;
-        }
+        // if (filterValues.customer && filterValues.customer !== 'all') {
+        //     query += `&customer_id=${filterValues.customer}`;
+        // }
 
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/orders${query}`, 'GET', []).then((response) => {
@@ -427,15 +419,6 @@ const OrderList = () => {
         }
     };
 
-    // Lấy danh sách phương thức thanh toán từ API khi load trang
-    useEffect(() => {
-        requestApi('api/payment-methods', 'GET', []).then((response) => {
-            if (response.data && response.data.data) {
-                const activeMethods = response.data.data.filter(m => m.is_active);
-                setPaymentMethods(activeMethods);
-            }
-        });
-    }, []);
 
     return (
         <div id="layoutSidenav_content">
@@ -488,7 +471,7 @@ const OrderList = () => {
                                         value={filterValues.paymentMethod ? {
                                             value: filterValues.paymentMethod,
                                             label: filterValues.paymentMethod === 'all' ? 'Tất cả' : 
-                                                   paymentMethods.find(pm => pm.id == filterValues.paymentMethod)?.name || filterValues.paymentMethod
+                                                   paymentMethods.find(pm => pm.id === filterValues.paymentMethod)?.name || filterValues.paymentMethod
                                         } : { value: 'all', label: 'Tất cả' }}
                                         onChange={(selected) => updateFilter('paymentMethod', selected ? selected.value : 'all')}
                                         options={[
@@ -509,7 +492,7 @@ const OrderList = () => {
                                     />
 
                                     {/* Khách hàng */}
-                                    <FilterSelectSingle
+                                    {/* <FilterSelectSingle
                                         label="Khách hàng"
                                         value={filterValues.customer ? {
                                             value: filterValues.customer,
@@ -525,7 +508,7 @@ const OrderList = () => {
                                             }))
                                         ]}
                                         placeholder="Chọn khách hàng"
-                                    />
+                                    /> */}
                                 </div>
                             )}
                         </div>
