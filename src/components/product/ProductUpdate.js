@@ -48,6 +48,13 @@ const ProductUpdate = () => {
     // State cho attributes
     const [attributes, setAttributes] = useState([]);
 
+    // State cho collapse/expand
+    const [expandUnitConversions, setExpandUnitConversions] = useState(true);
+    const [expandAttributes, setExpandAttributes] = useState(true);
+
+    // Force re-render khi icon thay đổi
+    const [, forceUpdate] = useState();
+
     // Lấy dữ liệu sản phẩm và danh mục, chi nhánh
     useEffect(() => {
         const fetchData = async () => {
@@ -125,14 +132,16 @@ const ProductUpdate = () => {
                     setAttributes(formatted);
                 }
                 
-                // Chi nhánh - lấy từ branches array
-                if (data.branches && data.branches.length > 0) {
-                    // Nếu có branches thì set applyToAllBranches = false và chọn các branches này
-                    const branchIds = data.branches.map(branch => branch.id);
+                // Chi nhánh - lấy từ applies_to_all_branches field
+                if (data.applies_to_all_branches === true || data.applies_to_all_branches === 1) {
+                    setApplyToAllBranches(true);
+                    setSelectedBranches([]);
+                    setBranchPrices([]);
+                } else if (data.branches && data.branches.length > 0) {
                     setApplyToAllBranches(false);
+                    const branchIds = data.branches.map(branch => branch.id);
                     setSelectedBranches(branchIds);
                 } else {
-                    // Nếu không có branches thì áp dụng cho toàn hệ thống
                     setApplyToAllBranches(true);
                     setSelectedBranches([]);
                 }
@@ -393,11 +402,11 @@ const ProductUpdate = () => {
             formData.append('attributes_json', JSON.stringify(attributesFormatted));
             
             // Chi nhánh
-            formData.append('apply_to_all_branches', applyToAllBranches ? 1 : 0);
+            formData.append('applies_to_all_branches', applyToAllBranches ? 1 : 0);
             if (!applyToAllBranches && selectedBranches.length > 0) {
                 selectedBranches.forEach(id => formData.append('branch_ids[]', id));
+                formData.append('branch_prices_json', JSON.stringify(branchPrices));
             }
-            formData.append('branch_prices_json', JSON.stringify(branchPrices));
 
             // Log dữ liệu trước khi gửi
             const reviewData = {
@@ -822,11 +831,23 @@ const ProductUpdate = () => {
                                                         <div className="card">
                                                             <div className="card-header d-flex justify-content-between align-items-center">
                                                                 <h6 className="mb-0">Đơn vị tính</h6>
-                                                                <button type="button" className="btn btn-sm btn-primary" onClick={addUnitConversion}>
-                                                                    + Thêm đơn vị
-                                                                </button>
+                                                                <div className="d-flex gap-2">
+                                                                    <button type="button" className="btn btn-sm btn-primary" onClick={addUnitConversion}>
+                                                                        + Thêm đơn vị
+                                                                    </button>
+                                                                    <button 
+                                                                        type="button" 
+                                                                        className="btn btn-sm btn-light border"
+                                                                        onClick={() => setExpandUnitConversions(!expandUnitConversions)}
+                                                                        title={expandUnitConversions ? "Thu gọn" : "Mở rộng"}
+                                                                    >
+                                                                        <span key={`unit-${expandUnitConversions}`}>
+                                                                            <i className={expandUnitConversions ? "fas fa-chevron-up text-secondary" : "fas fa-chevron-down text-secondary"}></i>
+                                                                        </span>
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                            <div className="card-body">
+                                                            <div className="card-body" style={{display: expandUnitConversions ? 'block' : 'none'}}>
                                                                 {/* Bảng đơn vị chuyển đổi */}
                                                                 {unitConversions.length > 0 && (
                                                                     <div className="row mb-3">
@@ -974,11 +995,23 @@ const ProductUpdate = () => {
                                                         <div className="card">
                                                             <div className="card-header d-flex justify-content-between align-items-center">
                                                                 <h6 className="mb-0">Thuộc tính sản phẩm</h6>
-                                                                <button type="button" className="btn btn-sm btn-primary" onClick={addAttribute}>
-                                                                    + Thêm thuộc tính
-                                                                </button>
+                                                                <div className="d-flex gap-2">
+                                                                    <button type="button" className="btn btn-sm btn-primary" onClick={addAttribute}>
+                                                                        + Thêm thuộc tính
+                                                                    </button>
+                                                                    <button 
+                                                                        type="button" 
+                                                                        className="btn btn-sm btn-light border"
+                                                                        onClick={() => setExpandAttributes(!expandAttributes)}
+                                                                        title={expandAttributes ? "Thu gọn" : "Mở rộng"}
+                                                                    >
+                                                                        <span key={`attr-${expandAttributes}`}>
+                                                                            <i className={expandAttributes ? "fas fa-chevron-up text-secondary" : "fas fa-chevron-down text-secondary"}></i>
+                                                                        </span>
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                            <div className="card-body">
+                                                            <div className="card-body" style={{display: expandAttributes ? 'block' : 'none'}}>
                                                                 {attributes.map((attr, attrIndex) => (
                                                                     <div key={attrIndex} className="mb-4 border-bottom pb-3">
                                                                         <div className="row mb-3">
@@ -1217,6 +1250,8 @@ const ProductUpdate = () => {
                                                                     placeholder="Tìm kiếm & chọn chi nhánh..."
                                                                     classNamePrefix="react-select"
                                                                     styles={selectStyles}
+                                                                    menuPortalTarget={document.body}
+                                                                    menuPosition="fixed"
                                                                 />
                                                             </div>
                                                         </div>

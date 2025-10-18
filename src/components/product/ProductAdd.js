@@ -42,6 +42,13 @@ const ProductAdd = () => {
     // State cho attributes
     const [attributes, setAttributes] = useState([]);
 
+    // State cho collapse/expand
+    const [expandUnitConversions, setExpandUnitConversions] = useState(true);
+    const [expandAttributes, setExpandAttributes] = useState(true);
+
+    // Force re-render khi icon thay đổi
+    const [, forceUpdate] = useState();
+
     // Lấy danh sách danh mục và chi nhánh
     useEffect(() => {
         const fetchData = async () => {
@@ -266,11 +273,11 @@ const ProductAdd = () => {
             formData.append('attributes_json', JSON.stringify(attributesFormatted));
             
             // Chi nhánh
-            formData.append('apply_to_all_branches', applyToAllBranches ? 1 : 0);
+            formData.append('applies_to_all_branches', applyToAllBranches ? 1 : 0);
             if (!applyToAllBranches && selectedBranches.length > 0) {
                 selectedBranches.forEach(id => formData.append('branch_ids[]', id));
+                formData.append('branch_prices_json', JSON.stringify(branchPrices));
             }
-            formData.append('branch_prices_json', JSON.stringify(branchPrices));
             
             // Log dữ liệu trước khi gửi
             const reviewData = {
@@ -352,18 +359,9 @@ const ProductAdd = () => {
                                                     borderBottomWidth: activeTab === 'thong-tin' ? '2px' : '1px',
                                                     textDecoration: 'none',
                                                     backgroundColor: 'transparent !important',
-                                                    borderColor: 'transparent !important'
+                                                   
                                                 }}
-                                                onMouseEnter={(e) => {
-                                                    e.target.style.backgroundColor = 'transparent !important';
-                                                    e.target.style.borderColor = 'transparent !important';
-                                                    e.target.style.color = activeTab === 'thong-tin' ? '#007bff' : '#6c757d';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.target.style.backgroundColor = 'transparent !important';
-                                                    e.target.style.borderColor = 'transparent !important';
-                                                    e.target.style.color = activeTab === 'thong-tin' ? '#007bff' : '#6c757d';
-                                                }}
+                                               
                                             >
                                                 Thông tin
                                             </button>
@@ -379,18 +377,9 @@ const ProductAdd = () => {
                                                     borderBottomWidth: activeTab === 'mo-ta' ? '2px' : '1px',
                                                     textDecoration: 'none',
                                                     backgroundColor: 'transparent !important',
-                                                    borderColor: 'transparent !important'
+                                                   
                                                 }}
-                                                onMouseEnter={(e) => {
-                                                    e.target.style.backgroundColor = 'transparent !important';
-                                                    e.target.style.borderColor = 'transparent !important';
-                                                    e.target.style.color = activeTab === 'mo-ta' ? '#007bff' : '#6c757d';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.target.style.backgroundColor = 'transparent !important';
-                                                    e.target.style.borderColor = 'transparent !important';
-                                                    e.target.style.color = activeTab === 'mo-ta' ? '#007bff' : '#6c757d';
-                                                }}
+                                              
                                             >
                                                 Mô tả chi tiết
                                             </button>
@@ -406,7 +395,7 @@ const ProductAdd = () => {
                                                     borderBottomWidth: activeTab === 'chi-nhanh' ? '2px' : '1px',
                                                     textDecoration: 'none',
                                                     backgroundColor: 'transparent !important',
-                                                    borderColor: 'transparent !important'
+                                                  
                                                 }}
                                                 
                                             >
@@ -705,11 +694,27 @@ const ProductAdd = () => {
                                                         <div className="card">
                                                             <div className="card-header d-flex justify-content-between align-items-center">
                                                                 <h6 className="mb-0">Đơn vị tính</h6>
-                                                                <button type="button" className="btn btn-sm btn-primary" onClick={addUnitConversion}>
-                                                                    + Thêm đơn vị
-                                                                </button>
+                                                                <div className="d-flex gap-2">
+                                                                    <button 
+                                                                        type="button" 
+                                                                        className="btn btn-sm btn-primary" 
+                                                                        onClick={addUnitConversion}
+                                                                    >
+                                                                        + Thêm đơn vị
+                                                                    </button>
+                                                                    <button 
+                                                                        type="button" 
+                                                                        className="btn btn-sm btn-light border"
+                                                                        onClick={() => setExpandUnitConversions(!expandUnitConversions)}
+                                                                        title={expandUnitConversions ? "Thu gọn" : "Mở rộng"}
+                                                                    >
+                                                                        <span key={`unit-${expandUnitConversions}`}>
+                                                                            <i className={expandUnitConversions ? "fas fa-chevron-up text-secondary" : "fas fa-chevron-down text-secondary"}></i>
+                                                                        </span>
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                            <div className="card-body">
+                                                            <div className="card-body" style={{display: expandUnitConversions ? 'block' : 'none'}}>
                                                                 {/* Bảng đơn vị chuyển đổi */}
                                                                 {unitConversions.length > 0 && (
                                                                     <div className="row mb-3">
@@ -858,11 +863,23 @@ const ProductAdd = () => {
                                                         <div className="card">
                                                             <div className="card-header d-flex justify-content-between align-items-center">
                                                                 <h6 className="mb-0">Thuộc tính sản phẩm</h6>
-                                                                <button type="button" className="btn btn-sm btn-primary" onClick={addAttribute}>
-                                                                    + Thêm thuộc tính
-                                                                </button>
+                                                                <div className="d-flex gap-2">
+                                                                    <button type="button" className="btn btn-sm btn-primary" onClick={addAttribute}>
+                                                                        + Thêm thuộc tính
+                                                                    </button>
+                                                                    <button 
+                                                                        type="button" 
+                                                                        className="btn btn-sm btn-light border"
+                                                                        onClick={() => setExpandAttributes(!expandAttributes)}
+                                                                        title={expandAttributes ? "Thu gọn" : "Mở rộng"}
+                                                                    >
+                                                                        <span key={`attr-${expandAttributes}`}>
+                                                                            <i className={expandAttributes ? "fas fa-chevron-up text-secondary" : "fas fa-chevron-down text-secondary"}></i>
+                                                                        </span>
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                            <div className="card-body">
+                                                            <div className="card-body" style={{display: expandAttributes ? 'block' : 'none'}}>
                                                                 {attributes.map((attr, attrIndex) => (
                                                                     <div key={attrIndex} className="mb-4 border-bottom pb-3">
                                                                         <div className="row mb-3">
@@ -1098,6 +1115,8 @@ const ProductAdd = () => {
                                                                     placeholder="Tìm kiếm & chọn chi nhánh..."
                                                                     classNamePrefix="react-select"
                                                                     styles={selectStyles}
+                                                                    menuPortalTarget={document.body}
+                                                                    menuPosition="fixed"
                                                                 />
                                                             </div>
                                                         </div>

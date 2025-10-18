@@ -25,6 +25,7 @@ const BranchUpdate = () => {
     useEffect(() => {
         const fetchBranchData = async () => {
             try {
+                dispatch(actions.controlLoading(true));
                 const response = await requestApi(`api/admin/branches/${params.id}`, 'GET');
                 const data = response.data.data;
                 setValue('code', data.code);
@@ -32,13 +33,19 @@ const BranchUpdate = () => {
                 setValue('address', data.address);
                 setValue('phone_number', data.phone_number);
                 setValue('email', data.email);
-                setValue('active', data.active ? String(data.active) : "1");
+                // Convert boolean hoặc number thành string
+                const activeValue = typeof data.active === 'boolean' 
+                    ? (data.active ? '1' : '0')
+                    : String(data.active);
+                setValue('active', activeValue);
+                dispatch(actions.controlLoading(false));
             } catch (error) {
+                dispatch(actions.controlLoading(false));
                 console.error("Error fetching branch data: ", error);
             }
         };
         fetchBranchData();
-    }, [params.id, setValue]);
+    }, [params.id, setValue, dispatch]);
 
     const handleSubmitForm = async (data) => {
         setIsSubmitting(true);

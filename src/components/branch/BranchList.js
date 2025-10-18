@@ -72,7 +72,7 @@ const BranchList = () => {
         },
         {
             title: "Trạng thái",
-            element: row => row.active === 1
+            element: row => (row.active === 1 || row.active === true)
                 ? <span className="badge bg-success">Hoạt động</span>
                 : <span className="badge bg-secondary">Không hoạt động</span>,
             width: "10%"
