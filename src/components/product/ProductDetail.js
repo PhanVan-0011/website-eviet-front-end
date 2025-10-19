@@ -11,6 +11,16 @@ import { cleanHtml, oembedToIframe } from '../../helpers/formatData';
 import { formatVNDWithUnit } from '../../helpers/formatMoney';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
+// Component hiển thị từng field thông tin
+const InfoItem = ({ label, value, isDanger = false }) => (
+    <div className="col-md-3 mb-3">
+        <div className="text-muted small mb-1">{label}</div>
+        <div className={`fw-semibold border-bottom pb-2 ${isDanger ? 'text-danger' : ''}`}>
+            {value ?? 'Chưa có'}
+        </div>
+    </div>
+);
+
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -20,6 +30,7 @@ const ProductDetail = () => {
     const [showModal, setShowModal] = useState(false);
     const [modalImg, setModalImg] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [activeTab, setActiveTab] = useState('thong-tin');
 
     useEffect(() => {
         setLoading(true);
@@ -126,46 +137,121 @@ const ProductDetail = () => {
                         <li className="breadcrumb-item active">Chi tiết</li>
                     </ol>
 
-                    <div className="row g-3">
-                        {/* Thông tin sản phẩm & hình ảnh */}
-                        <div className="col-lg-6">
-                            <div className="card shadow-sm border-0">
-                                <div className="card-header py-2 background-detail">
-                                    <h6 className="mb-0 fw-bold">
-                                        <i className="fas fa-box me-2"></i>Thông tin sản phẩm & hình ảnh
-                                    </h6>
-                                </div>
-                                <div className="card-body p-3">
-                                    {/* Hình ảnh sản phẩm */}
-                                    <div className="mb-3" style={{ height: '280px', display: 'flex', flexDirection: 'column' }}>
-                                        {product.image_urls && product.image_urls.length > 0 ? (
+                    <div className="card border">
+                        {/* Tab Navigation */}
+                        <ul className="nav nav-tabs" id="productDetailTabs" role="tablist" style={{borderBottom: '2px solid #dee2e6'}}>
+                            <li className="nav-item" role="presentation">
+                                <button
+                                    className={`nav-link ${activeTab === 'thong-tin' ? 'active' : ''}`}
+                                    type="button"
+                                    onClick={() => setActiveTab('thong-tin')}
+                                    style={{ 
+                                        color: activeTab === 'thong-tin' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'thong-tin' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'thong-tin' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'thong-tin' ? '500' : 'normal'
+                                    }}
+                                >
+                                    Thông tin
+                                </button>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <button
+                                    className={`nav-link ${activeTab === 'mo-ta' ? 'active' : ''}`}
+                                    type="button"
+                                    onClick={() => setActiveTab('mo-ta')}
+                                    style={{ 
+                                        color: activeTab === 'mo-ta' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'mo-ta' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'mo-ta' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'mo-ta' ? '500' : 'normal'
+                                    }}
+                                >
+                                    Mô tả, ghi chú
+                                </button>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <button
+                                    className={`nav-link ${activeTab === 'ton-kho' ? 'active' : ''}`}
+                                    type="button"
+                                    onClick={() => setActiveTab('ton-kho')}
+                                    style={{ 
+                                        color: activeTab === 'ton-kho' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'ton-kho' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'ton-kho' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'ton-kho' ? '500' : 'normal'
+                                    }}
+                                >
+                                    Tồn kho
+                                </button>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <button
+                                    className={`nav-link ${activeTab === 'the-kho' ? 'active' : ''}`}
+                                    type="button"
+                                    onClick={() => setActiveTab('the-kho')}
+                                    style={{ 
+                                        color: activeTab === 'the-kho' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'the-kho' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'the-kho' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'the-kho' ? '500' : 'normal'
+                                    }}
+                                >
+                                    Thẻ kho
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div style={{ padding: '1.5rem' }}>
+                            {/* Tab Thông tin */}
+                            {activeTab === 'thong-tin' && (
+                                <div>
+                                    {/* Header: Hình ảnh + Tên sản phẩm */}
+                                    <div className="row mb-4 pb-4" style={{borderBottom: '1px solid #dee2e6'}}>
+                                        {/* Hình ảnh sản phẩm nhỏ */}
+                                        <div className="col-auto">
+                                            {product.images && product.images.length > 0 ? (
                                             (() => {
-                                                const featuredImg = product.image_urls.find(img => img.is_featured === 1);
-                                                const otherImgs = product.image_urls.filter(img => img.is_featured !== 1);
+                                                    const featuredImg = product.images.find(img => img.is_featured === 1);
+                                                    const displayImg = featuredImg || product.images[0];
                                                 return (
                                                     <>
-                                                        {featuredImg ? (
-                                                            <>
-                                                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8, overflow: 'hidden' }}>
                                                                     <img
-                                                                        key={featuredImg.id}
-                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + (featuredImg.main_url || featuredImg.thumb_url)}
-                                                                        alt={product.name + '-featured'}
+                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + (displayImg.main_url || displayImg.thumb_url)}
+                                                                alt={product.name}
                                                                         className="img-thumbnail"
                                                                         style={{
-                                                                            objectFit: 'contain',
-                                                                            boxShadow: '0 0 8px #007bff33',
+                                                                    objectFit: 'cover',
                                                                             cursor: 'pointer',
-                                                                            maxWidth: '100%',
-                                                                            maxHeight: '100%',
                                                                             borderRadius: 8,
                                                                             background: '#f8f9fa',
-                                                                            border: '1px solid #dee2e6'
+                                                                    border: '1px solid #dee2e6',
+                                                                    width: 150,
+                                                                    height: 150
                                                                         }}
-                                                                        title="Ảnh đại diện (bấm để xem lớn)"
-                                                                        onClick={() => handleImgClick(featuredImg)}
+                                                                title="Bấm để xem lớn"
+                                                                onClick={() => handleImgClick(displayImg)}
                                                                     />
-                                                                </div>
                                                                 {/* Modal xem ảnh full */}
                                                                 {showModal && modalImg && (
                                                                     <Modal show={showModal} onHide={handleCloseModal} centered>
@@ -186,33 +272,6 @@ const ProductDetail = () => {
                                                                             </div>
                                                                         </Modal.Body>
                                                                     </Modal>
-                                                                )}
-                                                            </>
-                                                        ) : null}
-                                                        {/* Các ảnh phụ */}
-                                                        {otherImgs.length > 0 && (
-                                                            <div className="d-flex flex-wrap gap-1 justify-content-center" style={{ maxHeight: 70, overflowY: 'auto', flexShrink: 0 }}>
-                                                                {otherImgs.map((img, idx) => (
-                                                                    <img
-                                                                        key={img.id}
-                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + (img.main_url || img.thumb_url)}
-                                                                        alt={product.name + '-' + idx}
-                                                                        style={{
-                                                                            width: 45,
-                                                                            height: 45,
-                                                                            objectFit: 'cover',
-                                                                            cursor: 'pointer',
-                                                                            borderRadius: 6,
-                                                                            background: '#f8f9fa',
-                                                                            border: '1px solid #dee2e6',
-                                                                            flexShrink: 0
-                                                                        }}
-                                                                        className="img-thumbnail"
-                                                                        title="Ảnh sản phẩm (bấm để xem lớn)"
-                                                                        onClick={() => handleImgClick(img)}
-                                                                    />
-                                                                ))}
-                                                            </div>
                                                         )}
                                                     </>
                                                 );
@@ -220,8 +279,8 @@ const ProductDetail = () => {
                                         ) : (
                                             <div
                                                 style={{
-                                                    width: '100%',
-                                                    height: '100%',
+                                                        width: 150,
+                                                        height: 150,
                                                     borderRadius: 8,
                                                     background: '#f8f9fa',
                                                     border: '1px solid #dee2e6',
@@ -230,70 +289,165 @@ const ProductDetail = () => {
                                                     justifyContent: 'center'
                                                 }}
                                             >
-                                                <i className="fas fa-image" style={{ fontSize: 60, color: '#adb5bd' }}></i>
-                                            </div>
-                                        )}
-                                    </div>
-                                    
-                                    {/* Thông tin cơ bản - Compact */}
-                                    <div className="row g-2">
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Tên sản phẩm</small>
-                                            <h6 className="fw-bold mb-1">{product.name}</h6>
-                                        </div>
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Danh mục</small>
-                                            <span className="small">{product.categories && product.categories.length > 0
-                                                ? product.categories.map(cat => cat.name).join(', ')
-                                                : 'Chưa phân loại'}</span>
-                                        </div>
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Trạng thái</small>
-                                            {product.status === 1
-                                                ? <span className="badge bg-success small"><i className="fas fa-check-circle me-1"></i>Đang bán</span>
-                                                : <span className="badge bg-secondary small"><i className="fas fa-ban me-1"></i>Ngừng bán</span>
-                                            }
-                                        </div>
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Số lượng</small>
-                                            <span className="fw-semibold">{product.stock_quantity}</span>
-                                        </div>
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Giá gốc</small>
-                                            <span className="fw-bold text-info">{formatVNDWithUnit(product.original_price)}</span>
-                                        </div>
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Giá bán</small>
-                                            <span className="fw-bold text-danger">{formatVNDWithUnit(product.sale_price)}</span>
-                                        </div>
-                                        {product.size && (
-                                            <div className="col-6">
-                                                <small className="text-muted d-block">Kích thước</small>
-                                                <span className="badge bg-secondary">{product.size}</span>
-                                            </div>
-                                        )}
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Ngày tạo</small>
-                                            <span className="small">{formatDate(product.created_at)}</span>
-                                        </div>
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Ngày cập nhật</small>
-                                            <span className="small">{formatDate(product.updated_at)}</span>
+                                                    <i className="fas fa-image" style={{ fontSize: 40, color: '#adb5bd' }}></i>
+                                                </div>
+                                            )}
                                         </div>
 
+                                        {/* Tên sản phẩm + Nhóm hàng + Trạng thái */}
+                                        <div className="col">
+                                            <h3 className="fw-bold mb-2">{product.name}</h3>
+                                            <div className="mb-3">
+                                                <small className="text-muted d-block">Nhóm hàng:</small>
+                                                <span className="text-dark">{product.categories && product.categories.length > 0
+                                                    ? product.categories.map(cat => cat.name).join(', ')
+                                                    : 'Chưa phân loại'}</span>
+                                            </div>
+                                            <div className="d-flex gap-2 flex-wrap">
+                                                {product.status === 1 ? (
+                                                    <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Hoạt động</span>
+                                                ) : (
+                                                    <span className="badge bg-danger"><i className="fas fa-ban me-1"></i>Không hoạt động</span>
+                                                )}
+                                                {product.is_sales_unit && (
+                                                    <span className="badge bg-info"><i className="fas fa-shopping-bag me-1"></i>Bán trực tiếp</span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
+                                    
+                                    {/* Lưới thông tin 4 cột */}
+                                    <div className="row">
+                                        <InfoItem label="Mã hàng" value={product.product_code || product.id} />
+                                        <InfoItem label="Tồn kho" value={product.total_stock_quantity || 0} />
+                                        <InfoItem label="Định mức tồn" value="0 - 999,999,999" />
+                                        <InfoItem label="Giá vốn" value={formatVNDWithUnit(product.cost_price)} />
+
+                                        <InfoItem label="Giá bán" value={formatVNDWithUnit(product.base_store_price)} isDanger />
+                                        <InfoItem label="Thương hiệu" value={product.brand || 'Chưa có'} />
+                                        <InfoItem label="Vị trí" value={product.location || 'Chưa có'} />
+                                        <InfoItem label="Trọng lượng" value={product.weight || 'Chưa có'} />
+
+                                        <InfoItem label="Giá App" value={formatVNDWithUnit(product.base_app_price)} isDanger />
+                                        <InfoItem label="Trạng thái" value={product.status === 1 ? 'Hoạt động' : 'Không hoạt động'} />
+                                        <InfoItem label="Bán trực tiếp" value={product.is_sales_unit ? 'Có' : 'Không'} />
+                                        <InfoItem label="Ngày tạo" value={formatDate(product.created_at)} />
+                                    </div>
+
+                                    {/* Các hình ảnh phụ nếu có */}
+                                    {product.images && product.images.filter(img => img.is_featured !== 1).length > 0 && (
+                                        <div className="mt-4">
+                                            <small className="text-muted d-block mb-2 fw-semibold">Các hình ảnh khác:</small>
+                                            <div className="d-flex flex-wrap gap-2">
+                                                {product.images.filter(img => img.is_featured !== 1).map((img, idx) => (
+                                                    <img
+                                                        key={img.id}
+                                                        src={urlImage + (img.main_url || img.thumb_url)}
+                                                        alt={product.name + '-' + idx}
+                                                        style={{
+                                                            width: 60,
+                                                            height: 60,
+                                                            objectFit: 'cover',
+                                                            cursor: 'pointer',
+                                                            borderRadius: 6,
+                                                            background: '#f8f9fa',
+                                                            border: '1px solid #dee2e6'
+                                                        }}
+                                                        className="img-thumbnail"
+                                                        title="Bấm để xem lớn"
+                                                        onClick={() => handleImgClick(img)}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Đơn vị tính */}
+                                    {product.unit_conversions && product.unit_conversions.length > 0 && (
+                                        <div className="mt-4">
+                                            <h6 className="fw-bold mb-3">Đơn vị tính</h6>
+                                            <div className="table-responsive">
+                                                <table className="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Tên đơn vị</th>
+                                                            <th>Quy đổi</th>
+                                                            <th>Giá cửa hàng</th>
+                                                            <th>Giá App</th>
+                                                            <th>Mã hàng</th>
+                                                            <th>Bán trực tiếp</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {product.unit_conversions.map((unit, idx) => (
+                                                            <tr key={idx}>
+                                                                <td>{unit.unit_name}</td>
+                                                                <td className="text-center">{unit.conversion_factor}</td>
+                                                                <td className="text-danger">{formatVNDWithUnit(unit.store_price)}</td>
+                                                                <td className="text-danger">{formatVNDWithUnit(unit.app_price)}</td>
+                                                                <td>{unit.unit_code || 'N/A'}</td>
+                                                                <td className="text-center">{unit.is_sales_unit ? 'Có' : 'Không'}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Thuộc tính sản phẩm */}
+                                    {product.attributes && product.attributes.length > 0 && (
+                                        <div className="mt-4">
+                                            <h6 className="fw-bold mb-3">Thuộc tính sản phẩm</h6>
+                                            {product.attributes.map((attr, attrIdx) => (
+                                                <div key={attrIdx} className="mb-4 p-3 border rounded bg-light">
+                                                    <div className="mb-3">
+                                                        <small className="text-muted d-block mb-1 fw-semibold">Thuộc tính:</small>
+                                                        <strong className="d-block mb-2">{attr.name}</strong>
+                                                        <small className="text-muted d-block">Loại: {attr.type === 'select' ? 'Một lựa chọn' : attr.type === 'checkbox' ? 'Nhiều lựa chọn' : 'Ghi chú'}</small>
+                                                    </div>
+                                                    {attr.values && attr.values.length > 0 && (
+                                                        <div className="table-responsive">
+                                                            <table className="table table-sm table-bordered mb-0">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Giá trị</th>
+                                                                        <th>Phụ thu</th>
+                                                                        <th className="text-center">Mặc định</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {attr.values.map((value, valIdx) => (
+                                                                        <tr key={valIdx}>
+                                                                            <td>{value.value}</td>
+                                                                            <td className="text-danger">{formatVNDWithUnit(value.price_adjustment)}</td>
+                                                                            <td className="text-center">
+                                                                                {value.is_default && <i className="fas fa-check text-success fw-bold"></i>}
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        </div>
-                        {/* Mô tả sản phẩm */}
-                        <div className="col-lg-6">
-                            <div className="card shadow-sm border-0 h-100">
-                                <div className="card-header py-2 background-detail">
-                                    <h6 className="mb-0 fw-bold">
-                                        <i className="fas fa-info-circle me-2"></i>Mô tả sản phẩm
-                                    </h6>
-                                </div>
-                                <div className="card-body p-3" style={{ overflowY: 'auto' }}>
+                            )}
+
+                            {/* Tab Mô tả */}
+                            {activeTab === 'mo-ta' && (
+                                <div className="tab-pane fade show active">
+                                    <div style={{ 
+                                        height: '400px', 
+                                        overflowY: 'auto',
+                                        paddingRight: '10px',
+                                        border: '1px solid #dee2e6',
+                                        borderRadius: '6px',
+                                        padding: '15px'
+                                    }}>
                                     {product.description
                                         ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(product.description)) }} />
                                         : <div className="text-center text-muted py-5">
@@ -303,12 +457,33 @@ const ProductDetail = () => {
                                     }
                                 </div>
                             </div>
+                            )}
+
+                            {/* Tab Tồn kho */}
+                            {activeTab === 'ton-kho' && (
+                                <div className="tab-pane fade show active">
+                                    <div className="text-center text-muted py-5">
+                                        <i className="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                                        <p className="mb-0">Nội dung tab Tồn kho</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab Thẻ kho */}
+                            {activeTab === 'the-kho' && (
+                                <div className="tab-pane fade show active">
+                                    <div className="text-center text-muted py-5">
+                                        <i className="fas fa-tags fa-3x mb-3 opacity-50"></i>
+                                        <p className="mb-0">Nội dung tab Thẻ kho</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Nút thao tác - Compact */}
-                    <div className="row mb-4">
-                        <div className="col-12 d-flex justify-content-center gap-2" style={{ marginTop: 20 }}>
+                    {/* Nút thao tác */}
+                    <div className="row mt-4 mb-4">
+                        <div className="col-12 d-flex justify-content-center gap-2">
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
                                 <i className="fas fa-arrow-left me-1"></i>Quay lại
                             </button>
