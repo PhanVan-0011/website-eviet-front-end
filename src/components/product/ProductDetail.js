@@ -226,32 +226,37 @@ const ProductDetail = () => {
                             {/* Tab Thông tin */}
                             {activeTab === 'thong-tin' && (
                                 <div>
-                                    {/* Header: Hình ảnh + Tên sản phẩm */}
-                                    <div className="row mb-4 pb-4" style={{borderBottom: '1px solid #dee2e6'}}>
-                                        {/* Hình ảnh sản phẩm nhỏ */}
-                                        <div className="col-auto">
-                                            {product.images && product.images.length > 0 ? (
-                                            (() => {
-                                                    const featuredImg = product.images.find(img => img.is_featured === 1);
-                                                    const displayImg = featuredImg || product.images[0];
-                                                return (
-                                                    <>
-                                                                    <img
-                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + (displayImg.main_url || displayImg.thumb_url)}
-                                                                alt={product.name}
-                                                                        className="img-thumbnail"
-                                                                        style={{
-                                                                    objectFit: 'cover',
-                                                                            cursor: 'pointer',
-                                                                            borderRadius: 8,
-                                                                            background: '#f8f9fa',
-                                                                    border: '1px solid #dee2e6',
-                                                                    width: 150,
-                                                                    height: 150
-                                                                        }}
-                                                                title="Bấm để xem lớn"
-                                                                onClick={() => handleImgClick(displayImg)}
-                                                                    />
+                                    {/* Header: Hình ảnh + Thông tin sản phẩm */}
+                                    <div style={{display: 'flex', gap: '1.5rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #dee2e6'}}>
+                                        {/* Cột trái: Hình ảnh */}
+                                        <div style={{flex: '0 0 30%'}}>
+                                            <div style={{display: 'flex', gap: '0.75rem'}}>
+                                                {/* Hình ảnh chính */}
+                                                <div style={{flex: 1}}>
+                                                    {/* Hình ảnh */}
+                                                    {product.images && product.images.length > 0 ? (
+                                                    (() => {
+                                                            const featuredImg = product.images.find(img => img.is_featured === 1);
+                                                            const displayImg = featuredImg || product.images[0];
+                                                        return (
+                                                            <div style={{position: 'relative'}}>
+                                                                <img
+                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + (displayImg.main_url || displayImg.thumb_url)}
+                                                                    alt={product.name}
+                                                                    className="img-thumbnail w-100"
+                                                                    style={{
+                                                                        objectFit: 'fill',
+                                                                        cursor: 'pointer',
+                                                                        borderRadius: 8,
+                                                                        background: '#f8f9fa',
+                                                                        border: '1px solid #dee2e6',
+                                                                        height: 350,
+                                                                        display: 'block'
+                                                                    }}
+                                                                    title="Bấm để xem lớn"
+                                                                    onClick={() => handleImgClick(displayImg)}
+                                                                />
+
                                                                 {/* Modal xem ảnh full */}
                                                                 {showModal && modalImg && (
                                                                     <Modal show={showModal} onHide={handleCloseModal} centered>
@@ -272,38 +277,64 @@ const ProductDetail = () => {
                                                                             </div>
                                                                         </Modal.Body>
                                                                     </Modal>
-                                                        )}
-                                                    </>
-                                                );
-                                            })()
-                                        ) : (
-                                            <div
-                                                style={{
-                                                        width: 150,
-                                                        height: 150,
-                                                    borderRadius: 8,
-                                                    background: '#f8f9fa',
-                                                    border: '1px solid #dee2e6',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}
-                                            >
-                                                    <i className="fas fa-image" style={{ fontSize: 40, color: '#adb5bd' }}></i>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })()
+                                                ) : (
+                                                    <div
+                                                        style={{
+                                                            width: '100%',
+                                                            height: 350,
+                                                            borderRadius: 8,
+                                                            background: '#f8f9fa',
+                                                            border: '1px solid #dee2e6',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center'
+                                                        }}
+                                                    >
+                                                        <i className="fas fa-image" style={{ fontSize: 60, color: '#adb5bd' }}></i>
+                                                    </div>
+                                                )}
                                                 </div>
-                                            )}
+
+                                                {/* Ảnh phụ nhỏ bên phải */}
+                                                {product.images && product.images.filter(img => img.is_featured !== 1).length > 0 && (
+                                                    <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem', width: 'auto'}}>
+                                                        {product.images.filter(img => img.is_featured !== 1).map((img, idx) => (
+                                                            <img
+                                                                key={img.id}
+                                                                src={urlImage + (img.main_url || img.thumb_url)}
+                                                                alt={product.name + '-' + idx}
+                                                                style={{
+                                                                    width: 80,
+                                                                    height: 80,
+                                                                    objectFit: 'cover',
+                                                                    cursor: 'pointer',
+                                                                    borderRadius: 6,
+                                                                    background: '#f8f9fa',
+                                                                    border: '1px solid #dee2e6'
+                                                                }}
+                                                                className="img-thumbnail"
+                                                                title="Bấm để xem lớn"
+                                                                onClick={() => handleImgClick(img)}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
 
-                                        {/* Tên sản phẩm + Nhóm hàng + Trạng thái */}
-                                        <div className="col">
-                                            <h3 className="fw-bold mb-2">{product.name}</h3>
-                                            <div className="mb-3">
-                                                <small className="text-muted d-block">Nhóm hàng:</small>
-                                                <span className="text-dark">{product.categories && product.categories.length > 0
-                                                    ? product.categories.map(cat => cat.name).join(', ')
-                                                    : 'Chưa phân loại'}</span>
-                                            </div>
-                                            <div className="d-flex gap-2 flex-wrap">
+                                        {/* Cột phải: Thông tin sản phẩm */}
+                                        <div style={{flex: '0 0 70%'}}>
+                                            {/* Tên sản phẩm */}
+                                            <h3 style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
+                                                {product.name}
+                                            </h3>
+
+                                            {/* Badges */}
+                                            <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem'}}>
                                                 {product.status === 1 ? (
                                                     <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Hoạt động</span>
                                                 ) : (
@@ -313,55 +344,33 @@ const ProductDetail = () => {
                                                     <span className="badge bg-info"><i className="fas fa-shopping-bag me-1"></i>Bán trực tiếp</span>
                                                 )}
                                             </div>
+
+                                            {/* Nhóm hàng */}
+                                            <div className="mb-3">
+                                                <small className="text-muted d-block fw-semibold">Nhóm hàng:</small>
+                                                <span className="text-dark">{product.categories && product.categories.length > 0
+                                                    ? product.categories.map(cat => cat.name).join(', ')
+                                                    : 'Chưa phân loại'}</span>
+                                            </div>
+
+                                            {/* Lưới thông tin */}
+                                            <div className="row">
+                                                <InfoItem label="Mã hàng" value={product.product_code || product.id} />
+                                                <InfoItem label="Tồn kho" value={product.total_stock_quantity || 0} />
+                                                <InfoItem label="Đơn vị cơ bản" value={product.base_unit || 'Chưa có'} />
+                                                <InfoItem label="Giá vốn" value={formatVNDWithUnit(product.cost_price)} />
+
+                                                <InfoItem label="Giá bán" value={formatVNDWithUnit(product.base_store_price)} isDanger />
+                                                <InfoItem label="Giá App" value={formatVNDWithUnit(product.base_app_price)} isDanger />
+                                                <InfoItem label="Trạng thái" value={product.status === 1 ? 'Hoạt động' : 'Không hoạt động'} />
+                                                <InfoItem label="Bán trực tiếp" value={product.is_sales_unit ? 'Có' : 'Không'} />
+
+                                                <InfoItem label="Ngày tạo" value={formatDate(product.created_at)} />
+                                                <InfoItem label="Ngày cập nhật" value={formatDate(product.updated_at)} />
+                                            </div>
                                         </div>
                                     </div>
                                     
-                                    {/* Lưới thông tin 4 cột */}
-                                    <div className="row">
-                                        <InfoItem label="Mã hàng" value={product.product_code || product.id} />
-                                        <InfoItem label="Tồn kho" value={product.total_stock_quantity || 0} />
-                                        <InfoItem label="Định mức tồn" value="0 - 999,999,999" />
-                                        <InfoItem label="Giá vốn" value={formatVNDWithUnit(product.cost_price)} />
-
-                                        <InfoItem label="Giá bán" value={formatVNDWithUnit(product.base_store_price)} isDanger />
-                                        <InfoItem label="Thương hiệu" value={product.brand || 'Chưa có'} />
-                                        <InfoItem label="Vị trí" value={product.location || 'Chưa có'} />
-                                        <InfoItem label="Trọng lượng" value={product.weight || 'Chưa có'} />
-
-                                        <InfoItem label="Giá App" value={formatVNDWithUnit(product.base_app_price)} isDanger />
-                                        <InfoItem label="Trạng thái" value={product.status === 1 ? 'Hoạt động' : 'Không hoạt động'} />
-                                        <InfoItem label="Bán trực tiếp" value={product.is_sales_unit ? 'Có' : 'Không'} />
-                                        <InfoItem label="Ngày tạo" value={formatDate(product.created_at)} />
-                                    </div>
-
-                                    {/* Các hình ảnh phụ nếu có */}
-                                    {product.images && product.images.filter(img => img.is_featured !== 1).length > 0 && (
-                                        <div className="mt-4">
-                                            <small className="text-muted d-block mb-2 fw-semibold">Các hình ảnh khác:</small>
-                                            <div className="d-flex flex-wrap gap-2">
-                                                {product.images.filter(img => img.is_featured !== 1).map((img, idx) => (
-                                                    <img
-                                                        key={img.id}
-                                                        src={urlImage + (img.main_url || img.thumb_url)}
-                                                        alt={product.name + '-' + idx}
-                                                        style={{
-                                                            width: 60,
-                                                            height: 60,
-                                                            objectFit: 'cover',
-                                                            cursor: 'pointer',
-                                                            borderRadius: 6,
-                                                            background: '#f8f9fa',
-                                                            border: '1px solid #dee2e6'
-                                                        }}
-                                                        className="img-thumbnail"
-                                                        title="Bấm để xem lớn"
-                                                        onClick={() => handleImgClick(img)}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
                                     {/* Đơn vị tính */}
                                     {product.unit_conversions && product.unit_conversions.length > 0 && (
                                         <div className="mt-4">
@@ -462,20 +471,88 @@ const ProductDetail = () => {
                             {/* Tab Tồn kho */}
                             {activeTab === 'ton-kho' && (
                                 <div className="tab-pane fade show active">
-                                    <div className="text-center text-muted py-5">
-                                        <i className="fas fa-inbox fa-3x mb-3 opacity-50"></i>
-                                        <p className="mb-0">Nội dung tab Tồn kho</p>
-                                    </div>
+                                    {product.branches && product.branches.length > 0 ? (
+                                        <div className="table-responsive">
+                                            <table className="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Mã chi nhánh</th>
+                                                        <th>Tên chi nhánh</th>
+                                                        <th>Địa chỉ</th>
+                                                        <th>Số điện thoại</th>
+                                                        <th>Email</th>
+                                                        <th>Trạng thái</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {product.branches.map((branch, idx) => (
+                                                        <tr key={idx}>
+                                                            <td>{branch.code}</td>
+                                                            <td>{branch.name}</td>
+                                                            <td>{branch.address}</td>
+                                                            <td>{branch.phone_number}</td>
+                                                            <td>{branch.email}</td>
+                                                            <td>
+                                                                {branch.active ? (
+                                                                    <span className="badge bg-success">Hoạt động</span>
+                                                                ) : (
+                                                                    <span className="badge bg-danger">Không hoạt động</span>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center text-muted py-5">
+                                            <i className="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                                            <p className="mb-0">Sản phẩm chưa liên kết với chi nhánh nào</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
                             {/* Tab Thẻ kho */}
                             {activeTab === 'the-kho' && (
                                 <div className="tab-pane fade show active">
-                                    <div className="text-center text-muted py-5">
-                                        <i className="fas fa-tags fa-3x mb-3 opacity-50"></i>
-                                        <p className="mb-0">Nội dung tab Thẻ kho</p>
-                                    </div>
+                                    {product.special_prices && product.special_prices.length > 0 ? (
+                                        <div className="table-responsive">
+                                            <table className="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Tên giá đặc biệt</th>
+                                                        <th>Giá</th>
+                                                        <th>Trạng thái</th>
+                                                        <th>Ngày bắt đầu</th>
+                                                        <th>Ngày kết thúc</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {product.special_prices.map((price, idx) => (
+                                                        <tr key={idx}>
+                                                            <td>{price.name || 'N/A'}</td>
+                                                            <td className="text-danger">{formatVNDWithUnit(price.price)}</td>
+                                                            <td>
+                                                                {price.status ? (
+                                                                    <span className="badge bg-success">Hoạt động</span>
+                                                                ) : (
+                                                                    <span className="badge bg-danger">Không hoạt động</span>
+                                                                )}
+                                                            </td>
+                                                            <td>{price.start_date ? formatDate(price.start_date) : 'N/A'}</td>
+                                                            <td>{price.end_date ? formatDate(price.end_date) : 'N/A'}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center text-muted py-5">
+                                            <i className="fas fa-tags fa-3x mb-3 opacity-50"></i>
+                                            <p className="mb-0">Sản phẩm chưa có giá đặc biệt nào</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { toastErrorConfig } from '../../tools/toastConfig';
+import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import requestApi from '../../helpers/api';
 import { useDispatch, useSelector } from 'react-redux';
 import * as actions from '../../redux/actions/index';
@@ -9,6 +9,17 @@ import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
 import moment from 'moment';
 import DataTables from '../common/DataTables';
+import { Modal, Button } from 'react-bootstrap';
+
+// Component hiển thị từng field thông tin
+const InfoItem = ({ label, value, isDanger = false }) => (
+    <div className="col-md-3 mb-3">
+        <div className="text-muted small mb-1">{label}</div>
+        <div className={`fw-semibold border-bottom pb-2 ${isDanger ? 'text-danger' : ''}`}>
+            {value ?? 'Chưa có'}
+        </div>
+    </div>
+);
 
 const SupplierDetail = () => {
     const navigate = useNavigate();
@@ -17,44 +28,27 @@ const SupplierDetail = () => {
     const isLoading = useSelector(state => state.globalLoading.isLoading);
     
     const [supplier, setSupplier] = useState(null);
-    const [activeTab, setActiveTab] = useState('info');
-    const [importHistory, setImportHistory] = useState([
-        {
-            id: 1,
-            voucher_code: 'PN009057',
-            created_at: '2025-09-15T00:00:00.000000Z',
-            user: { name: 'EV - DOANH CT' },
-            branch: { name: 'CT CSB' },
-            total_amount: '568000'
-        },
-        {
-            id: 2,
-            voucher_code: 'PN009058',
-            created_at: '2025-09-14T10:30:00.000000Z',
-            user: { name: 'EV - DOANH CT' },
-            branch: { name: 'CT CSB' },
-            total_amount: '1250000'
-        },
-        {
-            id: 3,
-            voucher_code: 'PN009059',
-            created_at: '2025-09-13T14:15:00.000000Z',
-            user: { name: 'EV - DOANH CT' },
-            branch: { name: 'CT CSB' },
-            total_amount: '890000'
-        }
-    ]);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('thong-tin');
+    const [importHistory, setImportHistory] = useState([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemOfPage, setItemOfPage] = useState(10);
+    const [numOfPages, setNumOfPages] = useState(1);
 
     // Load supplier data
     useEffect(() => {
         if (id) {
+            setLoading(true);
             dispatch(actions.controlLoading(true));
             requestApi(`api/admin/suppliers/${id}`, 'GET', []).then((response) => {
+                setLoading(false);
                 dispatch(actions.controlLoading(false));
                 if (response.data && response.data.data) {
                     setSupplier(response.data.data);
                 }
             }).catch((error) => {
+                setLoading(false);
                 dispatch(actions.controlLoading(false));
                 if (error.response && error.response.data && error.response.data.message) {
                     toast.error(error.response.data.message, toastErrorConfig);
@@ -66,37 +60,39 @@ const SupplierDetail = () => {
         }
     }, [id, dispatch, navigate]);
 
-    const handleBack = () => {
-        navigate('/supplier');
-    };
+    // Reset to page 1 when changing items per page
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [itemOfPage]);
 
-    const handleEdit = () => {
-        navigate(`/supplier/${id}`);
-    };
-
-    if (isLoading) {
-        return (
-            <div id="layoutSidenav_content">
-                <main>
-                    <div className="container-fluid px-4">
-                        <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
-                            <div className="spinner-border text-primary" role="status">
-                                <span className="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            </div>
-        );
-    }
-
-    if (!supplier) {
-        return (
-            <div id="layoutSidenav_content">
-                
-            </div>
-        );
-    }
+    // Load import history
+    useEffect(() => {
+        if (id) {
+            dispatch(actions.controlLoading(true));
+            requestApi(`api/admin/suppliers/${id}/purchase-history?page=${currentPage}&limit=${itemOfPage}`, 'GET', []).then((response) => {
+                dispatch(actions.controlLoading(false));
+                console.log('Purchase history response:', response);
+                if (response.data) {
+                    // Xử lý dữ liệu
+                    const historyData = response.data.data || response.data;
+                    if (Array.isArray(historyData)) {
+                        setImportHistory(historyData);
+                    } else if (historyData && historyData.data && Array.isArray(historyData.data)) {
+                        setImportHistory(historyData.data);
+                    }
+                    
+                    // Xử lý pagination
+                    if (response.data.pagination) {
+                        setNumOfPages(response.data.pagination.last_page || 1);
+                    }
+                }
+            }).catch((error) => {
+                dispatch(actions.controlLoading(false));
+                console.log('Error loading purchase history:', error);
+                setImportHistory([]);
+            });
+        }
+    }, [id, currentPage, itemOfPage, dispatch]);
 
     // Format VND currency
     const formatVND = (value) => {
@@ -111,19 +107,19 @@ const SupplierDetail = () => {
         {
             title: "Mã phiếu",
             element: row => (
-                <span className="text-primary fw-bold">{row?.voucher_code || '-'}</span>
+                <span className="text-primary fw-bold">{row?.invoice_code || '-'}</span>
             ),
-            width: "15%"
+            width: "12%"
         },
         {
             title: "Thời gian",
-            element: row => row?.created_at ? moment(row.created_at).format('DD/MM/YYYY HH:mm') : '-',
-            width: "20%"
+            element: row => row?.invoice_date ? moment(row.invoice_date).format('DD/MM/YYYY HH:mm') : '-',
+            width: "15%"
         },
         {
             title: "Người tạo",
             element: row => row?.user?.name || '-',
-            width: "20%"
+            width: "15%"
         },
         {
             title: "Chi nhánh",
@@ -133,197 +129,282 @@ const SupplierDetail = () => {
         {
             title: "Tổng cộng",
             element: row => row?.total_amount ? `${formatVND(parseInt(row.total_amount))} ₫` : '0 ₫',
-            width: "15%"
+            width: "12%"
         },
         {
             title: "Trạng thái",
-            element: row => (
-                <span className="badge bg-success">Đã nhập hàng</span>
-            ),
-            width: "15%"
+            element: row => {
+                const statusMap = {
+                    'draft': { label: 'Nháp', class: 'bg-secondary' },
+                    'received': { label: 'Đã nhập hàng', class: 'bg-success' },
+                    'cancelled': { label: 'Đã hủy', class: 'bg-danger' }
+                };
+                const status = statusMap[row?.status] || { label: row?.status || '-', class: 'bg-secondary' };
+                return <span className={`badge ${status.class}`}>{status.label}</span>;
+            },
+            width: "12%"
         }
     ];
+
+    // Columns for debt history table
+    const debtHistoryColumns = [
+        {
+            title: "Mã phiếu",
+            element: row => (
+                <span className="text-primary fw-bold">{row?.invoice_code || '-'}</span>
+            ),
+            width: "15%"
+        },
+        {
+            title: "Thời gian",
+            element: row => row?.invoice_date ? moment(row.invoice_date).format('DD/MM/YYYY HH:mm') : '-',
+            width: "18%"
+        },
+        {
+            title: "Loại",
+            element: row => <span>Nhập hàng</span>,
+            width: "12%"
+        },
+        {
+            title: "Giá trị",
+            element: row => row?.total_amount ? `${formatVND(parseInt(row.total_amount))} ₫` : '0 ₫',
+            width: "15%"
+        },
+        {
+            title: "Nợ cần trả nhà cung cấp",
+            element: row => row?.amount_owed ? `${formatVND(parseInt(row.amount_owed))} ₫` : '0 ₫',
+            width: "18%"
+        }
+    ];
+
+    // Chỉ hiển thị nội dung chính khi đã load xong
+    if (loading) {
+        return (
+            <div className="container-fluid">
+                <div className="d-flex justify-content-center align-items-center vh-100">
+                    {/* Loading state */}
+                </div>
+            </div> 
+        );
+    }
+
+    if (!supplier) {
+        return (
+            <div className="container-fluid px-4">
+                <div className="mt-4 mb-3">
+                    <h1 className="mt-4">Chi tiết nhà cung cấp</h1>
+                    <ol className="breadcrumb mb-4">
+                        <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
+                        <li className="breadcrumb-item"><Link to="/supplier">Nhà cung cấp</Link></li>
+                        <li className="breadcrumb-item active">Chi tiết</li>
+                    </ol>
+                </div>
+                
+                <div className="d-flex flex-column justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+                    <img
+                        src="https://cdn-icons-png.flaticon.com/512/6134/6134065.png"
+                        alt="Không tìm thấy nhà cung cấp"
+                        style={{ width: 120, marginBottom: 24, opacity: 0.85 }}
+                    />
+                    <h2 className="text-danger mb-2" style={{ fontWeight: 700 }}>
+                        Không tìm thấy nhà cung cấp!
+                    </h2>
+                    <p className="text-secondary mb-4 fs-5 text-center" style={{ maxWidth: 400 }}>
+                        Nhà cung cấp bạn tìm kiếm không tồn tại hoặc đã bị xóa khỏi hệ thống.<br />
+                        Vui lòng kiểm tra lại hoặc quay về trang danh sách nhà cung cấp.
+                    </p>
+                    <Link to="/supplier" className="btn btn-outline-primary px-4 py-2">
+                        <i className="fas fa-arrow-left me-2"></i>Quay về danh sách nhà cung cấp
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    // Hàm xóa nhà cung cấp
+    const handleOpenDeleteModal = () => {
+        setShowDeleteModal(true);
+    };
+
+    const handleDelete = async () => {
+        setShowDeleteModal(false);
+        dispatch(actions.controlLoading(true));
+        try {
+            const res = await requestApi(`api/admin/suppliers/${id}`, 'DELETE');
+            dispatch(actions.controlLoading(false));
+            toast.success(res.data?.message || 'Xóa nhà cung cấp thành công!', toastSuccessConfig);
+            navigate('/supplier');
+        } catch (e) {
+            dispatch(actions.controlLoading(false));
+            toast.error(
+                e?.response?.data?.message || 'Xóa nhà cung cấp thất bại!', toastErrorConfig
+            );
+        }
+    };
 
     return (
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4"></h1>
-                    <ol className="breadcrumb mb-4">
-                        <li className="breadcrumb-item">
-                            <a href="/">Trang chủ</a>
-                        </li>
-                        <li className="breadcrumb-item">
-                            <a href="/supplier">Nhà cung cấp</a>
-                        </li>
-                        <li className="breadcrumb-item active">Chi tiết nhà cung cấp</li>
-                    </ol>
-                    
-                    {/* Header */}
-                    <div className="card mb-0">
-                        <div className="card-header bg-secondary text-white">
-                            <div className="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h4 className="mb-0">
-                                        <i className="fas fa-home me-2"></i>
-                                        {supplier.code} - {supplier.name}
-                                    </h4>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="d-flex align-items-center justify-content-between mt-4 mb-2">
+                        <h2 className="mb-0">Chi tiết nhà cung cấp #{supplier.id}</h2>
                     </div>
+                    <ol className="breadcrumb mb-4">
+                        <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
+                        <li className="breadcrumb-item"><Link to="/supplier">Nhà cung cấp</Link></li>
+                        <li className="breadcrumb-item active">Chi tiết</li>
+                    </ol>
 
-                    {/* Custom Tabs */}
-                    <div className="card">
-                        <div className="card-header bg-white p-0">
-                            <div className="custom-tabs">
+                    <div className="card border">
+                        {/* Tab Navigation */}
+                        <ul className="nav nav-tabs" id="supplierDetailTabs" role="tablist" style={{borderBottom: '2px solid #dee2e6'}}>
+                            <li className="nav-item" role="presentation">
                                 <button
-                                    className={`custom-tab ${activeTab === 'info' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('info')}
+                                    className={`nav-link ${activeTab === 'thong-tin' ? 'active' : ''}`}
                                     type="button"
+                                    onClick={() => setActiveTab('thong-tin')}
+                                    style={{ 
+                                        color: activeTab === 'thong-tin' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'thong-tin' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'thong-tin' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'thong-tin' ? '500' : 'normal',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}
                                 >
                                     <i className="fas fa-info-circle me-2"></i>
                                     Thông tin
                                 </button>
+                            </li>
+                            <li className="nav-item" role="presentation">
                                 <button
-                                    className={`custom-tab ${activeTab === 'history' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('history')}
+                                    className={`nav-link ${activeTab === 'lich-su' ? 'active' : ''}`}
                                     type="button"
+                                    onClick={() => setActiveTab('lich-su')}
+                                    style={{ 
+                                        color: activeTab === 'lich-su' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'lich-su' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'lich-su' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'lich-su' ? '500' : 'normal',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}
                                 >
                                     <i className="fas fa-history me-2"></i>
                                     Lịch sử nhập hàng
                                 </button>
-                            </div>
-                        </div>
-                        <div className="card-body p-0">
-                            {activeTab === 'info' ? (
-                                // Information Tab
-                                <div className="p-4">
-                                    <div className="row">
-                                        <div className="col-md-8">
-                                            <h5 className="mb-4">
-                                                <i className="fas fa-building me-2"></i>
-                                                {supplier.name} {supplier.code}
-                                            </h5>
-                                            
-                                            <div className="row mb-3">
-                                                <div className="col-md-6">
-                                                    <label className="form-label fw-semibold">Người tạo:</label>
-                                                    <p className="form-control-plaintext">{supplier.user?.name || 'Chưa có'}</p>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <label className="form-label fw-semibold">Ngày tạo:</label>
-                                                    <p className="form-control-plaintext">
-                                                        {supplier.created_at ? moment(supplier.created_at).format('DD/MM/YYYY') : 'Chưa có'}
-                                                    </p>
-                                                </div>
-                                            </div>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <button
+                                    className={`nav-link ${activeTab === 'no' ? 'active' : ''}`}
+                                    type="button"
+                                    onClick={() => setActiveTab('no')}
+                                    style={{ 
+                                        color: activeTab === 'no' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'no' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'no' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'no' ? '500' : 'normal',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    <i className="fas fa-credit-card me-2"></i>
+                                    Nợ nhà cung cấp
+                                </button>
+                            </li>
+                        </ul>
 
-                                            <div className="row mb-3">
-                                                <div className="col-md-6">
-                                                    <label className="form-label fw-semibold">Nhóm nhà cung cấp:</label>
-                                                    <p className="form-control-plaintext">
-                                                        {supplier.group?.name || 'Chưa có'}
-                                                    </p>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <label className="form-label fw-semibold">Trạng thái:</label>
-                                                    <p className="form-control-plaintext">
-                                                        {supplier.active === 1 ? (
-                                                            <span className="badge bg-success">Hoạt động</span>
-                                                        ) : (
-                                                            <span className="badge bg-secondary">Không hoạt động</span>
-                                                        )}
-                                                    </p>
-                                                </div>
-                                            </div>
+                        <div style={{ padding: '1.5rem' }}>
+                            {/* Tab Thông tin */}
+                            {activeTab === 'thong-tin' && (
+                                <div>
+                                    {/* Header: Thông tin nhà cung cấp */}
+                                    <div style={{marginBottom: '1.5rem', paddingBottom: '1.5rem'}}>
+                                        {/* Tên nhà cung cấp */}
+                                        <h3 style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
+                                            {supplier.code} - {supplier.name}
+                                        </h3>
 
-                                            <div className="row mb-3">
-                                                <div className="col-md-6">
-                                                    <label className="form-label fw-semibold">Điện thoại:</label>
-                                                    <p className="form-control-plaintext">{supplier.phone_number || 'Chưa có'}</p>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <label className="form-label fw-semibold">Email:</label>
-                                                    <p className="form-control-plaintext">{supplier.email || 'Chưa có'}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="row mb-3">
-                                                <div className="col-md-6">
-                                                    <label className="form-label fw-semibold">Địa chỉ:</label>
-                                                    <p className="form-control-plaintext">{supplier.address || 'Chưa có'}</p>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <label className="form-label fw-semibold">Mã số thuế:</label>
-                                                    <p className="form-control-plaintext">{supplier.tax_code || 'Chưa có'}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="row mb-3">
-                                                <div className="col-md-6">
-                                                    <label className="form-label fw-semibold">Tổng mua:</label>
-                                                    <p className="form-control-plaintext">
-                                                        {supplier.total_purchase_amount ? `${formatVND(parseInt(supplier.total_purchase_amount))} ₫` : '0 ₫'}
-                                                    </p>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <label className="form-label fw-semibold">Nợ cần trả:</label>
-                                                    <p className="form-control-plaintext">
-                                                        {supplier.balance_due ? `${formatVND(parseInt(supplier.balance_due))} ₫` : '0 ₫'}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold">Ghi chú:</label>
-                                                <div className="rounded p-3 bg-light">
-                                                    <i className="fas fa-sticky-note me-2 text-muted"></i>
-                                                    {supplier.notes || 'Chưa có ghi chú'}
-                                                </div>
-                                            </div>
+                                        {/* Badges */}
+                                        <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem'}}>
+                                            {supplier.active === 1 ? (
+                                                <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Hoạt động</span>
+                                            ) : (
+                                                <span className="badge bg-danger"><i className="fas fa-ban me-1"></i>Không hoạt động</span>
+                                            )}
                                         </div>
+
+                                        {/* Nhóm nhà cung cấp */}
+                                        <div className="mb-3">
+                                            <small className="text-muted d-block fw-semibold">Nhóm nhà cung cấp:</small>
+                                            <span className="text-dark">{supplier.group?.name || 'Chưa có'}</span>
+                                        </div>
+
+                                        {/* Lưới thông tin */}
+                                        <div className="row">
+                                            <InfoItem label="Mã nhà cung cấp" value={supplier.code || supplier.id} />
+                                            <InfoItem label="Điện thoại" value={supplier.phone_number} />
+                                            <InfoItem label="Email" value={supplier.email} />
+                                            <InfoItem label="Ngày tạo" value={supplier.created_at ? moment(supplier.created_at).format('DD/MM/YYYY') : 'Chưa có'} />
+
+                                            <InfoItem label="Địa chỉ" value={supplier.address} />
+                                            <InfoItem label="Mã số thuế" value={supplier.tax_code} />
+                                            <InfoItem label="Người tạo" value={supplier.user?.name} />
+                                            <InfoItem label="Trạng thái" value={supplier.active === 1 ? 'Hoạt động' : 'Không hoạt động'} />
+
+                                            <InfoItem label="Tổng mua" value={supplier.total_purchase_amount ? `${formatVND(parseInt(supplier.total_purchase_amount))} ₫` : '0 ₫'} isDanger />
+                                            <InfoItem label="Nợ cần trả" value={supplier.balance_due ? `${formatVND(parseInt(supplier.balance_due))} ₫` : '0 ₫'} isDanger />
+                                        </div>
+
+                                        {/* Ghi chú */}
+                                        {supplier.notes && (
+                                            <div className="mt-4 p-3 border rounded bg-light">
+                                                <small className="text-muted d-block mb-2 fw-semibold">Ghi chú:</small>
+                                                <p className="mb-0">{supplier.notes}</p>
+                                            </div>
+                                        )}
                                     </div>
-                                    
-                                    {/* Action buttons centered */}
-                                    <div className="d-flex justify-content-center gap-2 mt-4 pt-3">
-                                        <button
-                                            type="button"
-                                            className="btn btn-secondary"
-                                            onClick={handleBack}
-                                        >
-                                            <i className="fas fa-arrow-left me-1"></i>
-                                            Quay lại
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="btn btn-primary"
-                                            onClick={handleEdit}
-                                        >
-                                            <i className="fas fa-edit me-1"></i>
-                                            Chỉnh sửa
-                                        </button>
+
+                                    {/* Action buttons */}
+                                    <div className="d-flex justify-content-end gap-2 mt-4 pt-3">
+                                        <Permission permission={PERMISSIONS.SUPPLIERS_UPDATE}>
+                                            <Link to={`/supplier/${supplier.id}`} className="btn btn-primary">
+                                                <i className="fas fa-edit me-1"></i>
+                                                Chỉnh sửa
+                                            </Link>
+                                        </Permission>
                                     </div>
                                 </div>
-                            ) : (
-                                // Import History Tab
-                                <div className="p-4">
-                                    <div className="d-flex justify-content-between align-items-center mb-3">
-                                        <h5 className="mb-0">
-                                            <i className="fas fa-history me-2"></i>
-                                            Lịch sử nhập hàng
-                                        </h5>
-                                    </div>
-                                    
+                            )}
+
+                            {/* Tab Lịch sử nhập hàng */}
+                            {activeTab === 'lich-su' && (
+                                <div>
                                     {importHistory.length > 0 ? (
                                         <DataTables
                                             name="Lịch sử nhập hàng"
                                             columns={importHistoryColumns}
                                             data={importHistory}
-                                            numOfPages={1}
-                                            currentPage={1}
-                                            setCurrentPage={() => {}}
-                                            setItemOfPage={() => {}}
+                                            numOfPages={numOfPages}
+                                            currentPage={currentPage}
+                                            setCurrentPage={setCurrentPage}
+                                            setItemOfPage={setItemOfPage}
+                                            selectedRows={[]}
                                             onSelectedRows={() => {}}
                                             hideSearch={true}
                                             hideSelected={true}
@@ -337,10 +418,68 @@ const SupplierDetail = () => {
                                     )}
                                 </div>
                             )}
+
+                            {/* Tab Nợ nhà cung cấp */}
+                            {activeTab === 'no' && (
+                                <div>
+                                    {importHistory.length > 0 ? (
+                                        <DataTables
+                                            name="Nợ nhà cung cấp"
+                                            columns={debtHistoryColumns}
+                                            data={importHistory}
+                                            numOfPages={numOfPages}
+                                            currentPage={currentPage}
+                                            setCurrentPage={setCurrentPage}
+                                            setItemOfPage={setItemOfPage}
+                                            selectedRows={[]}
+                                            onSelectedRows={() => {}}
+                                            hideSearch={true}
+                                            hideSelected={true}
+                                        />
+                                    ) : (
+                                        <div className="text-center py-5">
+                                            <i className="fas fa-credit-card text-muted mb-3" style={{ fontSize: '3rem' }}></i>
+                                            <h5 className="text-muted">Chưa có nợ nhà cung cấp</h5>
+                                            <p className="text-muted">Nhà cung cấp này hiện không có nợ.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Nút thao tác */}
+                    <div className="row mt-4 mb-4">
+                        <div className="col-12 d-flex justify-content-center gap-2">
+                            <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
+                                <i className="fas fa-arrow-left me-1"></i>Quay lại
+                            </button>
+                            <Link className="btn btn-primary btn-sm" to={`/supplier/${supplier.id}`}>
+                                <i className="fas fa-edit me-1"></i>Sửa nhà cung cấp
+                            </Link>
+                            <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
+                                <i className="fas fa-trash-alt me-1"></i>Xóa nhà cung cấp
+                            </button>
                         </div>
                     </div>
                 </div>
             </main>
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Xác nhận xóa</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Bạn có chắc chắn muốn xóa nhà cung cấp này?</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Hủy
+                    </Button>
+                    <Button variant="danger" onClick={handleDelete}>
+                        Xóa
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

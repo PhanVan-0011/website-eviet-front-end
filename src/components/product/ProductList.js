@@ -22,6 +22,112 @@ import LiveSearch from '../common/LiveSearch';
 import CategoryModal from '../common/CategoryModal';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
+// Component Dropdown custom cho chọn đơn vị
+const UnitDropdown = ({ product, selectedUnitIndex, onUnitChange }) => {
+    const [showDropdown, setShowDropdown] = useState(false);
+    const dropdownRef = useRef(null);
+    const hasUnitConversions = product.unit_conversions && product.unit_conversions.length > 0;
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const getDisplayUnit = (unitIndex) => {
+        if (unitIndex === 0) {
+            return product.base_unit || 'Cơ bản';
+        }
+        return product.unit_conversions[unitIndex - 1]?.unit_name || '';
+    };
+
+    if (!hasUnitConversions) {
+        return <span style={{ color: '#0066cc' }}>{product.base_unit}</span>;
+    }
+
+    return (
+        <div ref={dropdownRef} className="position-relative d-inline-block">
+            <button
+                type="button"
+                className="btn-sm p-0"
+                onClick={() => setShowDropdown(!showDropdown)}
+                style={{
+                    fontSize: '0.9rem',
+                    textDecoration: 'none',
+                    color: '#0066cc',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    background: 'none',
+                    border: 'none'
+                }}
+            >
+                <span>{getDisplayUnit(selectedUnitIndex)}</span>
+                <i className="fas fa-chevron-down" style={{ fontSize: '0.65rem' }}></i>
+            </button>
+
+            {showDropdown && (
+                <div
+                    className="position-absolute"
+                    style={{
+                        left: 0,
+                        top: '100%',
+                        marginTop: '0.25rem',
+                        minWidth: '150px',
+                        zIndex: 1000,
+                        border: '1px solid #ddd',
+                        borderRadius: '0.25rem',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                    }}
+                >
+                    <button
+                        className="w-100 text-start"
+                        onClick={() => {
+                            onUnitChange(product.id, 0);
+                            setShowDropdown(false);
+                        }}
+                        style={{
+                            padding: '0.5rem 0.75rem',
+                            backgroundColor: selectedUnitIndex === 0 ? '#f0f0f0' : 'transparent',
+                            border: 'none',
+                            fontWeight: selectedUnitIndex === 0 ? 'bold' : 'normal',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem'
+                        }}
+                    >
+                        {product.base_unit} <span className="">(Cơ bản)</span>
+                    </button>
+                    {product.unit_conversions.map((unit, idx) => (
+                        <button
+                            key={idx}
+                            className="w-100 text-start"
+                            onClick={() => {
+                                onUnitChange(product.id, idx + 1);
+                                setShowDropdown(false);
+                            }}
+                            style={{
+                                padding: '0.5rem 0.75rem',
+                                backgroundColor: selectedUnitIndex === idx + 1 ? '#f0f0f0' : 'transparent',
+                                border: 'none',
+                                fontWeight: selectedUnitIndex === idx + 1 ? 'bold' : 'normal',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                borderTop: '1px solid #f0f0f0'
+                            }}
+                        >
+                            {unit.unit_name}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
 
 const formatVND = (value) => {
     if (typeof value !== 'number' && typeof value !== 'string') return '';
@@ -54,12 +160,58 @@ const ProductList = () => {
         suppliers: [],
         brands: [],
         creationTime: { from: null, to: null },
-        productStatus: 'all',
-        directSale: 'all'
+        productStatus: 'active',
+        directSale: 'yes'
     });
     const [isFilterVisible, setIsFilterVisible] = useState(true);
     const [isPulsing, setIsPulsing] = useState(false);
     const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [totalStockQuantity, setTotalStockQuantity] = useState(0);
+    
+    // State để lưu đơn vị được chọn cho mỗi sản phẩm (key: product_id, value: unit_index)
+    const [selectedUnits, setSelectedUnits] = useState({});
+
+    // Hàm thay đổi đơn vị cho sản phẩm
+    const handleUnitChange = (productId, unitIndex) => {
+        setSelectedUnits(prev => ({
+            ...prev,
+            [productId]: unitIndex
+        }));
+    };
+
+    // Hàm lấy thông tin theo đơn vị được chọn
+    const getUnitData = (product) => {
+        const selectedUnitIndex = selectedUnits[product.id] || 0;
+        
+        // Nếu chọn đơn vị cơ bản (index 0)
+        if (selectedUnitIndex === 0) {
+            return {
+                code: product.product_code,
+                storePrice: product.base_store_price,
+                appPrice: product.base_app_price,
+                unit: product.base_unit
+            };
+        }
+        
+        // Nếu chọn đơn vị chuyển đổi
+        const unitConversion = product.unit_conversions?.[selectedUnitIndex - 1];
+        if (unitConversion) {
+            return {
+                code: unitConversion.unit_code || product.product_code,
+                storePrice: unitConversion.store_price,
+                appPrice: unitConversion.app_price,
+                unit: unitConversion.unit_name
+            };
+        }
+        
+        // Fallback về đơn vị cơ bản
+        return {
+            code: product.product_code,
+            storePrice: product.base_store_price,
+            appPrice: product.base_app_price,
+            unit: product.base_unit
+        };
+    };
 
 
     const updateFilter = (key, value) => {
@@ -155,12 +307,12 @@ const ProductList = () => {
         }
         
         // Lọc trạng thái sản phẩm
-        if (filterValues.productStatus && filterValues.productStatus !== 'all') {
+        if (filterValues.productStatus) {
             query += `&status=${filterValues.productStatus === 'active' ? 1 : 0}`;
         }
         
         // Lọc bán trực tiếp
-        if (filterValues.directSale && filterValues.directSale !== 'all') {
+        if (filterValues.directSale) {
             query += `&is_sales_unit=${filterValues.directSale === 'yes' ? 1 : 0}`;
         }
         
@@ -177,6 +329,37 @@ const ProductList = () => {
             setNumOfPages(response.data.pagination.last_page);
         }).catch((error) => {
             dispatch(actions.controlLoading(false));
+        });
+
+        // Lấy tổng tồn kho toàn bộ (không phân trang)
+        let summaryQuery = '';
+        if (searchText) summaryQuery += `?keyword=${searchText}`;
+        if (filterValues.categories && filterValues.categories.length > 0) {
+            summaryQuery += (summaryQuery ? '&' : '?') + `category_id=${filterValues.categories[0].value}`;
+        }
+        if (filterValues.suppliers && filterValues.suppliers.length > 0) {
+            summaryQuery += (summaryQuery ? '&' : '?') + `supplier_id=${filterValues.suppliers[0].value}`;
+        }
+        if (filterValues.productStatus) {
+            summaryQuery += (summaryQuery ? '&' : '?') + `status=${filterValues.productStatus === 'active' ? 1 : 0}`;
+        }
+        if (filterValues.directSale) {
+            summaryQuery += (summaryQuery ? '&' : '?') + `is_sales_unit=${filterValues.directSale === 'yes' ? 1 : 0}`;
+        }
+        if (filterValues.creationTime?.from && filterValues.creationTime?.to) {
+            summaryQuery += (summaryQuery ? '&' : '?') + `start_date=${filterValues.creationTime.from.toISOString().split('T')[0]}`;
+            summaryQuery += `&end_date=${filterValues.creationTime.to.toISOString().split('T')[0]}`;
+        }
+
+        requestApi(`api/admin/products${summaryQuery}&limit=10000`, 'GET', []).then((response) => {
+            if (response.data && response.data.data) {
+                const total = response.data.data.reduce((sum, product) => {
+                    return sum + (parseInt(product.total_stock_quantity) || 0);
+                }, 0);
+                setTotalStockQuantity(total);
+            }
+        }).catch(() => {
+            setTotalStockQuantity(0);
         });
     }, [
         currentPage,
@@ -242,7 +425,14 @@ const ProductList = () => {
                     Mã 
                 </span>
             ),
-            element: row => row.product_code,
+            element: row => {
+                const unitData = getUnitData(row);
+                return (
+                    <div className="text-nowrap">
+                        {unitData.code}
+                    </div>
+                );
+            },
             width: "8%"
         },
         { 
@@ -251,8 +441,32 @@ const ProductList = () => {
                     Tên sản phẩm {renderSortIcon('name')}
                 </span>
             ),
-            element: row => row.name,
-            width: "13%"
+            element: row => {
+                const hasUnitConversions = row.unit_conversions && row.unit_conversions.length > 0;
+                const selectedUnitIndex = selectedUnits[row.id] || 0;
+                
+                return (
+                    <div style={{ minWidth: '180px' }}>
+                        <div className="fw-bold mb-1">{row.name}</div>
+                        <div style={{ fontSize: '0.9rem' }}>
+                            {hasUnitConversions && (
+                                <>
+                                    <span style={{ color: '#0066cc' }}>- </span>
+                                    <UnitDropdown
+                                        product={row}
+                                        selectedUnitIndex={selectedUnitIndex}
+                                        onUnitChange={handleUnitChange}
+                                    />
+                                </>
+                            )}
+                            {!hasUnitConversions && row.base_unit && (
+                                <span style={{ color: '#0066cc' }}>- {row.base_unit}</span>
+                            )}
+                        </div>
+                    </div>
+                );
+            },
+            width: "15%"
         },
         { 
             title: "Hình ảnh", 
@@ -300,8 +514,7 @@ const ProductList = () => {
                     {formatVND(parseInt(row.cost_price))} ₫
                 </div>
             ),
-            width: "11%",
-            summarizable: true
+            width: "11%"
         },
         {
             title: () => (
@@ -309,13 +522,15 @@ const ProductList = () => {
                     Giá cửa hàng {renderSortIcon('base_store_price')}
                 </span>
             ),
-            element: row => (
-                <div>
-                    {formatVND(parseInt(row.base_store_price))} ₫
-                </div>
-            ),
-            width: "11%",
-            summarizable: true
+            element: row => {
+                const unitData = getUnitData(row);
+                return (
+                    <div>
+                        {formatVND(parseInt(unitData.storePrice))} ₫
+                    </div>
+                );
+            },
+            width: "11%"
         },
         { 
             title: () => (
@@ -323,17 +538,22 @@ const ProductList = () => {
                     Giá App {renderSortIcon('base_app_price')}
                 </span>
             ),
-            element: row => (
-                <div>
-                    {formatVND(parseInt(row.base_app_price))} ₫
-                </div>
-            ),
-            width: "11%",
-            summarizable: true
+            element: row => {
+                const unitData = getUnitData(row);
+                return (
+                    <div>
+                        {formatVND(parseInt(unitData.appPrice))} ₫
+                    </div>
+                );
+            },
+            width: "11%"
         },
         { 
             title: "Đơn vị",
-            element: row => row.base_unit || "---",
+            element: row => {
+                const unitData = getUnitData(row);
+                return unitData.unit || "---";
+            },
             width: "8%"
         },
         { 
@@ -342,13 +562,6 @@ const ProductList = () => {
                 ? <span className="badge bg-info">Có</span>
                 : <span className="badge bg-light text-dark">Không</span>,
             width: "8%"
-        },
-        { 
-            title: "Chi nhánh",
-            element: row => Array.isArray(row.branches)
-                ? row.branches.map(b => b.name).join(', ')
-                : "---",
-            width: "12%"
         },
         { 
             title: () => (
@@ -556,12 +769,10 @@ const ProductList = () => {
                                         label="Trạng thái sản phẩm"
                                         value={filterValues.productStatus ? {
                                             value: filterValues.productStatus,
-                                            label: filterValues.productStatus === 'all' ? 'Tất cả' : 
-                                                   filterValues.productStatus === 'active' ? 'Đang bán' : 'Ngừng bán'
+                                            label: filterValues.productStatus === 'active' ? 'Đang bán' : 'Ngừng bán'
                                         } : null}
-                                        onChange={(selected) => updateFilter('productStatus', selected ? selected.value : 'all')}
+                                        onChange={(selected) => updateFilter('productStatus', selected ? selected.value : 'active')}
                                         options={[
-                                            { value: 'all', label: 'Tất cả' },
                                             { value: 'active', label: 'Đang bán' },
                                             { value: 'inactive', label: 'Ngừng bán' }
                                         ]}
@@ -571,10 +782,9 @@ const ProductList = () => {
                                     {/* Bán trực tiếp */}
                                     <FilterButtonGroup
                                         label="Bán trực tiếp"
-                                        value={filterValues.directSale || 'all'}
+                                        value={filterValues.directSale || 'yes'}
                                         onChange={(value) => updateFilter('directSale', value)}
                                         options={[
-                                            { value: 'all', label: 'Tất cả' },
                                             { value: 'yes', label: 'Có' },
                                             { value: 'no', label: 'Không' }
                                         ]}
@@ -678,6 +888,7 @@ const ProductList = () => {
                         onSelectedRows={selectedRows => setSelectedRows(selectedRows)}
                         hideSearch={true}
                         showSummary={true}
+                        customSummaryData={{ 4: totalStockQuantity }}
                     />
                                 </div>
                             </div>

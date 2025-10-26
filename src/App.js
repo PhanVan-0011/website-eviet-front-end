@@ -59,6 +59,9 @@ import SupplierAdd from './components/supplier/SupplierAdd';
 import SupplierUpdate from './components/supplier/SupplierUpdate';
 import SupplierDetail from './components/supplier/SupplierDetail';
 import Import from './components/import/Import';
+import ImportEdit from './components/import/ImportEdit';
+import ImportList from './components/import/ImportList';
+import ImportDetail from './components/import/ImportDetail';
 function App() {
   return (
     <Routes>
@@ -115,7 +118,10 @@ function App() {
             <Route path="/supplier/add" element={<SupplierAdd />} />
             <Route path="/supplier/:id" element={<SupplierUpdate />} />
             <Route path="/supplier/detail/:id" element={<SupplierDetail />} />
-            <Route path="/import" element={<Import />} />
+            <Route path="/import" element={<ImportList />} />
+            <Route path="/import/add" element={<Import />} />
+            <Route path="/import/edit/:id" element={<ImportEdit />} />
+            <Route path="/import/detail/:id" element={<ImportDetail />} />
           </Route>
         </Route>
         <Route element={<PublicRoutes />}>

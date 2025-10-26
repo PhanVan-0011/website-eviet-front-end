@@ -1,5 +1,17 @@
 @charset "UTF-8";
 
+/* Custom textarea for import notes */
+div.col-sm-8 textarea.form-control.import-notes {
+    height: 200px !important;
+    min-height: 200px !important;
+}
+
+/* Fallback với specificity cao hơn */
+.row .col-sm-8 textarea.form-control.import-notes {
+    height: 200px !important;
+    min-height: 200px !important;
+}
+
 /* Custom styles for Group Supplier textarea */
 textarea.form-control[rows="12"] {
     height: 100px !important;
@@ -871,7 +883,7 @@ progress {
   color: #6c757d;
 }
 .blockquote-footer::before {
-  content: "— ";
+  content: "— ";
 }
 
 .img-fluid {
@@ -3897,7 +3909,6 @@ textarea.form-control-lg {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-
 .nav {
   --bs-nav-link-padding-x: 1rem;
   --bs-nav-link-padding-y: 0.5rem;
@@ -5491,7 +5502,6 @@ textarea.form-control-lg {
 .toast:not(.show) {
   display: none;
 }
-
 .toast-container {
   --bs-toast-zindex: 1090;
   position: absolute;
@@ -6291,7 +6301,6 @@ textarea.form-control-lg {
   border-radius: 50%;
   animation: var(--bs-spinner-animation-speed) linear infinite var(--bs-spinner-animation-name);
 }
-
 @keyframes spinner-border {
   to {
     transform: rotate(360deg) /* rtl:ignore */;
@@ -7092,7 +7101,6 @@ textarea.form-control-lg {
   left: 0;
   z-index: 1030;
 }
-
 .sticky-top {
   position: sticky;
   top: 0;
@@ -7891,11 +7899,9 @@ textarea.form-control-lg {
 .mt-1 {
   margin-top: 0.25rem !important;
 }
-
 .mt-2 {
   margin-top: 0.5rem !important;
 }
-
 .mt-3 {
   margin-top: 1rem !important;
 }
@@ -8591,7 +8597,6 @@ textarea.form-control-lg {
 .invisible {
   visibility: hidden !important;
 }
-
 @media (min-width: 576px) {
   .float-sm-start {
     float: left !important;
@@ -12173,12 +12178,10 @@ body {
     position: relative;
     transform: translateX(0);
 }
-
 .main-content-area.expanded {
     transform: translateX(0);
     margin-left: 0;
 }
-
 /* Quick filter buttons */
 .quick-filter-btn {
     font-size: 0.75rem;
@@ -12370,6 +12373,7 @@ body {
     height: 38px !important;
     min-height: 38px !important;
 }
+
 /*//Detail format*/
 .background-detail{
   background-color: #e6f8ec;
@@ -12391,3 +12395,17 @@ body {
     z-index: 99999 !important;
     position: absolute !important;
 }
+
+/* Custom textarea height for import notes */
+div.col-sm-8 textarea.form-control.import-notes {
+    height: 200px !important;
+    min-height: 200px !important;
+}
+
+/* Fallback với specificity cao hơn */
+.row .col-sm-8 textarea.form-control.import-notes {
+    height: 200px !important;
+    min-height: 200px !important;
+}
+
+/* Custom styles for Group Supplier textarea */

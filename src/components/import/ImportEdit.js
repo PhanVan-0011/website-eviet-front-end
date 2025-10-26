@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import moment from 'moment';
@@ -11,11 +11,15 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { vi } from 'date-fns/locale';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 
-const Import = () => {
+const ImportEdit = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { id } = useParams();
   
   const [isLoading, setIsLoading] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [unitsLoading, setUnitsLoading] = useState(true); // Track loading state for units
+  const [invoiceDetail, setInvoiceDetail] = useState(null); // Lưu toàn bộ invoice detail
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState(null);
@@ -39,47 +43,40 @@ const Import = () => {
     notes: ''
   });
 
-  // Set người nhập mặc định là người dùng hiện tại
-  const setDefaultUser = () => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const currentUser = JSON.parse(userData);
-      setSelectedUser({
-        value: currentUser.id,
-        label: currentUser.name || currentUser.username || 'N/A',
-        data: currentUser
-      });
-    }
-  };
-
-  // Set chi nhánh mặc định từ localStorage hoặc header
-  const setDefaultBranch = () => {
-    try {
-      const selectedBranchData = localStorage.getItem('selectedBranch');
-      if (selectedBranchData) {
-        const branch = JSON.parse(selectedBranchData);
-        setSelectedBranch(branch);
-      }
-    } catch (error) {
-      console.error('Error parsing selected branch:', error);
-    }
-  };
-
   useEffect(() => {
-    fetchSuppliers();
-    fetchProducts(''); // Load tất cả sản phẩm ban đầu
-    fetchUsers();
-    fetchBranches();
-    setDefaultUser(); // Set default user
-    setDefaultBranch(); // Set default branch
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const fetchInitialData = async () => {
+      dispatch(actions.controlLoading(true));
+      setUnitsLoading(true);
+      
+      try {
+        // Ưu tiên load invoice detail trước
+        await fetchInvoiceDetail();
+        
+        // Load các data khác song song (không cần chờ)
+        Promise.all([
+          fetchSuppliers(),
+          fetchUsers(),
+          fetchBranches(),
+          // Products sẽ được load trong loadInvoiceItems
+        ]);
+      } catch (error) {
+        console.error('Error fetching initial data:', error);
+      } finally {
+        dispatch(actions.controlLoading(false));
+      }
+    };
+    
+    fetchInitialData();
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Tính toán totals khi importItems hoặc discount thay đổi
   useEffect(() => {
-    calculateTotals();
-  }, [importItems, formData.discount]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (dataLoaded) {
+      calculateTotals();
+    }
+  }, [importItems, formData.discount, dataLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Debounce search logic - giảm từ 400ms xuống 200ms để phản hồi nhanh hơn
+  // Debounce search logic
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       setSearchKeyword(searchInput);
@@ -90,9 +87,170 @@ const Import = () => {
     return () => clearTimeout(delayDebounce);
   }, [searchInput]);
 
+  const fetchInvoiceDetail = async () => {
+    try {
+      const response = await requestApi(`api/admin/purchase-invoices/${id}`, 'GET');
+      
+      if (response.data && response.data.data) {
+        const invoice = response.data.data;
+        
+        // Lưu toàn bộ invoice detail
+        setInvoiceDetail(invoice);
+        
+        // Set form data
+        setFormData({
+          import_code: invoice.invoice_code || '',
+          status: invoice.status || 'draft',
+          total_amount: parseFloat(invoice.total_amount) || 0,
+          discount: parseFloat(invoice.discount_amount) || 0,
+          payable_amount: parseFloat(invoice.total_amount) || 0,
+          paid_amount: parseFloat(invoice.paid_amount) || 0,
+          payment_method: 'Tiền mặt',
+          notes: invoice.notes || ''
+        });
+
+        // Set date
+        if (invoice.invoice_date) {
+          setSelectedDate(new Date(invoice.invoice_date));
+        }
+
+        // Set supplier
+        if (invoice.supplier) {
+          setSelectedSupplier(invoice.supplier);
+        }
+
+        // Set branch
+        if (invoice.branch) {
+          setSelectedBranch(invoice.branch);
+        }
+
+        // Set user
+        if (invoice.user) {
+          setSelectedUser({
+            value: invoice.user.id,
+            label: invoice.user.name || invoice.user.username || 'N/A',
+            data: invoice.user
+          });
+        }
+
+        setDataLoaded(true);
+      }
+    } catch (error) {
+      console.error('Error fetching invoice detail:', error);
+      toast.error('Không thể tải thông tin phiếu nhập!', toastErrorConfig);
+      navigate('/import');
+    }
+  };
+
+  // Load invoice items ngay sau khi có detail (không chờ products)
+  useEffect(() => {
+    const loadInvoiceItems = async () => {
+      if (dataLoaded && invoiceDetail && invoiceDetail.details) {
+        const details = invoiceDetail.details;
+        
+        const items = details.map((detail, index) => {
+          // Tạo "fake" unit từ data hiện tại để hiển thị ngay
+          const currentUnit = {
+            product_id: detail.product_id,
+            unit_code: detail.product?.product_code || '',
+            display_name: detail.product?.name || '',
+            unit_name: detail.unit_of_measure,
+            unit_price: parseFloat(detail.unit_price),
+            cost_price: parseFloat(detail.unit_price)
+          };
+          
+          const item = {
+            id: Date.now() + index + Math.random(),
+            product_id: detail.product_id,
+            code: detail.product?.product_code || '',
+            name: detail.product?.name || '',
+            unit: detail.unit_of_measure,
+            quantity: parseFloat(detail.quantity),
+            unit_price: parseFloat(detail.unit_price),
+            total: parseFloat(detail.subtotal),
+            availableUnits: [currentUnit], // ✅ Có ngay 1 unit để hiển thị dropdown
+            selectedUnitIndex: 0
+          };
+          
+          return item;
+        });
+        
+        setImportItems(items);
+        
+        // Tự động fetch products cho các items này để lấy availableUnits (không blocking UI)
+        (async () => {
+          try {
+            // Fetch từng product bằng cách search theo tên
+            const productPromises = details.map(detail => {
+              const productName = detail.product?.name || '';
+              if (productName) {
+                return requestApi(`api/admin/products/search-for-purchase?keyword=${encodeURIComponent(productName)}`, 'GET');
+              }
+              return Promise.resolve({ data: { data: [] } });
+            });
+            
+            const responses = await Promise.all(productPromises);
+            
+            // Gộp tất cả units từ các response
+            const allProductUnits = responses.flatMap(res => res.data?.data || []);
+            
+            // Update availableUnits cho từng item (merge với units hiện tại)
+            setImportItems(prev => prev.map(item => {
+              const allUnitsOfProduct = allProductUnits.filter(p => p.product_id === item.product_id);
+              
+              if (allUnitsOfProduct.length > 0) {
+                // Tìm index của unit hiện tại trong danh sách mới
+                const currentUnitIndex = allUnitsOfProduct.findIndex(u => u.unit_name === item.unit);
+                
+                return {
+                  ...item,
+                  availableUnits: allUnitsOfProduct, // Thay thế bằng list đầy đủ
+                  selectedUnitIndex: currentUnitIndex >= 0 ? currentUnitIndex : 0
+                };
+              }
+              
+              // Nếu không tìm thấy units mới, giữ nguyên fake unit cũ
+              return item;
+            }));
+            
+            // Cập nhật products state để search vẫn hoạt động
+            setProducts(allProductUnits);
+            
+            // Đánh dấu units đã load xong
+            setUnitsLoading(false);
+          } catch (error) {
+            console.error('Error fetching product units:', error);
+            setUnitsLoading(false);
+          }
+        })();
+      }
+    };
+    
+    loadInvoiceItems();
+  }, [dataLoaded, invoiceDetail]); // eslint-disable-line react-hooks/exhaustive-deps
+  
+  // Update availableUnits khi user search thêm products mới (optional, ít dùng)
+  useEffect(() => {
+    if (importItems.length > 0 && products.length > 0 && !unitsLoading) {
+      setImportItems(prev => prev.map(item => {
+        if (item.availableUnits) return item; // Đã có rồi, không update
+        
+        const allUnitsOfProduct = products.filter(p => p.product_id === item.product_id);
+        const currentUnitIndex = allUnitsOfProduct.findIndex(u => u.unit_name === item.unit);
+        
+        return {
+          ...item,
+          availableUnits: allUnitsOfProduct.length > 0 ? allUnitsOfProduct : null,
+          selectedUnitIndex: currentUnitIndex >= 0 ? currentUnitIndex : 0
+        };
+      }));
+    }
+  }, [products.length, importItems.length, unitsLoading]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const fetchSuppliers = async () => {
     try {
-      const response = await requestApi('api/admin/suppliers?limit=1000', 'GET');
+      // Giảm limit để nhanh hơn
+      const response = await requestApi('api/admin/suppliers?limit=100', 'GET');
       if (response.data && response.data.data) {
         setSuppliers(response.data.data);
       }
@@ -119,7 +277,8 @@ const Import = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await requestApi('api/admin/users?limit=1000', 'GET');
+      // Giảm limit để nhanh hơn
+      const response = await requestApi('api/admin/users?limit=50', 'GET');
       if (response.data && response.data.data) {
         setUsers(response.data.data);
       }
@@ -131,7 +290,8 @@ const Import = () => {
 
   const fetchBranches = async () => {
     try {
-      const response = await requestApi('api/admin/branches?limit=1000', 'GET');
+      // Giảm limit để nhanh hơn
+      const response = await requestApi('api/admin/branches?limit=50', 'GET');
       if (response.data && response.data.data) {
         setBranches(response.data.data);
       }
@@ -156,10 +316,6 @@ const Import = () => {
     setSelectedSupplier(supplier);
   };
 
-  const handleRemoveSupplier = () => {
-    setSelectedSupplier(null);
-  };
-
   const handleItemChange = (id, field, value) => {
     setImportItems(prev => prev.map(item => {
       if (item.id === id) {
@@ -177,38 +333,12 @@ const Import = () => {
     setImportItems(prev => prev.filter(item => item.id !== id));
   };
 
-  const handleAddItem = () => {
-    const newItem = {
-      id: Date.now(),
-      code: '',
-      name: '',
-      unit: '',
-      quantity: 1,
-      unit_price: 0,
-      total: 0,
-      product_id: null
-    };
-    setImportItems(prev => [...prev, newItem]);
-  };
-
   const handleFormChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSaveDraft = async () => {
+  const handleUpdateInvoice = async (status) => {
     // Validate
-    if (!selectedSupplier) {
-      toast.error('Vui lòng chọn nhà cung cấp!', toastErrorConfig);
-      return;
-    }
-    if (!selectedUser) {
-      toast.error('Vui lòng chọn người nhập!', toastErrorConfig);
-      return;
-    }
-    if (!selectedBranch) {
-      toast.error('Vui lòng chọn chi nhánh!', toastErrorConfig);
-      return;
-    }
     if (importItems.length === 0) {
       toast.error('Vui lòng thêm sản phẩm!', toastErrorConfig);
       return;
@@ -217,19 +347,16 @@ const Import = () => {
     // Validate product_id for all items
     const invalidItems = importItems.filter(item => !item.product_id);
     if (invalidItems.length > 0) {
-      toast.error('Vui lòng chọn sản phẩm từ danh sách tìm kiếm, không được nhập thủ công!', toastErrorConfig);
+      toast.error('Vui lòng chọn sản phẩm từ danh sách tìm kiếm!', toastErrorConfig);
       return;
     }
 
     setIsLoading(true);
     dispatch(actions.controlLoading(true));
     try {
+      // Payload chỉ gồm các field được phép sửa
       const payload = {
-        supplier_id: parseInt(selectedSupplier.id),
-        user_id: parseInt(selectedUser.value),
-        branch_id: parseInt(selectedBranch.id),
-        invoice_date: selectedDate.toISOString(),
-        status: 'draft',
+        status: status,
         discount_amount: parseFloat(formData.discount) || 0,
         paid_amount: parseFloat(formData.paid_amount) || 0,
         notes: formData.notes || '',
@@ -241,126 +368,28 @@ const Import = () => {
         }))
       };
       
-      console.log('=== PAYLOAD BEFORE SUBMIT (DRAFT) ===', payload);
-      
-      const response = await requestApi('api/admin/purchase-invoices', 'POST', payload);
+      const response = await requestApi(`api/admin/purchase-invoices/${id}`, 'PUT', payload);
       dispatch(actions.controlLoading(false));
       if (response.data && response.data.success) {
-        toast.success(response.data.message || 'Lưu phiếu nhập nháp thành công!', toastSuccessConfig);
+        toast.success(response.data.message || 'Cập nhật phiếu nhập thành công!', toastSuccessConfig);
         navigate('/import');
       } else {
-        toast.error(response.data.message || 'Lưu phiếu nhập nháp thất bại', toastErrorConfig);
+        toast.error(response.data.message || 'Cập nhật phiếu nhập thất bại', toastErrorConfig);
       }
     } catch (error) {
-      console.error('Error saving import:', error);
+      console.error('Error updating import:', error);
       dispatch(actions.controlLoading(false));
       if (error.response && error.response.data && error.response.data.message) {
         toast.error(error.response.data.message, toastErrorConfig);
       } else {
-        toast.error('Có lỗi xảy ra khi lưu phiếu nhập!', toastErrorConfig);
+        toast.error('Có lỗi xảy ra khi cập nhật phiếu nhập!', toastErrorConfig);
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleComplete = async () => {
-    // Validate
-    if (!selectedSupplier) {
-      toast.error('Vui lòng chọn nhà cung cấp!', toastErrorConfig);
-      return;
-    }
-    if (!selectedUser) {
-      toast.error('Vui lòng chọn người nhập!', toastErrorConfig);
-      return;
-    }
-    if (!selectedBranch) {
-      toast.error('Vui lòng chọn chi nhánh!', toastErrorConfig);
-      return;
-    }
-    if (importItems.length === 0) {
-      toast.error('Vui lòng thêm sản phẩm!', toastErrorConfig);
-      return;
-    }
-    
-    // Validate product_id for all items
-    const invalidItems = importItems.filter(item => !item.product_id);
-    if (invalidItems.length > 0) {
-      toast.error('Vui lòng chọn sản phẩm từ danh sách tìm kiếm, không được nhập thủ công!', toastErrorConfig);
-      return;
-    }
-
-    setIsLoading(true);
-    dispatch(actions.controlLoading(true));
-    try {
-      const payload = {
-        supplier_id: parseInt(selectedSupplier.id),
-        user_id: parseInt(selectedUser.value),
-        branch_id: parseInt(selectedBranch.id),
-        invoice_date: selectedDate.toISOString(),
-        status: 'received',
-        discount_amount: parseFloat(formData.discount) || 0,
-        paid_amount: parseFloat(formData.paid_amount) || 0,
-        notes: formData.notes || '',
-        details: importItems.map(item => ({
-          product_id: parseInt(item.product_id),
-          unit_of_measure: item.unit,
-          quantity: parseFloat(item.quantity),
-          unit_price: parseFloat(item.unit_price)
-        }))
-      };
-      
-      console.log('=== PAYLOAD BEFORE SUBMIT (COMPLETE) ===', payload);
-      
-      const response = await requestApi('api/admin/purchase-invoices', 'POST', payload);
-      dispatch(actions.controlLoading(false));
-      if (response.data && response.data.success) {
-        toast.success(response.data.message || 'Hoàn thành phiếu nhập thành công!', toastSuccessConfig);
-        navigate('/import');
-      } else {
-        toast.error(response.data.message || 'Hoàn thành phiếu nhập thất bại', toastErrorConfig);
-      }
-    } catch (error) {
-      console.error('Error completing import:', error);
-      dispatch(actions.controlLoading(false));
-      if (error.response && error.response.data && error.response.data.message) {
-        toast.error(error.response.data.message, toastErrorConfig);
-      } else {
-        toast.error('Có lỗi xảy ra khi hoàn thành phiếu nhập!', toastErrorConfig);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const resetForm = () => {
-    setImportItems([
-      {
-        id: Date.now(),
-        code: '',
-        name: '',
-        unit: '',
-        quantity: 1,
-        unit_price: 0,
-        total: 0,
-        product_id: null
-      }
-    ]);
-    setFormData({
-      import_code: '',
-      status: 'draft',
-      total_amount: 0,
-      discount: 0,
-      payable_amount: 0,
-      paid_amount: 0,
-      payment_method: 'Tiền mặt',
-      notes: ''
-    });
-    setSelectedSupplier(null);
-    setSelectedBranch(null);
-  };
-
-  // Hàm format giá tiền VND (chỉ số, không ký hiệu) - dùng cho input
+  // Hàm format giá tiền VND
   const formatVND = (value) => {
     if (typeof value === 'string') {
       value = value.replace(/\D/g, '');
@@ -371,7 +400,6 @@ const Import = () => {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
-  // Hàm format hiển thị VND với ký hiệu - dùng cho display
   const formatVNDDisplay = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -409,10 +437,8 @@ const Import = () => {
     if (selectedOption && selectedOption.data) {
       const product = selectedOption.data;
       
-      // Lọc tất cả units của sản phẩm này từ products array
       const allUnitsOfProduct = products.filter(p => p.product_id === product.product_id);
       
-      // Tạo item mới với unit đầu tiên được chọn
       const newItem = {
         id: Date.now(),
         product_id: product.product_id,
@@ -423,13 +449,13 @@ const Import = () => {
         unit_price: 0,
         total: 0,
         image_url: product.image_url || null,
-        availableUnits: allUnitsOfProduct, // Lưu tất cả units
+        availableUnits: allUnitsOfProduct,
         selectedUnitIndex: allUnitsOfProduct.findIndex(u => 
           u.unit_code === product.unit_code
-        ) // Index của unit đang chọn
+        )
       };
       setImportItems(prev => [...prev, newItem]);
-      setSelectedProduct(null); // Reset selection
+      setSelectedProduct(null);
     }
   };
 
@@ -454,7 +480,6 @@ const Import = () => {
     }));
   };
 
-  // Xử lý tìm kiếm động khi người dùng gõ
   const handleSearchInputChange = (inputValue) => {
     setSearchInput(inputValue);
   };
@@ -479,16 +504,11 @@ const Import = () => {
     })
   };
 
-  // Custom Option component với hình ảnh
+  // Custom Option component
   const CustomOption = ({ innerRef, innerProps, data, isSelected, isFocused }) => {
     const imageUrl = data.data?.image_url 
       ? `${process.env.REACT_APP_IMAGE_SERVER_URL}${data.data.image_url}`
       : null;
-
-    console.log('CustomOption - imageUrl:', imageUrl);
-    console.log('CustomOption - data.data?.image_url:', data.data?.image_url);
-    console.log('CustomOption - REACT_APP_IMAGE_SERVER_URL:', process.env.REACT_APP_IMAGE_SERVER_URL);
-    console.log('CustomOption - full data:', data.data);
 
     return (
       <div
@@ -551,13 +571,11 @@ const Import = () => {
     );
   };
 
-  // Custom SingleValue component với hình ảnh
+  // Custom SingleValue component
   const CustomSingleValue = ({ data }) => {
     const imageUrl = data.data?.image_url 
       ? `${process.env.REACT_APP_IMAGE_SERVER_URL}${data.data.image_url}`
       : null;
- 
-
 
     return (
       <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -601,6 +619,20 @@ const Import = () => {
     );
   };
 
+  // Status badge
+  const getStatusBadge = () => {
+    const statusMap = {
+      'draft': { label: 'Nháp', class: 'bg-secondary' },
+      'received': { label: 'Đã nhập hàng', class: 'bg-success' },
+      'cancelled': { label: 'Đã hủy', class: 'bg-danger' }
+    };
+    const status = statusMap[formData.status] || { label: formData.status, class: 'bg-secondary' };
+    return <span className={`badge ${status.class}`}>{status.label}</span>;
+  };
+
+  if (!dataLoaded) {
+    return null; // Hoặc hiển thị loading spinner
+  }
 
   return (
     <div className="container-fluid mt-4">
@@ -611,11 +643,11 @@ const Import = () => {
           <div className="d-flex align-items-center mb-3">
             <button
               className="btn btn-outline-secondary me-3"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/import')}
             >
               <i className="fas fa-arrow-left"></i>
             </button>
-            <h4 className="mb-0 me-4">Nhập hàng</h4>
+            <h4 className="mb-0 me-4">Cập nhật phiếu nhập</h4>
             
             {/* Thanh tìm kiếm sản phẩm với react-select */}
             <div className="position-relative" style={{ width: '400px' }}>
@@ -718,7 +750,7 @@ const Import = () => {
                           />
                         </td>
                         <td className="align-middle">
-                          {item.availableUnits && item.availableUnits.length > 1 ? (
+                          {item.availableUnits && item.availableUnits.length > 0 ? (
                             <select
                               className="form-select form-select-sm"
                               value={item.selectedUnitIndex}
@@ -791,100 +823,50 @@ const Import = () => {
               <h6 className="mb-0 fw-bold">Thông tin phiếu nhập</h6>
             </div>
             <div className="card-body">
-              {/* Người nhập và Ngày nhập */}
+              {/* Người nhập và Ngày nhập (readonly) */}
               <div className="row mb-3">
                 <div className="col-6">
                   <div className="d-flex align-items-center">
-                    <i className="fas fa-user me-2 text-primary"></i>
-                    <Select
-                      value={selectedUser}
-                      onChange={setSelectedUser}
-                      options={userOptions}
-                      styles={{
-                        ...selectStyles,
-                        control: (provided) => ({
-                          ...provided,
-                          minHeight: '32px',
-                          fontSize: '14px'
-                        })
-                      }}
-                      placeholder="Người nhập"
-                      isClearable
-                      isSearchable
+                    <i className="fas fa-user me-2 text-muted"></i>
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      value={selectedUser?.label || 'N/A'}
+                      readOnly
+                      style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
                     />
                   </div>
                 </div>
                 <div className="col-6">
                   <div className="d-flex align-items-center">
-                    <i className="fas fa-calendar me-2 text-primary"></i>
-                    <DatePicker
-                      selected={selectedDate}
-                      onChange={setSelectedDate}
-                      showTimeSelect
-                      timeFormat="HH:mm"
-                      timeIntervals={15}
-                      dateFormat="dd/MM/yyyy HH:mm"
-                      locale={vi}
+                    <i className="fas fa-calendar me-2 text-muted"></i>
+                    <input
+                      type="text"
                       className="form-control form-control-sm"
-                      placeholderText="Ngày nhập"
+                      value={moment(selectedDate).format('DD/MM/YYYY HH:mm')}
+                      readOnly
+                      style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Thông tin nhà cung cấp */}
+              {/* Thông tin nhà cung cấp (readonly) */}
               <div className="row mb-3">
                 <label className="col-sm-4 col-form-label fw-semibold">Nhà cung cấp</label>
                 <div className="col-sm-8">
-                  <div className="position-relative">
-                    <Select
-                      value={selectedSupplier ? { value: selectedSupplier.id, label: `${selectedSupplier.name} - ${selectedSupplier.code}` } : null}
-                      onChange={(option) => {
-                        if (option) {
-                          const supplier = suppliers.find(s => s.id === option.value);
-                          if (supplier) handleSupplierSelect(supplier);
-                        } else {
-                          setSelectedSupplier(null);
-                        }
-                      }}
-                      options={supplierOptions}
-                      styles={{
-                        ...selectStyles,
-                        control: (provided) => ({
-                          ...provided,
-                          minHeight: '38px',
-                          borderColor: '#ced4da',
-                          paddingRight: '40px',
-                          '&:hover': {
-                            borderColor: '#86b7fe'
-                          }
-                        })
-                      }}
-                      placeholder="Chọn nhà cung cấp"
-                      isClearable
-                      isSearchable
-                      className="w-100"
-                    />
-                    <Link 
-                      to="/supplier/add" 
-                      className="btn btn-outline-primary btn-sm position-absolute"
-                      title="Thêm nhà cung cấp mới"
-                      style={{ 
-                        right: '8px', 
-                        top: '50%', 
-                        transform: 'translateY(-50%)',
-                        zIndex: 10,
-                        padding: '2px 6px'
-                      }}
-                    >
-                      <i className="fas fa-plus"></i>
-                    </Link>
-                  </div>
-                {selectedSupplier && (
-                  <div className="mt-1">
-                    <small className="text-muted">Nợ: {formatVNDDisplay(selectedSupplier.balance_due || 0)}</small>
-                  </div>
-                )}
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={selectedSupplier ? `${selectedSupplier.name} - ${selectedSupplier.code}` : 'N/A'}
+                    readOnly
+                    style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                  />
+                  {selectedSupplier && (
+                    <div className="mt-1">
+                      <small className="text-muted">Nợ: {formatVNDDisplay(selectedSupplier.balance_due || 0)}</small>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -897,8 +879,8 @@ const Import = () => {
                     type="text"
                     className="form-control"
                     value={formData.import_code}
-                    onChange={(e) => handleFormChange('import_code', e.target.value)}
-                      placeholder="Mã phiếu tự động"
+                    readOnly
+                    style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
                   />
                   </div>
                 </div>
@@ -909,7 +891,7 @@ const Import = () => {
                 <label className="col-sm-4 col-form-label fw-semibold">Trạng thái</label>
                 <div className="col-sm-8">
                   <div className="d-flex align-items-center">
-                    <span className="badge bg-secondary">Nháp</span>
+                    {getStatusBadge()}
                   </div>
                 </div>
               </div>
@@ -1009,7 +991,7 @@ const Import = () => {
               <div className="d-flex gap-2">
         <button
                   className="btn btn-primary flex-fill"
-          onClick={handleSaveDraft}
+          onClick={() => handleUpdateInvoice('draft')}
           disabled={isLoading}
         >
           <i className="fas fa-save me-1"></i>
@@ -1017,7 +999,7 @@ const Import = () => {
         </button>
         <button
                   className="btn btn-success flex-fill"
-          onClick={handleComplete}
+          onClick={() => handleUpdateInvoice('received')}
           disabled={isLoading}
         >
           <i className="fas fa-check me-1"></i>
@@ -1032,4 +1014,5 @@ const Import = () => {
   );
 };
 
-export default Import;
+export default ImportEdit;
+

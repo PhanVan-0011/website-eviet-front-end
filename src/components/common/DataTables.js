@@ -5,7 +5,7 @@ import { useRef } from 'react';
 
 const DataTables = (props) => {
     console.log("DataTables props: ", props);
-   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, selectedRows: externalSelectedRows, filterHeader, hideSelected, hideSearch = false, isLoading = false, showSummary = false } = props;
+   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, selectedRows: externalSelectedRows, filterHeader, hideSelected, hideSearch = false, isLoading = false, showSummary = false, customSummaryData = {} } = props;
    const [selectedRows, setSelectedRows] = useState([]);
    const isFirstRender = useRef(true);
    
@@ -239,7 +239,8 @@ const DataTables = (props) => {
     const renderSummaryRow = () => {
         if (!showSummary) return null;
         
-        const summary = calculateSummary();
+        // Sử dụng customSummaryData nếu được cung cấp, nếu không tính từ data hiện tại
+        const summary = Object.keys(customSummaryData).length > 0 ? customSummaryData : calculateSummary();
         const { visibleIdx, newWidths } = calculateColumnWidths();
         let widthIdx = 0;
         

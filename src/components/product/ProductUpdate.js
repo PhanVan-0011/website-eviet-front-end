@@ -334,7 +334,7 @@ const ProductUpdate = () => {
         
         // Validate unit conversions
         for (let unit of unitConversions) {
-            if (!unit.unit_name || !unit.store_price || !unit.app_price) {
+            if (!unit.unit_name || !unit.conversion_factor || unit.conversion_factor <= 0) {
                 return;
             }
         }
@@ -868,113 +868,134 @@ const ProductUpdate = () => {
                                                                                     <tbody>
                                                                                         {unitConversions.map((unit, index) => (
                                                                                             <tr key={index}>
-                                                                                                <td>
-                                                                                                    <input
-                                                                                                        type="text"
-                                                                                                        className={`form-control ${isSubmitted && !unit.unit_name ? 'is-invalid' : ''}`}
-                                                                                                        value={unit.unit_name}
-                                                                                                        onChange={e => {
-                                                                                                            const newUnits = [...unitConversions];
-                                                                                                            newUnits[index].unit_name = e.target.value;
-                                                                                                            setUnitConversions(newUnits);
-                                                                                                        }}
-                                                                                                        placeholder="Nhập tên đơn vị"
-                                                                                                    />
-                                                                                                    <div className="invalid-feedback d-block small" style={{visibility: isSubmitted && !unit.unit_name ? 'visible' : 'hidden'}}>
-                                                                                                        Tên đơn vị là bắt buộc
-                                                                                                    </div>
-                                                                                                </td>
-                                                                                                <td>
-                                                                                                    <input
-                                                                                                        type="number"
-                                                                                                        className="form-control"
-                                                                                                        value={unit.conversion_factor}
-                                                                                                        onChange={e => {
-                                                                                                            const newUnits = [...unitConversions];
-                                                                                                            const val = parseInt(e.target.value);
-                                                                                                            newUnits[index].conversion_factor = val < 1 ? 1 : (isNaN(val) ? 1 : val);
-                                                                                                            setUnitConversions(newUnits);
-                                                                                                        }}
-                                                                                                        min="1"
-                                                                                                        required
-                                                                                                    />
-                                                                                                    <div className="invalid-feedback d-block small" style={{visibility: 'hidden'}}>
-                                                                                                        &nbsp;
-                                                                                                    </div>
-                                                                                                </td>
-                                                                                                <td>
-                                                                                                    <input
-                                                                                                        type="text"
-                                                                                                        className={`form-control ${isSubmitted && !unit.store_price ? 'is-invalid' : ''}`}
-                                                                                                        value={unit.store_price}
-                                                                                                        onChange={e => {
-                                                                                                            const newUnits = [...unitConversions];
-                                                                                                            const formatted = formatVND(e.target.value);
-                                                                                                            newUnits[index].store_price = formatted;
-                                                                                                            setUnitConversions(newUnits);
-                                                                                                        }}
-                                                                                                        placeholder="Giá cửa hàng"
-                                                                                                    />
-                                                                                                    <div className="invalid-feedback d-block small" style={{visibility: isSubmitted && !unit.store_price ? 'visible' : 'hidden'}}>
-                                                                                                        Giá cửa hàng là bắt buộc
-                                                                                                    </div>
-                                                                                                </td>
-                                                                                                <td>
-                                                                                                    <input
-                                                                                                        type="text"
-                                                                                                        className={`form-control ${isSubmitted && !unit.app_price ? 'is-invalid' : ''}`}
-                                                                                                        value={unit.app_price}
-                                                                                                        onChange={e => {
-                                                                                                            const newUnits = [...unitConversions];
-                                                                                                            const formatted = formatVND(e.target.value);
-                                                                                                            newUnits[index].app_price = formatted;
-                                                                                                            setUnitConversions(newUnits);
-                                                                                                        }}
-                                                                                                        placeholder="Giá App"
-                                                                                                    />
-                                                                                                    <div className="invalid-feedback d-block small" style={{visibility: isSubmitted && !unit.app_price ? 'visible' : 'hidden'}}>
-                                                                                                        Giá App là bắt buộc
-                                                                                                    </div>
-                                                                                                </td>
-                                                                                                <td>
-                                                                                                    <input
-                                                                                                        type="text"
-                                                                                                        className="form-control"
-                                                                                                        value={unit.unit_code}
-                                                                                                        onChange={e => {
-                                                                                                            const newUnits = [...unitConversions];
-                                                                                                            newUnits[index].unit_code = e.target.value;
-                                                                                                            setUnitConversions(newUnits);
-                                                                                                        }}
-                                                                                                        placeholder="Mã hàng tự động"
-                                                                                                    />
-                                                                                                    <div className="invalid-feedback d-block small" style={{visibility: 'hidden'}}>
-                                                                                                        &nbsp;
-                                                                                                    </div>
-                                                                                                </td>
-                                                                                                <td>
-                                                                                                    <div className="form-check">
+                                                                                                <td style={{ verticalAlign: 'middle' }}>
+                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                                                                                                         <input
-                                                                                                            className="form-check-input"
-                                                                                                            type="checkbox"
-                                                                                                            checked={unit.is_sales_unit}
+                                                                                                            type="text"
+                                                                                                            className={`form-control ${isSubmitted && !unit.unit_name ? 'is-invalid' : ''}`}
+                                                                                                            value={unit.unit_name}
                                                                                                             onChange={e => {
-                                                                                                const newUnits = [...unitConversions];
-                                                                                                newUnits[index].is_sales_unit = e.target.checked;
-                                                                                                setUnitConversions(newUnits);
-                                                                                            }}
+                                                                                                                const newUnits = [...unitConversions];
+                                                                                                                newUnits[index].unit_name = e.target.value;
+                                                                                                                setUnitConversions(newUnits);
+                                                                                                            }}
+                                                                                                            placeholder="Nhập tên đơn vị"
                                                                                                         />
-                                                                                                        <label className="form-check-label">Bán trực tiếp</label>
-                                                                                            </div>
+                                                                                                        <div className="invalid-feedback d-block small" style={{visibility: isSubmitted && !unit.unit_name ? 'visible' : 'hidden'}}>
+                                                                                                            Tên đơn vị là bắt buộc
+                                                                                                        </div>
+                                                                                                    </div>
                                                                                                 </td>
-                                                                                                <td>
-                                                                                                    <button
-                                                                                                        type="button"
-                                                                                                        className="btn btn-sm btn-danger"
-                                                                                                        onClick={() => removeUnitConversion(index)}
-                                                                                                    >
-                                                                                                        <i className="fas fa-trash"></i>
-                                                                                                    </button>
+                                                                                                <td style={{ verticalAlign: 'middle' }}>
+                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                                                                        <input
+                                                                                                            type="number"
+                                                                                                            className={`form-control ${isSubmitted && (!unit.conversion_factor || unit.conversion_factor <= 0) ? 'is-invalid' : ''}`}
+                                                                                                            value={unit.conversion_factor}
+                                                                                                            onChange={e => {
+                                                                                                                const newUnits = [...unitConversions];
+                                                                                                                const val = parseFloat(e.target.value);
+                                                                                                                newUnits[index].conversion_factor = isNaN(val) || val <= 0 ? '' : val;
+                                                                                                                setUnitConversions(newUnits);
+                                                                                                            }}
+                                                                                                            min="0"
+                                                                                                            step="1"
+                                                                                                            placeholder="Nhập số lớn hơn 0"
+                                                                                                        />
+                                                                                                        <div className="invalid-feedback d-block small" style={{visibility: isSubmitted && (!unit.conversion_factor || unit.conversion_factor <= 0) ? 'visible' : 'hidden'}}>
+                                                                                                            Giá quy đổi phải lớn hơn 0
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td style={{ verticalAlign: 'middle' }}>
+                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                                        <input
+                                                                                                            type="text"
+                                                                                                            className="form-control"
+                                                                                                            value={unit.store_price}
+                                                                                                            onChange={e => {
+                                                                                                                const newUnits = [...unitConversions];
+                                                                                                                const formatted = formatVND(e.target.value);
+                                                                                                                newUnits[index].store_price = formatted;
+                                                                                                                setUnitConversions(newUnits);
+                                                                                                            }}
+                                                                                                            placeholder="Giá cửa hàng (không bắt buộc)"
+                                                                                                        />
+                                                                                                        <div className="invalid-feedback d-block small" style={{visibility: 'hidden'}}>
+                                                                                                            &nbsp;
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td style={{ verticalAlign: 'middle' }}>
+                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                                        <input
+                                                                                                            type="text"
+                                                                                                            className="form-control"
+                                                                                                            value={unit.app_price}
+                                                                                                            onChange={e => {
+                                                                                                                const newUnits = [...unitConversions];
+                                                                                                                const formatted = formatVND(e.target.value);
+                                                                                                                newUnits[index].app_price = formatted;
+                                                                                                                setUnitConversions(newUnits);
+                                                                                                            }}
+                                                                                                            placeholder="Giá App (không bắt buộc)"
+                                                                                                        />
+                                                                                                        <div className="invalid-feedback d-block small" style={{visibility: 'hidden'}}>
+                                                                                                            &nbsp;
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td style={{ verticalAlign: 'middle' }}>
+                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                                        <input
+                                                                                                            type="text"
+                                                                                                            className="form-control"
+                                                                                                            value={unit.unit_code}
+                                                                                                            onChange={e => {
+                                                                                                                const newUnits = [...unitConversions];
+                                                                                                                newUnits[index].unit_code = e.target.value;
+                                                                                                                setUnitConversions(newUnits);
+                                                                                                            }}
+                                                                                                            placeholder="Mã hàng tự động"
+                                                                                                        />
+                                                                                                        <div className="invalid-feedback d-block small" style={{visibility: 'hidden'}}>
+                                                                                                            &nbsp;
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td style={{ verticalAlign: 'middle' }}>
+                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                                                                        <div className="form-check">
+                                                                                                            <input
+                                                                                                                className="form-check-input"
+                                                                                                                type="checkbox"
+                                                                                                                checked={unit.is_sales_unit}
+                                                                                                                onChange={e => {
+                                                                                                    const newUnits = [...unitConversions];
+                                                                                                    newUnits[index].is_sales_unit = e.target.checked;
+                                                                                                    setUnitConversions(newUnits);
+                                                                                                }}
+                                                                                                            />
+                                                                                                            <label className="form-check-label">Bán trực tiếp</label>
+                                                                                                        </div>
+                                                                                                        <div style={{visibility: 'hidden'}}>
+                                                                                                            &nbsp;
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td style={{ verticalAlign: 'middle' }}>
+                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                                                                        <button
+                                                                                                            type="button"
+                                                                                                            className="btn btn-sm btn-danger"
+                                                                                                            onClick={() => removeUnitConversion(index)}
+                                                                                                        >
+                                                                                                            <i className="fas fa-trash"></i>
+                                                                                                        </button>
+                                                                                                        <div style={{visibility: 'hidden'}}>
+                                                                                                            &nbsp;
+                                                                                                        </div>
+                                                                                                    </div>
                                                                                                 </td>
                                                                                             </tr>
                                                                                         ))}
@@ -1030,7 +1051,7 @@ const ProductUpdate = () => {
                                                                                 />
                                                                                 {isSubmitted && !attr.name && <div className="invalid-feedback d-block">Tên thuộc tính là bắt buộc</div>}
                                                                             </div>
-                                                                            <div className="col-md-4">
+                                                                            <div className="col-md-2">
                                                                                 <label className="form-label">Loại thuộc tính</label>
                                                                                 <select
                                                                                     className="form-select"
@@ -1046,7 +1067,7 @@ const ProductUpdate = () => {
                                                                                     <option value="text">Ghi chú (Text Input)</option>
                                                                                 </select>
                                                                             </div>
-                                                                            <div className="col-md-2 d-flex align-items-end">
+                                                                            <div className="col-md-2 d-flex align-items-end justify-content-center">
                                                                                 <button
                                                                                     type="button"
                                                                                     className="btn btn-sm btn-danger"
@@ -1114,7 +1135,7 @@ const ProductUpdate = () => {
                                                                                                     <label className="form-check-label">Mặc định</label>
                                                                                                 </div>
                                                                                             </div>
-                                                                                            <div className="col-md-2">
+                                                                                            <div className="col-md-2 d-flex align-items-center justify-content-center">
                                                                                                 <button
                                                                                                     type="button"
                                                                                                     className="btn btn-sm btn-danger"
