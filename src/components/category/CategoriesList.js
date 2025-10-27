@@ -15,7 +15,7 @@ import {
 } from '../common/FilterComponents';
 import ImageList from '../common/ImageList';
 import LiveSearch from '../common/LiveSearch';
-const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
+const urlImage = process.env.REACT_APP_API_URL + 'api/images';
 
 const CategoriesList = () => {
     const [categories, setCategories] = useState([]);
@@ -58,7 +58,8 @@ const CategoriesList = () => {
             element: row => {
                 // Kiểm tra xem có icon không (API trả về trường 'icon' chứ không phải 'icon_url')
                 if (row.icon) {
-                    return <ImageList src={urlImage + row.icon} alt={row.name} />;
+                    const newIconPath = row.icon.replace(/\/([^\/]+)$/, '/main/$1');
+                    return <ImageList src={urlImage + newIconPath} alt={row.name} />;
                 } else {
                     return <ImageList icon alt="Không có icon" />;
                 }
