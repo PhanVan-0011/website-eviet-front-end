@@ -255,11 +255,25 @@ const ProductAdd = () => {
             formData.append('featured_image_index', featuredImageIndex);
             
             // Unit conversions
-            const unitConversionsFormatted = unitConversions.map(unit => ({
-                ...unit,
-                store_price: typeof unit.store_price === 'string' ? Number(unit.store_price.replace(/\./g, '')) : Number(unit.store_price) || 0,
-                app_price: typeof unit.app_price === 'string' ? Number(unit.app_price.replace(/\./g, '')) : Number(unit.app_price) || 0,
-            }));
+            // const unitConversionsFormatted = unitConversions.map(unit => ({
+            //     ...unit,
+            //     store_price: typeof unit.store_price === 'string' ? Number(unit.store_price.replace(/\./g, '')) : Number(unit.store_price) || 0,
+            //     app_price: typeof unit.app_price === 'string' ? Number(unit.app_price.replace(/\./g, '')) : Number(unit.app_price) || 0,
+            // }));
+            const unitConversionsFormatted = unitConversions.map(unit => {
+                const storePrice = typeof unit.store_price === 'string' ? unit.store_price.trim() : unit.store_price;
+                const appPrice = typeof unit.app_price === 'string' ? unit.app_price.trim() : unit.app_price;
+            
+                return {
+                    ...unit,
+                    store_price: storePrice === '' || storePrice == null
+                        ? null
+                        : Number(String(storePrice).replace(/\./g, '')),
+                    app_price: appPrice === '' || appPrice == null
+                        ? null
+                        : Number(String(appPrice).replace(/\./g, '')),
+                };
+            });
             formData.append('unit_conversions_json', JSON.stringify(unitConversionsFormatted));
             
             // Attributes
