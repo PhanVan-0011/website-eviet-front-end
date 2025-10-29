@@ -77,7 +77,7 @@ const SupplierUpdate = () => {
             dispatch(actions.controlLoading(true));
             const response = await requestApi(
                 `api/admin/suppliers/${params.id}`,
-                'POST',
+                'PUT',
                 submitData
             );
             dispatch(actions.controlLoading(false));

@@ -193,7 +193,7 @@ const CategoryUpdate = () => {
                                                             {(iconPreview || currentIconUrl) ? (
                                                                 <>
                                                                     <img
-                                                                        src={iconPreview || (currentIconUrl ? process.env.REACT_APP_API_URL + 'api/images/' + currentIconUrl : '')}
+                                                                        src={iconPreview || (currentIconUrl ? process.env.REACT_APP_API_URL + 'api/images/' + currentIconUrl.replace(/\/([^\/]+)$/, '/main/$1') : '')}
                                                                         alt="Icon preview"
                                                                         className="w-100 h-100 rounded position-absolute top-0 start-0"
                                                                         style={{ objectFit: 'contain', aspectRatio: '1/1' }}
