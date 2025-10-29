@@ -365,7 +365,8 @@ const Import = () => {
     if (typeof value === 'string') {
       value = value.replace(/\D/g, '');
     } else {
-      value = String(value || '');
+      // Làm tròn thành số nguyên để tránh số thập phân
+      value = String(Math.round(value) || '');
     }
     if (!value) return '';
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -412,6 +413,11 @@ const Import = () => {
       // Lọc tất cả units của sản phẩm này từ products array
       const allUnitsOfProduct = products.filter(p => p.product_id === product.product_id);
       
+      // Parse cost_price an toàn (loại bỏ dấu . nếu có)
+      const costPrice = typeof product.cost_price === 'string' 
+        ? parseFloat(product.cost_price.replace(/\./g, '')) 
+        : parseFloat(product.cost_price) || 0;
+      
       // Tạo item mới với unit đầu tiên được chọn
       const newItem = {
         id: Date.now(),
@@ -419,9 +425,9 @@ const Import = () => {
         code: product.unit_code || '',
         name: product.display_name || '',
         unit: product.unit_name || 'Hộp',
-        quantity: 0,
-        unit_price: 0,
-        total: 0,
+        quantity: 1,
+        unit_price: costPrice,
+        total: costPrice,
         image_url: product.image_url || null,
         availableUnits: allUnitsOfProduct, // Lưu tất cả units
         selectedUnitIndex: allUnitsOfProduct.findIndex(u => 
@@ -439,13 +445,18 @@ const Import = () => {
       if (item.id === itemId && item.availableUnits) {
         const newUnit = item.availableUnits[newUnitIndex];
         if (newUnit) {
-          const newTotal = item.quantity * item.unit_price;
+          // Parse cost_price an toàn (loại bỏ dấu . nếu có)
+          const newUnitPrice = typeof newUnit.cost_price === 'string'
+            ? parseFloat(newUnit.cost_price.replace(/\./g, ''))
+            : parseFloat(newUnit.cost_price) || 0;
+          const newTotal = item.quantity * newUnitPrice;
           return {
             ...item,
             selectedUnitIndex: newUnitIndex,
             code: newUnit.unit_code,
             name: newUnit.display_name,
             unit: newUnit.unit_name,
+            unit_price: newUnitPrice,
             total: newTotal
           };
         }
@@ -760,17 +771,20 @@ const Import = () => {
                           />
                         </td>
                         <td>
-                          <input
-                            type="text"
-                            className="form-control form-control-sm text-end"
-                            value={item.unit_price === 0 || item.unit_price === '' ? '' : formatVND(item.unit_price)}
-                            onChange={(e) => {
-                              const formatted = formatVND(e.target.value);
-                              const rawValue = Number(formatted.replace(/\./g, '')) || 0;
-                              handleItemChange(item.id, 'unit_price', rawValue);
-                            }}
-                            placeholder="0"
-                          />
+                          <div className="input-group input-group-sm">
+                            <input
+                              type="text"
+                              className="form-control form-control-sm text-end"
+                              value={item.unit_price === 0 || item.unit_price === '' ? '' : formatVND(item.unit_price)}
+                              onChange={(e) => {
+                                const formatted = formatVND(e.target.value);
+                                const rawValue = Number(formatted.replace(/\./g, '')) || 0;
+                                handleItemChange(item.id, 'unit_price', rawValue);
+                              }}
+                              placeholder="0"
+                            />
+                            <span className="input-group-text">₫</span>
+                          </div>
                         </td>
                         <td className="text-end align-middle">
                           <span className="fw-bold text-primary">{formatVNDDisplay(item.total)}</span>
@@ -988,6 +1002,20 @@ const Import = () => {
                 <div className="mt-1">
                     <small className="text-muted">Tiền mặt</small>
                   </div>
+                </div>
+              </div>
+
+              {/* Công nợ */}
+              <div className="row mb-3">
+                <label className="col-sm-4 col-form-label fw-semibold text-danger">Công nợ</label>
+                <div className="col-sm-8">
+                <input
+                  type="text"
+                    className="form-control fw-bold text-end text-danger"
+                  value={formatVNDDisplay(formData.payable_amount - formData.paid_amount)}
+                  readOnly
+                    style={{ backgroundColor: '#fff5f5' }}
+                />
                 </div>
               </div>
 

@@ -675,6 +675,7 @@ const ProductList = () => {
                 setShowModal(false);
                 if (response.data && response.data.success) {
                     toast.success(response.data.message || "Xóa sản phẩm thành công!", toastSuccessConfig);
+                    setSelectedRows([]);
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa sản phẩm thất bại", toastErrorConfig);
@@ -694,6 +695,7 @@ const ProductList = () => {
                 setShowModal(false);
                 if (response.data && response.data.success) {
                     toast.success(response.data.message || "Xóa sản phẩm thành công!", toastSuccessConfig);
+                    setSelectedRows([]);
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa sản phẩm thất bại", toastErrorConfig);

@@ -224,8 +224,6 @@ const ImportDetail = () => {
                                                         <th>Tên hàng</th>
                                                         <th className="text-center">Số lượng</th>
                                                         <th className="text-end">Đơn giá</th>
-                                                        <th className="text-end">Giảm giá</th>
-                                                        <th className="text-end">Giá nhập</th>
                                                         <th className="text-end">Thành tiền</th>
                                                     </tr>
                                                 </thead>
@@ -249,10 +247,6 @@ const ImportDetail = () => {
                                                             <td className="text-center">
                                                                 {parseFloat(item.quantity).toLocaleString('vi-VN')}
                                                             </td>
-                                                            <td className="text-end">
-                                                                {formatVND(item.unit_price)}
-                                                            </td>
-                                                            <td className="text-end">0</td>
                                                             <td className="text-end">
                                                                 {formatVND(item.unit_price)}
                                                             </td>

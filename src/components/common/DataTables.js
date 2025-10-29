@@ -5,7 +5,7 @@ import { useRef } from 'react';
 
 const DataTables = (props) => {
     console.log("DataTables props: ", props);
-   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, selectedRows: externalSelectedRows, filterHeader, hideSelected, hideSearch = false, isLoading = false, showSummary = false, customSummaryData = {} } = props;
+   const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, selectedRows: externalSelectedRows, filterHeader, hideSelected, hideSearch = false, isLoading = false, showSummary = false, customSummaryData = {}, tableHeight = '60vh' } = props;
    const [selectedRows, setSelectedRows] = useState([]);
    const isFirstRender = useRef(true);
    
@@ -462,11 +462,11 @@ const DataTables = (props) => {
                         </div>
                     )}
                 </div>
-                {/* Bọc bảng trong div để hỗ trợ scroll ngang */}
-                <div style={{ width: '100%', overflowX: 'auto' }}>
+                {/* Vùng scroll cho thân bảng: header cố định (sticky) */}
+                <div style={{ width: '100%', overflow: 'auto', maxHeight: tableHeight, borderTop: '#dee2e6 1px solid' }}>
                     <table className="table table-bordered table-hover " id="datatablesSimple" style={{minWidth: tableMinWidth, width: '100%'}} cellSpacing="0">
                         {data.length > 0 && (
-                            <thead className="custom-table" style={{ backgroundColor: '#f8f9fa' }}>
+                            <thead className="custom-table" style={{ backgroundColor: '#f8f9fa', position: 'sticky', top: 0, zIndex: 3, borderTop: '#dee2e6 1px solid' }}>
                                 {renderFilterHeader()}
                                 <tr>
                                     {!hideSelected && (

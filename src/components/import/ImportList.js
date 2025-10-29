@@ -51,7 +51,7 @@ const ImportList = () => {
         branches: [],
         users: [],
         creationTime: { from: null, to: null },
-        invoiceStatus: 'draft'
+        invoiceStatus: 'all'
     });
     const [isFilterVisible, setIsFilterVisible] = useState(true);
     const [isPulsing, setIsPulsing] = useState(false);
@@ -109,7 +109,7 @@ const ImportList = () => {
         }
         
         // Lọc trạng thái
-        if (filterValues.invoiceStatus) {
+        if (filterValues.invoiceStatus && filterValues.invoiceStatus !== 'all') {
             query += `&status=${filterValues.invoiceStatus}`;
         }
         
@@ -155,7 +155,9 @@ const ImportList = () => {
             bValue = b.status;
         }
 
-        if (sortField === 'total_amount' || sortField === 'amount_owed' || sortField === 'paid_amount') {
+        if (sortField === 'total_amount' || sortField === 'amount_owed' || sortField === 'paid_amount' || 
+            sortField === 'subtotal_amount' || sortField === 'discount_amount' || 
+            sortField === 'total_quantity' || sortField === 'total_items') {
             aValue = Number(aValue);
             bValue = Number(bValue);
         } else {
@@ -167,6 +169,29 @@ const ImportList = () => {
         if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
         return 0;
     });
+
+    // Tính tổng cho các cột
+    const calculateTotals = () => {
+        return sortedInvoices.reduce((totals, invoice) => {
+            return {
+                totalQuantity: totals.totalQuantity + (Number(invoice.total_quantity) || 0),
+                totalItems: totals.totalItems + (Number(invoice.total_items) || 0),
+                totalSubtotalAmount: totals.totalSubtotalAmount + (Number(invoice.subtotal_amount) || 0),
+                totalDiscountAmount: totals.totalDiscountAmount + (Number(invoice.discount_amount) || 0),
+                totalAmount: totals.totalAmount + (Number(invoice.total_amount) || 0),
+                totalPaidAmount: totals.totalPaidAmount + (Number(invoice.paid_amount) || 0)
+            };
+        }, {
+            totalQuantity: 0,
+            totalItems: 0,
+            totalSubtotalAmount: 0,
+            totalDiscountAmount: 0,
+            totalAmount: 0,
+            totalPaidAmount: 0
+        });
+    };
+
+    const totals = calculateTotals();
 
     // Handle sort
     const handleSort = (field) => {
@@ -197,7 +222,7 @@ const ImportList = () => {
             element: row => (
                 <span className="text-primary fw-bold">{row?.invoice_code || '-'}</span>
             ),
-            width: "12%"
+            width: "10%"
         },
         { 
             title: () => (
@@ -210,7 +235,7 @@ const ImportList = () => {
                 // Parse và cộng thêm 7 giờ
                 return moment(row.invoice_date).add(7, 'hours').format('DD/MM/YYYY HH:mm');
             },
-            width: "15%"
+            width: "12%"
         },
         { 
             title: () => (
@@ -219,7 +244,7 @@ const ImportList = () => {
                 </span>
             ),
             element: row => row?.supplier?.code || '-',
-            width: "12%"
+            width: "8%"
         },
         { 
             title: () => (
@@ -228,16 +253,76 @@ const ImportList = () => {
                 </span>
             ),
             element: row => row?.supplier?.name || '-',
-            width: "15%"
+            width: "12%"
+        },
+        { 
+            title: () => (
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('branch')}>
+                    Chi nhánh {renderSortIcon('branch')}
+                </span>
+            ),
+            element: row => row?.branch?.name || '-',
+            width: "10%"
+        },
+        { 
+            title: () => (
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('total_quantity')}>
+                    Tổng số lượng {renderSortIcon('total_quantity')}
+                </span>
+            ),
+            element: row => row?.total_quantity ? `${row.total_quantity}` : '0',
+            width: "8%",
+            summarizable: true
+        },
+        { 
+            title: () => (
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('total_items')}>
+                    Số mặt hàng {renderSortIcon('total_items')}
+                </span>
+            ),
+            element: row => row?.total_items ? `${row.total_items}` : '0',
+            width: "8%",
+            summarizable: true
+        },
+        { 
+            title: () => (
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('subtotal_amount')}>
+                    Tổng tiền hàng {renderSortIcon('subtotal_amount')}
+                </span>
+            ),
+            element: row => row?.subtotal_amount ? `${formatVND(parseInt(row.subtotal_amount))} ₫` : '0 ₫',
+            width: "10%",
+            summarizable: true
+        },
+        { 
+            title: () => (
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('discount_amount')}>
+                    Giảm giá {renderSortIcon('discount_amount')}
+                </span>
+            ),
+            element: row => row?.discount_amount ? `${formatVND(parseInt(row.discount_amount))} ₫` : '0 ₫',
+            width: "8%",
+            summarizable: true
         },
         { 
             title: () => (
                 <span style={{cursor: 'pointer'}} onClick={() => handleSort('total_amount')}>
-                    Giá trị {renderSortIcon('total_amount')}
+                    Cần trả NCC {renderSortIcon('total_amount')}
                 </span>
             ),
             element: row => row?.total_amount ? `${formatVND(parseInt(row.total_amount))} ₫` : '0 ₫',
-            width: "12%"
+            width: "10%",
+            summarizable: true
+        },
+        { 
+            title: () => (
+                <span style={{cursor: 'pointer'}} onClick={() => handleSort('paid_amount')}>
+                    Tiền trả NCC {renderSortIcon('paid_amount')}
+                </span>
+            ),
+            element: row => row?.paid_amount ? `${formatVND(parseInt(row.paid_amount))} ₫` : '0 ₫',
+            width: "10%",
+            summarizable: true
         },
         { 
             title: () => (
@@ -246,7 +331,8 @@ const ImportList = () => {
                 </span>
             ),
             element: row => row?.amount_owed ? `${formatVND(parseInt(row.amount_owed))} ₫` : '0 ₫',
-            width: "12%"
+            width: "10%",
+            summarizable: true
         },
         {
             title: "Trạng thái",
@@ -259,7 +345,7 @@ const ImportList = () => {
                 const status = statusMap[row?.status] || { label: row?.status || '-', class: 'bg-secondary' };
                 return <span className={`badge ${status.class}`}>{status.label}</span>;
             },
-            width: "12%"
+            width: "10%"
         },
         {
             title: "Hành động", 
@@ -285,7 +371,7 @@ const ImportList = () => {
                     )}
                 </div>
             ),
-            width: "12%"
+            width: "8%"
         }
     ];
 
@@ -326,6 +412,7 @@ const ImportList = () => {
                 setShowModal(false);
                 if (response.data && response.data.success) {
                     toast.success(response.data.message || "Xóa phiếu nhập hàng thành công!", toastSuccessConfig);
+                    setSelectedRows([]);
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa phiếu nhập hàng thất bại", toastErrorConfig);
@@ -357,6 +444,7 @@ const ImportList = () => {
                 setShowModal(false);
                 if (response.data && response.data.success) {
                     toast.success(response.data.message || "Xóa phiếu nhập hàng thành công!", toastSuccessConfig);
+                    setSelectedRows([]);
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa phiếu nhập hàng thất bại", toastErrorConfig);
@@ -430,10 +518,13 @@ const ImportList = () => {
                                         label="Trạng thái"
                                         value={filterValues.invoiceStatus ? {
                                             value: filterValues.invoiceStatus,
-                                            label: filterValues.invoiceStatus === 'draft' ? 'Nháp' : filterValues.invoiceStatus === 'received' ? 'Đã nhập hàng' : 'Đã hủy'
+                                            label: filterValues.invoiceStatus === 'all' ? 'Nháp và đã nhập hàng' : 
+                                                   filterValues.invoiceStatus === 'draft' ? 'Nháp' : 
+                                                   filterValues.invoiceStatus === 'received' ? 'Đã nhập hàng' : 'Đã hủy'
                                         } : null}
-                                        onChange={(selected) => updateFilter('invoiceStatus', selected ? selected.value : 'draft')}
+                                        onChange={(selected) => updateFilter('invoiceStatus', selected ? selected.value : 'all')}
                                         options={[
+                                            { value: 'all', label: 'Nháp và đã nhập hàng' },
                                             { value: 'draft', label: 'Nháp' },
                                             { value: 'received', label: 'Đã nhập hàng' },
                                             { value: 'cancelled', label: 'Đã hủy' }
@@ -538,6 +629,7 @@ const ImportList = () => {
                                         selectedRows={selectedRows}
                                         onSelectedRows={selectedRows => setSelectedRows(selectedRows)}
                                         hideSearch={true}
+                                        showSummary={true}
                                     />
                                 </div>
                             </div>

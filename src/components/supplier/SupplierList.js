@@ -43,7 +43,7 @@ const SupplierList = () => {
     const [filterValues, setFilterValues] = useState({
         group: 'all',
         creationTime: { from: null, to: null },
-        status: 'all',
+        status: 'active',
         balanceDue: 'all'
     });
     const [isFilterVisible, setIsFilterVisible] = useState(true);
@@ -231,6 +231,14 @@ const SupplierList = () => {
             width: "8%"
         },
         {
+            title: "Người tạo",
+            element: row => {
+                if (!row || !row.user) return <span>-</span>;
+                return <span>{row.user.name || '-'}</span>;
+            },
+            width: "10%"
+        },
+        {
             title: "Trạng thái",
             element: row => {
                 if (!row) return <span className="badge bg-secondary">Không xác định</span>;
@@ -264,7 +272,7 @@ const SupplierList = () => {
                             className="btn btn-danger btn-sm px-2 py-1"
                             onClick={() => handleDelete(row.id)}
                             title="Xóa"
-                        >
+                        >a
                             <i className="fas fa-trash"></i>
                         </button>
                     </div>
@@ -294,6 +302,7 @@ const SupplierList = () => {
                 setShowModal(false);
                 if (response.data && response.data.success) {
                     toast.success(response.data.message || "Xóa nhà cung cấp thành công!", toastSuccessConfig);
+                    setSelectedRows([]);
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa nhà cung cấp thất bại", toastErrorConfig);
@@ -313,7 +322,7 @@ const SupplierList = () => {
                 setShowModal(false);
                 if (response.data && response.data.success) {
                     toast.success(response.data.message || "Xóa nhà cung cấp thành công!", toastSuccessConfig);
-                    setSelectedRows([]); // Clear selected rows after successful deletion
+                    setSelectedRows([]);
                     setRefresh(Date.now());
                 } else {
                     toast.error(response.data.message || "Xóa nhà cung cấp thất bại", toastErrorConfig);

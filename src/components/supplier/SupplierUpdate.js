@@ -46,6 +46,7 @@ const SupplierUpdate = () => {
                 dispatch(actions.controlLoading(true));
                 const response = await requestApi(`api/admin/suppliers/${params.id}`, 'GET');
                 const data = response.data.data;
+                setValue('code', data.code);
                 setValue('name', data.name);
                 setValue('group_id', data.group_id);
                 setValue('phone_number', data.phone_number);
@@ -119,7 +120,22 @@ const SupplierUpdate = () => {
                             <div className='mb-3 row'>
                                 <form onSubmit={handleSubmit(handleSubmitForm)}>
                                     <div className="row mb-3">
-                                        <div className="col-md-12">
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputCode" className="form-label fw-semibold">
+                                                    Mã nhà cung cấp
+                                                </label>
+                                                <input
+                                                    className="form-control"
+                                                    id="inputCode"
+                                                    {...register('code')}
+                                                    placeholder="Mã nhà cung cấp tự động"
+                                                    readOnly
+                                                    style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
                                             <div className="mb-3">
                                                 <label htmlFor="inputName" className="form-label fw-semibold">
                                                     Tên nhà cung cấp <span style={{color: 'red'}}>*</span>

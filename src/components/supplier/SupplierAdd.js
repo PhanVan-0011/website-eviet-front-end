@@ -94,15 +94,14 @@ const SupplierAdd = () => {
                                         <div className="col-md-6">
                                             <div className="mb-3">
                                                 <label htmlFor="inputCode" className="form-label fw-semibold">
-                                                    Mã nhà cung cấp <span style={{color: 'red'}}>*</span>
+                                                    Mã nhà cung cấp
                                                 </label>
                                                 <input
                                                     className="form-control"
                                                     id="inputCode"
-                                                    {...register('code', { required: 'Mã nhà cung cấp là bắt buộc' })}
-                                                    placeholder="Nhập mã nhà cung cấp"
+                                                    {...register('code')}
+                                                    placeholder="Mã nhà cung cấp tự động"
                                                 />
-                                                {errors.code && <div className="text-danger mt-1">{errors.code.message}</div>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
