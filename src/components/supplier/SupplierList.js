@@ -271,8 +271,7 @@ const SupplierList = () => {
                         <button
                             className="btn btn-danger btn-sm px-2 py-1"
                             onClick={() => handleDelete(row.id)}
-                            title="Xóa"
-                        >a
+                            title="Xóa">
                             <i className="fas fa-trash"></i>
                         </button>
                     </div>
