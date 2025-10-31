@@ -32,7 +32,7 @@ const ProductAdd = () => {
     const [stockQuantity, setStockQuantity] = useState(0);
     
     // State cho tab Chi nhánh
-    const [applyToAllBranches, setApplyToAllBranches] = useState(false);
+    const [applyToAllBranches, setApplyToAllBranches] = useState(true);
     const [selectedBranches, setSelectedBranches] = useState([]);
     const [branchPrices, setBranchPrices] = useState([]);
     

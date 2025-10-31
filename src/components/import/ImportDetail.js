@@ -215,9 +215,10 @@ const ImportDetail = () => {
                                     </div>
 
                                     {/* Bảng sản phẩm */}
-                                    <div className="mb-4">
-                                        <div className="table-responsive">
-                                            <table className="table table-bordered">
+                                    <div className="mb-4" style={{ display: 'flex', flexDirection: 'column' }}>
+                                        {/* Header cố định */}
+                                        <div className="table-responsive" style={{ overflowY: 'visible', overflowX: 'auto' }}>
+                                            <table className="table table-bordered mb-0">
                                                 <thead className="table-light">
                                                     <tr>
                                                         <th>Mã hàng</th>
@@ -227,6 +228,11 @@ const ImportDetail = () => {
                                                         <th className="text-end">Thành tiền</th>
                                                     </tr>
                                                 </thead>
+                                            </table>
+                                        </div>
+                                        {/* Nội dung cuộn - tự động tăng chiều cao theo item */}
+                                        <div className="table-responsive" style={{ overflowY: invoice.details && invoice.details.length > 10 ? 'auto' : 'visible', overflowX: 'auto', maxHeight: invoice.details && invoice.details.length > 10 ? '500px' : 'auto' }}>
+                                            <table className="table table-bordered mb-0">
                                                 <tbody>
                                                     {invoice.details && invoice.details.map((item, index) => (
                                                         <tr key={index}>

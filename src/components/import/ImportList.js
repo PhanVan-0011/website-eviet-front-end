@@ -356,17 +356,24 @@ const ImportList = () => {
                         <i className="fas fa-eye"></i>
                     </Link>
                     
-                    {/* Chỉ sửa khi draft */}
-                    {row?.status === 'draft' && (
+                    {/* Sửa - hiển thị cả draft và received */}
+                    {(row?.status === 'draft' || row?.status === 'received') && (
                         <Link className="btn btn-primary btn-sm" to={`/import/edit/${row.id}`} title="Chỉnh sửa">
                             <i className="fas fa-edit"></i>
                         </Link>
                     )}
                     
-                    {/* Chỉ xóa khi draft */}
-                    {row?.status === 'draft' && (
+                    {/* Xóa - hiển thị cả draft và received */}
+                    {(row?.status === 'draft' || row?.status === 'received') && (
                         <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)} title="Xóa">
                             <i className="fas fa-trash"></i>
+                        </button>
+                    )}
+
+                    {/* Hủy phiếu nếu đã nhập hàng */}
+                    {row?.status === 'received' && (
+                        <button className="btn btn-warning btn-sm" onClick={() => handleCancel(row.id)} title="Hủy phiếu">
+                            <i className="fas fa-times-circle"></i>
                         </button>
                     )}
                 </div>
@@ -459,6 +466,27 @@ const ImportList = () => {
                 }
             });
         }
+    }
+
+    // Handle Cancel Invoice
+    const handleCancel = (id) => {
+        dispatch(actions.controlLoading(true));
+        requestApi(`api/admin/purchase-invoices/${id}/cancel`, 'PUT', {}).then((response) => {
+            dispatch(actions.controlLoading(false));
+            if (response.data && response.data.success) {
+                toast.success(response.data.message || "Hủy phiếu nhập hàng thành công!", toastSuccessConfig);
+                setRefresh(Date.now());
+            } else {
+                toast.error(response.data.message || "Hủy phiếu nhập hàng thất bại", toastErrorConfig);
+            }
+        }).catch((e) => {
+            dispatch(actions.controlLoading(false));
+            if (e.response && e.response.data && e.response.data.message) {
+                toast.error(e.response.data.message, toastErrorConfig);
+            } else {
+                toast.error("Server error", toastErrorConfig);
+            }
+        });
     }
 
     return (

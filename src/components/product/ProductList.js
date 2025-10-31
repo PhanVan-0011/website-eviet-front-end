@@ -79,10 +79,11 @@ const UnitDropdown = ({ product, selectedUnitIndex, onUnitChange }) => {
                         top: '100%',
                         marginTop: '0.25rem',
                         minWidth: '150px',
-                        zIndex: 1000,
+                        zIndex: 9999,
                         border: '1px solid #ddd',
                         borderRadius: '0.25rem',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                        backgroundColor: 'white'
                     }}
                 >
                     <button

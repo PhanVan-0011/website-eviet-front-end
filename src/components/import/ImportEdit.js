@@ -438,6 +438,19 @@ const ImportEdit = () => {
     if (selectedOption && selectedOption.data) {
       const product = selectedOption.data;
       
+      // ✅ Kiểm tra xem sản phẩm này đã tồn tại chưa (cùng product_id và unit_name)
+      const existingItem = importItems.find(
+        item => item.product_id === product.product_id && item.unit === product.unit_name
+      );
+      
+      if (existingItem) {
+        // Nếu đã tồn tại với cùng unit → tăng số lượng lên 1
+        handleItemChange(existingItem.id, 'quantity', existingItem.quantity + 1);
+         
+        setSelectedProduct(null);
+        return;
+      }
+      
       const allUnitsOfProduct = products.filter(p => p.product_id === product.product_id);
       
       // Parse cost_price an toàn (loại bỏ dấu . nếu có)
@@ -471,6 +484,22 @@ const ImportEdit = () => {
       if (item.id === itemId && item.availableUnits) {
         const newUnit = item.availableUnits[newUnitIndex];
         if (newUnit) {
+          // ✅ Kiểm tra xem unit mới này có bị trùng với sản phẩm khác không
+          const isDuplicateUnit = importItems.some(
+            existingItem => 
+              existingItem.id !== itemId && 
+              existingItem.product_id === item.product_id && 
+              existingItem.unit === newUnit.unit_name
+          );
+          
+          if (isDuplicateUnit) {
+            toast.error(
+              `Sản phẩm này đã tồn tại với đơn vị "${newUnit.unit_name}". Không được phép đổi sang unit này!`,
+              toastErrorConfig
+            );
+            return item; // Không thay đổi gì
+          }
+          
           // Parse cost_price an toàn (loại bỏ dấu . nếu có)
           const newUnitPrice = typeof newUnit.cost_price === 'string'
             ? parseFloat(newUnit.cost_price.replace(/\./g, ''))
@@ -646,72 +675,77 @@ const ImportEdit = () => {
   }
 
   return (
-    <div className="container-fluid mt-4">
-      {/* Header */}
-      <div className="d-flex justify-content-between align-items-start mb-4 gap-4">
-        {/* Phần bên trái - Tìm kiếm với border (70%) */}
-        <div style={{ width: '70%' }} className="border rounded p-3">
-          <div className="d-flex align-items-center mb-3">
-            <button
-              className="btn btn-outline-secondary me-3"
-              onClick={() => navigate('/import')}
-            >
-              <i className="fas fa-arrow-left"></i>
-            </button>
-            <h4 className="mb-0 me-4">Cập nhật phiếu nhập</h4>
-            
-            {/* Thanh tìm kiếm sản phẩm với react-select */}
-            <div className="position-relative" style={{ width: '400px' }}>
-              <Select
-                value={selectedProduct}
-                onChange={handleProductSelect}
-                onInputChange={handleSearchInputChange}
-                options={productOptions}
-                components={{
-                  Option: CustomOption,
-                  SingleValue: CustomSingleValue
-                }}
-                styles={{
-                  ...selectStyles,
-                  control: (provided) => ({
-                    ...provided,
-                    minHeight: '38px',
-                    borderColor: '#ced4da',
-                    paddingRight: '40px',
-                    '&:hover': {
-                      borderColor: '#86b7fe'
-                    }
-                  })
-                }}
-                placeholder="Tìm hàng hóa theo mã hoặc tên"
-                isClearable
-                isSearchable
-                className="w-100"
-              />
-              <Link 
-                to="/product/add" 
-                className="btn btn-outline-primary btn-sm position-absolute"
-                title="Thêm sản phẩm mới"
-                style={{ 
-                  right: '8px', 
-                  top: '50%', 
-                  transform: 'translateY(-50%)',
-                  zIndex: 10,
-                  padding: '2px 6px'
-                }}
-              >
-                <i className="fas fa-plus"></i>
-              </Link>
-            </div>
-          </div>
+    <div className="container-fluid mt-4" style={{ height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column', paddingBottom: 0, overflow: 'hidden' }}>
+      {/* Nút quay lại + Thanh tìm kiếm cùng 1 hàng */}
+      <div className="d-flex align-items-center mb-3 gap-2">
+        <button
+          className="btn btn-outline-secondary"
+          onClick={() => navigate('/import')}
+        >
+          <i className="fas fa-arrow-left"></i>
+        </button>
+        <h4 className="mb-0" style={{ minWidth: '160px' }}>Cập nhật phiếu nhập</h4>
+        
+        {/* Thanh tìm kiếm sản phẩm với react-select */}
+        <div className="position-relative" style={{ width: '400px', zIndex: 100 }}>
+          <Select
+            value={selectedProduct}
+            onChange={handleProductSelect}
+            onInputChange={handleSearchInputChange}
+            options={productOptions}
+            components={{
+              Option: CustomOption,
+              SingleValue: CustomSingleValue
+            }}
+            styles={{
+              ...selectStyles,
+              control: (provided) => ({
+                ...provided,
+                minHeight: '38px',
+                borderColor: '#ced4da',
+                paddingRight: '40px',
+                '&:hover': {
+                  borderColor: '#86b7fe'
+                }
+              }),
+              menu: (provided) => ({
+                ...provided,
+                zIndex: 9999
+              })
+            }}
+            placeholder="Tìm hàng hóa theo mã hoặc tên"
+            isClearable
+            isSearchable
+            className="w-100"
+          />
+          <Link 
+            to="/product/add" 
+            className="btn btn-outline-primary btn-sm position-absolute"
+            title="Thêm sản phẩm mới"
+            style={{ 
+              right: '8px', 
+              top: '50%', 
+              transform: 'translateY(-50%)',
+              zIndex: 10,
+              padding: '2px 6px'
+            }}
+          >
+            <i className="fas fa-plus"></i>
+          </Link>
+        </div>
+      </div>
 
+      {/* Main Content - 2 khối song song */}
+      <div className="d-flex gap-3 flex-grow-1" style={{ minHeight: 0, paddingBottom: '1rem', overflow: 'hidden' }}>
+        {/* Phần bên trái - Bảng (60%) */}
+        <div style={{ width: '60%', display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
           {/* Bảng sản phẩm */}
-          <div className="card shadow-sm">
+          <div className="card shadow-sm" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
             <div className="card-header bg-light">
               <h6 className="mb-0 fw-bold">Danh sách sản phẩm nhập</h6>
             </div>
-            <div className="card-body p-0">
-              <div className="table-responsive">
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+              <div className="table-responsive" style={{ overflowY: 'visible', overflowX: 'auto' }}>
                 <table className="table table-hover mb-0">
                   <thead className="table-light">
                     <tr>
@@ -725,118 +759,124 @@ const ImportEdit = () => {
                       <th width="13%">Thành tiền</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {importItems.map((item, index) => (
-                      <tr key={item.id}>
-                        <td className="text-center align-middle">
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleRemoveItem(item.id)}
-                            title="Xóa sản phẩm"
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>
-                        </td>
-                        <td className="text-center align-middle">
-                          {index + 1}
-                        </td>
-                        <td className="align-middle">
-                          <input
-                            type="text"
-                            className="form-control form-control-sm"
-                            value={item.code}
-                            readOnly
-                            placeholder="Mã sản phẩm"
-                            style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
-                          />
-                        </td>
-                        <td className="align-middle">
-                          <input
-                            type="text"
-                            className="form-control form-control-sm"
-                            value={item.name}
-                            readOnly
-                            placeholder="Tên sản phẩm"
-                            style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
-                          />
-                        </td>
-                        <td className="align-middle">
-                          {item.availableUnits && item.availableUnits.length > 0 ? (
-                            <select
-                              className="form-select form-select-sm"
-                              value={item.selectedUnitIndex}
-                              onChange={(e) => handleUnitChange(item.id, parseInt(e.target.value))}
+                </table>
+              </div>
+              <div className="card-body p-0" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+                <div className="table-responsive">
+                  <table className="table table-hover mb-0">
+                    <tbody>
+                      {importItems.map((item, index) => (
+                        <tr key={item.id}>
+                          <td className="text-center align-middle">
+                            <button
+                              className="btn btn-sm btn-outline-danger"
+                              onClick={() => handleRemoveItem(item.id)}
+                              title="Xóa sản phẩm"
                             >
-                              {item.availableUnits.map((unit, index) => (
-                                <option key={index} value={index}>
-                                  {unit.unit_name}
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </td>
+                          <td className="text-center align-middle">
+                            {index + 1}
+                          </td>
+                          <td className="align-middle">
                             <input
                               type="text"
                               className="form-control form-control-sm"
-                              value={item.unit}
+                              value={item.code}
                               readOnly
-                              placeholder="ĐVT"
+                              placeholder="Mã sản phẩm"
                               style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
                             />
-                          )}
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            className="form-control form-control-sm text-center"
-                            value={item.quantity === 0 ? '' : item.quantity}
-                            onChange={(e) => {
-                              const val = parseFloat(e.target.value);
-                              if (isNaN(val) || val <= 0) {
-                                handleItemChange(item.id, 'quantity', '');
-                              } else {
-                                handleItemChange(item.id, 'quantity', val);
-                              }
-                            }}
-                            placeholder="0"
-                            min="0"
-                            step="1"
-                          />
-                        </td>
-                        <td>
-                          <div className="input-group input-group-sm">
+                          </td>
+                          <td className="align-middle">
                             <input
                               type="text"
-                              className="form-control form-control-sm text-end"
-                              value={item.unit_price === 0 || item.unit_price === '' ? '' : formatVND(item.unit_price)}
+                              className="form-control form-control-sm"
+                              value={item.name}
+                              readOnly
+                              placeholder="Tên sản phẩm"
+                              style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                            />
+                          </td>
+                          <td className="align-middle">
+                            {item.availableUnits && item.availableUnits.length > 0 ? (
+                              <select
+                                className="form-select form-select-sm"
+                                value={item.selectedUnitIndex}
+                                onChange={(e) => handleUnitChange(item.id, parseInt(e.target.value))}
+                              >
+                                {item.availableUnits.map((unit, index) => (
+                                  <option key={index} value={index}>
+                                    {unit.unit_name}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                value={item.unit}
+                                readOnly
+                                placeholder="ĐVT"
+                                style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                              />
+                            )}
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              className="form-control form-control-sm text-center"
+                              value={item.quantity === 0 ? '' : item.quantity}
                               onChange={(e) => {
-                                const formatted = formatVND(e.target.value);
-                                const rawValue = Number(formatted.replace(/\./g, '')) || 0;
-                                handleItemChange(item.id, 'unit_price', rawValue);
+                                const val = parseFloat(e.target.value);
+                                if (isNaN(val) || val <= 0) {
+                                  handleItemChange(item.id, 'quantity', '');
+                                } else {
+                                  handleItemChange(item.id, 'quantity', val);
+                                }
                               }}
                               placeholder="0"
+                              min="0"
+                              step="1"
                             />
-                            <span className="input-group-text">₫</span>
-                          </div>
-                        </td>
-                        <td className="text-end align-middle">
-                          <span className="fw-bold text-primary">{formatVNDDisplay(item.total)}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          </td>
+                          <td>
+                            <div className="input-group input-group-sm">
+                              <input
+                                type="text"
+                                className="form-control form-control-sm text-end"
+                                value={item.unit_price === 0 || item.unit_price === '' ? '' : formatVND(item.unit_price)}
+                                onChange={(e) => {
+                                  const formatted = formatVND(e.target.value);
+                                  const rawValue = Number(formatted.replace(/\./g, '')) || 0;
+                                  handleItemChange(item.id, 'unit_price', rawValue);
+                                }}
+                                placeholder="0"
+                              />
+                              <span className="input-group-text">₫</span>
+                            </div>
+                          </td>
+                          <td className="text-end align-middle">
+                            <span className="fw-bold text-primary">{formatVNDDisplay(item.total)}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Phần bên phải - Thông tin phiếu nhập (30%) */}
-        <div style={{ width: '30%' }}>
-          <div className="card shadow-sm">
+        {/* Phần bên phải - Thông tin phiếu nhập (40%) */}
+        <div style={{ width: '40%', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <div className="card shadow-sm" style={{ display: 'flex', flexDirection: 'column', minHeight: 0, height: '100%' }}>
             <div className="card-header bg-light">
               <h6 className="mb-0 fw-bold">Thông tin phiếu nhập</h6>
             </div>
-            <div className="card-body">
+            <div className="card-body" style={{ flex: 1, overflowY: 'auto', minHeight: 0, paddingBottom: 0 }}>
               {/* Người nhập và Ngày nhập (readonly) */}
               <div className="row mb-3">
                 <div className="col-6">
@@ -1013,27 +1053,27 @@ const ImportEdit = () => {
                   />
                 </div>
               </div>
+            </div>
 
-
-      {/* Nút hành động */}
-              <div className="d-flex gap-2">
-        <button
-                  className="btn btn-primary flex-fill"
-          onClick={() => handleUpdateInvoice('draft')}
-          disabled={isLoading}
-        >
-          <i className="fas fa-save me-1"></i>
-          Lưu tạm
-        </button>
-        <button
-                  className="btn btn-success flex-fill"
-          onClick={() => handleUpdateInvoice('received')}
-          disabled={isLoading}
-        >
-          <i className="fas fa-check me-1"></i>
-          Hoàn thành
-        </button>
-              </div>
+            {/* Nút hành động - Cố định ở dưới */}
+            <div className="d-flex gap-2" style={{ padding: '1rem', borderTop: '1px solid #dee2e6', flexShrink: 0, backgroundColor: 'white' }}>
+              <button
+                className="btn btn-primary flex-fill"
+                onClick={() => handleUpdateInvoice('draft')}
+                disabled={isLoading}
+                style={{ display: formData.status === 'received' ? 'none' : 'block' }}
+              >
+                <i className="fas fa-save me-1"></i>
+                Lưu tạm
+              </button>
+              <button
+                className="btn btn-success flex-fill"
+                onClick={() => handleUpdateInvoice('received')}
+                disabled={isLoading}
+              >
+                <i className="fas fa-check me-1"></i>
+                Hoàn thành
+              </button>
             </div>
           </div>
         </div>

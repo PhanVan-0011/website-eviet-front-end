@@ -37,10 +37,21 @@ const SupplierAdd = () => {
     const handleSubmitForm = async (data) => {
         setIsSubmitting(true);
         
-        // Thêm user_id (có thể lấy từ user hiện tại hoặc hardcode)
+        // Lấy user_id từ localStorage
+        const userData = localStorage.getItem('user');
+        const currentUser = userData ? JSON.parse(userData) : null;
+        const userId = currentUser?.id || null;
+        
+        if (!userId) {
+            toast.error('Không tìm thấy thông tin người dùng', toastErrorConfig);
+            setIsSubmitting(false);
+            return;
+        }
+        
+        // Thêm user_id thực tế
         const submitData = {
             ...data,
-            user_id: 37, // Hoặc lấy từ user hiện tại
+            user_id: userId,
             is_active: data.is_active === 'true' // Convert string to boolean
         };
         
