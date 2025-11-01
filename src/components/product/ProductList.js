@@ -137,6 +137,62 @@ const formatVND = (value) => {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
+// Hàm format số với phần thập phân
+const formatNumberWithDecimal = (value) => {
+    if (typeof value !== 'number' && typeof value !== 'string') return '';
+    
+    const num = parseFloat(value);
+    if (isNaN(num)) return '';
+    
+    // Làm tròn 3 chữ số thập phân
+    const rounded = Math.round(num * 1000) / 1000;
+    
+    // Tách phần nguyên và phần thập phân
+    const parts = rounded.toString().split('.');
+    const intPart = parts[0];
+    const decPart = parts[1] || '';
+    
+    // Format phần nguyên với dấu chấm phân cách hàng nghìn
+    const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    
+    // Nếu có phần thập phân, thêm dấu phẩy (không pad zeros, hiển thị tối đa 3 chữ số)
+    if (decPart) {
+        return formattedInt + ',' + decPart;
+    }
+    
+    return formattedInt;
+};
+
+// Helper function để tính giá vốn và tồn kho theo đơn vị
+const calculateUnitMetrics = (product, selectedUnitIndex) => {
+    // Nếu là đơn vị cơ bản
+    if (selectedUnitIndex === 0) {
+        return {
+            costPrice: product.cost_price,
+            stockQuantity: product.total_stock_quantity
+        };
+    }
+
+    // Nếu là đơn vị chuyển đổi
+    const unitConversion = product.unit_conversions?.[selectedUnitIndex - 1];
+    if (unitConversion && unitConversion.conversion_factor) {
+        const factor = parseFloat(unitConversion.conversion_factor) || 1;
+        
+        return {
+            // Giá vốn = giá vốn cơ bản × hệ số quy đổi, làm tròn 3 số thập phân
+            costPrice: parseFloat((parseFloat(product.cost_price) * factor).toFixed(3)),
+            // Tồn kho = tồn kho cơ bản ÷ hệ số quy đổi, làm tròn 3 số thập phân
+            stockQuantity: parseFloat((parseFloat(product.total_stock_quantity) / factor).toFixed(3))
+        };
+    }
+
+    // Fallback
+    return {
+        costPrice: product.cost_price,
+        stockQuantity: product.total_stock_quantity
+    };
+};
+
 const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [numOfPages, setNumOfPages] = useState(1);
@@ -183,6 +239,7 @@ const ProductList = () => {
     // Hàm lấy thông tin theo đơn vị được chọn
     const getUnitData = (product) => {
         const selectedUnitIndex = selectedUnits[product.id] || 0;
+        const metrics = calculateUnitMetrics(product, selectedUnitIndex);
         
         // Nếu chọn đơn vị cơ bản (index 0)
         if (selectedUnitIndex === 0) {
@@ -190,7 +247,9 @@ const ProductList = () => {
                 code: product.product_code,
                 storePrice: product.base_store_price,
                 appPrice: product.base_app_price,
-                unit: product.base_unit
+                unit: product.base_unit,
+                costPrice: metrics.costPrice,
+                stockQuantity: metrics.stockQuantity
             };
         }
         
@@ -201,7 +260,9 @@ const ProductList = () => {
                 code: unitConversion.unit_code || product.product_code,
                 storePrice: unitConversion.store_price,
                 appPrice: unitConversion.app_price,
-                unit: unitConversion.unit_name
+                unit: unitConversion.unit_name,
+                costPrice: metrics.costPrice,
+                stockQuantity: metrics.stockQuantity
             };
         }
         
@@ -210,7 +271,9 @@ const ProductList = () => {
             code: product.product_code,
             storePrice: product.base_store_price,
             appPrice: product.base_app_price,
-            unit: product.base_unit
+            unit: product.base_unit,
+            costPrice: metrics.costPrice,
+            stockQuantity: metrics.stockQuantity
         };
     };
 
@@ -500,7 +563,14 @@ const ProductList = () => {
                     Tồn kho{renderSortIcon('total_stock_quantity')}
                 </span>
             ),
-            element: row => row.total_stock_quantity,
+            element: row => {
+                const unitData = getUnitData(row);
+                return (
+                    <div>
+                        {formatNumberWithDecimal(unitData.stockQuantity)}
+                    </div>
+                );
+            },
             width: "7%",
             summarizable: true
         },
@@ -510,11 +580,14 @@ const ProductList = () => {
                     Giá vốn {renderSortIcon('cost_price')}
                 </span>
             ),
-            element: row => (
-                <div>
-                    {formatVND(parseInt(row.cost_price))} ₫
-                </div>
-            ),
+            element: row => {
+                const unitData = getUnitData(row);
+                return (
+                    <div>
+                        {formatVND(unitData.costPrice)} ₫
+                    </div>
+                );
+            },
             width: "11%"
         },
         {
