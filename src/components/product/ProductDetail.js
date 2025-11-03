@@ -220,6 +220,26 @@ const ProductDetail = () => {
                                     Thẻ kho
                                 </button>
                             </li>
+                            <li className="nav-item" role="presentation">
+                                <button
+                                    className={`nav-link ${activeTab === 'chi-nhanh' ? 'active' : ''}`}
+                                    type="button"
+                                    onClick={() => setActiveTab('chi-nhanh')}
+                                    style={{ 
+                                        color: activeTab === 'chi-nhanh' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'chi-nhanh' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'chi-nhanh' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'chi-nhanh' ? '500' : 'normal'
+                                    }}
+                                >
+                                    Chi nhánh áp dụng
+                                </button>
+                            </li>
                         </ul>
 
                         <div style={{ padding: '1.5rem' }}>
@@ -553,6 +573,50 @@ const ProductDetail = () => {
                                             <p className="mb-0">Sản phẩm chưa có giá đặc biệt nào</p>
                                         </div>
                                     )}
+                                </div>
+                            )}
+
+                            {/* Tab Chi nhánh áp dụng */}
+                            {activeTab === 'chi-nhanh' && (
+                                <div className="tab-pane fade show active">
+                                    <div style={{ 
+                                        height: '400px', 
+                                        overflowY: 'auto',
+                                        paddingRight: '10px',
+                                        border: '1px solid #dee2e6',
+                                        borderRadius: '6px',
+                                        padding: '15px'
+                                    }}>
+                                        {product.branches && product.branches.length > 0 ? (
+                                            <div className="table-responsive">
+                                                <table className="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Mã chi nhánh</th>
+                                                            <th>Tên chi nhánh</th>
+                                                            <th>Địa chỉ</th>
+                                                            <th>Số điện thoại</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {product.branches.map((branch, idx) => (
+                                                            <tr key={idx}>
+                                                                <td>{branch.code || branch.id}</td>
+                                                                <td>{branch.name}</td>
+                                                                <td>{branch.address || 'N/A'}</td>
+                                                                <td>{branch.phone_number || 'N/A'}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center text-muted py-5">
+                                                <i className="fas fa-store fa-3x mb-3 opacity-50"></i>
+                                                <p className="mb-0">Sản phẩm này áp dụng cho toàn bộ hệ thống</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>

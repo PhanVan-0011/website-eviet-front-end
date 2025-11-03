@@ -5,12 +5,23 @@ import { formatDate } from '../../tools/formatData';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import { toast } from 'react-toastify';
-import moment from 'moment';
 import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import { cleanHtml, oembedToIframe } from '../../helpers/formatData';
 import { formatVNDWithUnit } from '../../helpers/formatMoney';
+import moment from 'moment';
+
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
+
+// Component hiển thị từng field thông tin
+const InfoItem = ({ label, value, isDanger = false }) => (
+    <div className="col-md-3 mb-3">
+        <div className="text-muted small mb-1">{label}</div>
+        <div className={`fw-semibold border-bottom pb-2 ${isDanger ? 'text-danger' : ''}`}>
+            {value ?? 'Chưa có'}
+        </div>
+    </div>
+);
 
 const ComboDetail = () => {
     const { id } = useParams();
@@ -20,23 +31,15 @@ const ComboDetail = () => {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [modalImg, setModalImg] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [activeTab, setActiveTab] = useState('thong-tin');
 
     useEffect(() => {
         setLoading(true);
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/combos/${id}`, 'GET')
             .then(res => {
-                // Xử lý dữ liệu trả về cho phù hợp
-                const data = res.data.data;
-                // Lấy ảnh chính
-                let mainImage = '';
-                if (data.image_urls && data.image_urls.length > 0) {
-                    mainImage = data.image_urls[0].main_url;
-                }
-                setCombo({
-                    ...data,
-                    mainImage,
-                });
+                setCombo(res.data.data);
                 setLoading(false);
                 dispatch(actions.controlLoading(false));
             })
@@ -48,20 +51,23 @@ const ComboDetail = () => {
     }, [id, dispatch]);
 
     // Hàm xóa combo
+    const handleOpenDeleteModal = () => {
+        setShowDeleteModal(true);
+    };
+
     const handleDelete = async () => {
-        if (window.confirm('Bạn có chắc chắn muốn xóa combo này?')) {
-            dispatch(actions.controlLoading(true));
-            try {
-                const res = await requestApi(`api/admin/combos/${id}`, 'DELETE');
-                dispatch(actions.controlLoading(false));
-                toast.success(res.data?.message || 'Xóa combo thành công!', toastSuccessConfig);
-                navigate('/combo');
-            } catch (e) {
-                dispatch(actions.controlLoading(false));
-                toast.error(
-                    e?.response?.data?.message || 'Xóa combo thất bại!', toastErrorConfig
-                );
-            }
+        setShowDeleteModal(false);
+        dispatch(actions.controlLoading(true));
+        try {
+            const res = await requestApi(`api/admin/combos/${id}`, 'DELETE');
+            dispatch(actions.controlLoading(false));
+            toast.success(res.data?.message || 'Xóa combo thành công!', toastSuccessConfig);
+            navigate('/combo');
+        } catch (e) {
+            dispatch(actions.controlLoading(false));
+            toast.error(
+                e?.response?.data?.message || 'Xóa combo thất bại!', toastErrorConfig
+            );
         }
     };
 
@@ -79,12 +85,13 @@ const ComboDetail = () => {
     if (loading) {
         return (
             <div className="container-fluid">
-                 <div className="d-flex justify-content-center align-items-center vh-100">
+                <div className="d-flex justify-content-center align-items-center vh-100">
                     {/* <span className="fs-5">Đang tải dữ liệu...</span> */}
                 </div>
-            </div> 
+            </div>
         );
     }
+
     if (!combo) {
         return (
             <div className="container-fluid px-4">
@@ -95,7 +102,7 @@ const ComboDetail = () => {
                         <li className="breadcrumb-item active">Chi tiết combo</li>
                     </ol>
                 </div>
-                <div className="d-flex flex-column justify-content-center align-items-center  bg-light" style={{ minHeight: '60vh' }}>
+                <div className="d-flex flex-column justify-content-center align-items-center bg-light" style={{ minHeight: '60vh' }}>
                     <img
                         src="https://cdn-icons-png.flaticon.com/512/6134/6134065.png"
                         alt="Không tìm thấy combo"
@@ -129,46 +136,125 @@ const ComboDetail = () => {
                         <li className="breadcrumb-item active">Chi tiết</li>
                     </ol>
 
-                    <div className="row g-3">
-                        {/* Thông tin combo & hình ảnh */}
-                        <div className="col-lg-4">
-                            <div className="card shadow-sm border-0">
-                                <div className="card-header background-detail py-2">
-                                    <h6 className="mb-0 fw-bold">
-                                        <i className="fas fa-cubes me-2"></i>Thông tin combo & hình ảnh
-                                    </h6>
-                                </div>
-                                <div className="card-body p-3">
-                                    {/* Hình ảnh combo */}
-                                    <div className="mb-3" style={{ height: '280px', display: 'flex', flexDirection: 'column' }}>
-                                        {combo.image_urls && combo.image_urls.length > 0 ? (
-                                            (() => {
-                                                const featuredImg = combo.image_urls.find(img => img.is_featured === 1);
-                                                const otherImgs = combo.image_urls.filter(img => img.is_featured !== 1);
-                                                return (
-                                                    <>
-                                                        {featuredImg ? (
-                                                            <>
-                                                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8, overflow: 'hidden' }}>
-                                                                    <img
-                                                                        key={featuredImg.id}
-                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + (featuredImg.main_url || featuredImg.thumb_url)}
-                                                                        alt={combo.name + '-featured'}
-                                                                        className="img-thumbnail"
-                                                                        style={{
-                                                                            objectFit: 'contain',
-                                                                            boxShadow: '0 0 8px #007bff33',
-                                                                            cursor: 'pointer',
-                                                                            maxWidth: '100%',
-                                                                            maxHeight: '100%',
-                                                                            borderRadius: 8,
-                                                                            background: '#f8f9fa',
-                                                                            border: '1px solid #dee2e6'
-                                                                        }}
-                                                                        title="Ảnh đại diện (bấm để xem lớn)"
-                                                                        onClick={() => handleImgClick(featuredImg)}
-                                                                    />
-                                                                </div>
+                    <div className="card border">
+                        {/* Tab Navigation */}
+                        <ul className="nav nav-tabs" id="comboDetailTabs" role="tablist" style={{borderBottom: '2px solid #dee2e6'}}>
+                            <li className="nav-item" role="presentation">
+                                <button
+                                    className={`nav-link ${activeTab === 'thong-tin' ? 'active' : ''}`}
+                                    type="button"
+                                    onClick={() => setActiveTab('thong-tin')}
+                                    style={{ 
+                                        color: activeTab === 'thong-tin' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'thong-tin' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'thong-tin' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'thong-tin' ? '500' : 'normal'
+                                    }}
+                                >
+                                    Thông tin
+                                </button>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <button
+                                    className={`nav-link ${activeTab === 'san-pham' ? 'active' : ''}`}
+                                    type="button"
+                                    onClick={() => setActiveTab('san-pham')}
+                                    style={{ 
+                                        color: activeTab === 'san-pham' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'san-pham' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'san-pham' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'san-pham' ? '500' : 'normal'
+                                    }}
+                                >
+                                    Sản phẩm trong combo
+                                </button>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <button
+                                    className={`nav-link ${activeTab === 'mo-ta' ? 'active' : ''}`}
+                                    type="button"
+                                    onClick={() => setActiveTab('mo-ta')}
+                                    style={{ 
+                                        color: activeTab === 'mo-ta' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'mo-ta' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'mo-ta' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'mo-ta' ? '500' : 'normal'
+                                    }}
+                                >
+                                    Mô tả chi tiết
+                                </button>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <button
+                                    className={`nav-link ${activeTab === 'chi-nhanh' ? 'active' : ''}`}
+                                    type="button"
+                                    onClick={() => setActiveTab('chi-nhanh')}
+                                    style={{ 
+                                        color: activeTab === 'chi-nhanh' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'chi-nhanh' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'chi-nhanh' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        padding: '0.5rem 1rem',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'chi-nhanh' ? '500' : 'normal'
+                                    }}
+                                >
+                                    Chi nhánh áp dụng
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div style={{ padding: '1.5rem' }}>
+                            {/* Tab Thông tin */}
+                            {activeTab === 'thong-tin' && (
+                                <div>
+                                    {/* Header: Hình ảnh + Thông tin combo */}
+                                    <div style={{display: 'flex', gap: '1.5rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #dee2e6'}}>
+                                        {/* Cột trái: Hình ảnh */}
+                                        <div style={{flex: '0 0 30%'}}>
+                                            <div style={{display: 'flex', gap: '0.75rem'}}>
+                                                {/* Hình ảnh chính */}
+                                                <div style={{flex: 1}}>
+                                                    {combo.image_urls && combo.image_urls.length > 0 ? (
+                                                    (() => {
+                                                            const featuredImg = combo.image_urls.find(img => img.is_featured === 1);
+                                                            const displayImg = featuredImg || combo.image_urls[0];
+                                                        return (
+                                                            <div style={{position: 'relative'}}>
+                                                                <img
+                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + (displayImg.main_url || displayImg.thumb_url)}
+                                                                    alt={combo.name}
+                                                                    className="img-thumbnail w-100"
+                                                                    style={{
+                                                                        objectFit: 'fill',
+                                                                        cursor: 'pointer',
+                                                                        borderRadius: 8,
+                                                                        background: '#f8f9fa',
+                                                                        border: '1px solid #dee2e6',
+                                                                        height: 350,
+                                                                        display: 'block'
+                                                                    }}
+                                                                    title="Bấm để xem lớn"
+                                                                    onClick={() => handleImgClick(displayImg)}
+                                                                />
+
                                                                 {/* Modal xem ảnh full */}
                                                                 {showModal && modalImg && (
                                                                     <Modal show={showModal} onHide={handleCloseModal} centered>
@@ -190,216 +276,255 @@ const ComboDetail = () => {
                                                                         </Modal.Body>
                                                                     </Modal>
                                                                 )}
-                                                            </>
-                                                        ) : null}
-                                                        {/* Các ảnh phụ */}
-                                                        {otherImgs.length > 0 && (
-                                                            <div className="d-flex flex-wrap gap-1 justify-content-center" style={{ maxHeight: 70, overflowY: 'auto', flexShrink: 0 }}>
-                                                                {otherImgs.map((img, idx) => (
-                                                                    <img
-                                                                        key={img.id}
-                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + (img.main_url || img.thumb_url)}
-                                                                        alt={combo.name + '-' + idx}
-                                                                        style={{
-                                                                            width: 45,
-                                                                            height: 45,
-                                                                            objectFit: 'cover',
-                                                                            cursor: 'pointer',
-                                                                            borderRadius: 6,
-                                                                            background: '#f8f9fa',
-                                                                            border: '1px solid #dee2e6',
-                                                                            flexShrink: 0
-                                                                        }}
-                                                                        className="img-thumbnail"
-                                                                        title="Ảnh combo (bấm để xem lớn)"
-                                                                        onClick={() => handleImgClick(img)}
-                                                                    />
-                                                                ))}
                                                             </div>
-                                                        )}
-                                                    </>
-                                                );
-                                            })()
-                                        ) : (
-                                            <div
-                                                style={{
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    borderRadius: 8,
-                                                    background: '#f8f9fa',
-                                                    border: '1px solid #dee2e6',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}
-                                            >
-                                                <i className="fas fa-image" style={{ fontSize: 60, color: '#adb5bd' }}></i>
+                                                        );
+                                                    })()
+                                                ) : (
+                                                    <div
+                                                        style={{
+                                                            width: '100%',
+                                                            height: 350,
+                                                            borderRadius: 8,
+                                                            background: '#f8f9fa',
+                                                            border: '1px solid #dee2e6',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center'
+                                                        }}
+                                                    >
+                                                        <i className="fas fa-image" style={{ fontSize: 60, color: '#adb5bd' }}></i>
+                                                    </div>
+                                                )}
+                                                </div>
+
+                                                {/* Ảnh phụ nhỏ bên phải */}
+                                                {combo.image_urls && combo.image_urls.filter(img => img.is_featured !== 1).length > 0 && (
+                                                    <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem', width: 'auto'}}>
+                                                        {combo.image_urls.filter(img => img.is_featured !== 1).map((img, idx) => (
+                                                            <img
+                                                                key={img.id}
+                                                                src={urlImage + (img.main_url || img.thumb_url)}
+                                                                alt={combo.name + '-' + idx}
+                                                                style={{
+                                                                    width: 80,
+                                                                    height: 80,
+                                                                    objectFit: 'cover',
+                                                                    cursor: 'pointer',
+                                                                    borderRadius: 6,
+                                                                    background: '#f8f9fa',
+                                                                    border: '1px solid #dee2e6'
+                                                                }}
+                                                                className="img-thumbnail"
+                                                                title="Bấm để xem lớn"
+                                                                onClick={() => handleImgClick(img)}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
-                                    
-                                    {/* Thông tin cơ bản - Compact */}
-                                    <div className="row g-2">
-                                        <div className="col-12">
-                                            <small className="text-muted d-block">Tên combo</small>
-                                            <h6 className="fw-bold mb-1">{combo.name}</h6>
                                         </div>
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Trạng thái</small>
-                                            {combo.is_active === true
-                                                ? <span className="badge bg-success small"><i className="fas fa-check-circle me-1"></i>Đang áp dụng</span>
-                                                : <span className="badge bg-secondary small"><i className="fas fa-ban me-1"></i>Ngừng áp dụng</span>
-                                            }
-                                        </div>
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Số sản phẩm</small>
-                                            <span className="fw-semibold">{combo.items ? combo.items.length : 0}</span>
-                                        </div>
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Giá combo</small>
-                                            <span className="fw-bold text-danger">{formatVNDWithUnit(combo.price)}</span>
-                                        </div>
-                                        <div className="col-6">
-                                            <small className="text-muted d-block">Ngày tạo</small>
-                                            <span className="small">{formatDate(combo.created_at)}</span>
-                                        </div>
-                                        <div className="col-12">
-                                            <small className="text-muted d-block">Thời gian áp dụng</small>
-                                            <div className="small">
-                                                <span className="text-primary">{moment(combo.start_date).format('HH:mm DD/MM/YYYY')}</span>
-                                                <span className="text-muted"> đến </span>
-                                                <span className="text-danger">{moment(combo.end_date).format('HH:mm DD/MM/YYYY')}</span>
+
+                                        {/* Cột phải: Thông tin combo */}
+                                        <div style={{flex: '0 0 70%'}}>
+                                            {/* Tên combo */}
+                                            <h3 style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
+                                                {combo.name}
+                                            </h3>
+
+                                            {/* Badges */}
+                                            <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem'}}>
+                                                {combo.is_active === true ? (
+                                                    <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Đang áp dụng</span>
+                                                ) : (
+                                                    <span className="badge bg-danger"><i className="fas fa-ban me-1"></i>Ngừng áp dụng</span>
+                                                )}
+                                                {combo.applies_to_all_branches ? (
+                                                    <span className="badge bg-info"><i className="fas fa-globe me-1"></i>Toàn hệ thống</span>
+                                                ) : (
+                                                    <span className="badge bg-secondary"><i className="fas fa-store me-1"></i>Chi nhánh cụ thể</span>
+                                                )}
+                                            </div>
+
+                                            {/* Lưới thông tin */}
+                                            <div className="row">
+                                                <InfoItem label="Mã combo" value={combo.combo_code || combo.id} />
+                                                <InfoItem label="Số sản phẩm" value={combo.items ? combo.items.length : 0} />
+                                                <InfoItem label="Giá cửa hàng" value={formatVNDWithUnit(combo.base_store_price)} isDanger />
+                                                <InfoItem label="Giá App" value={formatVNDWithUnit(combo.base_app_price)} isDanger />
+
+                                                <InfoItem label="Thời gian bắt đầu" value={combo.start_date ? moment(combo.start_date).format('HH:mm DD/MM/YYYY') : 'N/A'} />
+                                                <InfoItem label="Thời gian kết thúc" value={combo.end_date ? moment(combo.end_date).format('HH:mm DD/MM/YYYY') : 'N/A'} />
+                                                <InfoItem label="Ngày tạo" value={formatDate(combo.created_at)} />
+                                                <InfoItem label="Ngày cập nhật" value={formatDate(combo.updated_at)} />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        {/* Mô tả & Sản phẩm trong combo */}
-                        <div className="col-lg-8">
-                            <div className="card shadow-sm border-0 h-100 d-flex flex-column">
-                               
-                                <div className="card-header background-detail py-2 border-top">
-                                    <h6 className="mb-0 fw-bold">
-                                        <i className="fas fa-box-open me-2"></i>Sản phẩm trong combo ({combo.items ? combo.items.length : 0})
-                                    </h6>
-                                </div>
-                                <div className="card-body p-0 flex-grow-1" style={{ overflowY: 'auto' }}>
-                                    <div className="table-responsive">
-                                        <table className="table table-hover align-middle mb-0 table-sm">
-                                            <thead className="table-light">
-                                                <tr>
-                                                    <th style={{ width: 40 }}>#</th>
-                                                    <th style={{ width: 60 }}>Ảnh</th>
-                                                    <th>Sản phẩm</th>
-                                                    <th className="text-center" style={{ width: 80 }}>Giá</th>
-                                                    <th className="text-center" style={{ width: 50 }}>SL</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {combo.items && combo.items.length > 0 ? (
-                                                    combo.items.map((item, idx) => (
-                                                        <tr key={item.id}>
+                            )}
+
+                            {/* Tab Sản phẩm trong combo */}
+                            {activeTab === 'san-pham' && (
+                                <div className="tab-pane fade show active">
+                                    {combo.items && combo.items.length > 0 ? (
+                                        <div className="table-responsive">
+                                            <table className="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th style={{ width: 60 }}>Ảnh</th>
+                                                        <th>Sản phẩm</th>
+                                                        <th className="text-center" style={{ width: 80 }}>Giá</th>
+                                                        <th className="text-center" style={{ width: 50 }}>SL</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {combo.items.map((item, idx) => (
+                                                        <tr key={idx}>
                                                             <td>{idx + 1}</td>
                                                             <td>
-                                                                {(() => {
-                                                                    const getProductImage = (product) => {
-                                                                        if (!product) return null;
-                                                                        if (product.image_urls && Array.isArray(product.image_urls)) {
-                                                                            const featuredImage = product.image_urls.find(img => img.is_featured === 1);
-                                                                            if (featuredImage && featuredImage.thumb_url) {
-                                                                                return featuredImage.thumb_url;
-                                                                            }
-                                                                        }
-                                                                        if (product.image_url) {
-                                                                            return product.image_url;
-                                                                        }
-                                                                        return null;
-                                                                    };
-
-                                                                    const productImageUrl = getProductImage(item.product);
-                                                                    return productImageUrl ? (
-                                                                        <img
-                                                                            src={productImageUrl.startsWith('http')
-                                                                                ? productImageUrl
-                                                                                : urlImage + productImageUrl}
-                                                                            alt={item.product ? item.product.name : ''}
-                                                                            className="img-thumbnail"
-                                                                            style={{
-                                                                                width: 40,
-                                                                                height: 40,
-                                                                                objectFit: 'cover',
-                                                                                borderRadius: 6,
-                                                                                border: '1px solid #dee2e6'
-                                                                            }}
-                                                                        />
-                                                                    ) : (
-                                                                        <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #dee2e6', borderRadius: 6 }}>
-                                                                            <i className="fas fa-image" style={{ fontSize: 16, color: '#adb5bd' }}></i>
-                                                                        </div>
-                                                                    );
-                                                                })()}
-                                                            </td>
-                                                            <td>
-                                                                <div className="fw-semibold small">{item.product ? item.product.name : ''}</div>
-                                                                {item.product?.size && (
-                                                                    <span className="badge bg-secondary small me-1">{item.product.size}</span>
+                                                                {item.image_url ? (
+                                                                    <img
+                                                                        src={item.image_url.startsWith('http') ? item.image_url : urlImage + item.image_url}
+                                                                        alt={item.name}
+                                                                        className="img-thumbnail"
+                                                                        style={{
+                                                                            width: 40,
+                                                                            height: 40,
+                                                                            objectFit: 'cover',
+                                                                            borderRadius: 6,
+                                                                            border: '1px solid #dee2e6'
+                                                                        }}
+                                                                    />
+                                                                ) : (
+                                                                    <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #dee2e6', borderRadius: 6 }}>
+                                                                        <i className="fas fa-image" style={{ fontSize: 16, color: '#adb5bd' }}></i>
+                                                                    </div>
                                                                 )}
                                                             </td>
+                                                            <td>
+                                                                <div className="fw-semibold small">{item.name}</div>
+                                                                <small className="text-muted">{item.product_code}</small>
+                                                            </td>
                                                             <td className="text-center">
-                                                                <span className="fw-bold text-primary small">{formatVNDWithUnit(item.product?.sale_price)}</span>
+                                                                <span className="fw-bold text-danger small">{formatVNDWithUnit(item.base_store_price)}</span>
                                                             </td>
                                                             <td className="text-center">
                                                                 <span className="fw-bold">{item.quantity}</span>
                                                             </td>
                                                         </tr>
-                                                    ))
-                                                ) : (
-                                                    <tr>
-                                                        <td colSpan={5} className="text-center text-muted py-3">
-                                                            <i className="fas fa-box-open fa-2x mb-2 opacity-50"></i>
-                                                            <p className="mb-0">Không có sản phẩm trong combo</p>
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center text-muted py-5">
+                                            <i className="fas fa-box-open fa-3x mb-3 opacity-50"></i>
+                                            <p className="mb-0">Không có sản phẩm trong combo</p>
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="card-header background-detail py-2">
-                                    <h6 className="mb-0 fw-bold">
-                                        <i className="fas fa-info-circle me-2"></i>Mô tả combo
-                                    </h6>
-                                </div>
-                                <div className="card-body p-3" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                            )}
+
+                            {/* Tab Mô tả */}
+                            {activeTab === 'mo-ta' && (
+                                <div className="tab-pane fade show active">
+                                    <div style={{ 
+                                        height: '400px', 
+                                        overflowY: 'auto',
+                                        paddingRight: '10px',
+                                        border: '1px solid #dee2e6',
+                                        borderRadius: '6px',
+                                        padding: '15px'
+                                    }}>
                                     {combo.description
                                         ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(combo.description)) }} />
-                                        : <div className="text-center text-muted py-3">
-                                            <i className="fas fa-file-alt fa-2x mb-2 opacity-50"></i>
-                                            <p className="mb-0 small">Chưa có mô tả combo</p>
+                                        : <div className="text-center text-muted py-5">
+                                            <i className="fas fa-file-alt fa-3x mb-3 opacity-50"></i>
+                                            <p className="mb-0">Chưa có mô tả combo</p>
                                         </div>
                                     }
                                 </div>
                             </div>
+                            )}
+
+                            {/* Tab Chi nhánh áp dụng */}
+                            {activeTab === 'chi-nhanh' && (
+                                <div className="tab-pane fade show active">
+                                    <div style={{ 
+                                        height: '400px', 
+                                        overflowY: 'auto',
+                                        paddingRight: '10px',
+                                        border: '1px solid #dee2e6',
+                                        borderRadius: '6px',
+                                        padding: '15px'
+                                    }}>
+                                        {combo.branches && combo.branches.length > 0 ? (
+                                            <div className="table-responsive">
+                                                <table className="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Mã chi nhánh</th>
+                                                            <th>Tên chi nhánh</th>
+                                                            <th>Địa chỉ</th>
+                                                            <th>Số điện thoại</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {combo.branches.map((branch, idx) => (
+                                                            <tr key={idx}>
+                                                                <td>{branch.code || branch.id}</td>
+                                                                <td>{branch.name}</td>
+                                                                <td>{branch.address || 'N/A'}</td>
+                                                                <td>{branch.phone_number || 'N/A'}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center text-muted py-5">
+                                                <i className="fas fa-store fa-3x mb-3 opacity-50"></i>
+                                                <p className="mb-0">Combo này áp dụng cho toàn bộ hệ thống</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Nút thao tác - Compact */}
-                    <div className="row mb-4">
-                        <div className="col-12 d-flex justify-content-center gap-2" style={{ marginTop: 20 }}>
+                    {/* Nút thao tác */}
+                    <div className="row mt-4 mb-4">
+                        <div className="col-12 d-flex justify-content-center gap-2">
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
                                 <i className="fas fa-arrow-left me-1"></i>Quay lại
                             </button>
                             <Link className="btn btn-primary btn-sm" to={`/combo/${combo.id}`}>
                                 <i className="fas fa-edit me-1"></i>Sửa combo
                             </Link>
-                            <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+                            <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
                                 <i className="fas fa-trash-alt me-1"></i>Xóa combo
                             </button>
                         </div>
                     </div>
                 </div>
             </main>
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Xác nhận xóa</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Bạn có chắc chắn muốn xóa combo này?</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Hủy
+                    </Button>
+                    <Button variant="danger" onClick={handleDelete}>
+                        Xóa
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

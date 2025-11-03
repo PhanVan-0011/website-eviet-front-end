@@ -36,7 +36,6 @@ const ComboList = () => {
     // Filter states
     const [filterValues, setFilterValues] = useState({
         status: 'all',
-        priceRange: 'all',
         dateRange: { from: null, to: null }
     });
     const [isFilterVisible, setIsFilterVisible] = useState(true);
@@ -73,11 +72,6 @@ const ComboList = () => {
         if (filterValues.dateRange?.from && filterValues.dateRange?.to) {
             query += `&start_date=${moment(filterValues.dateRange.from).format('YYYY-MM-DD')}`;
             query += `&end_date=${moment(filterValues.dateRange.to).format('YYYY-MM-DD')}`;
-        }
-        if (filterValues.priceRange && filterValues.priceRange !== 'all') {
-            const [min, max] = filterValues.priceRange.split('-');
-            if (min) query += `&min_price=${min}`;
-            if (max) query += `&max_price=${max}`;
         }
 
         dispatch(actions.controlLoading(true));
@@ -170,13 +164,26 @@ const ComboList = () => {
         },
         {
             title: () => (
-                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('price')}>
-                    Giá {renderSortIcon('price')}
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('base_store_price')}>
+                    Giá cửa hàng {renderSortIcon('base_store_price')}
                 </span>
             ),
             element: row => (
                 <div>
-                    {Number(row.price).toLocaleString()} ₫
+                    {Number(row.base_store_price).toLocaleString()} ₫
+                </div>
+            ),
+            width: "10%"
+        },
+        {
+            title: () => (
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('base_app_price')}>
+                    Giá ứng dụng {renderSortIcon('base_app_price')}
+                </span>
+            ),
+            element: row => (
+                <div>
+                    {Number(row.base_app_price).toLocaleString()} ₫
                 </div>
             ),
             width: "10%"
@@ -312,34 +319,6 @@ const ComboList = () => {
                                             { value: 'false', label: 'Không hiển thị' }
                                         ]}
                                         placeholder="Chọn trạng thái"
-                                    />
-
-                                    {/* Khoảng giá */}
-                                    <FilterSelectSingle
-                                        label="Khoảng giá"
-                                        value={filterValues.priceRange ? {
-                                            value: filterValues.priceRange,
-                                            label: filterValues.priceRange === 'all' ? 'Tất cả' : 
-                                                   filterValues.priceRange === '0-10000' ? 'Dưới 10.000 ₫' :
-                                                   filterValues.priceRange === '10000-20000' ? '10.000 ₫ - 20.000 ₫' :
-                                                   filterValues.priceRange === '20000-40000' ? '20.000 ₫ - 40.000 ₫' :
-                                                   filterValues.priceRange === '40000-70000' ? '40.000 ₫ - 70.000 ₫' :
-                                                   filterValues.priceRange === '70000-100000' ? '70.000 ₫ - 100.000 ₫' :
-                                                   filterValues.priceRange === '100000-200000' ? '100.000 ₫ - 200.000 ₫' :
-                                                   filterValues.priceRange === '200000-' ? 'Trên 200.000 ₫' : filterValues.priceRange
-                                        } : null}
-                                        onChange={(selected) => updateFilter('priceRange', selected ? selected.value : 'all')}
-                                        options={[
-                                            { value: 'all', label: 'Tất cả' },
-                                            { value: '0-10000', label: 'Dưới 10.000 ₫' },
-                                            { value: '10000-20000', label: '10.000 ₫ - 20.000 ₫' },
-                                            { value: '20000-40000', label: '20.000 ₫ - 40.000 ₫' },
-                                            { value: '40000-70000', label: '40.000 ₫ - 70.000 ₫' },
-                                            { value: '70000-100000', label: '70.000 ₫ - 100.000 ₫' },
-                                            { value: '100000-200000', label: '100.000 ₫ - 200.000 ₫' },
-                                            { value: '200000-', label: 'Trên 200.000 ₫' }
-                                        ]}
-                                        placeholder="Chọn khoảng giá"
                                     />
 
                                     {/* Thời gian áp dụng */}
