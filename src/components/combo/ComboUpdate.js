@@ -24,7 +24,7 @@ const ComboUpdate = () => {
     const { register, handleSubmit, setValue, trigger, formState: { errors, isSubmitted }, setError, clearErrors } = useForm();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState('thong-tin');
-    
+
     // Thông tin cơ bản
     const [products, setProducts] = useState([]);
     const [branches, setBranches] = useState([]);
@@ -42,7 +42,7 @@ const ComboUpdate = () => {
     const [endDatePicker, setEndDatePicker] = useState(null);
     const [comboItems, setComboItems] = useState([{ product_id: '', quantity: 1 }]);
     const [description, setDescription] = useState('');
-    
+
     // Chi nhánh
     const [applyToAllBranches, setApplyToAllBranches] = useState(true);
     const [selectedBranches, setSelectedBranches] = useState([]);
@@ -58,14 +58,14 @@ const ComboUpdate = () => {
                     requestApi('api/admin/branches?limit=1000', 'GET', []),
                     requestApi(`api/admin/combos/${params.id}`, 'GET')
                 ]);
-                
+
                 if (productsRes.data && productsRes.data.data) {
                     setProducts(productsRes.data.data);
                 }
                 if (branchRes.data && branchRes.data.data) {
                     setBranches(branchRes.data.data);
                 }
-                
+
                 // Xử lý dữ liệu combo
                 if (comboRes.data && comboRes.data.data) {
                     const data = comboRes.data.data;
@@ -76,7 +76,7 @@ const ComboUpdate = () => {
                     setPrice(formatVND(parseInt(data.price, 10)));
                     setBaseStorePrice(formatVND(parseInt(data.base_store_price || 0, 10)));
                     setBaseAppPrice(formatVND(parseInt(data.base_app_price || 0, 10)));
-                    
+
                     if (data.start_date) {
                         const start = new Date(data.start_date);
                         setStartDatePicker(start);
@@ -90,20 +90,20 @@ const ComboUpdate = () => {
                         setValue('end_date', end, { shouldValidate: true });
                     }
                     setValue('is_active', data.is_active === true ? "1" : "0");
-                    
+
                     if (data.image_urls && data.image_urls.length > 0) {
                         setOldImage(data.image_urls[0].main_url);
                     }
-                    
+
                     setDescription(data.description || '');
-                    
+
                     if (data.items && data.items.length > 0) {
                         setComboItems(data.items.map(item => ({
                             product_id: item.product_id,
                             quantity: item.quantity
                         })));
                     }
-                    
+
                     // Xử lý chi nhánh
                     if (data.applies_to_all_branches === true || data.applies_to_all_branches === 1) {
                         setApplyToAllBranches(true);
@@ -114,9 +114,9 @@ const ComboUpdate = () => {
                         setSelectedBranches(branchIds);
                     }
                 }
-                 dispatch(actions.controlLoading(false));
+                dispatch(actions.controlLoading(false));
             } catch (error) {
-                 dispatch(actions.controlLoading(false));
+                dispatch(actions.controlLoading(false));
                 toast.error("Không lấy được dữ liệu", toastErrorConfig);
             }
         };
@@ -216,7 +216,7 @@ const ComboUpdate = () => {
         try {
             dispatch(actions.controlLoading(true));
             const formData = new FormData();
-            
+
             // Thông tin cơ bản
             formData.append('combo_code', comboCode);
             formData.append('name', data.name);
@@ -227,14 +227,14 @@ const ComboUpdate = () => {
             formData.append('start_date', startDate ? format(new Date(startDate), 'yyyy-MM-dd HH:mm:ss') : '');
             formData.append('end_date', endDate ? format(new Date(endDate), 'yyyy-MM-dd HH:mm:ss') : '');
             formData.append('is_active', data.is_active);
-            
+
             // Xử lý ảnh
             if (imageFile) {
                 formData.append('image_url', imageFile);
             } else if (shouldRemoveImage) {
                 formData.append('image_url', '');
             }
-            
+
             // Sản phẩm trong combo
             comboItems.forEach((item, idx) => {
                 formData.append(`items[${idx}][product_id]`, item.product_id);
@@ -298,7 +298,7 @@ const ComboUpdate = () => {
                                             className={`nav-link ${activeTab === 'thong-tin' ? 'active' : ''}`}
                                             type="button"
                                             onClick={() => setActiveTab('thong-tin')}
-                                            style={{ 
+                                            style={{
                                                 color: activeTab === 'thong-tin' ? '#007bff' : '#6c757d',
                                                 borderBottomColor: activeTab === 'thong-tin' ? '#007bff' : 'transparent',
                                                 borderBottomWidth: activeTab === 'thong-tin' ? '2px' : '1px',
@@ -314,7 +314,7 @@ const ComboUpdate = () => {
                                             className={`nav-link ${activeTab === 'mo-ta' ? 'active' : ''}`}
                                             type="button"
                                             onClick={() => setActiveTab('mo-ta')}
-                                            style={{ 
+                                            style={{
                                                 color: activeTab === 'mo-ta' ? '#007bff' : '#6c757d',
                                                 borderBottomColor: activeTab === 'mo-ta' ? '#007bff' : 'transparent',
                                                 borderBottomWidth: activeTab === 'mo-ta' ? '2px' : '1px',
@@ -330,7 +330,7 @@ const ComboUpdate = () => {
                                             className={`nav-link ${activeTab === 'chi-nhanh' ? 'active' : ''}`}
                                             type="button"
                                             onClick={() => setActiveTab('chi-nhanh')}
-                                            style={{ 
+                                            style={{
                                                 color: activeTab === 'chi-nhanh' ? '#007bff' : '#6c757d',
                                                 borderBottomColor: activeTab === 'chi-nhanh' ? '#007bff' : 'transparent',
                                                 borderBottomWidth: activeTab === 'chi-nhanh' ? '2px' : '1px',
@@ -350,7 +350,7 @@ const ComboUpdate = () => {
                                         <div className="tab-pane fade show active">
                                             <div className="row mb-3">
                                                 <div className="col-md-6">
-                                                    <div className="mb-3">
+                                                    <div className="mb-4">
                                                         <label htmlFor="inputComboCode" className="form-label fw-semibold">
                                                             Mã combo
                                                         </label>
@@ -362,11 +362,9 @@ const ComboUpdate = () => {
                                                             placeholder="Mã combo"
                                                         />
                                                     </div>
-                                                </div>
-                                                <div className="col-md-6">
                                                     <div className="mb-3">
                                                         <label htmlFor="inputName" className="form-label fw-semibold">
-                                                            Tên combo <span style={{color: 'red'}}>*</span>
+                                                            Tên combo <span style={{ color: 'red' }}>*</span>
                                                         </label>
                                                         <input
                                                             className="form-control"
@@ -376,28 +374,6 @@ const ComboUpdate = () => {
                                                         />
                                                         {isSubmitted && errors.name && <div className="text-danger mt-1">{errors.name.message}</div>}
                                                     </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="row mb-3">
-                                                <div className="col-md-6">
-                                                    <div className="mb-3">
-                                                        <label htmlFor="inputStatus" className="form-label fw-semibold">
-                                                            Trạng thái <span style={{color: 'red'}}>*</span>
-                                                        </label>
-                                                        <select
-                                                            className="form-select"
-                                                            id="inputStatus"
-                                                            {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
-                                                            defaultValue="1"
-                                                        >
-                                                            <option value="1">Hiển thị</option>
-                                                            <option value="0">Ẩn</option>
-                                                        </select>
-                                                        {isSubmitted && errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
-                                                    </div>
-                                                </div>
-                                                <div className="col-md-6">
                                                     <div className="mb-3">
                                                         <label htmlFor="inputBaseStorePrice" className="form-label fw-semibold">
                                                             Giá cửa hàng (VNĐ)
@@ -414,8 +390,6 @@ const ComboUpdate = () => {
                                                             placeholder="Nhập giá cửa hàng"
                                                         />
                                                     </div>
-                                                </div>
-                                                <div className="col-md-6">
                                                     <div className="mb-3">
                                                         <label htmlFor="inputBaseAppPrice" className="form-label fw-semibold">
                                                             Giá App (VNĐ)
@@ -433,132 +407,151 @@ const ComboUpdate = () => {
                                                         />
                                                     </div>
                                                 </div>
-                                            </div>
-
-                                            {/* Ngày bắt đầu và kết thúc */}
-                                            <div className="row mb-3">
                                                 <div className="col-md-6">
-                                                    <div className="mb-3">
-                                                        <label htmlFor="inputStartDate" className="form-label fw-semibold">
-                                                            Thời gian bắt đầu <span style={{color: 'red'}}>*</span>
-                                                        </label>
-                                                        <div className="d-flex align-items-center" style={{gap: '4px'}}>
-                                                            <DatePicker
-                                                                selected={startDatePicker}
-                                                                onChange={date => {
-                                                                    setStartDatePicker(date);
-                                                                    setStartDate(date);
-                                                                    setValue('start_date', date, { shouldValidate: true });
-                                                                }}
-                                                                locale={vi}
-                                                                dateFormat="dd/MM/yyyy HH:mm"
-                                                                className="form-control"
-                                                                placeholderText="Chọn thời gian bắt đầu"
-                                                                id="inputStartDate"
-                                                                autoComplete="off"
-                                                                showTimeSelect
-                                                                timeFormat="HH:mm"
-                                                                timeIntervals={15}
-                                                                timeCaption="Giờ"
-                                                                popperPlacement="bottom-start"
-                                                            />
-                                                            <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{height: '38px'}} onClick={() => document.getElementById('inputStartDate')?.focus()}>
-                                                                <i className="fas fa-calendar-alt text-secondary"></i>
-                                                            </button>
-                                                            <input type="hidden" {...register('start_date', { required: 'Thời gian bắt đầu là bắt buộc' })} />
-                                                        </div>
-                                                        {isSubmitted && errors.start_date && <div className="text-danger mt-1 small">{errors.start_date.message}</div>}
-                                                    </div>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <div className="mb-3">
-                                                        <label htmlFor="inputEndDate" className="form-label fw-semibold">
-                                                            Thời gian kết thúc <span style={{color: 'red'}}>*</span>
-                                                        </label>
-                                                        <div className="d-flex align-items-center" style={{gap: '4px'}}>
-                                                            <DatePicker
-                                                                selected={endDatePicker}
-                                                                onChange={date => {
-                                                                    setEndDatePicker(date);
-                                                                    setEndDate(date);
-                                                                    setValue('end_date', date, { shouldValidate: true });
-                                                                }}
-                                                                locale={vi}
-                                                                dateFormat="dd/MM/yyyy HH:mm"
-                                                                className="form-control"
-                                                                placeholderText="Chọn thời gian kết thúc"
-                                                                id="inputEndDate"
-                                                                autoComplete="off"
-                                                                showTimeSelect
-                                                                timeFormat="HH:mm"
-                                                                timeIntervals={15}
-                                                                timeCaption="Giờ"
-                                                                popperPlacement="bottom-start"
-                                                            />
-                                                            <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{height: '38px'}} onClick={() => document.getElementById('inputEndDate')?.focus()}>
-                                                                <i className="fas fa-calendar-alt text-secondary"></i>
-                                                            </button>
-                                                            <input type="hidden" {...register('end_date', { required: 'Thời gian kết thúc là bắt buộc' })} />
-                                                        </div>
-                                                        {isSubmitted && errors.end_date && <div className="text-danger mt-1 small">{errors.end_date.message}</div>}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Hình ảnh */}
-                                            <div className="row mb-3">
-                                                <div className="col-md-12">
-                                                    <div className="mb-3">
-                                                        <label className="form-label fw-semibold">Hình ảnh combo</label>
-                                                        <div className="d-flex flex-column align-items-center">
-                                                            <div
-                                                                className="border border-2 border-secondary border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center mb-2"
-                                                                style={{ aspectRatio: '3/2', width: '100%', maxWidth: 320 }}
-                                                            >
-                                                                {(imagePreview || oldImage) ? (
-                                                                    <>
-                                                                        <img
-                                                                            src={imagePreview || (oldImage?.startsWith('http') ? oldImage : urlImage + oldImage)}
-                                                                            alt="Preview"
-                                                                            className="w-100 h-100 rounded position-absolute top-0 start-0"
-                                                                            style={{ objectFit: 'fill', aspectRatio: '1/1' }}
-                                                                        />
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 m-1 d-flex align-items-center justify-content-center no-hover"
-                                                                            style={{ zIndex: 2, width: 28, height: 28, padding: 0, background: '#fff' }}
-                                                                            aria-label="Xóa ảnh"
-                                                                            onClick={handleRemoveImage}
-                                                                        >
-                                                                            <i className="fas fa-times"></i>
-                                                                        </button>
-                                                                    </>
-                                                                ) : (
-                                                                    <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
-                                                                        <i className="fas fa-image fs-1 text-secondary"></i>
+                                                      {/* Hình ảnh */}
+                                                    <div className="row mb-3">
+                                                        <div className="col-md-12">
+                                                            <div className="mb-3">
+                                                                <div className="d-flex flex-column align-items-center">
+                                                                    <div
+                                                                        className="border border-2 border-secondary border-dashed rounded bg-light position-relative d-flex align-items-center justify-content-center mb-2"
+                                                                        style={{ aspectRatio: '3/2', width: '100%', maxWidth: 320 }}
+                                                                    >
+                                                                        {(imagePreview || oldImage) ? (
+                                                                            <>
+                                                                                <img
+                                                                                    src={imagePreview || (oldImage?.startsWith('http') ? oldImage : urlImage + oldImage)}
+                                                                                    alt="Preview"
+                                                                                    className="w-100 h-100 rounded position-absolute top-0 start-0"
+                                                                                    style={{ objectFit: 'fill', aspectRatio: '1/1' }}
+                                                                                />
+                                                                                <button
+                                                                                    type="button"
+                                                                                    className="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 m-1 d-flex align-items-center justify-content-center no-hover"
+                                                                                    style={{ zIndex: 2, width: 28, height: 28, padding: 0, background: '#fff' }}
+                                                                                    aria-label="Xóa ảnh"
+                                                                                    onClick={handleRemoveImage}
+                                                                                >
+                                                                                    <i className="fas fa-times"></i>
+                                                                                </button>
+                                                                            </>
+                                                                        ) : (
+                                                                            <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                                                                <i className="fas fa-image fs-1 text-secondary"></i>
+                                                                            </div>
+                                                                        )}
                                                                     </div>
-                                                                )}
+                                                                    <label htmlFor="inputImage" className="form-label btn btn-secondary mb-0 mt-2">
+                                                                        <i className="fas fa-upload"></i> {imagePreview || oldImage ? 'Thay đổi ảnh' : 'Thêm ảnh combo'}
+                                                                    </label>
+                                                                    <div className="text-muted small">
+                                                                        Chỉ chọn 1 ảnh, định dạng: jpg, png...<br />
+                                                                        Kích thước tối đa: 2MB
+                                                                    </div>
+                                                                    <input
+                                                                        className="form-control"
+                                                                        id="inputImage"
+                                                                        type="file"
+                                                                        accept="image/*"
+                                                                        style={{ display: 'none' }}
+                                                                        onChange={onChangeImage}
+                                                                    />
+                                                                    <input
+                                                                        type="hidden"
+                                                                        {...register('imageFile')}
+                                                                    />
+                                                                    {isSubmitted && errors.imageFile && <div className="text-danger mt-1 small">{errors.imageFile.message}</div>}
+                                                                </div>
                                                             </div>
-                                                            <label htmlFor="inputImage" className="form-label btn btn-secondary mb-0 mt-2">
-                                                                <i className="fas fa-upload"></i> {imagePreview || oldImage ? 'Thay đổi ảnh' : 'Thêm ảnh combo'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <div className="row mb-3">
+                                                <div className="col-md-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="inputStatus" className="form-label fw-semibold">
+                                                            Trạng thái <span style={{ color: 'red' }}>*</span>
+                                                        </label>
+                                                        <select
+                                                            className="form-select"
+                                                            id="inputStatus"
+                                                            {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
+                                                            defaultValue="1"
+                                                        >
+                                                            <option value="1">Hiển thị</option>
+                                                            <option value="0">Ẩn</option>
+                                                        </select>
+                                                        {isSubmitted && errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
+                                                    </div>
+                                                </div>
+                                                {/* Ngày bắt đầu và kết thúc */}
+                                                <div className="col-md-6 d-flex justify-content-center">
+                                                    <div className="row">
+                                                        <div className="col-md-6">
+                                                            <label htmlFor="inputStartDate" className="form-label fw-semibold">
+                                                                Thời gian bắt đầu <span style={{ color: 'red' }}>*</span>
                                                             </label>
-                                                            <div className="text-muted small">
-                                                                Chỉ chọn 1 ảnh, định dạng: jpg, png...<br/>
-                                                                Kích thước tối đa: 2MB
+                                                            <div className="d-flex align-items-center" style={{ gap: '4px' }}>
+                                                                <DatePicker
+                                                                    selected={startDatePicker}
+                                                                    onChange={date => {
+                                                                        setStartDatePicker(date);
+                                                                        setStartDate(date);
+                                                                        setValue('start_date', date, { shouldValidate: true });
+                                                                    }}
+                                                                    locale={vi}
+                                                                    dateFormat="dd/MM/yyyy HH:mm"
+                                                                    className="form-control"
+                                                                    placeholderText="Chọn thời gian bắt đầu"
+                                                                    id="inputStartDate"
+                                                                    autoComplete="off"
+                                                                    showTimeSelect
+                                                                    timeFormat="HH:mm"
+                                                                    timeIntervals={15}
+                                                                    timeCaption="Giờ"
+                                                                    popperPlacement="bottom-start"
+                                                                />
+                                                                <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{ height: '38px' }} onClick={() => document.getElementById('inputStartDate')?.focus()}>
+                                                                    <i className="fas fa-calendar-alt text-secondary"></i>
+                                                                </button>
+                                                                <input type="hidden" {...register('start_date', { required: 'Thời gian bắt đầu là bắt buộc' })} />
                                                             </div>
-                                                            <input
-                                                                className="form-control"
-                                                                id="inputImage"
-                                                                type="file"
-                                                                accept="image/*"
-                                                                style={{ display: 'none' }}
-                                                                onChange={onChangeImage}
-                                                            />
-                                                            <input
-                                                                type="hidden"
-                                                                {...register('imageFile')}
-                                                            />
-                                                            {isSubmitted && errors.imageFile && <div className="text-danger mt-1 small">{errors.imageFile.message}</div>}
+                                                            {isSubmitted && errors.start_date && <div className="text-danger mt-1 small">{errors.start_date.message}</div>}
+                                                        </div>
+
+                                                        <div className="col-md-6">
+                                                            <label htmlFor="inputEndDate" className="form-label fw-semibold">
+                                                                Thời gian kết thúc <span style={{ color: 'red' }}>*</span>
+                                                            </label>
+                                                            <div className="d-flex align-items-center" style={{ gap: '4px' }}>
+                                                                <DatePicker
+                                                                    selected={endDatePicker}
+                                                                    onChange={date => {
+                                                                        setEndDatePicker(date);
+                                                                        setEndDate(date);
+                                                                        setValue('end_date', date, { shouldValidate: true });
+                                                                    }}
+                                                                    locale={vi}
+                                                                    dateFormat="dd/MM/yyyy HH:mm"
+                                                                    className="form-control"
+                                                                    placeholderText="Chọn thời gian kết thúc"
+                                                                    id="inputEndDate"
+                                                                    autoComplete="off"
+                                                                    showTimeSelect
+                                                                    timeFormat="HH:mm"
+                                                                    timeIntervals={15}
+                                                                    timeCaption="Giờ"
+                                                                    popperPlacement="bottom-start"
+                                                                />
+                                                                <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{ height: '38px' }} onClick={() => document.getElementById('inputEndDate')?.focus()}>
+                                                                    <i className="fas fa-calendar-alt text-secondary"></i>
+                                                                </button>
+                                                                <input type="hidden" {...register('end_date', { required: 'Thời gian kết thúc là bắt buộc' })} />
+                                                            </div>
+                                                            {isSubmitted && errors.end_date && <div className="text-danger mt-1 small">{errors.end_date.message}</div>}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -571,9 +564,9 @@ const ComboUpdate = () => {
                                                         <div className="card-header d-flex justify-content-between align-items-center">
                                                             <h6 className="mb-0">Sản phẩm trong combo</h6>
                                                             <div className="d-flex gap-2">
-                                                                <button 
-                                                                    type="button" 
-                                                                    className="btn btn-sm btn-primary" 
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-sm btn-primary"
                                                                     onClick={handleAddItem}
                                                                 >
                                                                     + Thêm sản phẩm
@@ -581,82 +574,82 @@ const ComboUpdate = () => {
                                                             </div>
                                                         </div>
                                                         <div className="card-body pt-2">
-                                                             <div className="table-responsive">
-                                                                 <table className="table table-bordered">
-                                                                     <thead>
-                                                                         <tr>
-                                                                             <th>Sản phẩm</th>
-                                                                             <th>Ảnh</th>
-                                                                             <th>Số lượng</th>
-                                                                             <th>Thao tác</th>
-                                                                         </tr>
-                                                                     </thead>
-                                                                     <tbody>
-                                                                         {comboItems.map((item, idx) => (
-                                                                             <tr key={idx}>
-                                                                                 <td style={{ verticalAlign: 'middle', position: 'relative', zIndex: 10 }}>
-                                                                                     <div style={{ minWidth: '280px' }}>
-                                                                                         <Select
-                                                                                             options={productOptions.filter(opt => !comboItems.some((it, i) => it.product_id === opt.value && i !== idx))}
-                                                                                             value={productOptions.find(opt => String(opt.value) === String(item.product_id)) || null}
-                                                                                             onChange={opt => handleChangeItem(idx, 'product_id', opt ? opt.value : '')}
-                                                                                             placeholder="Tìm kiếm & chọn sản phẩm..."
-                                                                                             classNamePrefix="react-select"
-                                                                                             styles={{
-                                                                                                 ...selectStyles,
-                                                                                                 menuPortal: (base) => ({ ...base, zIndex: 9999 })
-                                                                                             }}
-                                                                                             menuPortalTarget={document.body}
-                                                                                             menuPosition="fixed"
-                                                                                         />
-                                                                                     </div>
-                                                                                 </td>
-                                                                                 <td style={{ verticalAlign: 'middle' }}>
-                                                                                     <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                                                                         {products.find(p => String(p.id) === String(item.product_id))?.featured_image?.thumb_url ? (
-                                                                                             <img
-                                                                                                 src={process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).featured_image.thumb_url}
-                                                                                                 alt=""
-                                                                                                 style={{ width: 60, height: 60, objectFit: 'contain', borderRadius: 4, border: '1px solid #eee' }}
-                                                                                             />
-                                                                                         ) : (
-                                                                                             <div style={{ width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 4 }}>
-                                                                                                 <i className="fas fa-image" style={{ fontSize: 24, color: '#bbb' }}></i>
-                                                                                             </div>
-                                                                                         )}
-                                                                                     </div>
-                                                                                 </td>
-                                                                                 <td style={{ verticalAlign: 'middle' }}>
-                                                                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                                                                                         <input
-                                                                                             type="number"
-                                                                                             className="form-control"
-                                                                                             min={1}
-                                                                                             value={item.quantity}
-                                                                                             onChange={e => handleChangeItem(idx, 'quantity', e.target.value)}
-                                                                                             placeholder="Số lượng"
-                                                                                             style={{ width: '100px' }}
-                                                                                             required
-                                                                                         />
-                                                                                     </div>
-                                                                                 </td>
-                                                                                 <td style={{ verticalAlign: 'middle' }}>
-                                                                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                                                                                         <button
-                                                                                             type="button"
-                                                                                             className="btn btn-sm btn-danger"
-                                                                                             onClick={() => handleRemoveItem(idx)}
-                                                                                             disabled={comboItems.length === 1}
-                                                                                         >
-                                                                                             <i className="fas fa-trash"></i>
-                                                                                         </button>
-                                                                                     </div>
-                                                                                 </td>
-                                                                             </tr>
-                                                                         ))}
-                                                                     </tbody>
-                                                                 </table>
-                                                             </div>
+                                                            <div className="table-responsive">
+                                                                <table className="table table-bordered">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Sản phẩm</th>
+                                                                            <th>Ảnh</th>
+                                                                            <th>Số lượng</th>
+                                                                            <th>Thao tác</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {comboItems.map((item, idx) => (
+                                                                            <tr key={idx}>
+                                                                                <td style={{ verticalAlign: 'middle', position: 'relative', zIndex: 10 }}>
+                                                                                    <div style={{ minWidth: '280px' }}>
+                                                                                        <Select
+                                                                                            options={productOptions.filter(opt => !comboItems.some((it, i) => it.product_id === opt.value && i !== idx))}
+                                                                                            value={productOptions.find(opt => String(opt.value) === String(item.product_id)) || null}
+                                                                                            onChange={opt => handleChangeItem(idx, 'product_id', opt ? opt.value : '')}
+                                                                                            placeholder="Tìm kiếm & chọn sản phẩm..."
+                                                                                            classNamePrefix="react-select"
+                                                                                            styles={{
+                                                                                                ...selectStyles,
+                                                                                                menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                                                                                            }}
+                                                                                            menuPortalTarget={document.body}
+                                                                                            menuPosition="fixed"
+                                                                                        />
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td style={{ verticalAlign: 'middle' }}>
+                                                                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                                                                        {products.find(p => String(p.id) === String(item.product_id))?.featured_image?.thumb_url ? (
+                                                                                            <img
+                                                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).featured_image.thumb_url}
+                                                                                                alt=""
+                                                                                                style={{ width: 60, height: 60, objectFit: 'contain', borderRadius: 4, border: '1px solid #eee' }}
+                                                                                            />
+                                                                                        ) : (
+                                                                                            <div style={{ width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 4 }}>
+                                                                                                <i className="fas fa-image" style={{ fontSize: 24, color: '#bbb' }}></i>
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td style={{ verticalAlign: 'middle' }}>
+                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            className="form-control"
+                                                                                            min={1}
+                                                                                            value={item.quantity}
+                                                                                            onChange={e => handleChangeItem(idx, 'quantity', e.target.value)}
+                                                                                            placeholder="Số lượng"
+                                                                                            style={{ width: '100px' }}
+                                                                                            required
+                                                                                        />
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td style={{ verticalAlign: 'middle' }}>
+                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            className="btn btn-sm btn-danger"
+                                                                                            onClick={() => handleRemoveItem(idx)}
+                                                                                            disabled={comboItems.length === 1}
+                                                                                        >
+                                                                                            <i className="fas fa-trash"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
