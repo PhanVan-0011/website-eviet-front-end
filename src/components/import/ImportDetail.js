@@ -31,6 +31,7 @@ const ImportDetail = () => {
     const [invoice, setInvoice] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('thong-tin');
+    const [showCancelModal, setShowCancelModal] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -65,6 +66,38 @@ const ImportDetail = () => {
         };
         const statusInfo = statusMap[status] || { label: status, class: 'bg-secondary' };
         return <span className={`badge ${statusInfo.class}`}>{statusInfo.label}</span>;
+    };
+
+    // Mở modal xác nhận hủy phiếu
+    const handleCancelClick = () => {
+        setShowCancelModal(true);
+    };
+
+    // Xác nhận hủy phiếu nhập
+    const confirmCancel = async () => {
+        setShowCancelModal(false);
+        
+        dispatch(actions.controlLoading(true));
+        try {
+            const response = await requestApi(`api/admin/purchase-invoices/${id}/cancel`, 'PUT', {});
+            dispatch(actions.controlLoading(false));
+            
+            if (response.data && response.data.success) {
+                toast.success(response.data.message || 'Hủy phiếu nhập hàng thành công!', toastSuccessConfig);
+                setTimeout(() => {
+                    navigate('/import');
+                }, 1500);
+            } else {
+                toast.error(response.data.message || 'Hủy phiếu nhập hàng thất bại', toastErrorConfig);
+            }
+        } catch (e) {
+            dispatch(actions.controlLoading(false));
+            if (e.response && e.response.data && e.response.data.message) {
+                toast.error(e.response.data.message, toastErrorConfig);
+            } else {
+                toast.error('Lỗi khi hủy phiếu nhập hàng', toastErrorConfig);
+            }
+        }
     };
 
     if (loading) {
@@ -342,10 +375,33 @@ const ImportDetail = () => {
                                     </Link>
                                 </>
                             )}
+                            {invoice.status === 'received' && (
+                                <button className="btn btn-warning btn-sm" onClick={handleCancelClick} title="Hủy phiếu">
+                                    <i className="fas fa-times-circle me-1"></i>Hủy phiếu
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
             </main>
+
+            {/* Modal xác nhận hủy phiếu */}
+            <Modal show={showCancelModal} onHide={() => setShowCancelModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Xác nhận hủy phiếu nhập</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Bạn có chắc chắn muốn hủy phiếu nhập hàng này? Hành động này không thể hoàn tác.
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowCancelModal(false)}>
+                        Hủy
+                    </Button>
+                    <Button variant="danger" onClick={confirmCancel}>
+                        Xác nhận hủy
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

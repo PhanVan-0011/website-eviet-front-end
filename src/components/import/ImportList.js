@@ -363,8 +363,8 @@ const ImportList = () => {
                         </Link>
                     )}
                     
-                    {/* Xóa - hiển thị cả draft và received */}
-                    {(row?.status === 'draft' || row?.status === 'received') && (
+                    {/* Xóa - hiển thị chỉ draft */}
+                    {row?.status === 'draft' && (
                         <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)} title="Xóa">
                             <i className="fas fa-trash"></i>
                         </button>

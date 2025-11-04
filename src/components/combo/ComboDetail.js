@@ -161,26 +161,6 @@ const ComboDetail = () => {
                             </li>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'san-pham' ? 'active' : ''}`}
-                                    type="button"
-                                    onClick={() => setActiveTab('san-pham')}
-                                    style={{ 
-                                        color: activeTab === 'san-pham' ? '#007bff' : '#6c757d',
-                                        borderBottomColor: activeTab === 'san-pham' ? '#007bff' : 'transparent',
-                                        borderBottomWidth: activeTab === 'san-pham' ? '2px' : '1px',
-                                        textDecoration: 'none',
-                                        backgroundColor: 'transparent',
-                                        border: 'none',
-                                        padding: '0.5rem 1rem',
-                                        cursor: 'pointer',
-                                        fontWeight: activeTab === 'san-pham' ? '500' : 'normal'
-                                    }}
-                                >
-                                    Sản phẩm trong combo
-                                </button>
-                            </li>
-                            <li className="nav-item" role="presentation">
-                                <button
                                     className={`nav-link ${activeTab === 'mo-ta' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('mo-ta')}
@@ -359,6 +339,63 @@ const ComboDetail = () => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Sản phẩm trong combo */}
+                                    {combo.items && combo.items.length > 0 && (
+                                        <div className="mt-4">
+                                            <h6 className="fw-bold mb-3">Sản phẩm trong combo</h6>
+                                            <div className="table-responsive">
+                                                <table className="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th style={{ width: 60 }}>Ảnh</th>
+                                                            <th>Sản phẩm</th>
+                                                            <th className="text-center" style={{ width: 80 }}>Giá</th>
+                                                            <th className="text-center" style={{ width: 50 }}>SL</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {combo.items.map((item, idx) => (
+                                                            <tr key={idx}>
+                                                                <td>{idx + 1}</td>
+                                                                <td>
+                                                                    {item.image_url ? (
+                                                                        <img
+                                                                            src={item.image_url.startsWith('http') ? item.image_url : urlImage + item.image_url}
+                                                                            alt={item.name}
+                                                                            className="img-thumbnail"
+                                                                            style={{
+                                                                                width: 40,
+                                                                                height: 40,
+                                                                                objectFit: 'cover',
+                                                                                borderRadius: 6,
+                                                                                border: '1px solid #dee2e6'
+                                                                            }}
+                                                                        />
+                                                                    ) : (
+                                                                        <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #dee2e6', borderRadius: 6 }}>
+                                                                            <i className="fas fa-image" style={{ fontSize: 16, color: '#adb5bd' }}></i>
+                                                                        </div>
+                                                                    )}
+                                                                </td>
+                                                                <td>
+                                                                    <div className="fw-semibold small">{item.name}</div>
+                                                                    <small className="text-muted">{item.product_code}</small>
+                                                                </td>
+                                                                <td className="text-center">
+                                                                    <span className="fw-bold text-danger small">{formatVNDWithUnit(item.base_store_price)}</span>
+                                                                </td>
+                                                                <td className="text-center">
+                                                                    <span className="fw-bold">{item.quantity}</span>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 

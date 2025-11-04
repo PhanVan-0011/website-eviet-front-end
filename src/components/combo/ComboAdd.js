@@ -69,7 +69,7 @@ const ComboAdd = () => {
     }, []);
 
     // Tạo options cho react-select
-    const productOptions = products.map(p => ({ value: p.id, label: p.name + (p.size ? ` - ${p.size}` : '') + (p.category?.name ? ` (${p.category.name})` : '') }));
+    const productOptions = products.map(p => ({ value: p.id, label: p.name + (p.size ? ` - ${p.size}` : '') + (p.category?.name ? ` (${p.category.name})` : ''), data: p }));
     const branchOptions = branches.map(branch => ({ value: branch.id, label: branch.name }));
 
     // Hàm format giá tiền
@@ -77,6 +77,137 @@ const ComboAdd = () => {
         value = value.replace(/\D/g, '');
         if (!value) return '';
         return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
+
+    // Hàm format hiển thị VND với ký hiệu
+    const formatVNDDisplay = (amount) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    };
+
+    // Custom Option component với hình ảnh
+    const CustomOption = ({ innerRef, innerProps, data, isSelected, isFocused }) => {
+        const imageUrl = data.data?.featured_image?.thumb_url 
+            ? `${process.env.REACT_APP_API_URL}api/images/${data.data.featured_image.thumb_url}`
+            : null;
+
+        return (
+            <div
+                ref={innerRef}
+                {...innerProps}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '8px 12px',
+                    backgroundColor: isSelected ? '#0d6efd' : isFocused ? '#e7f1ff' : 'white',
+                    color: isSelected ? 'white' : '#212529',
+                    cursor: 'pointer'
+                }}
+            >
+                {imageUrl ? (
+                    <img
+                        src={imageUrl}
+                        alt={data.data?.name || 'Product'}
+                        style={{
+                            width: '32px',
+                            height: '32px',
+                            objectFit: 'cover',
+                            borderRadius: '4px',
+                            marginRight: '8px',
+                            border: '1px solid #ddd'
+                        }}
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                        }}
+                    />
+                ) : (
+                    <div
+                        style={{
+                            width: '32px',
+                            height: '32px',
+                            backgroundColor: '#f8f9fa',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            marginRight: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '12px',
+                            color: '#6c757d'
+                        }}
+                    >
+                        <i className="fas fa-image"></i>
+                    </div>
+                )}
+                <div>
+                    <div style={{ fontWeight: '500' }}>
+                        <span className="badge bg-primary me-2">{data.data?.product_code || 'N/A'}</span>
+                        {data.data?.name || 'N/A'}
+                    </div>
+                    <div style={{ fontSize: '12px', opacity: 0.8 }}>
+                        Tồn: {data.data?.total_stock_quantity || 0} | Giá: {formatVNDDisplay(data.data?.base_store_price || 0)}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // Custom SingleValue component với hình ảnh
+    const CustomSingleValue = ({ data }) => {
+        const imageUrl = data.data?.featured_image?.thumb_url 
+            ? `${process.env.REACT_APP_API_URL}api/images/${data.data.featured_image.thumb_url}`
+            : null;
+
+        return (
+            <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '10px', minHeight: '60px' }}>
+                {imageUrl ? (
+                    <img
+                        src={imageUrl}
+                        alt={data.data?.name || 'Product'}
+                        style={{
+                            width: '48px',
+                            height: '48px',
+                            objectFit: 'cover',
+                            borderRadius: '4px',
+                            border: '1px solid #ddd',
+                            flexShrink: 0
+                        }}
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                        }}
+                    />
+                ) : (
+                    <div
+                        style={{
+                            width: '48px',
+                            height: '48px',
+                            backgroundColor: '#f8f9fa',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '18px',
+                            color: '#6c757d',
+                            flexShrink: 0
+                        }}
+                    >
+                        <i className="fas fa-image"></i>
+                    </div>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', minWidth: 0, justifyContent: 'center', height: '100%' }}>
+                    <div style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                        <span className="badge bg-primary" style={{ fontSize: '11px', flexShrink: 0, padding: '4px 8px' }}>{data.data?.product_code || 'N/A'}</span>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '16px' }}>{data.data?.name || 'N/A'}</span>
+                    </div>
+                    <div style={{ fontSize: '12px', opacity: 0.75, color: '#6c757d', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '3px' }}>
+                        Tồn: {data.data?.total_stock_quantity || 0} | Giá: {formatVNDDisplay(data.data?.base_store_price || 0)}
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     // Hàm xử lý khi chọn ảnh
@@ -522,18 +653,21 @@ const ComboAdd = () => {
                                                         <div className="card-body pt-2">
                                                             {comboItems.length > 0 && (
                                                                 <div className="table-responsive">
-                                                                    <table className="table table-bordered">
-                                                                        <thead>
+                                                                    <table className="table table-bordered table-hover mb-0">
+                                                                        <thead className="table-light">
                                                                             <tr>
-                                                                                <th>Sản phẩm</th>
-                                                                                <th>Ảnh</th>
-                                                                                <th>Số lượng</th>
-                                                                                <th>Thao tác</th>
+                                                                                <th width="5%" className="text-center">STT</th>
+                                                                                <th width="55%">Sản phẩm</th>
+                                                                                <th width="20%" className="text-center">Số lượng</th>
+                                                                                <th width="20%" className="text-center">Thao tác</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
                                                                             {comboItems.map((item, idx) => (
                                                                                 <tr key={idx}>
+                                                                                    <td className="text-center align-middle">
+                                                                                        <span className="fw-semibold text-muted">{idx + 1}</span>
+                                                                                    </td>
                                                                                     <td style={{ verticalAlign: 'middle', position: 'relative', zIndex: 10 }}>
                                                                                         <div style={{ minWidth: '280px' }}>
                                                                                             <Select
@@ -544,54 +678,65 @@ const ComboAdd = () => {
                                                                                                 classNamePrefix="react-select"
                                                                                                 styles={{
                                                                                                     ...selectStyles,
-                                                                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                                                                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                                                                    valueContainer: (base) => ({ 
+                                                                                                        ...base, 
+                                                                                                        padding: '0 8px',
+                                                                                                        display: 'flex',
+                                                                                                        alignItems: 'center'
+                                                                                                    }),
+                                                                                                    input: (base) => ({
+                                                                                                        ...base,
+                                                                                                        margin: 0,
+                                                                                                        padding: 0,
+                                                                                                        position: 'absolute',
+                                                                                                        opacity: 0
+                                                                                                    }),
+                                                                                                    singleValue: (base) => ({ 
+                                                                                                        ...base, 
+                                                                                                        margin: 0,
+                                                                                                        position: 'relative',
+                                                                                                        top: 0,
+                                                                                                        transform: 'none',
+                                                                                                        maxWidth: 'calc(100% - 8px)'
+                                                                                                    }),
+                                                                                                    control: (base) => ({
+                                                                                                        ...base,
+                                                                                                        minHeight: '60px'
+                                                                                                    })
                                                                                                 }}
                                                                                                 menuPortalTarget={document.body}
                                                                                                 menuPosition="fixed"
+                                                                                                components={{
+                                                                                                    Option: CustomOption,
+                                                                                                    SingleValue: CustomSingleValue
+                                                                                                }}
                                                                                             />
                                                                                             {errors.comboItems && idx === 0 && <div className="text-danger small mt-1">{errors.comboItems.message}</div>}
                                                                                         </div>
                                                                                     </td>
-                                                                                    <td style={{ verticalAlign: 'middle' }}>
-                                                                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                                                                            {products.find(p => String(p.id) === String(item.product_id))?.featured_image?.thumb_url ? (
-                                                                                                <img
-                                                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + products.find(p => String(p.id) === String(item.product_id)).featured_image.thumb_url}
-                                                                                                    alt=""
-                                                                                                    style={{ width: 60, height: 60, objectFit: 'contain', borderRadius: 4, border: '1px solid #eee' }}
-                                                                                                />
-                                                                                            ) : (
-                                                                                                <div style={{ width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 4 }}>
-                                                                                                    <i className="fas fa-image" style={{ fontSize: 24, color: '#bbb' }}></i>
-                                                                                                </div>
-                                                                                            )}
-                                                                                        </div>
+                                                                                    <td className="text-center align-middle">
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            className="form-control form-control-sm"
+                                                                                            min={1}
+                                                                                            value={item.quantity}
+                                                                                            onChange={e => handleChangeItem(idx, 'quantity', e.target.value)}
+                                                                                            placeholder="Số lượng"
+                                                                                            style={{ width: '80px', margin: '0 auto' }}
+                                                                                            required
+                                                                                        />
                                                                                     </td>
-                                                                                    <td style={{ verticalAlign: 'middle' }}>
-                                                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                                                                                            <input
-                                                                                                type="number"
-                                                                                                className="form-control"
-                                                                                                min={1}
-                                                                                                value={item.quantity}
-                                                                                                onChange={e => handleChangeItem(idx, 'quantity', e.target.value)}
-                                                                                                placeholder="Số lượng"
-                                                                                                style={{ width: '100px' }}
-                                                                                                required
-                                                                                            />
-                                                                                        </div>
-                                                                                    </td>
-                                                                                    <td style={{ verticalAlign: 'middle' }}>
-                                                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                                                                                            <button
-                                                                                                type="button"
-                                                                                                className="btn btn-sm btn-danger"
-                                                                                                onClick={() => handleRemoveItem(idx)}
-                                                                                                disabled={comboItems.length === 1}
-                                                                                            >
-                                                                                                <i className="fas fa-trash"></i>
-                                                                                            </button>
-                                                                                        </div>
+                                                                                    <td className="text-center align-middle">
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            className="btn btn-sm btn-danger"
+                                                                                            onClick={() => handleRemoveItem(idx)}
+                                                                                            disabled={comboItems.length === 1}
+                                                                                            title="Xóa sản phẩm"
+                                                                                        >
+                                                                                            <i className="fas fa-trash"></i>
+                                                                                        </button>
                                                                                     </td>
                                                                                 </tr>
                                                                             ))}
