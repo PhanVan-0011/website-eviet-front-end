@@ -486,7 +486,7 @@ const ProductList = () => {
         { 
             title: () => (
                 <span>
-                    Mã 
+                    Mã hàng
                 </span>
             ),
             element: row => {
@@ -502,7 +502,7 @@ const ProductList = () => {
         { 
             title: () => (
                 <span style={{cursor: 'pointer'}} onClick={() => handleSort('name')}>
-                    Tên sản phẩm {renderSortIcon('name')}
+                    Tên hàng {renderSortIcon('name')}
                 </span>
             ),
             element: row => {
@@ -881,7 +881,7 @@ const ProductList = () => {
                                             </span>
                                             <LiveSearch 
                                                 changeKeyword={setSearchText}
-                                                placeholder="Tìm kiếm theo mã sản phẩm, tên sản phẩm..."
+                                                placeholder="Tìm theo mã,tên hàng"
                                             />
                                         </div>
                                     </div>
@@ -929,24 +929,6 @@ const ProductList = () => {
                                         </small>
                                     </div>
                                 )}
-                            </div>
-
-                            {/* Header với tiêu đề */}
-                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
-                                <div className="d-flex align-items-center gap-2">
-                                    <h4 className="mb-0 fw-bold text-primary">Danh sách sản phẩm</h4>
-                                    {/* Filter Toggle Button */}
-                                    <FilterToggleButton
-                                        key={`toggle-${isFilterVisible}`}
-                                        isVisible={isFilterVisible}
-                                        onToggle={() => {
-                                            setIsPulsing(true);
-                                            setTimeout(() => setIsPulsing(false), 600);
-                                            toggleFilterVisibility();
-                                        }}
-                                        isPulsing={isPulsing}
-                                    />
-                                </div>
                             </div>
 
                             {/* Data Table */}
