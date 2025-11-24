@@ -413,24 +413,6 @@ const ComboList = () => {
                                 )}
                             </div>
 
-                            {/* Header với tiêu đề */}
-                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
-                                <div className="d-flex align-items-center gap-2">
-                                    <h4 className="mb-0 fw-bold text-primary">Danh sách combo</h4>
-                                    {/* Filter Toggle Button */}
-                                    <FilterToggleButton
-                                        key={`toggle-${isFilterVisible}`}
-                                        isVisible={isFilterVisible}
-                                        onToggle={() => {
-                                            setIsPulsing(true);
-                                            setTimeout(() => setIsPulsing(false), 600);
-                                            toggleFilterVisibility();
-                                        }}
-                                        isPulsing={isPulsing}
-                                    />
-                                </div>
-                            </div>
-
                             {/* Data Table */}
                             <div className="flex-grow-1 overflow-auto">
                                 <div className="p-3">

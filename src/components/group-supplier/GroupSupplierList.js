@@ -205,13 +205,6 @@ const GroupSupplierList = () => {
                         )}
                     </div>
 
-                            {/* Header với tiêu đề */}
-                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
-                                <div className="d-flex align-items-center gap-2">
-                                    <h4 className="mb-0 fw-bold text-dark">Danh sách nhóm nhà cung cấp</h4>
-                                </div>
-                            </div>
-
                             {/* Data Table */}
                             <div className="flex-grow-1 overflow-auto">
                                 <div className="p-3">
