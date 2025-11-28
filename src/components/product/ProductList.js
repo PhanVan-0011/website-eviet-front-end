@@ -7,6 +7,7 @@ import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
 import ImageList from '../common/ImageList';
+import ImageWithZoom from '../common/ImageWithZoom';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
@@ -536,12 +537,13 @@ const ProductList = () => {
             title: "Hình ảnh", 
             element: row => (
                 row.featured_image && row.featured_image.thumb_url ? (
-                    <ImageList
+                    <ImageWithZoom
                         src={urlImage + row.featured_image.thumb_url}
+                        zoomSrc={row.featured_image.main_url ? urlImage + row.featured_image.main_url : urlImage + row.featured_image.thumb_url}
                         alt={row.name}
                     />
                 ) : (
-                    <ImageList icon alt="Không có ảnh" />
+                    <ImageWithZoom icon alt="Không có ảnh" />
                 )
             ),
             width: "12%"
@@ -965,6 +967,7 @@ const ProductList = () => {
                         hideSearch={true}
                         showSummary={true}
                         customSummaryData={{ 4: totalStockQuantity }}
+                        tableHeight="calc(100vh - 340px)"
                     />
                                 </div>
                             </div>

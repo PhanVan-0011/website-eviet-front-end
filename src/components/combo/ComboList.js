@@ -8,6 +8,7 @@ import { Modal, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import ImageList from '../common/ImageList';
+import ImageWithZoom from '../common/ImageWithZoom';
 import moment from 'moment';
 import { cleanHtml } from '../../helpers/formatData';
 import {
@@ -139,9 +140,13 @@ const ComboList = () => {
               featured = row.image_urls.find(img => img.is_featured) || row.image_urls[0];
             }
             return featured && featured.thumb_url ? (
-              <ImageList src={urlImage + featured.thumb_url} alt={row.name} />
+              <ImageWithZoom
+                src={urlImage + featured.thumb_url}
+                zoomSrc={featured.main_url ? urlImage + featured.main_url : urlImage + featured.thumb_url}
+                alt={row.name}
+              />
             ) : (
-              <ImageList icon alt="Không có ảnh" />
+              <ImageWithZoom icon alt="Không có ảnh" />
             );
           },
           width: '12%'

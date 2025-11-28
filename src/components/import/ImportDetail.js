@@ -248,11 +248,15 @@ const ImportDetail = () => {
                                     </div>
 
                                     {/* Bảng sản phẩm */}
-                                    <div className="mb-4" style={{ display: 'flex', flexDirection: 'column' }}>
-                                        {/* Header cố định */}
-                                        <div className="table-responsive" style={{ overflowY: 'visible', overflowX: 'auto' }}>
+                                    <div className="mb-4">
+                                        <div 
+                                            className="table-responsive" 
+                                            style={{ 
+                                                maxHeight: invoice.details && invoice.details.length > 10 ? '500px' : 'none'
+                                            }}
+                                        >
                                             <table className="table table-bordered mb-0">
-                                                <thead className="table-light">
+                                                <thead className="table-light position-sticky top-0 bg-light" style={{ zIndex: 10 }}>
                                                     <tr>
                                                         <th>Mã hàng</th>
                                                         <th>Tên hàng</th>
@@ -261,11 +265,6 @@ const ImportDetail = () => {
                                                         <th className="text-end">Thành tiền</th>
                                                     </tr>
                                                 </thead>
-                                            </table>
-                                        </div>
-                                        {/* Nội dung cuộn - tự động tăng chiều cao theo item */}
-                                        <div className="table-responsive" style={{ overflowY: invoice.details && invoice.details.length > 10 ? 'auto' : 'visible', overflowX: 'auto', maxHeight: invoice.details && invoice.details.length > 10 ? '500px' : 'auto' }}>
-                                            <table className="table table-bordered mb-0">
                                                 <tbody>
                                                     {invoice.details && invoice.details.map((item, index) => (
                                                         <tr key={index}>
@@ -274,11 +273,11 @@ const ImportDetail = () => {
                                                                     to={`/product/detail/${item.product_id}`}
                                                                     className="text-dark text-decoration-none"
                                                                 >
-                                                                    {item.product?.product_code || 'N/A'}
+                                                                    {item.product?.product_code || ''}
                                                                 </Link>
                                                             </td>
                                                             <td>
-                                                                {item.product?.name || 'N/A'}
+                                                                {item.product?.name || ''}
                                                                 <small className="text-muted d-block">
                                                                     ({item.unit_of_measure})
                                                                 </small>

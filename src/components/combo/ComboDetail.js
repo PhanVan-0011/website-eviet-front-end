@@ -15,7 +15,7 @@ const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 // Component hiển thị từng field thông tin
 const InfoItem = ({ label, value, isDanger = false }) => (
-    <div className="col-md-3 mb-3">
+    <div className="col-md-4 col-lg-3 mb-3">
         <div className="text-muted small mb-1">{label}</div>
         <div className={`fw-semibold border-bottom pb-2 ${isDanger ? 'text-danger' : ''}`}>
             {value ?? 'Chưa có'}
@@ -208,7 +208,7 @@ const ComboDetail = () => {
                                     {/* Header: Hình ảnh + Thông tin combo */}
                                     <div style={{display: 'flex', gap: '1.5rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #dee2e6'}}>
                                         {/* Cột trái: Hình ảnh */}
-                                        <div style={{flex: '0 0 30%'}}>
+                                        <div style={{flex: '0 0 35%'}}>
                                             <div style={{display: 'flex', gap: '0.75rem'}}>
                                                 {/* Hình ảnh chính */}
                                                 <div style={{flex: 1}}>
@@ -228,7 +228,7 @@ const ComboDetail = () => {
                                                                         borderRadius: 8,
                                                                         background: '#f8f9fa',
                                                                         border: '1px solid #dee2e6',
-                                                                        height: 350,
+                                                                        height: 300,
                                                                         display: 'block'
                                                                     }}
                                                                     title="Bấm để xem lớn"
@@ -263,7 +263,7 @@ const ComboDetail = () => {
                                                     <div
                                                         style={{
                                                             width: '100%',
-                                                            height: 350,
+                                                            height: 300,
                                                             borderRadius: 8,
                                                             background: '#f8f9fa',
                                                             border: '1px solid #dee2e6',
@@ -305,7 +305,7 @@ const ComboDetail = () => {
                                         </div>
 
                                         {/* Cột phải: Thông tin combo */}
-                                        <div style={{flex: '0 0 70%'}}>
+                                        <div style={{flex: '0 0 65%'}}>
                                             {/* Tên combo */}
                                             <h3 style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
                                                 {combo.name}
@@ -348,11 +348,11 @@ const ComboDetail = () => {
                                                 <table className="table table-bordered">
                                                     <thead>
                                                         <tr>
-                                                            <th>#</th>
-                                                            <th style={{ width: 60 }}>Ảnh</th>
-                                                            <th>Sản phẩm</th>
-                                                            <th className="text-center" style={{ width: 80 }}>Giá</th>
-                                                            <th className="text-center" style={{ width: 50 }}>SL</th>
+                                                            <th style={{ width: '5%' }}>#</th>
+                                                            <th style={{ width: '10%' }}>Ảnh</th>
+                                                            <th style={{ width: '50%' }}>Sản phẩm</th>
+                                                            <th className="text-center" style={{ width: '20%' }}>Giá</th>
+                                                            <th className="text-center" style={{ width: '15%' }}>SL</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -366,16 +366,16 @@ const ComboDetail = () => {
                                                                             alt={item.name}
                                                                             className="img-thumbnail"
                                                                             style={{
-                                                                                width: 40,
-                                                                                height: 40,
+                                                                                width: 50,
+                                                                                height: 50,
                                                                                 objectFit: 'cover',
                                                                                 borderRadius: 6,
                                                                                 border: '1px solid #dee2e6'
                                                                             }}
                                                                         />
                                                                     ) : (
-                                                                        <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #dee2e6', borderRadius: 6 }}>
-                                                                            <i className="fas fa-image" style={{ fontSize: 16, color: '#adb5bd' }}></i>
+                                                                        <div style={{ width: 50, height: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #dee2e6', borderRadius: 6 }}>
+                                                                            <i className="fas fa-image" style={{ fontSize: 18, color: '#adb5bd' }}></i>
                                                                         </div>
                                                                     )}
                                                                 </td>
@@ -405,15 +405,15 @@ const ComboDetail = () => {
                                     {combo.items && combo.items.length > 0 ? (
                                         <div className="table-responsive">
                                             <table className="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th style={{ width: 60 }}>Ảnh</th>
-                                                        <th>Sản phẩm</th>
-                                                        <th className="text-center" style={{ width: 80 }}>Giá</th>
-                                                        <th className="text-center" style={{ width: 50 }}>SL</th>
-                                                    </tr>
-                                                </thead>
+                                                    <thead>
+                                                        <tr>
+                                                            <th style={{ width: '5%' }}>#</th>
+                                                            <th style={{ width: '10%' }}>Ảnh</th>
+                                                            <th style={{ width: '50%' }}>Sản phẩm</th>
+                                                            <th className="text-center" style={{ width: '20%' }}>Giá</th>
+                                                            <th className="text-center" style={{ width: '15%' }}>SL</th>
+                                                        </tr>
+                                                    </thead>
                                                 <tbody>
                                                     {combo.items.map((item, idx) => (
                                                         <tr key={idx}>
@@ -425,8 +425,8 @@ const ComboDetail = () => {
                                                                         alt={item.name}
                                                                         className="img-thumbnail"
                                                                         style={{
-                                                                            width: 40,
-                                                                            height: 40,
+                                                                            width: 50,
+                                                                            height: 50,
                                                                             objectFit: 'cover',
                                                                             borderRadius: 6,
                                                                             border: '1px solid #dee2e6'

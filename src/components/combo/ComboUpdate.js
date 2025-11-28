@@ -42,6 +42,7 @@ const ComboUpdate = () => {
     const [endDatePicker, setEndDatePicker] = useState(null);
     const [comboItems, setComboItems] = useState([{ product_id: '', quantity: 1 }]);
     const [description, setDescription] = useState('');
+    const [itemErrors, setItemErrors] = useState({});
 
     // Chi nhánh
     const [applyToAllBranches, setApplyToAllBranches] = useState(true);
@@ -126,6 +127,22 @@ const ComboUpdate = () => {
     // Tạo options cho react-select
     const productOptions = products.map(p => ({ value: p.id, label: p.name + (p.size ? ` - ${p.size}` : '') + (p.category?.name ? ` (${p.category.name})` : ''), data: p }));
     const branchOptions = branches.map(branch => ({ value: branch.id, label: branch.name }));
+
+    const getProductStock = (productId) => {
+        if (!productId) return null;
+        const product = products.find(p => String(p.id) === String(productId));
+        return product ? Number(product.total_stock_quantity || 0) : null;
+    };
+
+    const enforceQuantityValidity = (target, productStock) => {
+        if (!target.value || Number(target.value) < 1) {
+            target.setCustomValidity('Số lượng phải lớn hơn hoặc bằng 1');
+        } else if (productStock !== null && Number(target.value) > productStock) {
+            target.setCustomValidity(`Số lượng không được vượt quá tồn kho (${productStock})`);
+        } else {
+            target.setCustomValidity('');
+        }
+    };
 
     // Hàm format giá tiền
     const formatVND = (value) => {
@@ -307,14 +324,31 @@ const ComboUpdate = () => {
         if (comboItems.length === 1) return;
         setComboItems(comboItems.filter((_, i) => i !== idx));
         clearErrors('comboItems');
+        // Xóa lỗi của item bị xóa và cập nhật lại index cho các item còn lại
+        const newErrors = {};
+        Object.keys(itemErrors).forEach(key => {
+            const keyIdx = parseInt(key);
+            if (keyIdx < idx) {
+                newErrors[keyIdx] = itemErrors[keyIdx];
+            } else if (keyIdx > idx) {
+                newErrors[keyIdx - 1] = itemErrors[keyIdx];
+            }
+        });
+        setItemErrors(newErrors);
     };
     const handleChangeItem = (idx, field, value) => {
         setComboItems(comboItems.map((item, i) =>
             i === idx ? { ...item, [field]: value } : item
         ));
         clearErrors('comboItems');
+        // Xóa lỗi của item khi người dùng thay đổi
+        if (itemErrors[idx]) {
+            const newErrors = { ...itemErrors };
+            delete newErrors[idx];
+            setItemErrors(newErrors);
+        }
     };
-
+    
     // Hàm validate sản phẩm trong combo
     const validateComboItems = () => {
         if (!comboItems || comboItems.length === 0) {
@@ -327,10 +361,32 @@ const ComboUpdate = () => {
             setError('comboItems', { type: 'manual', message: 'Không được chọn trùng sản phẩm trong combo!' });
             return false;
         }
-        if (comboItems.some(i => !i.product_id || !i.quantity || Number(i.quantity) <= 0)) {
-            setError('comboItems', { type: 'manual', message: 'Vui lòng chọn sản phẩm và số lượng phải lớn hơn 0' });
+        
+        // Validate từng item và lưu lỗi theo index
+        const errors = {};
+        let hasError = false;
+        comboItems.forEach((item, idx) => {
+            if (!item.product_id) {
+                errors[idx] = 'Vui lòng chọn sản phẩm';
+                hasError = true;
+            } else if (!item.quantity || Number(item.quantity) < 1) {
+                errors[idx] = 'Số lượng phải lớn hơn 0';
+                hasError = true;
+            } else {
+                const productStock = getProductStock(item.product_id);
+                if (productStock !== null && Number(item.quantity) > productStock) {
+                    errors[idx] = `Số lượng không được vượt quá tồn kho (${productStock})`;
+                    hasError = true;
+                }
+            }
+        });
+
+        if (hasError) {
+            setItemErrors(errors);
             return false;
         }
+
+        setItemErrors({});
         clearErrors('comboItems');
         return true;
     };
@@ -716,7 +772,9 @@ const ComboUpdate = () => {
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
-                                                                        {comboItems.map((item, idx) => (
+                                                                        {comboItems.map((item, idx) => {
+                                                                            const productStock = getProductStock(item.product_id);
+                                                                            return (
                                                                             <tr key={idx}>
                                                                                 <td className="text-center align-middle">
                                                                                     <span className="fw-semibold text-muted">{idx + 1}</span>
@@ -726,7 +784,9 @@ const ComboUpdate = () => {
                                                                                         <Select
                                                                                             options={productOptions.filter(opt => !comboItems.some((it, i) => it.product_id === opt.value && i !== idx))}
                                                                                             value={productOptions.find(opt => String(opt.value) === String(item.product_id)) || null}
-                                                                                            onChange={opt => handleChangeItem(idx, 'product_id', opt ? opt.value : '')}
+                                                                                            onChange={opt => {
+                                                                                                handleChangeItem(idx, 'product_id', opt ? opt.value : '');
+                                                                                            }}
                                                                                             placeholder="Tìm kiếm & chọn sản phẩm..."
                                                                                             classNamePrefix="react-select"
                                                                                             styles={{
@@ -765,19 +825,25 @@ const ComboUpdate = () => {
                                                                                                 SingleValue: CustomSingleValue
                                                                                             }}
                                                                                         />
+                                                                                        {itemErrors[idx] && <div className="text-danger small mt-1">{itemErrors[idx]}</div>}
                                                                                     </div>
                                                                                 </td>
                                                                                 <td className="text-center align-middle">
-                                                                                    <input
-                                                                                        type="number"
-                                                                                        className="form-control form-control-sm"
-                                                                                        min={1}
-                                                                                        value={item.quantity}
-                                                                                        onChange={e => handleChangeItem(idx, 'quantity', e.target.value)}
-                                                                                        placeholder="Số lượng"
-                                                                                        style={{ width: '80px', margin: '0 auto' }}
-                                                                                        required
-                                                                                    />
+                                                                                    <div>
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            className="form-control form-control-sm"
+                                                                                            min={1}
+                                                                                            max={productStock ?? undefined}
+                                                                                            value={item.quantity}
+                                                                                            onChange={e => handleChangeItem(idx, 'quantity', e.target.value)}
+                                                                                            onInput={e => enforceQuantityValidity(e.target, productStock)}
+                                                                                            onInvalid={e => enforceQuantityValidity(e.target, productStock)}
+                                                                                            placeholder="Số lượng"
+                                                                                            style={{ width: '80px', margin: '0 auto' }}
+                                                                                            required
+                                                                                        />
+                                                                                    </div>
                                                                                 </td>
                                                                                 <td className="text-center align-middle">
                                                                                     <button
@@ -791,7 +857,7 @@ const ComboUpdate = () => {
                                                                                     </button>
                                                                                 </td>
                                                                             </tr>
-                                                                        ))}
+                                                                        )})}
                                                                     </tbody>
                                                                 </table>
                                                             </div>

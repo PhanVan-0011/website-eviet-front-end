@@ -712,127 +712,118 @@ const Import = () => {
             <div className="card-header bg-light">
               <h6 className="mb-0 fw-bold">Danh sách sản phẩm nhập</h6>
             </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
-              <div className="table-responsive" style={{ overflowY: 'visible', overflowX: 'auto' }}>
-                <table className="table table-hover mb-0">
-                  <thead className="table-light">
+            <div className="card-body p-0 d-flex flex-column" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <div className="table-responsive flex-grow-1" style={{ overflowY: 'auto', overflowX: 'auto' }}>
+                <table className="table table-hover table-bordered mb-0">
+                  <thead className="table-light position-sticky top-0 bg-light" style={{ zIndex: 10 }}>
                     <tr>
-                      <th width="4%" className="text-center"></th>
-                      <th width="4%" className="text-center">STT</th>
-                      <th width="12%">Mã hàng</th>
-                      <th width="30%">Tên hàng</th>
-                      <th width="12%">ĐVT</th>
-                      <th width="12%">Số lượng</th>
-                      <th width="13%">Đơn giá</th>
-                      <th width="13%">Thành tiền</th>
+                      <th className="text-center" style={{ width: '4%' }}></th>
+                      <th className="text-center" style={{ width: '4%' }}>STT</th>
+                      <th style={{ width: '12%' }}>Mã hàng</th>
+                      <th style={{ width: '30%' }}>Tên hàng</th>
+                      <th style={{ width: '12%' }}>ĐVT</th>
+                      <th style={{ width: '12%' }}>Số lượng</th>
+                      <th style={{ width: '13%' }}>Đơn giá</th>
+                      <th style={{ width: '13%' }}>Thành tiền</th>
                     </tr>
                   </thead>
-                </table>
-              </div>
-              <div className="card-body p-0" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-                <div className="table-responsive">
-                  <table className="table table-hover mb-0">
-                    <tbody>
-                      {importItems.map((item, index) => (
-                        <tr key={item.id}>
-                          <td className="text-center align-middle">
-                            <button
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={() => handleRemoveItem(item.id)}
-                              title="Xóa sản phẩm"
+                  <tbody>
+                    {importItems.map((item, index) => (
+                      <tr key={item.id}>
+                        <td className="text-center align-middle">
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleRemoveItem(item.id)}
+                            title="Xóa sản phẩm"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </td>
+                        <td className="text-center align-middle">
+                          {index + 1}
+                        </td>
+                        <td className="align-middle">
+                          <input
+                            type="text"
+                            className="form-control form-control-sm bg-light"
+                            value={item.code}
+                            readOnly
+                            placeholder="Mã sản phẩm"
+                          />
+                        </td>
+                        <td className="align-middle">
+                          <input
+                            type="text"
+                            className="form-control form-control-sm bg-light"
+                            value={item.name}
+                            readOnly
+                            placeholder="Tên sản phẩm"
+                          />
+                        </td>
+                        <td className="align-middle">
+                          {item.availableUnits && item.availableUnits.length > 1 ? (
+                            <select
+                              className="form-select form-select-sm"
+                              value={item.selectedUnitIndex}
+                              onChange={(e) => handleUnitChange(item.id, parseInt(e.target.value))}
                             >
-                              <i className="fas fa-trash"></i>
-                            </button>
-                          </td>
-                          <td className="text-center align-middle">
-                            {index + 1}
-                          </td>
-                          <td className="align-middle">
+                              {item.availableUnits.map((unit, index) => (
+                                <option key={index} value={index}>
+                                  {unit.unit_name}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
                             <input
                               type="text"
-                              className="form-control form-control-sm"
-                              value={item.code}
+                              className="form-control form-control-sm bg-light"
+                              value={item.unit}
                               readOnly
-                              placeholder="Mã sản phẩm"
-                              style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                              placeholder="ĐVT"
                             />
-                          </td>
-                          <td className="align-middle">
+                          )}
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            className="form-control form-control-sm text-center"
+                            value={item.quantity === 0 ? '' : item.quantity}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value);
+                              if (isNaN(val) || val <= 0) {
+                                handleItemChange(item.id, 'quantity', '');
+                              } else {
+                                handleItemChange(item.id, 'quantity', val);
+                              }
+                            }}
+                            placeholder="0"
+                            min="0"
+                            step="1"
+                          />
+                        </td>
+                        <td>
+                          <div className="input-group input-group-sm">
                             <input
                               type="text"
-                              className="form-control form-control-sm"
-                              value={item.name}
-                              readOnly
-                              placeholder="Tên sản phẩm"
-                              style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
-                            />
-                          </td>
-                          <td className="align-middle">
-                            {item.availableUnits && item.availableUnits.length > 1 ? (
-                              <select
-                                className="form-select form-select-sm"
-                                value={item.selectedUnitIndex}
-                                onChange={(e) => handleUnitChange(item.id, parseInt(e.target.value))}
-                              >
-                                {item.availableUnits.map((unit, index) => (
-                                  <option key={index} value={index}>
-                                    {unit.unit_name}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : (
-                              <input
-                                type="text"
-                                className="form-control form-control-sm"
-                                value={item.unit}
-                                readOnly
-                                placeholder="ĐVT"
-                                style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
-                              />
-                            )}
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              className="form-control form-control-sm text-center"
-                              value={item.quantity === 0 ? '' : item.quantity}
+                              className="form-control form-control-sm text-end"
+                              value={item.unit_price === 0 || item.unit_price === '' ? '' : formatVND(item.unit_price)}
                               onChange={(e) => {
-                                const val = parseFloat(e.target.value);
-                                if (isNaN(val) || val <= 0) {
-                                  handleItemChange(item.id, 'quantity', '');
-                                } else {
-                                  handleItemChange(item.id, 'quantity', val);
-                                }
+                                const formatted = formatVND(e.target.value);
+                                const rawValue = Number(formatted.replace(/\./g, '')) || 0;
+                                handleItemChange(item.id, 'unit_price', rawValue);
                               }}
                               placeholder="0"
-                              min="0"
-                              step="1"
                             />
-                          </td>
-                          <td>
-                            <div className="input-group input-group-sm">
-                              <input
-                                type="text"
-                                className="form-control form-control-sm text-end"
-                                value={item.unit_price === 0 || item.unit_price === '' ? '' : formatVND(item.unit_price)}
-                                onChange={(e) => {
-                                  const formatted = formatVND(e.target.value);
-                                  const rawValue = Number(formatted.replace(/\./g, '')) || 0;
-                                  handleItemChange(item.id, 'unit_price', rawValue);
-                                }}
-                                placeholder="0"
-                              />
-                              <span className="input-group-text">₫</span>
-                            </div>
-                          </td>
-                          <td className="text-end align-middle">
-                            <span className="fw-bold text-primary">{formatVNDDisplay(item.total)}</span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                            <span className="input-group-text">₫</span>
+                          </div>
+                        </td>
+                        <td className="text-end align-middle">
+                          <span className="fw-bold text-primary">{formatVNDDisplay(item.total)}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
