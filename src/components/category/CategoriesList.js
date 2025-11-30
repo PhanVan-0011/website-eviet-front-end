@@ -56,10 +56,9 @@ const CategoriesList = () => {
         { 
             title: "Icon", 
             element: row => {
-                // Kiểm tra xem có icon không (API trả về trường 'icon' chứ không phải 'icon_url')
+                // Kiểm tra xem có icon không (API trả về trường 'icon' đã bao gồm /main)
                 if (row.icon) {
-                    const newIconPath = row.icon.replace(/\/([^\/]+)$/, '/main/$1');
-                    return <ImageList src={urlImage + newIconPath} alt={row.name} />;
+                    return <ImageList src={urlImage + row.icon} alt={row.name} />;
                 } else {
                     return <ImageList icon alt="Không có icon" />;
                 }
@@ -69,18 +68,40 @@ const CategoriesList = () => {
         { 
             title: "Mô tả", 
             element: row => row.description,
-            width: "20%"
+            width: "18%"
+        },
+        { 
+            title: "Loại danh mục", 
+            element: row => {
+                const typeLabels = {
+                    'product': 'Sản phẩm',
+                    'post': 'Bài viết',
+                    'all': 'Tất cả'
+                };
+                const typeBadges = {
+                    'product': 'bg-primary',
+                    'post': 'bg-info',
+                    'all': 'bg-secondary'
+                };
+                const type = row.type || 'all';
+                return (
+                    <span className={`badge ${typeBadges[type] || 'bg-secondary'}`}>
+                        {typeLabels[type] || type}
+                    </span>
+                );
+            },
+            width: "12%"
         },
         // { title: "Danh mục cha", element: row => row.parent ? row.parent.name : "" },
         { 
             title: "Ngày tạo", 
             element: row => formatDate(row.created_at),
-            width: "12%"
+            width: "10%"
         },
         { 
             title: "Ngày cập nhật", 
             element: row => formatDate(row.updated_at),
-            width: "12%"
+            width: "10%"
         },
         {
             title: () => (

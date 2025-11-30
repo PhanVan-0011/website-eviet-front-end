@@ -113,6 +113,32 @@ const CategoryDetail = () => {
                                     
                                     <div className="row mb-3">
                                         <div className="col-sm-3">
+                                            <strong>Loại danh mục:</strong>
+                                        </div>
+                                        <div className="col-sm-9">
+                                            {(() => {
+                                                const type = category.type || 'all';
+                                                const typeLabels = {
+                                                    'product': 'Sản phẩm',
+                                                    'post': 'Bài viết',
+                                                    'all': 'Tất cả'
+                                                };
+                                                const typeBadges = {
+                                                    'product': 'bg-primary',
+                                                    'post': 'bg-info',
+                                                    'all': 'bg-secondary'
+                                                };
+                                                return (
+                                                    <span className={`badge ${typeBadges[type] || 'bg-secondary'}`}>
+                                                        {typeLabels[type] || type}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="row mb-3">
+                                        <div className="col-sm-3">
                                             <strong>Số sản phẩm:</strong>
                                         </div>
                                         <div className="col-sm-9">

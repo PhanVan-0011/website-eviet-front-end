@@ -55,6 +55,7 @@ const CategoryAdd = () => {
         formData.append('name', data.name);
         formData.append('description', data.description || '');
         formData.append('status', data.status);
+        formData.append('type', data.type);
         if (iconFile) {
             formData.append('icon', iconFile);
         }
@@ -153,6 +154,35 @@ const CategoryAdd = () => {
                                                 {errors.status && <div className="text-danger mt-1">{errors.status.message}</div>}
                                             </div>
                                         </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label htmlFor="inputType" className="form-label fw-semibold">
+                                                    Loại danh mục <span style={{color: 'red'}}>*</span>
+                                                </label>
+                                                <select
+                                                    className="form-select"
+                                                    id="inputType"
+                                                    {...register('type', { 
+                                                        required: 'Loại danh mục là bắt buộc',
+                                                        validate: (value) => {
+                                                            if (!['product', 'post', 'all'].includes(value)) {
+                                                                return 'Loại danh mục phải là product, post hoặc all';
+                                                            }
+                                                            return true;
+                                                        }
+                                                    })}
+                                                    defaultValue="all"
+                                                >
+                                                    <option value="all">Tất cả</option>
+                                                    <option value="product">Sản phẩm</option>
+                                                    <option value="post">Bài viết</option>
+                                                    
+                                                </select>
+                                                {errors.type && <div className="text-danger mt-1">{errors.type.message}</div>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="row mb-3">
                                         <div className="col-md-6">
                                             <div className="mb-3">
                                                 <div className="form-label fw-semibold">

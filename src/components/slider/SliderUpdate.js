@@ -441,7 +441,7 @@ const SliderUpdate = () => {
                                         )}
                                                 {!linkType && (
                                                     <div className="d-flex align-items-center justify-content-center h-100">
-                                                        <span className="text-muted fst-italic">Vui lòng chọn loại liên kết</span>
+                                                        <span className="text-muted fst-italic">Hiển thị khi không có liên kết</span>
                                             </div>
                                         )}
                                     </div>

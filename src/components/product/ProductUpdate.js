@@ -61,7 +61,7 @@ const ProductUpdate = () => {
             try {
                 dispatch(actions.controlLoading(true));
                 const [catRes, branchRes, prodRes] = await Promise.all([
-                    requestApi('api/admin/categories?limit=1000', 'GET', []),
+                    requestApi('api/admin/categories/for-type?for=product', 'GET', []),
                     requestApi('api/admin/branches?limit=1000', 'GET', []),
                     requestApi(`api/admin/products/${params.id}`, 'GET')
                 ]);

@@ -24,7 +24,7 @@ const PostAdd = () => {
 
     useEffect(() => {
         dispatch(actions.controlLoading(true));
-        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
+        requestApi('api/admin/categories/for-type?for=post', 'GET', []).then((response) => {
             if (response.data && response.data.data) setCategories(response.data.data);
             dispatch(actions.controlLoading(false));
         });

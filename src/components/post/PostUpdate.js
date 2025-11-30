@@ -35,7 +35,7 @@ const PostUpdate = () => {
             try {
                 dispatch(actions.controlLoading(true));
                 const [catRes, postRes] = await Promise.all([
-                    requestApi('api/admin/categories?limit=1000', 'GET', []),
+                    requestApi('api/admin/categories/for-type?for=post', 'GET', []),
                     requestApi(`api/admin/posts/${id}`, 'GET')
                 ]);
                 if (catRes.data && catRes.data.data) setCategories(catRes.data.data);

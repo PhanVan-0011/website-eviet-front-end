@@ -243,7 +243,7 @@ const SliderList = () => {
                 if (row.linkable_type === "App\\Models\\Post") {
                     return <span className="badge bg-primary">Khuyến mãi</span>;
                 }
-                return <span className="badge bg-secondary">-</span>;
+                return <span></span>;
             },
             width: "12%"
         },
