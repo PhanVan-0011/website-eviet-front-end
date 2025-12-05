@@ -144,11 +144,11 @@ const ImportDetail = () => {
     return (
         <div id="layoutSidenav_content">
             <main>
-                <div className="container-fluid px-4">
-                    <div className="d-flex align-items-center justify-content-between mt-4 mb-2">
-                        <h2 className="mb-0">Chi tiết phiếu nhập</h2>
+                <div className="container-fluid px-3 px-md-4">
+                    <div className="d-flex align-items-center justify-content-between mt-3 mt-md-4 mb-2">
+                        <h2 className="mb-0 detail-page-header">Chi tiết phiếu nhập</h2>
                     </div>
-                    <ol className="breadcrumb mb-4">
+                    <ol className="breadcrumb mb-3 mb-md-4 detail-breadcrumb">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item"><Link to="/import">Nhập hàng</Link></li>
                         <li className="breadcrumb-item active">Chi tiết</li>
@@ -156,10 +156,10 @@ const ImportDetail = () => {
 
                     <div className="card border">
                         {/* Tab Navigation */}
-                        <ul className="nav nav-tabs" id="importDetailTabs" role="tablist" style={{ borderBottom: '2px solid #dee2e6' }}>
+                        <ul className="nav nav-tabs flex-wrap" id="importDetailTabs" role="tablist" style={{ borderBottom: '2px solid #dee2e6' }}>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'thong-tin' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'thong-tin' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('thong-tin')}
                                     style={{
@@ -169,7 +169,6 @@ const ImportDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'thong-tin' ? '500' : 'normal'
                                     }}
@@ -179,7 +178,7 @@ const ImportDetail = () => {
                             </li>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'lich-su' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'lich-su' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('lich-su')}
                                     style={{
@@ -189,23 +188,23 @@ const ImportDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'lich-su' ? '500' : 'normal'
                                     }}
                                 >
-                                    Lịch sử thanh toán
+                                    <span className="d-none d-md-inline">Lịch sử thanh toán</span>
+                                    <span className="d-md-none">Thanh toán</span>
                                 </button>
                             </li>
                         </ul>
 
-                        <div style={{ padding: '1.5rem' }}>
+                        <div className="detail-card">
                             {/* Tab Thông tin */}
                             {activeTab === 'thong-tin' && (
                                 <div>
                                     {/* Mã phiếu nhập, Trạng thái, Chi nhánh */}
-                                    <div className="row mb-4">
-                                        <div className="col-md-6">
+                                    <div className="row mb-3 mb-md-4">
+                                        <div className="col-12 col-md-6">
                                             <div className="mb-3">
                                                 <div className="text-muted small mb-1">Mã phiếu nhập</div>
                                                 <div className="fw-semibold border-bottom pb-2">
@@ -213,7 +212,7 @@ const ImportDetail = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="col-md-6">
+                                        <div className="col-12 col-md-6">
                                             <InfoItem 
                                                 label="Chi nhánh" 
                                                 value={invoice.branch?.name || 'N/A'}
@@ -222,20 +221,20 @@ const ImportDetail = () => {
                                     </div>
 
                                     {/* Thông tin người tạo, ngày, NCC */}
-                                    <div className="row mb-4">
-                                        <div className="col-md-4">
+                                    <div className="row mb-3 mb-md-4">
+                                        <div className="col-12 col-md-4">
                                             <InfoItem 
                                                 label="Người tạo" 
                                                 value={invoice.user?.name || 'N/A'}
                                             />
                                         </div>
-                                        <div className="col-md-4">
+                                        <div className="col-12 col-md-4">
                                             <InfoItem 
                                                 label="Ngày nhập" 
                                                 value={moment(invoice.invoice_date).format('DD/MM/YYYY HH:mm')}
                                             />
                                         </div>
-                                        <div className="col-md-4">
+                                        <div className="col-12 col-md-4">
                                             <div className="mb-3">
                                                 <div className="text-muted small mb-1">Tên NCC</div>
                                                 <div className="fw-semibold border-bottom pb-2">
@@ -248,14 +247,14 @@ const ImportDetail = () => {
                                     </div>
 
                                     {/* Bảng sản phẩm */}
-                                    <div className="mb-4">
+                                    <div className="mb-3 mb-md-4">
                                         <div 
                                             className="table-responsive" 
                                             style={{ 
                                                 maxHeight: invoice.details && invoice.details.length > 10 ? '500px' : 'none'
                                             }}
                                         >
-                                            <table className="table table-bordered mb-0">
+                                            <table className="table table-bordered mb-0 detail-table">
                                                 <thead className="table-light position-sticky top-0 bg-light" style={{ zIndex: 10 }}>
                                                     <tr>
                                                         <th>Mã hàng</th>
@@ -300,14 +299,14 @@ const ImportDetail = () => {
 
                                     {/* Ghi chú và Tổng tiền */}
                                     <div className="row">
-                                        <div className="col-md-6">
-                                            <div className="border rounded p-3" style={{ minHeight: '200px' }}>
+                                        <div className="col-12 col-md-6 mb-3 mb-md-0">
+                                            <div className="border rounded p-2 p-md-3" style={{ minHeight: '200px' }}>
                                                 <div className="text-muted small mb-2">Ghi chú</div>
                                                 <div>{invoice.notes || ''}</div>
                                             </div>
                                         </div>
-                                        <div className="col-md-6">
-                                            <table className="table table-borderless">
+                                        <div className="col-12 col-md-6">
+                                            <table className="table table-borderless detail-table">
                                                 <tbody>
                                                     <tr>
                                                         <td className="text-end">Số lượng mặt hàng</td>
@@ -362,21 +361,21 @@ const ImportDetail = () => {
                     </div>
 
                     {/* Nút thao tác */}
-                    <div className="row mt-4 mb-4">
-                        <div className="col-12 d-flex justify-content-center gap-2">
+                    <div className="row mt-3 mt-md-4 mb-3 mb-md-4">
+                        <div className="col-12 d-flex justify-content-center detail-action-buttons">
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate('/import')}>
-                                <i className="fas fa-arrow-left me-1"></i>Quay lại
+                                <i className="fas fa-arrow-left me-1"></i><span className="d-none d-sm-inline">Quay lại</span>
                             </button>
                             {invoice.status === 'draft' && (
                                 <>
                                     <Link className="btn btn-primary btn-sm" to={`/import/edit/${invoice.id}`}>
-                                        <i className="fas fa-edit me-1"></i>Sửa phiếu nhập
+                                        <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa phiếu nhập</span>
                                     </Link>
                                 </>
                             )}
                             {invoice.status === 'received' && (
                                 <button className="btn btn-warning btn-sm" onClick={handleCancelClick} title="Hủy phiếu">
-                                    <i className="fas fa-times-circle me-1"></i>Hủy phiếu
+                                    <i className="fas fa-times-circle me-1"></i><span className="d-none d-sm-inline">Hủy phiếu</span>
                                 </button>
                             )}
                         </div>

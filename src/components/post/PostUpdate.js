@@ -196,7 +196,7 @@ const PostUpdate = () => {
                             <div className='mb-3 row'>
                                 <form onSubmit={handleSubmit(handleSubmitForm)}>
                                     <div className="row mb-4">
-                                        <div className="col-md-6">
+                                        <div className="col-12 col-md-6">
                                             <div className="mb-3">
                                                 <label htmlFor="inputTitle" className="form-label fw-semibold">
                                                     Tiêu đề <span style={{ color: 'red' }}>*</span>
@@ -210,7 +210,7 @@ const PostUpdate = () => {
                                                 {errors.title && <div className="text-danger mt-1">{errors.title.message}</div>}
                                             </div>
                                         </div>
-                                        <div className="col-md-6">
+                                        <div className="col-12 col-md-6">
                                             <div className="mb-3">
                                                 <label htmlFor="inputStatus" className="form-label fw-semibold">
                                                     Trạng thái <span style={{ color: 'red' }}>*</span>
@@ -229,7 +229,7 @@ const PostUpdate = () => {
                                         </div>
                                     </div>
                                     <div className="row mb-3">
-                                    <div className="col-md-6">
+                                    <div className="col-12 col-md-6">
                                             <div className="mb-3">
                                                 <label className="form-label fw-semibold">
                                                     Danh mục <span style={{ color: 'red' }}>*</span>
@@ -257,7 +257,7 @@ const PostUpdate = () => {
                                                 {errors.category_ids && <div className="text-danger">{errors.category_ids.message}</div>}
                                             </div>
                                         </div>
-                                        <div className="col-md-6 px-3">
+                                        <div className="col-12 col-md-6 px-3">
                                             <div className="mb-3">
                                                 <div className="form-label fw-semibold">
                                                     Hình ảnh bài viết 
@@ -336,10 +336,10 @@ const PostUpdate = () => {
                                         </div>
                                     </div>
                                     <div className="mt-4 mb-0">
-                                        <div className="d-flex justify-content-center gap-2">
+                                        <div className="d-flex flex-column flex-md-row justify-content-center gap-2">
                                             <button
                                                 type="button"
-                                                className="btn btn-danger w-25 font-weight-bold"
+                                                className="btn btn-danger w-100 w-md-auto font-weight-bold"
                                                 onClick={() => setShowModal(true)}
                                                 disabled={isSubmitting}
                                             >
@@ -347,14 +347,14 @@ const PostUpdate = () => {
                                             </button>
                                             <button
                                                 type="button"
-                                                className="btn btn-secondary w-25"
+                                                className="btn btn-secondary w-100 w-md-auto"
                                                 onClick={() => navigate('/post')}
                                                 disabled={isSubmitting}
                                             >
                                                 Hủy bỏ
                                             </button>
                                             <button
-                                                className="btn btn-primary w-25"
+                                                className="btn btn-primary w-100 w-md-auto"
                                                 type="submit"
                                                 disabled={isSubmitting}
                                             >

@@ -4,7 +4,7 @@ import DataTables from '../common/DataTables';
 import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Offcanvas, Dropdown } from 'react-bootstrap';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
@@ -45,6 +45,7 @@ const OrderList = () => {
     });
     const [isFilterVisible, setIsFilterVisible] = useState(true);
     const [isPulsing, setIsPulsing] = useState(false);
+    const [showFilterOffcanvas, setShowFilterOffcanvas] = useState(false);
 
     // Sort states
     const [sortField, setSortField] = useState('');
@@ -244,7 +245,7 @@ const OrderList = () => {
         {
             title: "Hành động",
             element: row => (
-                <div className="d-flex align-items-center flex-wrap gap-2">
+                <div className="d-flex align-items-center order-actions-cell" style={{ flexWrap: 'nowrap', gap: '0.25rem' }}>
                     {/* Xem chi tiết: ORDERS_VIEW */}
                     <Permission permission={PERMISSIONS.ORDERS_VIEW}>
                         <Link
@@ -287,7 +288,7 @@ const OrderList = () => {
                                     onClick={() => handleUpdateStatus(row.id, 'shipped')}
                                     title="Xác nhận đã gửi hàng"
                                 >
-                                    <i className="fas fa-truck me-1"></i> Gửi hàng
+                                Gửi hàng
                                 </button>
                             </Permission>
                             <Permission permission={PERMISSIONS.ORDERS_CANCEL}>
@@ -326,7 +327,7 @@ const OrderList = () => {
                     )}
                 </div>
             ),
-            width: "20%"
+            width: "25%"
         }
     ];
 
@@ -424,23 +425,104 @@ const OrderList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4"></h1>
-                    <ol className="breadcrumb mb-4">
-                        <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
-                        <li className="breadcrumb-item active">Danh sách đơn hàng</li>
-                    </ol>
+                    {/* Header row: Breadcrumb + Search + Actions */}
+                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom order-header-row" style={{ justifyContent: 'space-between', gap: '0.5rem' }}>
+                        {/* Left section: Breadcrumb / Filter button */}
+                        <div className="d-flex align-items-center flex-shrink-0">
+                            {/* Breadcrumb - ẩn trên tablet */}
+                            <ol className="breadcrumb mb-0 d-none d-md-flex" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
+                                <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
+                                <li className="breadcrumb-item active">Danh sách đơn hàng</li>
+                            </ol>
+                            
+                            {/* Nút Bộ lọc - chỉ hiện trên tablet/mobile */}
+                            <button 
+                                className="btn btn-outline-secondary btn-sm d-md-none"
+                                onClick={() => setShowFilterOffcanvas(true)}
+                                title="Bộ lọc"
+                            >
+                                <i className="fas fa-filter me-1"></i>
+                                <span className="d-none d-sm-inline">Bộ lọc</span>
+                            </button>
+                        </div>
+                        
+                        {/* Search - ở giữa */}
+                        <div className="order-search-bar" style={{ margin: '0 auto' }}>
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
+                                    <i className="fas fa-search text-muted"></i>
+                                </span>
+                                <LiveSearch 
+                                    changeKeyword={setSearchText}
+                                    placeholder="Tìm mã đơn, tên khách hàng..."
+                                />
+                            </div>
+                        </div>
+                            
+                        {/* Actions - bên phải */}
+                        <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                            {/* Nút tạo mới */}
+                            <Permission permission={PERMISSIONS.ORDERS_CREATE}>
+                                <Link className="btn btn-primary btn-sm" to="/order/add">
+                                    <i className="fas fa-plus me-1"></i>
+                                    <span className="d-none d-sm-inline">Tạo mới</span>
+                                </Link>
+                            </Permission>
+                            
+                            {/* Các button riêng lẻ - hiện trên >= 1280px */}
+                            <div className="order-action-buttons">
+                                <button className="btn btn-outline-secondary btn-sm">
+                                    <i className="fas fa-upload me-1"></i> Import
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm">
+                                    <i className="fas fa-download me-1"></i> Xuất file
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm" title="Cài đặt">
+                                    <i className="fas fa-cog"></i>
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm" title="Trợ giúp">
+                                    <i className="fas fa-question-circle"></i>
+                                </button>
+                            </div>
+                            
+                            {/* Dropdown menu cho các nút phụ - chỉ hiện khi < 1280px */}
+                            <div className="order-action-dropdown">
+                                <Dropdown>
+                                    <Dropdown.Toggle 
+                                        variant="outline-secondary" 
+                                        size="sm" 
+                                        className="d-flex align-items-center"
+                                        id="actions-dropdown"
+                                    >
+                                        <i className="fas fa-ellipsis-v"></i>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu align="end">
+                                        <Dropdown.Item>
+                                            <i className="fas fa-upload me-2"></i> Import
+                                        </Dropdown.Item>
+                                        <Dropdown.Item>
+                                            <i className="fas fa-download me-2"></i> Xuất file
+                                        </Dropdown.Item>
+                                        <Dropdown.Divider />
+                                        <Dropdown.Item>
+                                            <i className="fas fa-cog me-2"></i> Cài đặt
+                                        </Dropdown.Item>
+                                        <Dropdown.Item>
+                                            <i className="fas fa-question-circle me-2"></i> Trợ giúp
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </div>
+                        </div>
+                    </div>
                     
                     {/* Layout chính với FilterPanel và nội dung */}
-                    <div className="row g-0">
-                        {/* Filter Panel */}
-                        <div className={`position-relative filter-panel ${isFilterVisible ? 'col-md-2' : 'col-md-0'} transition-all d-flex flex-column`}>
-                            {isFilterVisible && (
-                                <div className="p-3 filter-content">
-                                    {/* <h6 className="fw-bold mb-3 text-primary text-center" style={{ fontSize: '0.9rem' }}>
-                                        <i className="fas fa-filter me-1"></i>
-                                        Đơn hàng
-                                    </h6> */}
-
+                    <div className="d-flex gap-4" style={{ gap: '16px' }}>
+                        {/* Filter Panel Card - Hiển thị trên tablet và desktop, ẩn trên mobile */}
+                        {isFilterVisible && (
+                            <div className="filter-card-wrapper d-none d-md-block" style={{ width: '240px', flexShrink: 0 }}>
+                                <div className="filter-card">
+                                    <div className="filter-card-content">
                                     {/* Trạng thái đơn hàng */}
                                     <FilterSelectSingle
                                         label="Trạng thái đơn hàng"
@@ -490,118 +572,120 @@ const OrderList = () => {
                                         value={filterValues.orderDate || { from: null, to: null }}
                                         onChange={(dateRange) => updateFilter('orderDate', dateRange)}
                                     />
+                                </div>
 
-                                    {/* Khách hàng */}
-                                    {/* <FilterSelectSingle
-                                        label="Khách hàng"
-                                        value={filterValues.customer ? {
-                                            value: filterValues.customer,
-                                            label: filterValues.customer === 'all' ? 'Tất cả' : 
-                                                   customers.find(c => c.id == filterValues.customer)?.name || filterValues.customer
+                                    {/* Toggle Button - Pill button ở mép phải */}
+                                    <button
+                                        className="filter-toggle-btn"
+                                        onClick={() => setIsFilterVisible(false)}
+                                        title="Thu gọn bộ lọc"
+                                    >
+                                        <i className="fas fa-chevron-left"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Table Card */}
+                        <div className="table-card-wrapper flex-grow-1">
+                            {/* Nút mở lại filter khi đã thu gọn - hiện trên tablet và desktop */}
+                            {!isFilterVisible && (
+                                <button
+                                    className="filter-toggle-btn-open d-none d-md-flex"
+                                    onClick={() => setIsFilterVisible(true)}
+                                    title="Mở bộ lọc"
+                                >
+                                    <i className="fas fa-chevron-right"></i>
+                                </button>
+                            )}
+                            
+                            <div className="table-card">
+                                <DataTables
+                                    name="Danh sách đơn hàng"
+                                    columns={columns}
+                                    data={sortedOrders}
+                                    numOfPages={numOfPages}
+                                    currentPage={currentPage}
+                                    setCurrentPage={setCurrentPage}
+                                    setItemOfPage={setItemOfPage}
+                                    selectedRows={selectedRows}
+                                    onSelectedRows={setSelectedRows}
+                                    hideSearch={true}
+                                    showSummary={true}
+                                    tableHeight="calc(100vh - 220px)"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Offcanvas Filter cho Tablet/Mobile */}
+                        <Offcanvas 
+                            show={showFilterOffcanvas} 
+                            onHide={() => setShowFilterOffcanvas(false)}
+                            placement="start"
+                            className="d-lg-none"
+                        >
+                            <Offcanvas.Header closeButton>
+                                <Offcanvas.Title>Bộ lọc</Offcanvas.Title>
+                            </Offcanvas.Header>
+                            <Offcanvas.Body>
+                                <div className="filter-card-content">
+                                    {/* Trạng thái đơn hàng */}
+                                    <FilterSelectSingle
+                                        label="Trạng thái đơn hàng"
+                                        value={filterValues.status ? {
+                                            value: filterValues.status,
+                                            label: filterValues.status === 'all' ? 'Tất cả' :
+                                                   filterValues.status === 'pending' ? 'Chờ xử lý' :
+                                                   filterValues.status === 'processing' ? 'Đang xử lý' :
+                                                   filterValues.status === 'shipped' ? 'Đã gửi hàng' :
+                                                   filterValues.status === 'delivered' ? 'Đã giao' :
+                                                   filterValues.status === 'cancelled' ? 'Đã hủy' : filterValues.status
                                         } : { value: 'all', label: 'Tất cả' }}
-                                        onChange={(selected) => updateFilter('customer', selected ? selected.value : 'all')}
+                                        onChange={(selected) => {
+                                            updateFilter('status', selected ? selected.value : 'all');
+                                        }}
                                         options={[
                                             { value: 'all', label: 'Tất cả' },
-                                            ...customers.map(customer => ({
-                                                value: customer.id,
-                                                label: customer.name
+                                            { value: 'pending', label: 'Chờ xử lý' },
+                                            { value: 'processing', label: 'Đang xử lý' },
+                                            { value: 'shipped', label: 'Đã gửi hàng' },
+                                            { value: 'delivered', label: 'Đã giao' },
+                                            { value: 'cancelled', label: 'Đã hủy' }
+                                        ]}
+                                        placeholder="Chọn trạng thái"
+                                    />
+
+                                    {/* Phương thức thanh toán */}
+                                    <FilterSelectSingle
+                                        label="Phương thức thanh toán"
+                                        value={filterValues.paymentMethod ? {
+                                            value: filterValues.paymentMethod,
+                                            label: filterValues.paymentMethod === 'all' ? 'Tất cả' : 
+                                                   paymentMethods.find(pm => pm.id === filterValues.paymentMethod)?.name || filterValues.paymentMethod
+                                        } : { value: 'all', label: 'Tất cả' }}
+                                        onChange={(selected) => {
+                                            updateFilter('paymentMethod', selected ? selected.value : 'all');
+                                        }}
+                                        options={[
+                                            { value: 'all', label: 'Tất cả' },
+                                            ...paymentMethods.map(pm => ({
+                                                value: pm.id,
+                                                label: pm.name
                                             }))
                                         ]}
-                                        placeholder="Chọn khách hàng"
-                                    /> */}
-                                </div>
-                            )}
-                        </div>
+                                        placeholder="Chọn phương thức"
+                                    />
 
-                        {/* Nội dung chính */}
-                        <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
-                            {/* Search bar với các nút action */}
-                            <div className="p-3 border-bottom bg-light search-bar">
-                                <div className="row align-items-center">
-                                    <div className="col-md-4">
-                                        <div className="input-group">
-                                            <span className="input-group-text">
-                                                <i className="fas fa-search"></i>
-                                            </span>
-                                            <LiveSearch 
-                                                changeKeyword={setSearchText}
-                                                placeholder="Tìm kiếm theo mã đơn hàng, tên khách hàng..."
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="col-md-8">
-                                        <div className="d-flex justify-content-end gap-2">
-                                            {/* Nút tạo mới */}
-                                            <Permission permission={PERMISSIONS.ORDERS_CREATE}>
-                                                <Link className="btn btn-primary" to="/order/add">
-                                                    <i className="fas fa-plus me-1"></i> Tạo mới
-                                                </Link>
-                                            </Permission>
-                                            
-                                            {/* Các nút khác */}
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-upload me-1"></i> Import file
-                                            </button>
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-download me-1"></i> Xuất file
-                                            </button>
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-cog"></i>
-                                            </button>
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-question-circle"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Search results info */}
-                                {searchText && (
-                                    <div className="search-results-info">
-                                        <small>
-                                            <i className="fas fa-info-circle me-1"></i>
-                                            Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {sortedOrders.length} kết quả
-                                        </small>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Header với tiêu đề */}
-                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
-                                <div className="d-flex align-items-center gap-2">
-                                    <h4 className="mb-0 fw-bold text-primary">Danh sách đơn hàng</h4>
-                                    {/* Filter Toggle Button */}
-                                    <FilterToggleButton
-                                        key={`toggle-${isFilterVisible}`}
-                                        isVisible={isFilterVisible}
-                                        onToggle={() => {
-                                            setIsPulsing(true);
-                                            setTimeout(() => setIsPulsing(false), 600);
-                                            toggleFilterVisibility();
-                                        }}
-                                        isPulsing={isPulsing}
+                                    {/* Thời gian đặt hàng */}
+                                    <FilterDateRange
+                                        label="Thời gian đặt hàng"
+                                        value={filterValues.orderDate || { from: null, to: null }}
+                                        onChange={(dateRange) => updateFilter('orderDate', dateRange)}
                                     />
                                 </div>
-                            </div>
+                            </Offcanvas.Body>
+                        </Offcanvas>
 
-                            {/* Data Table */}
-                            <div className="flex-grow-1 overflow-auto">
-                                <div className="p-3">
-                                    <DataTables
-                                        name="Danh sách đơn hàng"
-                                        columns={columns}
-                                        data={sortedOrders}
-                                        numOfPages={numOfPages}
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
-                                        setItemOfPage={setItemOfPage}
-                                        onSelectedRows={setSelectedRows}
-                                        hideSearch={true}
-                                        showSummary={true}
-                                    />
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </main>

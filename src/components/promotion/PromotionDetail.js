@@ -138,17 +138,17 @@ const PromotionDetail = () => {
     return (
         <div id="layoutSidenav_content">
             <main>
-                <div className="container-fluid px-4">
-                    <div className="mt-4 mb-3">
-                        <h2 className="">Chi tiết khuyến mãi</h2>
-                        <ol className="breadcrumb mb-4">
+                <div className="container-fluid px-3 px-md-4">
+                    <div className="mt-3 mt-md-4 mb-2 mb-md-3">
+                        <h2 className="detail-page-header">Chi tiết khuyến mãi</h2>
+                        <ol className="breadcrumb mb-3 mb-md-4 detail-breadcrumb">
                             <li className="breadcrumb-item"><Link to="/promotion">Danh sách khuyến mãi</Link></li>
                             <li className="breadcrumb-item active">Chi tiết khuyến mãi</li>
                         </ol>
                     </div>
-                    <div className="row g-4">
-                        <div className="col-md-6 d-flex" style={{ height: '75vh' }}>
-                            <div className="card shadow-sm mb-4 flex-fill" style={{ height: '100%' }}>
+                    <div className="row g-2 g-md-4">
+                        <div className="col-12 col-md-6 d-flex">
+                            <div className="card shadow-sm mb-3 mb-md-4 flex-fill" style={{ minHeight: '50vh', height: 'auto' }}>
                                 <div style={{ height: '50%', display: 'flex', flexDirection: 'column', padding: 16, overflow: 'hidden' }}>
                                     {promotion.image && promotion.image.main_url ? (
                                         <>
@@ -249,12 +249,12 @@ const PromotionDetail = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-6 mb-4 d-flex" style={{ height: '75vh' }}>
-                            <div className="card shadow-sm h-100 flex-fill d-flex flex-column" style={{ height: '100%' }}>
-                                <div className="card-header bg-light fw-bold">
+                        <div className="col-12 col-md-6 mb-3 mb-md-4 d-flex">
+                            <div className="card shadow-sm h-100 flex-fill d-flex flex-column" style={{ minHeight: '50vh', height: 'auto' }}>
+                                <div className="card-header bg-light fw-bold detail-card-header">
                                     <i className="fas fa-globe-asia me-2"></i>Điều kiện và giới hạn
                                 </div>
-                                <div className="card-body" style={{ maxHeight: '25%', overflowY: 'auto' }}>
+                                <div className="card-body detail-card" style={{ maxHeight: '25vh', overflowY: 'auto' }}>
                                     <div className="row">
                                         <div className="col-md-6">
                                             <div className="mb-2">
@@ -276,11 +276,11 @@ const PromotionDetail = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="card-header bg-light fw-bold border-top">
+                                <div className="card-header bg-light fw-bold border-top detail-card-header">
                                     <i className="fas fa-bullseye me-2"></i>Đối tượng áp dụng
                                 </div>
-                                <div className="card-body p-0" style={{ maxHeight: '30%', overflowY: 'auto' }}>
-                                    <div className="p-3">
+                                <div className="card-body p-0 detail-card" style={{ maxHeight: '30vh', overflowY: 'auto' }}>
+                                    <div className="p-2 p-md-3">
                                         {promotion.products?.length > 0 && (
                                             <div className="mb-2">
                                                 <span className="badge bg-primary me-2">Sản phẩm:</span>
@@ -310,10 +310,10 @@ const PromotionDetail = () => {
                                         )}
                                     </div>
                                 </div>
-                                <div className="card-header bg-light fw-bold border-top">
+                                <div className="card-header bg-light fw-bold border-top detail-card-header">
                                     <i className="fas fa-info-circle me-2"></i>Mô tả khuyến mãi
                                 </div>
-                                <div className="card-body flex-grow-1" style={{ overflowY: 'auto' }}>
+                                <div className="card-body flex-grow-1 detail-card" style={{ overflowY: 'auto' }}>
                                     {promotion.description
                                         ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(promotion.description)) }} />
                                         : <span className="text-muted fst-italic">Chưa có mô tả</span>
@@ -323,16 +323,16 @@ const PromotionDetail = () => {
                         </div>
                     </div>
                     {/* Button thao tác ra ngoài card, căn giữa, margin-top */}
-                    <div className="row mb-4">
-                        <div className="col-12 d-flex justify-content-center gap-2">
-                            <Link className="btn btn-primary" to={`/promotion/${promotion.id}`}>
-                                <i className="fas fa-edit"></i> Sửa khuyến mãi
+                    <div className="row mb-3 mb-md-4">
+                        <div className="col-12 d-flex justify-content-center detail-action-buttons">
+                            <Link className="btn btn-primary btn-sm" to={`/promotion/${promotion.id}`}>
+                                <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa khuyến mãi</span>
                             </Link>
-                            <button className="btn btn-danger" onClick={handleDelete}>
-                                <i className="fas fa-trash-alt"></i> Xóa khuyến mãi
+                            <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+                                <i className="fas fa-trash-alt me-1"></i><span className="d-none d-sm-inline">Xóa khuyến mãi</span>
                             </button>
-                            <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
-                                <i className="fas fa-arrow-left"></i> Quay lại
+                            <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
+                                <i className="fas fa-arrow-left me-1"></i><span className="d-none d-sm-inline">Quay lại</span>
                             </button>
                         </div>
                     </div>

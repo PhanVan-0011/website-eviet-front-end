@@ -4,10 +4,11 @@ import DataTables from '../common/DataTables';
 import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Dropdown } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import LiveSearch from '../common/LiveSearch';
 
 const RuleList = () => {
     const [roles, setRoles] = useState([]);
@@ -48,12 +49,16 @@ const RuleList = () => {
         { title: "Ngày cập nhật", element: row => formatDate(row.updated_at), width: '10%' },
         {
             title: "Hành động", element: row => (
-                <>
-                    <Link className="btn btn-primary btn-sm me-1" to={`/rule/${row.id}`}><i className="fas fa-edit"></i></Link>
-                    <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}><i className="fas fa-trash"></i></button>
-                </>
+                <div className="d-flex align-items-center gap-1" style={{ flexWrap: 'nowrap' }}>
+                    <Link className="btn btn-primary btn-sm px-2 py-1" to={`/rule/${row.id}`} title="Chỉnh sửa">
+                        <i className="fas fa-edit"></i>
+                    </Link>
+                    <button className="btn btn-danger btn-sm px-2 py-1" onClick={() => handleDelete(row.id)} title="Xóa">
+                        <i className="fas fa-trash"></i>
+                    </button>
+                </div>
             ),
-            width: '10%'
+            width: '18%'
         }
     ];
 
@@ -131,26 +136,111 @@ const RuleList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4">Danh sách vai trò</h1>
-                    <ol className="breadcrumb mb-4">
-                        <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
-                        <li className="breadcrumb-item active">Danh sách vai trò</li>
-                    </ol>
-                    <div className='mb-3'>
-                        <Link className="btn btn-primary me-2 add-custom-btn" to="/rule/add"><i className="fas fa-plus"></i> Thêm vai trò</Link>
-                        {selectedRows.length > 0 && <button className="btn btn-danger add-custom-btn" onClick={() => multiDelete(selectedRows)}><i className="fas fa-trash"></i> Xóa ({selectedRows.length})</button>}
+                    {/* Header row: Breadcrumb + Search + Actions */}
+                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom rule-header-row" style={{ justifyContent: 'space-between', gap: '0.5rem' }}>
+                        {/* Left section: Breadcrumb */}
+                        <div className="d-flex align-items-center flex-shrink-0">
+                            {/* Breadcrumb - ẩn trên tablet */}
+                            <ol className="breadcrumb mb-0 d-none d-md-flex" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
+                                <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
+                                <li className="breadcrumb-item active">Danh sách vai trò</li>
+                            </ol>
+                        </div>
+                        
+                        {/* Search - ở giữa */}
+                        <div className="rule-search-bar" style={{ margin: '0 auto' }}>
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
+                                    <i className="fas fa-search text-muted"></i>
+                                </span>
+                                <LiveSearch 
+                                    changeKeyword={setSearchText}
+                                    placeholder="Tìm theo tên vai trò..."
+                                />
+                            </div>
+                        </div>
+                            
+                        {/* Actions - bên phải */}
+                        <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                            {/* Nút xóa khi có vai trò được chọn */}
+                            {selectedRows.length > 0 && (
+                                <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
+                                    <i className="fas fa-trash me-1"></i>
+                                    <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
+                                </button>
+                            )}
+                            
+                            {/* Nút tạo mới */}
+                            <Link className="btn btn-primary btn-sm" to="/rule/add">
+                                <i className="fas fa-plus me-1"></i>
+                                <span className="d-none d-sm-inline">Tạo mới</span>
+                            </Link>
+                            
+                            {/* Các button riêng lẻ - hiện trên >= 1280px */}
+                            <div className="rule-action-buttons">
+                                <button className="btn btn-outline-secondary btn-sm">
+                                    <i className="fas fa-upload me-1"></i> Import
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm">
+                                    <i className="fas fa-download me-1"></i> Xuất file
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm" title="Cài đặt">
+                                    <i className="fas fa-cog"></i>
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm" title="Trợ giúp">
+                                    <i className="fas fa-question-circle"></i>
+                                </button>
+                            </div>
+                            
+                            {/* Dropdown menu cho các nút phụ - chỉ hiện khi < 1280px */}
+                            <div className="rule-action-dropdown">
+                                <Dropdown>
+                                    <Dropdown.Toggle 
+                                        variant="outline-secondary" 
+                                        size="sm" 
+                                        className="d-flex align-items-center"
+                                        id="actions-dropdown"
+                                    >
+                                        <i className="fas fa-ellipsis-v"></i>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu align="end">
+                                        <Dropdown.Item>
+                                            <i className="fas fa-upload me-2"></i> Import
+                                        </Dropdown.Item>
+                                        <Dropdown.Item>
+                                            <i className="fas fa-download me-2"></i> Xuất file
+                                        </Dropdown.Item>
+                                        <Dropdown.Divider />
+                                        <Dropdown.Item>
+                                            <i className="fas fa-cog me-2"></i> Cài đặt
+                                        </Dropdown.Item>
+                                        <Dropdown.Item>
+                                            <i className="fas fa-question-circle me-2"></i> Trợ giúp
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </div>
+                        </div>
                     </div>
-                    <DataTables
-                        name="Dữ liệu vai trò"
-                        columns={columns}
-                        data={roles}
-                        numOfPages={numOfPages}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        setItemOfPage={setItemOfPage}
-                        changeKeyword={(keyword) => setSearchText(keyword)}
-                        onSelectedRows={ (selectedRows) => setSelectedRows(selectedRows)}
-                    />
+                    
+                    {/* Table Card */}
+                    <div className="table-card-wrapper">
+                        <div className="table-card">
+                            <DataTables
+                                name="Danh sách vai trò"
+                                columns={columns}
+                                data={roles}
+                                numOfPages={numOfPages}
+                                currentPage={currentPage}
+                                setCurrentPage={setCurrentPage}
+                                setItemOfPage={setItemOfPage}
+                                hideSearch={true}
+                                selectedRows={selectedRows}
+                                onSelectedRows={ (selectedRows) => setSelectedRows(selectedRows)}
+                                tableHeight="calc(100vh - 220px)"
+                            />
+                        </div>
+                    </div>
                 </div>
             </main>
             <Modal show={showModal} onHide={() => {setShowModal(false); setItemDelete(null); setTypeDelete(null)}}>

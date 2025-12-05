@@ -136,7 +136,7 @@ const CategoryUpdate = () => {
                             <div className='mb-3 row'>
                                 <form onSubmit={handleSubmit(handleSubmitForm)}>
                                     <div className="row mb-3">
-                                        <div className="col-md-6">
+                                        <div className="col-12 col-md-6">
                                             <div className="mb-3">
                                                 <label htmlFor="inputName" className="form-label fw-semibold">
                                                     Tên danh mục <span style={{color: 'red'}}>*</span>
@@ -150,7 +150,7 @@ const CategoryUpdate = () => {
                                                 {errors.name && <div className="text-danger mt-1">{errors.name.message}</div>}
                                             </div>
                                         </div>
-                                        <div className="col-md-6">
+                                        <div className="col-12 col-md-6">
                                             <div className="mb-3">
                                                 <label htmlFor="inputDescription" className="form-label fw-semibold">
                                                     Mô tả
@@ -165,7 +165,7 @@ const CategoryUpdate = () => {
                                         </div>
                                     </div>
                                     <div className="row mb-3">
-                                        <div className="col-md-6">
+                                        <div className="col-12 col-md-6">
                                             <div className="mb-3">
                                                 <label htmlFor="inputStatus" className="form-label fw-semibold">
                                                     Trạng thái <span style={{color: 'red'}}>*</span>
@@ -182,7 +182,7 @@ const CategoryUpdate = () => {
                                                 {errors.status && <div className="text-danger mt-1">{errors.status.message}</div>}
                                             </div>
                                         </div>
-                                        <div className="col-md-6">
+                                        <div className="col-12 col-md-6">
                                             <div className="mb-3">
                                                 <label htmlFor="inputType" className="form-label fw-semibold">
                                                     Loại danh mục <span style={{color: 'red'}}>*</span>
@@ -211,7 +211,7 @@ const CategoryUpdate = () => {
                                         </div>
                                     </div>
                                     <div className="row mb-3">
-                                        <div className="col-md-6">
+                                        <div className="col-12 col-md-6">
                                             <div className="mb-3">
                                                 <div className="form-label fw-semibold">
                                                     Icon danh mục
@@ -293,10 +293,10 @@ const CategoryUpdate = () => {
                                         </div> */}
                                     </div>
                                     <div className="mt-4 mb-0">
-                                        <div className="d-flex justify-content-center gap-2">
+                                        <div className="d-flex flex-column flex-md-row justify-content-center gap-2">
                                             <button
                                                 type="button"
-                                                className="btn btn-danger w-25 font-weight-bold"
+                                                className="btn btn-danger w-100 w-md-auto font-weight-bold"
                                                 onClick={() => setShowModal(true)}
                                                 disabled={isSubmitting}
                                             >
@@ -304,14 +304,14 @@ const CategoryUpdate = () => {
                                             </button>
                                             <button
                                                 type="button"
-                                                className="btn btn-secondary w-25 font-weight-bold"
+                                                className="btn btn-secondary w-100 w-md-auto font-weight-bold"
                                                 onClick={() => navigation('/category')}
                                                 disabled={isSubmitting}
                                             >
                                                 Hủy bỏ
                                             </button>
                                                 <button
-                                                    className="btn btn-primary w-25"
+                                                    className="btn btn-primary w-100 w-md-auto"
                                                     type="submit"
                                                     disabled={isSubmitting}
                                                 >

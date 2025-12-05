@@ -127,11 +127,11 @@ const ProductDetail = () => {
     return (
         <div id="layoutSidenav_content">
             <main>
-                <div className="container-fluid px-4">
-                    <div className="d-flex align-items-center justify-content-between mt-4 mb-2">
-                        <h2 className="mb-0">Chi tiết sản phẩm #{product.id}</h2>
+                <div className="container-fluid px-3 px-md-4">
+                    <div className="d-flex align-items-center justify-content-between mt-3 mt-md-4 mb-2">
+                        <h2 className="mb-0 detail-page-header">Chi tiết sản phẩm #{product.id}</h2>
                     </div>
-                    <ol className="breadcrumb mb-4">
+                    <ol className="breadcrumb mb-3 mb-md-4 detail-breadcrumb">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item"><Link to="/product">Sản phẩm</Link></li>
                         <li className="breadcrumb-item active">Chi tiết</li>
@@ -139,10 +139,10 @@ const ProductDetail = () => {
 
                     <div className="card border">
                         {/* Tab Navigation */}
-                        <ul className="nav nav-tabs" id="productDetailTabs" role="tablist" style={{borderBottom: '2px solid #dee2e6'}}>
+                        <ul className="nav nav-tabs flex-wrap" id="productDetailTabs" role="tablist" style={{borderBottom: '2px solid #dee2e6'}}>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'thong-tin' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'thong-tin' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('thong-tin')}
                                     style={{ 
@@ -152,7 +152,6 @@ const ProductDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'thong-tin' ? '500' : 'normal'
                                     }}
@@ -162,7 +161,7 @@ const ProductDetail = () => {
                             </li>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'mo-ta' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'mo-ta' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('mo-ta')}
                                     style={{ 
@@ -172,17 +171,17 @@ const ProductDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'mo-ta' ? '500' : 'normal'
                                     }}
                                 >
-                                    Mô tả, ghi chú
+                                    <span className="d-none d-md-inline">Mô tả, ghi chú</span>
+                                    <span className="d-md-none">Mô tả</span>
                                 </button>
                             </li>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'ton-kho' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'ton-kho' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('ton-kho')}
                                     style={{ 
@@ -192,7 +191,6 @@ const ProductDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'ton-kho' ? '500' : 'normal'
                                     }}
@@ -202,7 +200,7 @@ const ProductDetail = () => {
                             </li>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'the-kho' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'the-kho' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('the-kho')}
                                     style={{ 
@@ -212,7 +210,6 @@ const ProductDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'the-kho' ? '500' : 'normal'
                                     }}
@@ -222,7 +219,7 @@ const ProductDetail = () => {
                             </li>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'chi-nhanh' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'chi-nhanh' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('chi-nhanh')}
                                     style={{ 
@@ -232,24 +229,24 @@ const ProductDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'chi-nhanh' ? '500' : 'normal'
                                     }}
                                 >
-                                    Chi nhánh áp dụng
+                                    <span className="d-none d-md-inline">Chi nhánh áp dụng</span>
+                                    <span className="d-md-none">Chi nhánh</span>
                                 </button>
                             </li>
                         </ul>
 
-                        <div style={{ padding: '1.5rem' }}>
+                        <div className="detail-card">
                             {/* Tab Thông tin */}
                             {activeTab === 'thong-tin' && (
                                 <div>
                                     {/* Header: Hình ảnh + Thông tin sản phẩm */}
-                                    <div style={{display: 'flex', gap: '1.5rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #dee2e6'}}>
+                                    <div className="d-flex flex-column flex-md-row detail-info-grid" style={{marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #dee2e6'}}>
                                         {/* Cột trái: Hình ảnh */}
-                                        <div style={{flex: '0 0 30%'}}>
+                                        <div className="w-100 w-md-auto mb-3 mb-md-0" style={{flex: '0 0 30%'}}>
                                             <div style={{display: 'flex', gap: '0.75rem'}}>
                                                 {/* Hình ảnh chính */}
                                                 <div style={{flex: 1}}>
@@ -270,8 +267,10 @@ const ProductDetail = () => {
                                                                         borderRadius: 8,
                                                                         background: '#f8f9fa',
                                                                         border: '1px solid #dee2e6',
-                                                                        height: 350,
-                                                                        display: 'block'
+                                                                        height: 'auto',
+                                                                        maxHeight: '350px',
+                                                                        display: 'block',
+                                                                        objectFit: 'contain'
                                                                     }}
                                                                     title="Bấm để xem lớn"
                                                                     onClick={() => handleImgClick(displayImg)}
@@ -347,9 +346,9 @@ const ProductDetail = () => {
                                         </div>
 
                                         {/* Cột phải: Thông tin sản phẩm */}
-                                        <div style={{flex: '0 0 70%'}}>
+                                        <div className="w-100 w-md-auto" style={{flex: '0 0 70%'}}>
                                             {/* Tên sản phẩm */}
-                                            <h3 style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
+                                            <h3 className="h4 h-md-3" style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
                                                 {product.name}
                                             </h3>
 
@@ -374,7 +373,7 @@ const ProductDetail = () => {
                                             </div>
 
                                             {/* Lưới thông tin */}
-                                            <div className="row">
+                                            <div className="row detail-info-grid">
                                                 <InfoItem label="Mã hàng" value={product.product_code || product.id} />
                                                 <InfoItem label="Tồn kho" value={product.total_stock_quantity || 0} />
                                                 <InfoItem label="Đơn vị cơ bản" value={product.base_unit || 'Chưa có'} />
@@ -393,10 +392,10 @@ const ProductDetail = () => {
                                     
                                     {/* Đơn vị tính */}
                                     {product.unit_conversions && product.unit_conversions.length > 0 && (
-                                        <div className="mt-4">
-                                            <h6 className="fw-bold mb-3">Đơn vị tính</h6>
+                                        <div className="mt-3 mt-md-4">
+                                            <h6 className="fw-bold mb-2 mb-md-3">Đơn vị tính</h6>
                                             <div className="table-responsive">
-                                                <table className="table table-bordered">
+                                                <table className="table table-bordered detail-table">
                                                     <thead>
                                                         <tr>
                                                             <th>Tên đơn vị</th>
@@ -623,16 +622,16 @@ const ProductDetail = () => {
                     </div>
 
                     {/* Nút thao tác */}
-                    <div className="row mt-4 mb-4">
-                        <div className="col-12 d-flex justify-content-center gap-2">
+                    <div className="row mt-3 mt-md-4 mb-3 mb-md-4">
+                        <div className="col-12 d-flex justify-content-center detail-action-buttons">
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
-                                <i className="fas fa-arrow-left me-1"></i>Quay lại
+                                <i className="fas fa-arrow-left me-1"></i><span className="d-none d-sm-inline">Quay lại</span>
                             </button>
                             <Link className="btn btn-primary btn-sm" to={`/product/${product.id}`}>
-                                <i className="fas fa-edit me-1"></i>Sửa sản phẩm
+                                <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa sản phẩm</span>
                             </Link>
                             <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
-                                <i className="fas fa-trash-alt me-1"></i>Xóa sản phẩm
+                                <i className="fas fa-trash-alt me-1"></i><span className="d-none d-sm-inline">Xóa sản phẩm</span>
                             </button>
                         </div>
                     </div>

@@ -245,11 +245,11 @@ const SupplierDetail = () => {
     return (
         <div id="layoutSidenav_content">
             <main>
-                <div className="container-fluid px-4">
-                    <div className="d-flex align-items-center justify-content-between mt-4 mb-2">
-                        <h2 className="mb-0">Chi tiết nhà cung cấp #{supplier.id}</h2>
+                <div className="container-fluid px-3 px-md-4">
+                    <div className="d-flex align-items-center justify-content-between mt-3 mt-md-4 mb-2">
+                        <h2 className="mb-0 detail-page-header">Chi tiết nhà cung cấp #{supplier.id}</h2>
                     </div>
-                    <ol className="breadcrumb mb-4">
+                    <ol className="breadcrumb mb-3 mb-md-4 detail-breadcrumb">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item"><Link to="/supplier">Nhà cung cấp</Link></li>
                         <li className="breadcrumb-item active">Chi tiết</li>
@@ -257,10 +257,10 @@ const SupplierDetail = () => {
 
                     <div className="card border">
                         {/* Tab Navigation */}
-                        <ul className="nav nav-tabs" id="supplierDetailTabs" role="tablist" style={{borderBottom: '2px solid #dee2e6'}}>
+                        <ul className="nav nav-tabs flex-wrap" id="supplierDetailTabs" role="tablist" style={{borderBottom: '2px solid #dee2e6'}}>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'thong-tin' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'thong-tin' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('thong-tin')}
                                     style={{ 
@@ -270,7 +270,6 @@ const SupplierDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'thong-tin' ? '500' : 'normal',
                                         display: 'flex',
@@ -278,12 +277,12 @@ const SupplierDetail = () => {
                                     }}
                                 >
                                     <i className="fas fa-info-circle me-2"></i>
-                                    Thông tin
+                                    <span className="d-none d-sm-inline">Thông tin</span>
                                 </button>
                             </li>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'lich-su' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'lich-su' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('lich-su')}
                                     style={{ 
@@ -293,7 +292,6 @@ const SupplierDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'lich-su' ? '500' : 'normal',
                                         display: 'flex',
@@ -301,12 +299,13 @@ const SupplierDetail = () => {
                                     }}
                                 >
                                     <i className="fas fa-history me-2"></i>
-                                    Lịch sử nhập hàng
+                                    <span className="d-none d-md-inline">Lịch sử nhập hàng</span>
+                                    <span className="d-md-none">Lịch sử</span>
                                 </button>
                             </li>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'no' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'no' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('no')}
                                     style={{ 
@@ -316,7 +315,6 @@ const SupplierDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'no' ? '500' : 'normal',
                                         display: 'flex',
@@ -324,19 +322,20 @@ const SupplierDetail = () => {
                                     }}
                                 >
                                     <i className="fas fa-credit-card me-2"></i>
-                                    Nợ nhà cung cấp
+                                    <span className="d-none d-md-inline">Nợ nhà cung cấp</span>
+                                    <span className="d-md-none">Nợ</span>
                                 </button>
                             </li>
                         </ul>
 
-                        <div style={{ padding: '1.5rem' }}>
+                        <div className="detail-card">
                             {/* Tab Thông tin */}
                             {activeTab === 'thong-tin' && (
                                 <div>
                                     {/* Header: Thông tin nhà cung cấp */}
                                     <div style={{marginBottom: '1.5rem', paddingBottom: '1.5rem'}}>
                                         {/* Tên nhà cung cấp */}
-                                        <h3 style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
+                                        <h3 className="h4 h-md-3" style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
                                             {supplier.code} - {supplier.name}
                                         </h3>
 
@@ -356,7 +355,7 @@ const SupplierDetail = () => {
                                         </div>
 
                                         {/* Lưới thông tin */}
-                                        <div className="row">
+                                        <div className="row detail-info-grid">
                                             <InfoItem label="Mã nhà cung cấp" value={supplier.code || supplier.id} />
                                             <InfoItem label="Điện thoại" value={supplier.phone_number} />
                                             <InfoItem label="Email" value={supplier.email} />
@@ -449,16 +448,16 @@ const SupplierDetail = () => {
                     </div>
 
                     {/* Nút thao tác */}
-                    <div className="row mt-4 mb-4">
-                        <div className="col-12 d-flex justify-content-center gap-2">
+                    <div className="row mt-3 mt-md-4 mb-3 mb-md-4">
+                        <div className="col-12 d-flex justify-content-center detail-action-buttons">
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
-                                <i className="fas fa-arrow-left me-1"></i>Quay lại
+                                <i className="fas fa-arrow-left me-1"></i><span className="d-none d-sm-inline">Quay lại</span>
                             </button>
                             <Link className="btn btn-primary btn-sm" to={`/supplier/${supplier.id}`}>
-                                <i className="fas fa-edit me-1"></i>Sửa nhà cung cấp
+                                <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa nhà cung cấp</span>
                             </Link>
                             <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
-                                <i className="fas fa-trash-alt me-1"></i>Xóa nhà cung cấp
+                                <i className="fas fa-trash-alt me-1"></i><span className="d-none d-sm-inline">Xóa nhà cung cấp</span>
                             </button>
                         </div>
                     </div>

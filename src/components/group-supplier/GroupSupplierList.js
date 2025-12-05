@@ -4,7 +4,7 @@ import DataTables from '../common/DataTables'
 import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Dropdown } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
@@ -139,89 +139,109 @@ const GroupSupplierList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4"></h1>
-                    <ol className="breadcrumb mb-4">
-                        <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
-                        <li className="breadcrumb-item active">Danh sách nhóm nhà cung cấp</li>
-                    </ol>
-                    
-                    {/* Layout chính */}
-                    <div className="row g-0">
-                        {/* Nội dung chính */}
-                        <div className="col-md-12 d-flex flex-column">
-                            {/* Search bar với các nút action */}
-                    <div className="p-3 border-bottom bg-light search-bar">
-                        <div className="row align-items-center">
-                            <div className="col-md-4">
-                                <div className="input-group">
-                                    <span className="input-group-text">
-                                        <i className="fas fa-search"></i>
-                                    </span>
-                                    <LiveSearch 
-                                        changeKeyword={setSearchText}
-                                        placeholder="Tìm kiếm theo tên nhóm nhà cung cấp..."
-                                    />
-                                </div>
-                            </div>
-                            <div className="col-md-8">
-                                <div className="d-flex justify-content-end gap-2">
-                                    {/* Nút xóa nhiều */}
-                                    {selectedRows.length > 0 && (
-                                        <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
-                                            <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
-                                        </button>
-                                    )}
-                                    
-                                    {/* Nút tạo mới */}
-                                    <Link className="btn btn-primary" to="/group-supplier/add">
-                                        <i className="fas fa-plus me-1"></i> Tạo mới
-                                    </Link>
-                                    
-                                    {/* Các nút khác */}
-                                    <button className="btn btn-secondary">
-                                        <i className="fas fa-upload me-1"></i> Import file
-                                    </button>
-                                    <button className="btn btn-secondary">
-                                        <i className="fas fa-download me-1"></i> Xuất file
-                                    </button>
-                                    <button className="btn btn-secondary">
-                                        <i className="fas fa-cog"></i>
-                                    </button>
-                                    <button className="btn btn-secondary">
-                                        <i className="fas fa-question-circle"></i>
-                                    </button>
-                                </div>
+                    {/* Header row: Breadcrumb + Search + Actions */}
+                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom group-supplier-header-row" style={{ justifyContent: 'space-between', gap: '0.5rem' }}>
+                        {/* Left section: Breadcrumb */}
+                        <div className="d-flex align-items-center flex-shrink-0">
+                            {/* Breadcrumb - ẩn trên tablet */}
+                            <ol className="breadcrumb mb-0 d-none d-md-flex" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
+                                <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
+                                <li className="breadcrumb-item active">Danh sách nhóm nhà cung cấp</li>
+                            </ol>
+                        </div>
+                        
+                        {/* Search - ở giữa */}
+                        <div className="group-supplier-search-bar" style={{ margin: '0 auto' }}>
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
+                                    <i className="fas fa-search text-muted"></i>
+                                </span>
+                                <LiveSearch 
+                                    changeKeyword={setSearchText}
+                                    placeholder="Tìm theo tên nhóm nhà cung cấp..."
+                                />
                             </div>
                         </div>
-
-                        {/* Search results info */}
-                        {searchText && (
-                            <div className="search-results-info">
-                                <small>
-                                    <i className="fas fa-info-circle me-1"></i>
-                                    Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {groupSuppliers.length} kết quả
-                                </small>
+                            
+                        {/* Actions - bên phải */}
+                        <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                            {/* Nút xóa khi có nhóm được chọn */}
+                            {selectedRows.length > 0 && (
+                                <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
+                                    <i className="fas fa-trash me-1"></i>
+                                    <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
+                                </button>
+                            )}
+                            
+                            {/* Nút tạo mới */}
+                            <Link className="btn btn-primary btn-sm" to="/group-supplier/add">
+                                <i className="fas fa-plus me-1"></i>
+                                <span className="d-none d-sm-inline">Tạo mới</span>
+                            </Link>
+                            
+                            {/* Các button riêng lẻ - hiện trên >= 1280px */}
+                            <div className="group-supplier-action-buttons">
+                                <button className="btn btn-outline-secondary btn-sm">
+                                    <i className="fas fa-upload me-1"></i> Import
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm">
+                                    <i className="fas fa-download me-1"></i> Xuất file
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm" title="Cài đặt">
+                                    <i className="fas fa-cog"></i>
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm" title="Trợ giúp">
+                                    <i className="fas fa-question-circle"></i>
+                                </button>
                             </div>
-                        )}
+                            
+                            {/* Dropdown menu cho các nút phụ - chỉ hiện khi < 1280px */}
+                            <div className="group-supplier-action-dropdown">
+                                <Dropdown>
+                                    <Dropdown.Toggle 
+                                        variant="outline-secondary" 
+                                        size="sm" 
+                                        className="d-flex align-items-center"
+                                        id="actions-dropdown"
+                                    >
+                                        <i className="fas fa-ellipsis-v"></i>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu align="end">
+                                        <Dropdown.Item>
+                                            <i className="fas fa-upload me-2"></i> Import
+                                        </Dropdown.Item>
+                                        <Dropdown.Item>
+                                            <i className="fas fa-download me-2"></i> Xuất file
+                                        </Dropdown.Item>
+                                        <Dropdown.Divider />
+                                        <Dropdown.Item>
+                                            <i className="fas fa-cog me-2"></i> Cài đặt
+                                        </Dropdown.Item>
+                                        <Dropdown.Item>
+                                            <i className="fas fa-question-circle me-2"></i> Trợ giúp
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </div>
+                        </div>
                     </div>
-
-                            {/* Data Table */}
-                            <div className="flex-grow-1 overflow-auto">
-                                <div className="p-3">
-                                    <DataTables 
-                                        name="Danh sách nhóm nhà cung cấp"
-                                        columns={columns}
-                                        data={groupSuppliers}
-                                        numOfPages={numOfPages}
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
-                                        setItemOfPage={setItemOfPage}
-                                        hideSearch={true}
-                                        selectedRows={selectedRows}
-                                        onSelectedRows={ (selectedRows) => setSelectedRows(selectedRows)}
-                                    />
-                                </div>
-                            </div>
+                    
+                    {/* Table Card */}
+                    <div className="table-card-wrapper">
+                        <div className="table-card">
+                            <DataTables 
+                                name="Danh sách nhóm nhà cung cấp"
+                                columns={columns}
+                                data={groupSuppliers}
+                                numOfPages={numOfPages}
+                                currentPage={currentPage}
+                                setCurrentPage={setCurrentPage}
+                                setItemOfPage={setItemOfPage}
+                                hideSearch={true}
+                                selectedRows={selectedRows}
+                                onSelectedRows={ (selectedRows) => setSelectedRows(selectedRows)}
+                                tableHeight="calc(100vh - 220px)"
+                            />
                         </div>
                     </div>
                 </div>

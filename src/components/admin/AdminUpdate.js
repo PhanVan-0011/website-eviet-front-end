@@ -278,100 +278,9 @@ const AdminUpdate = () => {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Avatar + Ngày sinh + Vai trò giống hệt AdminAdd */}
-                                <div className="row mb-3">
-                                    <div className="col-md-6">
-                                        <div className="row">
-                                            <div className="col-md-7">
-                                                <div className="mb-3">
-                                                    <label className="form-label fw-semibold">
-                                                        Ảnh đại diện
-                                                    </label>
-                                                    <div className="d-flex gap-2 align-items-start">
-                                                        <div 
-                                                            className="position-relative rounded-circle bg-light d-flex align-items-center justify-content-center border border-2 border-secondary border-dashed"
-                                                            style={{ width: 100, height: 100, overflow: 'hidden' }}
-                                                        >
-                                                            {imagePreview ? (
-                                                                <img
-                                                                    src={imagePreview}
-                                                                    alt="Avatar preview"
-                                                                    className="w-100 h-100"
-                                                                    style={{ objectFit: 'fill' }}
-                                                                />
-                                                            ) : oldAvatar ? (
-                                                                <img
-                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + oldAvatar}
-                                                                    alt="Avatar"
-                                                                    className="w-100 h-100"
-                                                                    style={{ objectFit: 'fill' }}
-                                                                />
-                                                            ) : (
-                                                                <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
-                                                                    <i className="fas fa-user fs-1 text-secondary"></i>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="d-flex flex-column gap-2">
-                                                            <div className="text-muted small">
-                                                                Chỉ chọn 1 ảnh, định dạng: jpg, png...<br/>
-                                                                Kích thước tối đa: 2MB
-                                                            </div>
-                                                            <label htmlFor="inputAvatar" className="btn btn-secondary mb-0">
-                                                                <i className="fas fa-upload me-2"></i>Chọn ảnh
-                                                            </label>
-                                                            <input
-                                                                id="inputAvatar"
-                                                                type="file"
-                                                                accept="image/*"
-                                                                style={{ display: 'none' }}
-                                                                onChange={onChangeImage}
-                                                            />
-                                                            
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="col-md-5">
-                                                <div className="mb-3">
-                                                    <label className="form-label fw-semibold" htmlFor='inputDob'>
-                                                        Ngày sinh
-                                                    </label>
-                                                    <div className="d-flex align-items-center">
-                                                        <label htmlFor="inputDob" className="form-label me-2" style={{
-                                                                color: '#0d6efd',
-                                                                fontSize: 20,
-                                                                marginRight: 10,
-                                                                minWidth: 24,
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center'
-                                                            }}>            
-                                                            <i className="fas fa-calendar-alt"></i>
-                                                        </label>
-                                                        <DatePicker
-                                                            id="inputDob"
-                                                            selected={dob}
-                                                            onChange={date => {
-                                                                setDob(date);
-                                                                setValue('date_of_birth', date ? date.toISOString().split('T')[0] : '');
-                                                            }}
-                                                            dateFormat="dd/MM/yyyy"
-                                                            locale={vi}
-                                                            className="form-control"
-                                                            placeholderText="dd/mm/yyyy"
-                                                            showMonthDropdown
-                                                            showYearDropdown
-                                                            dropdownMode="select"
-                                                            isClearable
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-6">
+                                {/* Vai trò - hiển thị trên màn hình 768px-1024px */}
+                                <div className="row mb-3 d-md-block d-lg-none">
+                                    <div className="col-12">
                                         <div className="mb-3">
                                             <label className="form-label fw-semibold">
                                                 Vai trò <span style={{ color: 'red' }}>*</span>
@@ -387,7 +296,136 @@ const AdminUpdate = () => {
                                                 }}
                                                 placeholder="Tìm kiếm & chọn vai trò..."
                                                 classNamePrefix="react-select"
-                                                styles={selectStyles}
+                                                styles={{
+                                                    ...selectStyles,
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                                                }}
+                                                menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                menuPosition="fixed"
+                                                onBlur={() => trigger('role_ids')}
+                                            />
+                                            <input
+                                                type="hidden"
+                                                {...register('role_ids', {
+                                                    validate: value => (value && value.length > 0) || 'Phải chọn ít nhất 1 vai trò!'
+                                                })}
+                                            />
+                                            {errors.role_ids && <div className="text-danger">{errors.role_ids.message}</div>}
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Ảnh đại diện và Ngày sinh - cùng hàng trên 768px-1024px */}
+                                <div className="row mb-3">
+                                    <div className="col-12 col-md-6">
+                                        <div className="mb-3">
+                                            <label className="form-label fw-semibold">
+                                                Ảnh đại diện
+                                            </label>
+                                            <div className="d-flex gap-2 align-items-start">
+                                                <div 
+                                                    className="position-relative rounded-circle bg-light d-flex align-items-center justify-content-center border border-2 border-secondary border-dashed"
+                                                    style={{ width: 100, height: 100, overflow: 'hidden' }}
+                                                >
+                                                    {imagePreview ? (
+                                                        <img
+                                                            src={imagePreview}
+                                                            alt="Avatar preview"
+                                                            className="w-100 h-100"
+                                                            style={{ objectFit: 'fill' }}
+                                                        />
+                                                    ) : oldAvatar ? (
+                                                        <img
+                                                            src={process.env.REACT_APP_API_URL + 'api/images/' + oldAvatar}
+                                                            alt="Avatar"
+                                                            className="w-100 h-100"
+                                                            style={{ objectFit: 'fill' }}
+                                                        />
+                                                    ) : (
+                                                        <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100">
+                                                            <i className="fas fa-user fs-1 text-secondary"></i>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="d-flex flex-column gap-2">
+                                                    <div className="text-muted small">
+                                                        Chỉ chọn 1 ảnh, định dạng: jpg, png...<br/>
+                                                        Kích thước tối đa: 2MB
+                                                    </div>
+                                                    <label htmlFor="inputAvatar" className="btn btn-secondary mb-0">
+                                                        <i className="fas fa-upload me-2"></i>Chọn ảnh
+                                                    </label>
+                                                    <input
+                                                        id="inputAvatar"
+                                                        type="file"
+                                                        accept="image/*"
+                                                        style={{ display: 'none' }}
+                                                        onChange={onChangeImage}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-12 col-md-6">
+                                        <div className="mb-3">
+                                            <label className="form-label fw-semibold" htmlFor='inputDob'>
+                                                Ngày sinh
+                                            </label>
+                                            <div className="d-flex align-items-center">
+                                                <label htmlFor="inputDob" className="form-label me-2" style={{
+                                                        color: '#0d6efd',
+                                                        fontSize: 20,
+                                                        marginRight: 10,
+                                                        minWidth: 24,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center'
+                                                    }}>            
+                                                    <i className="fas fa-calendar-alt"></i>
+                                                </label>
+                                                <DatePicker
+                                                    id="inputDob"
+                                                    selected={dob}
+                                                    onChange={date => {
+                                                        setDob(date);
+                                                        setValue('date_of_birth', date ? date.toISOString().split('T')[0] : '');
+                                                    }}
+                                                    dateFormat="dd/MM/yyyy"
+                                                    locale={vi}
+                                                    className="form-control"
+                                                    placeholderText="dd/mm/yyyy"
+                                                    showMonthDropdown
+                                                    showYearDropdown
+                                                    dropdownMode="select"
+                                                    isClearable
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Vai trò - chỉ hiển thị trên màn hình >= 1024px */}
+                                <div className="row mb-3 d-none d-lg-block">
+                                    <div className="col-12">
+                                        <div className="mb-3">
+                                            <label className="form-label fw-semibold">
+                                                Vai trò <span style={{ color: 'red' }}>*</span>
+                                            </label>
+                                            <Select
+                                                options={roleOptions}
+                                                isMulti
+                                                value={roleOptions.filter(opt => selectedRoles.includes(String(opt.value)) || selectedRoles.includes(opt.value))}
+                                                onChange={opts => {
+                                                    const values = opts ? opts.map(opt => opt.value) : [];
+                                                    setSelectedRoles(values);
+                                                    setValue('role_ids', values, { shouldValidate: true });
+                                                }}
+                                                placeholder="Tìm kiếm & chọn vai trò..."
+                                                classNamePrefix="react-select"
+                                                styles={{
+                                                    ...selectStyles,
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                                                }}
+                                                menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                menuPosition="fixed"
                                                 onBlur={() => trigger('role_ids')}
                                             />
                                             <input

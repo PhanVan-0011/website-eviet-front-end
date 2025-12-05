@@ -48,6 +48,7 @@ const PromotionUpdate = () => {
     const [maxDiscountAmount, setMaxDiscountAmount] = useState('');
     const [maxUsage, setMaxUsage] = useState('');
     const [maxUsagePerUser, setMaxUsagePerUser] = useState('');
+    const [isCombinable, setIsCombinable] = useState(false);
 
     // Hình ảnh
     const [imageFile, setImageFile] = useState(null);
@@ -84,11 +85,12 @@ const PromotionUpdate = () => {
                     const promoVal = data.type === 'fixed_amount' ? formatVND(data.value) : data.value;
                     setValuePromo(promoVal);
                     setValue('promoValue', promoVal);
-                    setMinOrderValue(data.conditions?.min_order_value ? data.conditions.min_order_value.toString() : '');
-                    setMaxDiscountAmount(data.conditions?.max_discount_amount ? data.conditions.max_discount_amount.toString() : '');
+                    setMinOrderValue(data.conditions?.min_order_value ? formatVND(data.conditions.min_order_value.toString()) : '');
+                    setMaxDiscountAmount(data.conditions?.max_discount_amount ? formatVND(data.conditions.max_discount_amount.toString()) : '');
                     setMaxUsage(data.usage_limits?.max_usage ? data.usage_limits.max_usage.toString() : '');
                     setMaxUsagePerUser(data.usage_limits?.max_usage_per_user ? data.usage_limits.max_usage_per_user.toString() : '');
                     setValue('is_active', data.is_active === true ? "1" : "0");
+                    setIsCombinable(data.is_combinable === true);
                     setValue('is_combinable', data.is_combinable === true ? "1" : "0");
                     const start = data.dates?.start_date ? moment(data.dates.start_date).toDate() : null;
                     const end = data.dates?.end_date ? moment(data.dates.end_date).toDate() : null;
@@ -178,6 +180,12 @@ const PromotionUpdate = () => {
     const productOptions = products.map(p => ({ value: p.id, label: p.name + (p.size ? ` - ${p.size}` : '') + (p.category?.name ? ` (${p.category.name})` : '') }));
     const categoryOptions = categories.map(c => ({ value: c.id, label: c.name }));
     const comboOptions = combos.map(c => ({ value: c.id, label: c.name }));
+    const applicationTypeOptions = [
+        { value: 'products', label: 'Sản phẩm' },
+        { value: 'categories', label: 'Danh mục' },
+        { value: 'combos', label: 'Combo' },
+        { value: 'orders', label: 'Đơn hàng' }
+    ];
 
     // Khi đổi loại khuyến mãi thì reset value
     useEffect(() => {
@@ -235,7 +243,7 @@ const PromotionUpdate = () => {
             formData.append('max_discount_amount', maxDiscountAmount ? Number(maxDiscountAmount.replace(/\./g, '')) : 0);
             formData.append('max_usage', maxUsage ? Number(maxUsage) : '');
             formData.append('max_usage_per_user', maxUsagePerUser ? Number(maxUsagePerUser) : '');
-            formData.append('is_combinable', data.is_combinable === '1' || data.is_combinable === true ? 1 : 0);
+            formData.append('is_combinable', isCombinable ? 1 : 0);
             formData.append('is_active', data.is_active === '1' || data.is_active === true ? 1 : 0);
             formData.append('start_date', startDatePicker ? format(new Date(startDatePicker), 'yyyy-MM-dd HH:mm:ss') : '');
             formData.append('end_date', endDatePicker ? format(new Date(endDatePicker), 'yyyy-MM-dd HH:mm:ss') : '');
@@ -306,14 +314,14 @@ const PromotionUpdate = () => {
                     <form onSubmit={handleSubmit(handleSubmitForm)}>
                         <div className="row g-4">
                             {/* Thông tin cơ bản */}
-                            <div className="col-lg-8">
+                            <div className="col-12 col-lg-8">
                                 <div className="card shadow-sm border-0 h-100">
                                     <div className="card-header bg-white border-bottom-0 pb-0">
                                         <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-info-circle me-2"></i>Thông tin cơ bản</h5>
                                     </div>
                                     <div className="card-body pt-2">
                                         <div className="row mb-3">
-                                            <div className="col-md-6">
+                                            <div className="col-12 col-md-6">
                                                 <div className="mb-3">
                                                     <label htmlFor="inputName" className="form-label fw-semibold">
                                                         Tên khuyến mãi <span style={{ color: 'red' }}>*</span>
@@ -327,7 +335,7 @@ const PromotionUpdate = () => {
                                                     {errors.name && <div className="text-danger mt-1">{errors.name.message}</div>}
                                                 </div>
                                             </div>
-                                            <div className="col-md-6">
+                                            <div className="col-12 col-md-6">
                                                 <div className="mb-3">
                                                     <label htmlFor="inputCode" className="form-label fw-semibold">
                                                         Mã khuyến mãi <span style={{ color: 'red' }}>*</span>
@@ -363,7 +371,7 @@ const PromotionUpdate = () => {
                                 </div>
                             </div>
                             {/* Hình ảnh khuyến mãi */}
-                            <div className="col-lg-4">
+                            <div className="col-12 col-lg-4">
                                 <div className="card shadow-sm border-0 h-100">
                                     <div className="card-header bg-white border-bottom-0 pb-0">
                                         <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-image me-2"></i>Hình ảnh khuyến mãi</h5>
@@ -445,34 +453,37 @@ const PromotionUpdate = () => {
                         </div>
                         {/* Cài đặt khuyến mãi */}
                         <div className="row mt-4">
-                            <div className="col-lg-12">
+                            <div className="col-12">
                                 <div className="card shadow-sm border-0">
                                     <div className="card-header bg-white border-bottom-0 pb-0">
                                         <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-cogs me-2"></i>Cài đặt khuyến mãi</h5>
                                     </div>
                                     <div className="card-body pt-2">
                                         <div className="row mb-3">
-                                            <div className="col-md-4">
+                                            <div className="col-12 col-md-4 mb-3 mb-md-0">
                                                 <label className="mb-1">Loại áp dụng <span style={{ color: 'red' }}>*</span></label>
-                                                <select
-                                                    className="form-select"
-                                                    value={applicationType}
-                                                    onChange={e => {
-                                                        setApplicationType(e.target.value);
-                                                        setSelectedProducts([]);
-                                                        setSelectedCategories([]);
-                                                        setSelectedCombos([]);
-                                                        clearErrors(['selectedProducts', 'selectedCategories', 'selectedCombos']);
+                                                <Select
+                                                    options={applicationTypeOptions}
+                                                    value={applicationTypeOptions.find(opt => opt.value === applicationType)}
+                                                    onChange={opt => {
+                                                        if (opt) {
+                                                            setApplicationType(opt.value);
+                                                            setSelectedProducts([]);
+                                                            setSelectedCategories([]);
+                                                            setSelectedCombos([]);
+                                                            clearErrors(['selectedProducts', 'selectedCategories', 'selectedCombos']);
+                                                        }
                                                     }}
-                                                    required
-                                                >
-                                                    <option value="products">Sản phẩm</option>
-                                                    <option value="categories">Danh mục</option>
-                                                    <option value="combos">Combo</option>
-                                                    <option value="orders">Đơn hàng</option>
-                                                </select>
+                                                    placeholder="Chọn loại áp dụng..."
+                                                    classNamePrefix="react-select"
+                                                    styles={selectStyles}
+                                                    menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                    menuPosition="fixed"
+                                                    maxMenuHeight={200}
+                                                    isSearchable={false}
+                                                />
                                             </div>
-                                            <div className="col-md-8">
+                                            <div className="col-12 col-md-8">
                                                 {/* Đối tượng áp dụng */}
                                                 {applicationType === 'products' && (
                                                     <div>
@@ -485,6 +496,9 @@ const PromotionUpdate = () => {
                                                             placeholder="Tìm kiếm & chọn sản phẩm..."
                                                             classNamePrefix="react-select"
                                                             styles={selectStyles}
+                                                            menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                            menuPosition="fixed"
+                                                            maxMenuHeight={200}
                                                         />
                                                         {errors.selectedProducts && <div className="text-danger mt-1 small">{errors.selectedProducts.message}</div>}
                                                     </div>
@@ -500,6 +514,9 @@ const PromotionUpdate = () => {
                                                             placeholder="Tìm kiếm & chọn danh mục..."
                                                             classNamePrefix="react-select"
                                                             styles={selectStyles}
+                                                            menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                            menuPosition="fixed"
+                                                            maxMenuHeight={200}
                                                         />
                                                         {errors.selectedCategories && <div className="text-danger mt-1 small">{errors.selectedCategories.message}</div>}
                                                     </div>
@@ -515,179 +532,211 @@ const PromotionUpdate = () => {
                                                             placeholder="Tìm kiếm & chọn combo..."
                                                             classNamePrefix="react-select"
                                                             styles={selectStyles}
+                                                            menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                            menuPosition="fixed"
+                                                            maxMenuHeight={200}
                                                         />
                                                         {errors.selectedCombos && <div className="text-danger mt-1 small">{errors.selectedCombos.message}</div>}
                                                     </div>
                                                 )}
                                                 {applicationType === 'orders' && (
-                                                    <div className="text-muted fst-italic mt-2">Áp dụng cho toàn bộ đơn hàng</div>
+                                                    <div className="d-flex align-items-center" style={{ minHeight: '62px' }}>
+                                                        <span className="text-muted fst-italic">Áp dụng cho toàn bộ đơn hàng</span>
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
-                                        {/* Dòng gồm: Loại khuyến mãi, Giá trị, Trạng thái, Thời gian bắt đầu, Thời gian kết thúc */}
+                                        <hr className="my-4" />
+                                        <h6 className="text-muted mb-3 fw-semibold">Giá trị khuyến mãi</h6>
+                                        {/* Hàng 2: Loại khuyến mãi - Giá trị - Trạng thái */}
                                         <div className="row mb-3">
-                                    <div className="col-md-2">
-                                        <label className="mb-1">Loại khuyến mãi <span style={{ color: 'red' }}>*</span></label>
-                                        <select
-                                            className="form-select"
-                                            value={promoType}
-                                            onChange={e => setPromoType(e.target.value)}
-                                            required
-                                        >
-                                            <option value="percentage">Phần trăm (%)</option>
-                                            <option value="fixed_amount">Tiền cố định (VNĐ)</option>
-                                        </select>
-                                    </div>
-                                    <div className="col-md-2">
-                                        <label className="mb-1">Giá trị <span style={{ color: 'red' }}>*</span></label>
-                                        <input
-                                            className="form-control"
-                                            type="text"
-                                            inputMode="numeric"
-                                            value={promoType === 'fixed_amount' ? formatVND(value) : value}
-                                            {...register('promoValue', {
-                                                required: 'Giá trị khuyến mãi là bắt buộc',
-                                                validate: v => {
-                                                    const val = promoType === 'fixed_amount' ? Number((v || '').replace(/\./g, '')) : Number(v);
-                                                    if (isNaN(val) || val <= 0) return 'Giá trị phải lớn hơn 0';
-                                                    if (promoType === 'percentage' && val > 100) return 'Phần trăm tối đa là 100';
-                                                    return true;
-                                                }
-                                            })}
-                                            onChange={e => setValuePromo(promoType === 'fixed_amount' ? formatVND(e.target.value) : e.target.value)}
-                                            placeholder={promoType === 'percentage' ? 'VD: 15 (%)' : 'VD: 20.000 (VNĐ)'}
-                                        />
-                                        {errors.promoValue && <div className="text-danger">{errors.promoValue.message}</div>}
-                                    </div>
-                                    <div className="col-md-2">
-                                        <label className="mb-1">Trạng thái <span style={{ color: 'red' }}>*</span></label>
-                                        <select
-                                            className="form-select"
-                                            {...register('is_active', { required: 'Trạng thái là bắt buộc', validate: v => v === '1' || v === '0' || 'Trạng thái không hợp lệ' })}
-                                            defaultValue="1"
-                                        >
-                                            <option value="1">Hiển thị</option>
-                                            <option value="0">Ẩn</option>
-                                        </select>
-                                        {errors.is_active && <div className="text-danger">{errors.is_active.message}</div>}
-                                    </div>
-                                    <div className="col-md-3">
-                                        <label className="mb-1">Thời gian bắt đầu <span style={{ color: 'red' }}>*</span></label>
-                                        <DatePicker
-                                            selected={startDatePicker}
-                                            onChange={date => {
-                                                setStartDatePicker(date);
-                                                setStartDate(date);
-                                                setValue('start_date', date, { shouldValidate: true });
-                                            }}
-                                            locale={vi}
-                                            dateFormat="dd/MM/yyyy HH:mm"
-                                            className="form-control"
-                                            placeholderText="Chọn thời gian bắt đầu"
-                                            showTimeSelect
-                                            timeFormat="HH:mm"
-                                            timeIntervals={15}
-                                            timeCaption="Giờ"
-                                        />
-                                        <input type="hidden" {...register('start_date', { required: 'Thời gian bắt đầu là bắt buộc' })} />
-                                        {errors.start_date && <div className="text-danger">{errors.start_date.message}</div>}
-                                    </div>
-                                    <div className="col-md-3">
-                                        <label className="mb-1">Thời gian kết thúc <span style={{ color: 'red' }}>*</span></label>
-                                        <DatePicker
-                                            selected={endDatePicker}
-                                            onChange={date => {
-                                                setEndDatePicker(date);
-                                                setEndDate(date);
-                                                setValue('end_date', date, { shouldValidate: true });
-                                            }}
-                                            locale={vi}
-                                            dateFormat="dd/MM/yyyy HH:mm"
-                                            className="form-control"
-                                            placeholderText="Chọn thời gian kết thúc"
-                                            showTimeSelect
-                                            timeFormat="HH:mm"
-                                            timeIntervals={15}
-                                            timeCaption="Giờ"
-                                        />
-                                        <input type="hidden" {...register('end_date', { required: 'Thời gian kết thúc là bắt buộc' })} />
-                                        {errors.end_date && <div className="text-danger">{errors.end_date.message}</div>}
-                                    </div>
-                                </div>
-                                {/* Dòng gồm: Đơn tối thiểu, Giảm tối đa, Tổng lượt sử dụng, Lượt/người, Kết hợp với mã khác */}
-                                <div className="row mb-3">
-                                    <div className="col-md-3">
-                                        <label className="mb-1">Đơn tối thiểu (VNĐ)</label>
-                                        <input
-                                            className="form-control"
-                                            id="inputMinOrderValue"
-                                            type="text"
-                                            inputMode="numeric"
-                                            autoComplete="off"
-                                            value={formatVND(minOrderValue)}
-                                            onChange={e => {
-                                                const formatted = formatVND(e.target.value);
-                                                setMinOrderValue(formatted);
-                                            }}
-                                            placeholder="VD: 50.000"
-                                        />
-                                    </div>
-                                    <div className="col-md-3">
-                                        <label className="mb-1">Giảm tối đa (VNĐ)</label>
-                                        <input
-                                            className="form-control"
-                                            id="inputMaxDiscountAmount"
-                                            type="text"
-                                            inputMode="numeric"
-                                            autoComplete="off"
-                                            value={formatVND(maxDiscountAmount)}
-                                            onChange={e => {
-                                                const formatted = formatVND(e.target.value);
-                                                setMaxDiscountAmount(formatted);
-                                            }}
-                                            placeholder="VD: 20.000"
-                                        />
-                                    </div>
-                                    <div className="col-md-2">
-                                        <label className="mb-1">Tổng lượt sử dụng</label>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            {...register('max_usage', {
-                                                min: { value: 1, message: 'Tổng lượt sử dụng phải lớn hơn 0' },
-                                                validate: v => !v || Number(v) > 0 || 'Tổng lượt sử dụng phải lớn hơn 0'
-                                            })}
-                                            value={maxUsage}
-                                            onChange={e => setMaxUsage(e.target.value)}
-                                            placeholder="VD: 100"
-                                        />
-                                        {errors.max_usage && <div className="text-danger">{errors.max_usage.message}</div>}
-                                    </div>
-                                    <div className="col-md-2">
-                                        <label className="mb-1">Lượt/người</label>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            {...register('max_usage_per_user', {
-                                                min: { value: 1, message: 'Lượt/người phải lớn hơn 0' },
-                                                validate: v => !v || Number(v) > 0 || 'Lượt/người phải lớn hơn 0'
-                                            })}
-                                            value={maxUsagePerUser}
-                                            onChange={e => setMaxUsagePerUser(e.target.value)}
-                                            placeholder="VD: 1"
-                                        />
-                                        {errors.max_usage_per_user && <div className="text-danger">{errors.max_usage_per_user.message}</div>}
-                                    </div>
-                                    <div className="col-md-2">
-                                        <label className="mb-1">Kết hợp với mã khác</label>
-                                        <select
-                                            className="form-select"
-                                            {...register('is_combinable')}
-                                            defaultValue="0"
-                                        >
-                                            <option value="1">Có</option>
-                                            <option value="0">Không</option>
-                                        </select>
+                                            <div className="col-12 col-md-4 mb-3 mb-md-0">
+                                                <label className="mb-1">Loại khuyến mãi <span style={{ color: 'red' }}>*</span></label>
+                                                <select
+                                                    className="form-select"
+                                                    value={promoType}
+                                                    onChange={e => setPromoType(e.target.value)}
+                                                    required
+                                                >
+                                                    <option value="percentage">Phần trăm (%)</option>
+                                                    <option value="fixed_amount">Tiền cố định (VNĐ)</option>
+                                                </select>
+                                            </div>
+                                            <div className="col-12 col-md-4 mb-3 mb-md-0">
+                                                <label className="mb-1">Giá trị <span style={{ color: 'red' }}>*</span></label>
+                                                <div className="input-group">
+                                                    <input
+                                                        className="form-control"
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        value={promoType === 'fixed_amount' ? formatVND(value) : value}
+                                                        {...register('promoValue', {
+                                                            required: 'Giá trị khuyến mãi là bắt buộc',
+                                                            validate: v => {
+                                                                const val = promoType === 'fixed_amount' ? Number((v || '').replace(/\./g, '')) : Number(v);
+                                                                if (isNaN(val) || val <= 0) return 'Giá trị phải lớn hơn 0';
+                                                                if (promoType === 'percentage' && val > 100) return 'Phần trăm tối đa là 100';
+                                                                return true;
+                                                            }
+                                                        })}
+                                                        onChange={e => setValuePromo(promoType === 'fixed_amount' ? formatVND(e.target.value) : e.target.value)}
+                                                        placeholder={promoType === 'percentage' ? 'VD: 15' : 'VD: 20.000'}
+                                                    />
+                                                    <span className="input-group-text bg-light">{promoType === 'percentage' ? '%' : 'VNĐ'}</span>
+                                                </div>
+                                                {errors.promoValue && <div className="text-danger small mt-1">{errors.promoValue.message}</div>}
+                                            </div>
+                                            <div className="col-12 col-md-4 mb-3 mb-md-0">
+                                                <label className="mb-1">Trạng thái <span style={{ color: 'red' }}>*</span></label>
+                                                <select
+                                                    className="form-select"
+                                                    {...register('is_active', { required: 'Trạng thái là bắt buộc', validate: v => v === '1' || v === '0' || 'Trạng thái không hợp lệ' })}
+                                                    defaultValue="1"
+                                                >
+                                                    <option value="1">Hiển thị</option>
+                                                    <option value="0">Ẩn</option>
+                                                </select>
+                                                {errors.is_active && <div className="text-danger small mt-1">{errors.is_active.message}</div>}
+                                            </div>
+                                        </div>
+                                        {/* Hàng 3: Thời gian bắt đầu - Thời gian kết thúc */}
+                                        <div className="row mb-3">
+                                            <div className="col-12 col-md-6 mb-3 mb-md-0">
+                                                <label className="mb-1">Thời gian bắt đầu <span style={{ color: 'red' }}>*</span></label>
+                                                <DatePicker
+                                                    selected={startDatePicker}
+                                                    onChange={date => {
+                                                        setStartDatePicker(date);
+                                                        setStartDate(date);
+                                                        setValue('start_date', date, { shouldValidate: true });
+                                                    }}
+                                                    locale={vi}
+                                                    dateFormat="dd/MM/yyyy HH:mm"
+                                                    className="form-control"
+                                                    placeholderText="Chọn thời gian bắt đầu"
+                                                    showTimeSelect
+                                                    timeFormat="HH:mm"
+                                                    timeIntervals={15}
+                                                    timeCaption="Giờ"
+                                                />
+                                                <input type="hidden" {...register('start_date', { required: 'Thời gian bắt đầu là bắt buộc' })} />
+                                                {errors.start_date && <div className="text-danger small mt-1">{errors.start_date.message}</div>}
+                                            </div>
+                                            <div className="col-12 col-md-6 mb-3 mb-md-0">
+                                                <label className="mb-1">Thời gian kết thúc <span style={{ color: 'red' }}>*</span></label>
+                                                <DatePicker
+                                                    selected={endDatePicker}
+                                                    onChange={date => {
+                                                        setEndDatePicker(date);
+                                                        setEndDate(date);
+                                                        setValue('end_date', date, { shouldValidate: true });
+                                                    }}
+                                                    locale={vi}
+                                                    dateFormat="dd/MM/yyyy HH:mm"
+                                                    className="form-control"
+                                                    placeholderText="Chọn thời gian kết thúc"
+                                                    showTimeSelect
+                                                    timeFormat="HH:mm"
+                                                    timeIntervals={15}
+                                                    timeCaption="Giờ"
+                                                />
+                                                <input type="hidden" {...register('end_date', { required: 'Thời gian kết thúc là bắt buộc' })} />
+                                                {errors.end_date && <div className="text-danger small mt-1">{errors.end_date.message}</div>}
+                                            </div>
+                                        </div>
+                                        <hr className="my-4" />
+                                        <h6 className="text-muted mb-3 fw-semibold">Điều kiện & Giới hạn</h6>
+                                        {/* Hàng 4: Điều kiện giới hạn */}
+                                        <div className="row mb-3">
+                                            <div className="col-12 col-md-3 mb-3 mb-md-0">
+                                                <label className="mb-1">Đơn tối thiểu (VNĐ)</label>
+                                                <div className="input-group">
+                                                    <input
+                                                        className="form-control"
+                                                        id="inputMinOrderValue"
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        autoComplete="off"
+                                                        value={formatVND(minOrderValue)}
+                                                        onChange={e => {
+                                                            const formatted = formatVND(e.target.value);
+                                                            setMinOrderValue(formatted);
+                                                        }}
+                                                        placeholder=""
+                                                    />
+                                                    <span className="input-group-text bg-light">VNĐ</span>
+                                                </div>
+                                            </div>
+                                            <div className="col-12 col-md-3 mb-3 mb-md-0">
+                                                <label className="mb-1">Giảm tối đa (VNĐ)</label>
+                                                <div className="input-group">
+                                                    <input
+                                                        className="form-control"
+                                                        id="inputMaxDiscountAmount"
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        autoComplete="off"
+                                                        value={formatVND(maxDiscountAmount)}
+                                                        onChange={e => {
+                                                            const formatted = formatVND(e.target.value);
+                                                            setMaxDiscountAmount(formatted);
+                                                        }}
+                                                        placeholder=""
+                                                    />
+                                                    <span className="input-group-text bg-light">VNĐ</span>
+                                                </div>
+                                            </div>
+                                            <div className="col-12 col-md-3 mb-3 mb-md-0">
+                                                <label className="mb-1">Tổng lượt sử dụng</label>
+                                                <input
+                                                    type="number"
+                                                    className="form-control"
+                                                    {...register('max_usage', {
+                                                        min: { value: 1, message: 'Tổng lượt sử dụng phải lớn hơn 0' },
+                                                        validate: v => !v || Number(v) > 0 || 'Tổng lượt sử dụng phải lớn hơn 0'
+                                                    })}
+                                                    value={maxUsage}
+                                                    onChange={e => setMaxUsage(e.target.value)}
+                                                    placeholder="VD: 100"
+                                                />
+                                                {errors.max_usage && <div className="text-danger small mt-1">{errors.max_usage.message}</div>}
+                                            </div>
+                                            <div className="col-12 col-md-3 mb-3 mb-md-0">
+                                                <label className="mb-1">Lượt/người</label>
+                                                <input
+                                                    type="number"
+                                                    className="form-control"
+                                                    {...register('max_usage_per_user', {
+                                                        min: { value: 1, message: 'Lượt/người phải lớn hơn 0' },
+                                                        validate: v => !v || Number(v) > 0 || 'Lượt/người phải lớn hơn 0'
+                                                    })}
+                                                    value={maxUsagePerUser}
+                                                    onChange={e => setMaxUsagePerUser(e.target.value)}
+                                                    placeholder="VD: 1"
+                                                />
+                                                {errors.max_usage_per_user && <div className="text-danger small mt-1">{errors.max_usage_per_user.message}</div>}
+                                            </div>
+                                        </div>
+                                        {/* Hàng 5: Kết hợp với mã khác (Toggle Switch) */}
+                                        <div className="row mb-3">
+                                            <div className="col-12">
+                                                <div className="form-check form-switch">
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        role="switch"
+                                                        id="switchCombinable"
+                                                        checked={isCombinable}
+                                                        onChange={e => {
+                                                            setIsCombinable(e.target.checked);
+                                                            setValue('is_combinable', e.target.checked ? '1' : '0');
+                                                        }}
+                                                    />
+                                                    <label className="form-check-label" htmlFor="switchCombinable">
+                                                        Kết hợp với mã khác
+                                                    </label>
+                                                </div>
+                                                <input type="hidden" {...register('is_combinable')} value={isCombinable ? '1' : '0'} />
                                             </div>
                                         </div>
                                     </div>
@@ -696,18 +745,18 @@ const PromotionUpdate = () => {
                         </div>
                         {/* Nút hành động */}
                         <div className="row mt-4 mb-4">
-                            <div className="col-lg-12">
-                                <div className="d-flex justify-content-center gap-2">
+                            <div className="col-12">
+                                <div className="d-flex flex-column flex-md-row justify-content-center gap-2">
                                     <button
                                         type="button"
-                                        className="btn btn-secondary w-25"
+                                        className="btn btn-secondary w-100 w-md-auto"
                                         onClick={() => navigation('/promotion')}
                                         disabled={isSubmitting}
                                     >
                                         Hủy bỏ
                                     </button>
                                     <button
-                                        className="btn btn-primary w-25"
+                                        className="btn btn-primary w-100 w-md-auto"
                                         type="submit"
                                         disabled={isSubmitting}
                                     >

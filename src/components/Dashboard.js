@@ -86,153 +86,117 @@ const Dashboard = () => {
     return (
     <div id="layoutSidenav_content">
        <main >
-         <div className="container-fluid px-4">
-            <h3 className="mt-4 mb-4"></h3>
-            <div className="row mb-4">
+         <div className="container-fluid px-2 px-md-4">
+            <h3 className="mt-3 mt-md-4 mb-3 mb-md-4"></h3>
+            {/* Stat Cards - Responsive: 1 col mobile, 2 cols tablet, 4 cols desktop */}
+            <div className="row g-2 g-md-3 mb-3 mb-md-4">
                 {/* Doanh thu tháng */}
-                <div className="col-md-3 ">
-                    <div className="card bg-white text-dark mb-3 position-relative shadow-sm stat-card-revenue">
-                        <div className="card-body">
-                            <h5 className="card-title d-flex align-items-center">
-                                {/* Biểu tượng với viền tròn */}
+                <div className="col-12 col-sm-6 col-lg-3">
+                    <div className="card bg-white text-dark mb-2 mb-md-3 position-relative shadow-sm stat-card-revenue h-100">
+                        <div className="card-body p-3 p-md-4">
+                            <h5 className="card-title d-flex align-items-center mb-2 mb-md-3">
                                 <span className="icon-circle-revenue stat-icon">
                                     <i className="fas fa-money-bill-wave"></i>
                                 </span>
                                 <span className="ms-2">Tổng doanh thu</span>
                             </h5>
-                            <p className="card-text-custom fs-3">
+                            <p className="card-text-custom mb-2 mb-md-3">
                                 {dashboardData?.data?.kpis?.total_revenue?.value !== undefined
                                     ? formatVND(dashboardData.data.kpis.total_revenue.value)
                                     : 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_revenue?.change !== undefined && (
-                                <span className={`d-block mb-2 ${dashboardData.data.kpis.total_revenue.change < 0 ? 'text-danger' : 'text-success'}`}>
+                                <span className={`d-block mb-0 ${dashboardData.data.kpis.total_revenue.change < 0 ? 'text-danger' : 'text-success'}`}>
                                     <i className={`fas ${dashboardData.data.kpis.total_revenue.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
-                                    <span className="percent-change">
+                                    <span className="percent-change small">
                                         {`${dashboardData.data.kpis.total_revenue.change > 0 ? '+' : ''}${dashboardData.data.kpis.total_revenue.change}% so với tháng trước`}
                                     </span>
                                 </span>
                             )}
-                            {/* <div className="d-flex justify-content-end">
-                                <Link className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1" to="/order" style={{ borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
-                                    Xem chi tiết <i className="fas fa-arrow-right"></i>
-                                </Link>
-                            </div> */}
                         </div>
                     </div>
                 </div>
 
                 {/* Tổng đơn hàng */}
-                <div className="col-md-3">
-                    <div className="card mb-3 position-relative stat-card-order">
-                        <div className="card-body">
-                             <h5 className="card-title d-flex align-items-center">
-                                {/* Biểu tượng với viền tròn */}
+                <div className="col-12 col-sm-6 col-lg-3">
+                    <div className="card mb-2 mb-md-3 position-relative stat-card-order h-100">
+                        <div className="card-body p-3 p-md-4">
+                             <h5 className="card-title d-flex align-items-center mb-2 mb-md-3">
                                 <span className="icon-circle-order stat-icon">
                                     <i className="fas fa-shopping-cart"></i>
                                 </span>
                                 <span className="ms-2">Tổng đơn hàng</span>
                             </h5>
-                            <p className="card-text-custom fs-3">
+                            <p className="card-text-custom mb-2 mb-md-3">
                                 {dashboardData?.data?.kpis?.total_orders?.value ?? 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_orders?.change !== undefined && (
-                                <span className={`d-block mb-2 ${dashboardData.data.kpis.total_orders.change < 0 ? 'text-danger' : 'text-success'}`}>
+                                <span className={`d-block mb-0 ${dashboardData.data.kpis.total_orders.change < 0 ? 'text-danger' : 'text-success'}`}>
                                     <i className={`fas ${dashboardData.data.kpis.total_orders.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
-                                    <span className="percent-change">
+                                    <span className="percent-change small">
                                         {`${dashboardData.data.kpis.total_orders.change > 0 ? '+' : ''}${dashboardData.data.kpis.total_orders.change}% so với tháng trước`}
                                     </span>
                                 </span>
                             )}
-                            {/* <div className="d-flex justify-content-end">
-                                <Link
-                                    className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
-                                    to="/order"
-                                    style={{ borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
-                                >
-                                    Xem chi tiết <i className="fas fa-arrow-right"></i>
-                                </Link>
-                            </div> */}
                         </div>
                     </div>
                 </div>
                 {/* Tổng sản phẩm */}
-                <div className="col-md-3">
-                    <div className="card mb-3 position-relative stat-card-product">
-                        <div className="card-body">
-                            <h5 className="card-title d-flex align-items-center">
-                                {/* Biểu tượng với viền tròn */}
+                <div className="col-12 col-sm-6 col-lg-3">
+                    <div className="card mb-2 mb-md-3 position-relative stat-card-product h-100">
+                        <div className="card-body p-3 p-md-4">
+                            <h5 className="card-title d-flex align-items-center mb-2 mb-md-3">
                                 <span className="icon-circle-product stat-icon">
                                     <i className="fas fa-box-open"></i>
                                 </span>
                                 <span className="ms-2">Tổng sản phẩm</span>
                             </h5>
-                            <p className="card-text-custom fs-3">
+                            <p className="card-text-custom mb-2 mb-md-3">
                                 {dashboardData?.data?.kpis?.total_products?.value ?? 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_products?.secondary_info?.text && (
-                            <span className="d-block mb-2">
+                            <span className="d-block mb-0">
                                 <i className="fas fa-exclamation-triangle me-1 text-warning-custom"></i>
-                                    <span className="percent-change">
+                                    <span className="percent-change small">
                                         <span className='text-warning-custom'>{dashboardData.data.kpis.total_products.secondary_info.text}</span>
                                     </span>
                             </span>
-                            
-
                             )}
-                            
-                            {/* <div className="d-flex justify-content-end">
-                                <Link
-                                    className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
-                                    to="/product"
-                                    style={{ borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
-                                >
-                                    Xem chi tiết <i className="fas fa-arrow-right"></i>
-                                </Link>
-                            </div> */}
                         </div>
                     </div>
                 </div>
                 {/* Tổng người dùng */}
-                <div className="col-md-3">
-                    <div className="card mb-3 position-relative stat-card-user">
-                        <div className="card-body">
-                            <h5 className="card-title">
+                <div className="col-12 col-sm-6 col-lg-3">
+                    <div className="card mb-2 mb-md-3 position-relative stat-card-user h-100">
+                        <div className="card-body p-3 p-md-4">
+                            <h5 className="card-title d-flex align-items-center mb-2 mb-md-3">
                                 <span className="icon-circle-user stat-icon">
                                     <i className="fas fa-users"></i>
                                 </span>
                                 <span className="ms-2">Tổng người dùng</span>
                             </h5>
-                            <p className="card-text-custom fs-3">
+                            <p className="card-text-custom mb-2 mb-md-3">
                                 {dashboardData?.data?.kpis?.total_users?.value ?? 'Đang tải...'}
                             </p>
                             {dashboardData?.data?.kpis?.total_users?.change !== undefined && (
-                                <span className={`d-block mb-2 ${dashboardData.data.kpis.total_users.change < 0 ? 'text-danger' : 'text-success'}`}>
+                                <span className={`d-block mb-0 ${dashboardData.data.kpis.total_users.change < 0 ? 'text-danger' : 'text-success'}`}>
                                     <i className={`fas ${dashboardData.data.kpis.total_users.change < 0 ? 'fa-arrow-down' : 'fa-arrow-up'} me-1`}></i>
-                                    <span className="percent-change">
+                                    <span className="percent-change small">
                                         {`${dashboardData.data.kpis.total_users.change > 0 ? '+' : ''}${dashboardData.data.kpis.total_users.change}% so với tháng trước`}
                                     </span>
                                 </span>
                             )}
-                            {/* <div className="d-flex justify-content-end">
-                                <Link
-                                    className="btn btn-light btn-sm fw-bold d-flex align-items-center gap-1"
-                                    to="/user"
-                                    style={{ borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
-                                >
-                                    Xem chi tiết <i className="fas fa-arrow-right"></i>
-                                </Link>
-                            </div> */}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="row mb-4">
-                <div className="col-md-6">
-                    <div className="card mb-3">
+            {/* Charts - Responsive: 1 col mobile, 2 cols desktop */}
+            <div className="row g-2 g-md-3 mb-3 mb-md-4">
+                <div className="col-12 col-md-6">
+                    <div className="card mb-2 mb-md-3 h-100">
                         <div className="card-header"><i className="fas fa-chart-area me-2"></i> Doanh thu 6 tháng gần nhất</div>
-                        <div className="card-body d-flex align-items-center justify-content-center" style={{ height: 300 }}>
+                        <div className="card-body d-flex align-items-center justify-content-center" style={{ minHeight: '250px', height: '250px' }}>
                             {revenueAreaChartData ? (
                                 <Bar  data={revenueAreaChartData} options={{ maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }} />
                             ) : (
@@ -241,10 +205,10 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-md-6">
-                    <div className="card mb-3">
+                <div className="col-12 col-md-6">
+                    <div className="card mb-2 mb-md-3 h-100">
                         <div className="card-header"><i className="fas fa-chart-pie me-2"></i> Trạng thái đơn hàng</div>
-                        <div className="card-body d-flex align-items-center justify-content-center" style={{ height: 300 }}>
+                        <div className="card-body d-flex align-items-center justify-content-center" style={{ minHeight: '250px', height: '250px' }}>
                             {orderStatusChartData ? (
                                 <Doughnut data={orderStatusChartData} options={{ maintainAspectRatio: false, plugins: { legend: { display: true } } }} />
                             ) : (
@@ -255,64 +219,69 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="row d-flex align-items-stretch">
-                <div className="col-md-6 d-flex">
-                    <div className="card mb-3 w-100">
+            {/* Tables - Responsive: 1 col mobile/tablet, 2 cols desktop */}
+            <div className="row g-2 g-md-3 align-items-stretch">
+                <div className="col-12 col-lg-6 d-flex">
+                    <div className="card mb-2 mb-md-3 w-100">
                         <div className="card-header"><i className="fas fa-fire me-2"></i> Top sản phẩm bán chạy</div>
                         <div className="card-body p-0">
-                            <table className="table mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Sản phẩm</th>
-                                        <th>Đã bán</th>
-                                        <th>Doanh thu</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {dashboardData?.data?.top_selling_products?.length > 0 ? (
-                                        dashboardData.data.top_selling_products.map((item, idx) => (
-                                            <tr key={idx}>
-                                                <td>{item.product_name}</td>
-                                                <td>{item.total_sold}</td>
-                                                <td>{formatVND(item.total_revenue)}</td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr><td colSpan="3" className="text-center">Không có dữ liệu</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
+                            <div className="table-responsive">
+                                <table className="table table-sm table-hover mb-0">
+                                    <thead className="table-light">
+                                        <tr>
+                                            <th className="ps-3">Sản phẩm</th>
+                                            <th>Đã bán</th>
+                                            <th className="pe-3">Doanh thu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {dashboardData?.data?.top_selling_products?.length > 0 ? (
+                                            dashboardData.data.top_selling_products.map((item, idx) => (
+                                                <tr key={idx}>
+                                                    <td className="ps-3">{item.product_name}</td>
+                                                    <td>{item.total_sold}</td>
+                                                    <td className="pe-3">{formatVND(item.total_revenue)}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr><td colSpan="3" className="text-center py-3">Không có dữ liệu</td></tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="col-md-6 d-flex">
-                    <div className="card mb-3 w-100">
+                <div className="col-12 col-lg-6 d-flex">
+                    <div className="card mb-2 mb-md-3 w-100">
                         <div className="card-header"><i className="fas fa-tasks me-2"></i> Đơn hàng cần xử lý</div>
                         <div className="card-body p-0">
-                            <table className="table mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Mã đơn</th>
-                                        <th>Khách hàng</th>
-                                        <th>Trạng thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {dashboardData?.data?.pending_orders?.length > 0 ? (
-                                        dashboardData.data.pending_orders.map((order, idx) => (
-                                            <tr key={idx}>
-                                                <td>{order.order_code}</td>
-                                                <td>{order.client_name}</td>
-                                                <td>
-                                                    <span className="badge bg-warning text-dark">Chờ xử lý</span>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr><td colSpan="3" className="text-center">Không có dữ liệu</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
+                            <div className="table-responsive">
+                                <table className="table table-sm table-hover mb-0">
+                                    <thead className="table-light">
+                                        <tr>
+                                            <th className="ps-3">Mã đơn</th>
+                                            <th>Khách hàng</th>
+                                            <th className="pe-3">Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {dashboardData?.data?.pending_orders?.length > 0 ? (
+                                            dashboardData.data.pending_orders.map((order, idx) => (
+                                                <tr key={idx}>
+                                                    <td className="ps-3">{order.order_code}</td>
+                                                    <td>{order.client_name}</td>
+                                                    <td className="pe-3">
+                                                        <span className="badge bg-warning text-dark">Chờ xử lý</span>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr><td colSpan="3" className="text-center py-3">Không có dữ liệu</td></tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

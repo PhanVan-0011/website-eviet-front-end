@@ -171,7 +171,7 @@ const OrderAdd = () => {
                         <div className='card-body'>
                             <form onSubmit={handleSubmit(handleSubmitForm)}>
                                 <div className="row mb-3">
-                                    <div className="col-md-4">
+                                    <div className="col-12 col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="inputClientName" className="form-label fw-semibold">
                                                 Tên khách hàng <span style={{ color: 'red' }}>*</span>
@@ -185,7 +185,7 @@ const OrderAdd = () => {
                                             {errors.client_name && <div className="text-danger mt-1">{errors.client_name.message}</div>}
                                         </div>
                                     </div>
-                                    <div className="col-md-4">
+                                    <div className="col-12 col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="inputClientPhone" className="form-label fw-semibold">
                                                 Số điện thoại <span style={{ color: 'red' }}>*</span>
@@ -205,7 +205,7 @@ const OrderAdd = () => {
                                             {errors.client_phone && <div className="text-danger mt-1">{errors.client_phone.message}</div>}
                                         </div>
                                     </div>
-                                    <div className="col-md-4">
+                                    <div className="col-12 col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="inputShippingFee" className="form-label fw-semibold">
                                                 Phí vận chuyển (VNĐ)
@@ -228,7 +228,7 @@ const OrderAdd = () => {
                                     </div>
                                 </div>
                                 <div className="row mb-3">
-                                    <div className="col-md-12">
+                                    <div className="col-12">
                                         <div className="mb-3">
                                             <label htmlFor="inputShippingAddress" className="form-label fw-semibold">
                                                 Địa chỉ giao hàng <span style={{ color: 'red' }}>*</span>
@@ -244,7 +244,7 @@ const OrderAdd = () => {
                                     </div>
                                 </div>
                                 <div className="row mb-3">
-                                    <div className="col-md-6">
+                                    <div className="col-12 col-md-6">
                                         <label className="mb-1 fw-semibold">Phương thức thanh toán <span style={{ color: 'red' }}>*</span></label>
                                         <select
                                             className="form-select"
@@ -266,108 +266,122 @@ const OrderAdd = () => {
                                     </div>
                                 </div>
                                 <div className="row mb-3">
-                                    <div className="col-md-12">
-                                        <label className="fw-bold mb-2">Sản phẩm/Combo trong đơn hàng <span style={{ color: 'red' }}>*</span></label>
-                                        {orderItems.map((item, idx) => (
-                                            <div className="row align-items-center mb-2" key={idx} style={{ minHeight: 70 }}>
-                                                <div className="col-4 d-flex align-items-center">
-                                                    <select
-                                                        className="form-select"
-                                                        value={item.type}
-                                                        onChange={e => handleChangeItem(idx, 'type', e.target.value)}
-                                                        style={{ maxWidth: 120 }}
-                                                    >
-                                                        <option value="product">Sản phẩm</option>
-                                                        <option value="combo">Combo</option>
-                                                    </select>
-                                                    <div className="flex-grow-1 ms-2">
-                                                        <Select
-                                                            options={
-                                                                (item.type === 'product' ? productOptions : comboOptions)
-                                                                    .filter(opt => !orderItems.some((it, i) => it.type === item.type && it.id === opt.value && i !== idx))
-                                                            }
-                                                            value={(item.type === 'product' ? productOptions : comboOptions).find(opt => String(opt.value) === String(item.id)) || null}
-                                                            onChange={opt => handleChangeItem(idx, 'id', opt ? opt.value : '')}
-                                                            placeholder={item.type === 'product' ? 'Chọn sản phẩm...' : 'Chọn combo...'}
-                                                            classNamePrefix="react-select"
-                                                            styles={selectStyles}
-                                                        />
+                                    <div className="col-12">
+                                        <label className="fw-bold mb-3">Sản phẩm/Combo trong đơn hàng <span style={{ color: 'red' }}>*</span></label>
+                                        <div className="d-flex flex-column gap-3">
+                                            {orderItems.map((item, idx) => (
+                                                <div key={idx} className="border rounded p-3 bg-light bg-opacity-50">
+                                                    <div className="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-md-between">
+                                                        <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                                                            <div className="d-flex gap-2 align-items-center">
+                                                                <select
+                                                                    className="form-select"
+                                                                    value={item.type}
+                                                                    onChange={e => handleChangeItem(idx, 'type', e.target.value)}
+                                                                    style={{ maxWidth: 120, flexShrink: 0 }}
+                                                                >
+                                                                    <option value="product">Sản phẩm</option>
+                                                                    <option value="combo">Combo</option>
+                                                                </select>
+                                                                <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                                                                    <Select
+                                                                        options={
+                                                                            (item.type === 'product' ? productOptions : comboOptions)
+                                                                                .filter(opt => !orderItems.some((it, i) => it.type === item.type && it.id === opt.value && i !== idx))
+                                                                        }
+                                                                        value={(item.type === 'product' ? productOptions : comboOptions).find(opt => String(opt.value) === String(item.id)) || null}
+                                                                        onChange={opt => handleChangeItem(idx, 'id', opt ? opt.value : '')}
+                                                                        placeholder={item.type === 'product' ? 'Chọn sản phẩm...' : 'Chọn combo...'}
+                                                                        classNamePrefix="react-select"
+                                                                        styles={selectStyles}
+                                                                        menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                                        menuPosition="fixed"
+                                                                        maxMenuHeight={200}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="d-none d-lg-flex justify-content-center" style={{ flexShrink: 0 }}>
+                                                            {item.id && (
+                                                                (() => {
+                                                                    const obj = item.type === 'product'
+                                                                        ? products.find(p => String(p.id) === String(item.id))
+                                                                        : combos.find(c => String(c.id) === String(item.id));
+                                                                    const thumbUrl = obj?.featured_image?.thumb_url;
+                                                                    if (thumbUrl) {
+                                                                        return (
+                                                                            <img
+                                                                                src={process.env.REACT_APP_API_URL + 'api/images/' + thumbUrl}
+                                                                                alt=""
+                                                                                className="img-fluid rounded border"
+                                                                                style={{ maxWidth: 100, maxHeight: 70, objectFit: 'contain', background: '#fff' }}
+                                                                            />
+                                                                        );
+                                                                    } else {
+                                                                        return (
+                                                                            <div className="d-flex align-items-center justify-content-center bg-white border rounded" style={{ width: 100, height: 70 }}>
+                                                                                <i className="fas fa-image text-secondary" style={{ fontSize: 32 }}></i>
+                                                                            </div>
+                                                                        );
+                                                                    }
+                                                                })()
+                                                            )}
+                                                        </div>
+                                                        <div className="d-flex align-items-center" style={{ width: 120, flexShrink: 0 }}>
+                                                            <input
+                                                                type="number"
+                                                                className="form-control"
+                                                                min={1}
+                                                                value={item.quantity}
+                                                                onChange={e => handleChangeItem(idx, 'quantity', e.target.value)}
+                                                                placeholder="Số lượng"
+                                                                required
+                                                            />
+                                                        </div>
+                                                        <div className="d-flex align-items-center gap-2" style={{ flexShrink: 0 }}>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-danger btn-sm"
+                                                                onClick={() => handleRemoveItem(idx)}
+                                                                disabled={orderItems.length === 1}
+                                                                title="Xóa sản phẩm"
+                                                                style={{ height: '38px', width: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                            >
+                                                                <i className="fas fa-minus"></i>
+                                                            </button>
+                                                            {idx === orderItems.length - 1 && (
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-success btn-sm"
+                                                                    onClick={handleAddItem}
+                                                                    title="Thêm sản phẩm"
+                                                                    style={{ height: '38px', width: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                >
+                                                                    <i className="fas fa-plus"></i>
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-2 d-flex align-items-center">
-                                                    {item.id && (
-                                                        (() => {
-                                                            const obj = item.type === 'product'
-                                                                ? products.find(p => String(p.id) === String(item.id))
-                                                                : combos.find(c => String(c.id) === String(item.id));
-                                                            const thumbUrl = obj?.featured_image?.thumb_url;
-                                                            if (thumbUrl) {
-                                                                return (
-                                                                    <img
-                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + thumbUrl}
-                                                                        alt=""
-                                                                        style={{ width: 90, height: 60, objectFit: 'contain', borderRadius: 4, border: '1px solid #eee', background: '#fff' }}
-                                                                    />
-                                                                );
-                                                            } else {
-                                                                return (
-                                                                    <div style={{ width: 90, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', border: '1px solid #eee', borderRadius: 4 }}>
-                                                                        <i className="fas fa-image" style={{ fontSize: 32, color: '#bbb' }}></i>
-                                                                    </div>
-                                                                );
-                                                            }
-                                                        })()
-                                                    )}
-                                                </div>
-                                                <div className="col-2">
-                                                    <input
-                                                        type="number"
-                                                        className="form-control"
-                                                        min={1}
-                                                        value={item.quantity}
-                                                        onChange={e => handleChangeItem(idx, 'quantity', e.target.value)}
-                                                        placeholder="Số lượng"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="col-2 d-flex align-items-center">
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-danger"
-                                                        onClick={() => handleRemoveItem(idx)}
-                                                        disabled={orderItems.length === 1}
-                                                    >
-                                                        <i className="fas fa-minus"></i>
-                                                    </button>
-                                                    {idx === orderItems.length - 1 && (
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-success ms-2"
-                                                            onClick={handleAddItem}
-                                                        >
-                                                            <i className="fas fa-plus"></i>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                         {errors.items && (
-                                            <div className="text-danger small w-100">{errors.items.message}</div>
+                                            <div className="text-danger small mt-2">{errors.items.message}</div>
                                         )}
                                     </div>
                                 </div>
                                 <div className="mt-4 mb-0">
-                                    <div className="d-flex justify-content-center gap-2">
+                                    <div className="d-flex flex-column flex-md-row justify-content-center gap-2">
                                         <button
                                             type="button"
-                                            className="btn btn-secondary w-25"
+                                            className="btn btn-secondary w-100 w-md-auto"
                                             onClick={() => navigation('/order')}
                                             disabled={isSubmitting}
                                         >
                                             Hủy bỏ
                                         </button>
                                         <button
-                                            className="btn btn-primary w-25"
+                                            className="btn btn-primary w-100 w-md-auto"
                                             type="submit"
                                             disabled={isSubmitting}
                                         >

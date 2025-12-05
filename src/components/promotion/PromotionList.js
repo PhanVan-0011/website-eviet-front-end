@@ -4,13 +4,13 @@ import DataTables from '../common/DataTables';
 import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Dropdown } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
 import moment from 'moment';
-import ImageList from '../common/ImageList';
+import ImageWithZoom from '../common/ImageWithZoom';
 import {
     FilterSelectSingle,
     FilterSelectMulti,
@@ -18,6 +18,7 @@ import {
     FilterDateRange,
     FilterToggleButton
 } from '../common/FilterComponents';
+import LiveSearch from '../common/LiveSearch';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
 const PromotionList = () => {
@@ -156,14 +157,18 @@ const PromotionList = () => {
         },
         {
             title: "Hình ảnh",
-            element: row => {
-                return row.image && row.image.thumb_url ? (
-                    <ImageList src={urlImage + row.image.thumb_url} alt={row.name} />
+            element: row => (
+                row.image && row.image.thumb_url ? (
+                    <ImageWithZoom
+                        src={urlImage + row.image.thumb_url}
+                        zoomSrc={row.image.main_url ? urlImage + row.image.main_url : urlImage + row.image.thumb_url}
+                        alt={row.name}
+                    />
                 ) : (
-                    <ImageList icon alt="Không có ảnh" />
-                );
-            },
-            width: "8%"
+                    <ImageWithZoom icon alt="Không có ảnh" />
+                )
+            ),
+            width: "12%"
         },
         {
             title: () => (
@@ -334,23 +339,102 @@ const PromotionList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4"></h1>
-                    <ol className="breadcrumb mb-4">
-                        <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
-                        <li className="breadcrumb-item active">Danh sách khuyến mãi</li>
-                    </ol>
+                    {/* Header row: Breadcrumb + Search + Actions */}
+                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom order-header-row" style={{ justifyContent: 'space-between', gap: '0.5rem' }}>
+                        {/* Left section: Breadcrumb */}
+                        <div className="d-flex align-items-center flex-shrink-0">
+                            <ol className="breadcrumb mb-0 d-none d-md-flex" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
+                                <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
+                                <li className="breadcrumb-item active">Danh sách khuyến mãi</li>
+                            </ol>
+                        </div>
+                        
+                        {/* Search - ở giữa */}
+                        <div className="order-search-bar" style={{ margin: '0 auto' }}>
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
+                                    <i className="fas fa-search text-muted"></i>
+                                </span>
+                                <LiveSearch 
+                                    changeKeyword={setSearchText}
+                                    placeholder="Tìm theo tên, mã khuyến mãi..."
+                                />
+                            </div>
+                        </div>
+                        
+                        {/* Actions - bên phải */}
+                        <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                            {/* Nút xóa khi có khuyến mãi được chọn */}
+                            <Permission permission={PERMISSIONS.PROMOTIONS_DELETE}>
+                                {selectedRows.length > 0 && (
+                                    <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
+                                        <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
+                                    </button>
+                                )}
+                            </Permission>
+                            
+                            {/* Nút tạo mới */}
+                            <Permission permission={PERMISSIONS.PROMOTIONS_CREATE}>
+                                <Link className="btn btn-primary btn-sm" to="/promotion/add">
+                                    <i className="fas fa-plus me-1"></i>
+                                    <span className="d-none d-sm-inline">Tạo mới</span>
+                                </Link>
+                            </Permission>
+                            
+                            {/* Các button riêng lẻ - hiện trên >= 1280px */}
+                            <div className="order-action-buttons">
+                                <button className="btn btn-outline-secondary btn-sm">
+                                    <i className="fas fa-upload me-1"></i> Import
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm">
+                                    <i className="fas fa-download me-1"></i> Xuất file
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm" title="Cài đặt">
+                                    <i className="fas fa-cog"></i>
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm" title="Trợ giúp">
+                                    <i className="fas fa-question-circle"></i>
+                                </button>
+                            </div>
+                            
+                            {/* Dropdown menu cho các nút phụ - chỉ hiện khi < 1280px */}
+                            <div className="order-action-dropdown">
+                                <Dropdown>
+                                    <Dropdown.Toggle 
+                                        variant="outline-secondary" 
+                                        size="sm" 
+                                        className="d-flex align-items-center"
+                                        id="actions-dropdown"
+                                    >
+                                        <i className="fas fa-ellipsis-v"></i>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu align="end">
+                                        <Dropdown.Item>
+                                            <i className="fas fa-upload me-2"></i> Import
+                                        </Dropdown.Item>
+                                        <Dropdown.Item>
+                                            <i className="fas fa-download me-2"></i> Xuất file
+                                        </Dropdown.Item>
+                                        <Dropdown.Divider />
+                                        <Dropdown.Item>
+                                            <i className="fas fa-cog me-2"></i> Cài đặt
+                                        </Dropdown.Item>
+                                        <Dropdown.Item>
+                                            <i className="fas fa-question-circle me-2"></i> Trợ giúp
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </div>
+                        </div>
+                    </div>
                     
                     {/* Layout chính với FilterPanel và nội dung */}
-                    <div className="row g-0">
-                        {/* Filter Panel */}
-                        <div className={`position-relative filter-panel ${isFilterVisible ? 'col-md-2' : 'col-md-0'} transition-all d-flex flex-column`}>
+                    <div className="d-flex gap-4" style={{ gap: '16px' }}>
+                        {/* Filter Panel Card */}
                             {isFilterVisible && (
-                                <div className="p-3 filter-content">
-                                    {/* <h6 className="fw-bold mb-3 text-primary text-center" style={{ fontSize: '0.9rem' }}>
-                                        <i className="fas fa-percent me-1"></i>
-                                        Khuyến mãi
-                                    </h6> */}
-
+                            <div className="filter-card-wrapper" style={{ width: '240px', flexShrink: 0 }}>
+                                <div className="filter-card">
+                                    <div className="filter-card-content">
                                     {/* Trạng thái khuyến mãi */}
                                     <FilterSelectSingle
                                         label="Trạng thái"
@@ -416,112 +500,33 @@ const PromotionList = () => {
                                         value={filterValues.dateRange || { from: null, to: null }}
                                         onChange={(dateRange) => updateFilter('dateRange', dateRange)}
                                     />
-                                </div>
-                            )}
                         </div>
 
-                        {/* Nội dung chính */}
-                        <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
-                            {/* Search bar với các nút action */}
-                            <div className="p-3 border-bottom bg-light search-bar">
-                                <div className="row align-items-center">
-                                    <div className="col-md-4">
-                                        <div className="input-group">
-                                            <span className="input-group-text">
-                                                <i className="fas fa-search"></i>
-                                            </span>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                placeholder="Tìm kiếm theo tên, mã khuyến mãi..."
-                                                value={searchText}
-                                                onChange={(e) => setSearchText(e.target.value)}
-                                            />
-                                            {searchText && (
+                                    {/* Toggle Button - Pill button ở mép phải */}
                                                 <button 
-                                                    className="btn btn-outline-secondary btn-sm"
-                                                    type="button"
-                                                    onClick={() => setSearchText('')}
-                                                    title="Xóa tìm kiếm"
-                                                    style={{
-                                                        borderLeft: 'none',
-                                                        borderRadius: '0 0.375rem 0.375rem 0',
-                                                        backgroundColor: '#f8f9fa',
-                                                        color: '#6c757d'
-                                                    }}
-                                                >
-                                                    <i className="fas fa-times"></i>
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="col-md-8">
-                                        <div className="d-flex justify-content-end gap-2">
-                                            {/* Nút xóa nhiều */}
-                                            {selectedRows.length > 0 && (
-                                                <Permission permission={PERMISSIONS.PROMOTIONS_DELETE}>
-                                                    <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
-                                                        <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
-                                                    </button>
-                                                </Permission>
-                                            )}
-                                            
-                                            {/* Nút tạo mới */}
-                                            <Permission permission={PERMISSIONS.PROMOTIONS_CREATE}>
-                                                <Link className="btn btn-primary" to="/promotion/add">
-                                                    <i className="fas fa-plus me-1"></i> Tạo mới
-                                                </Link>
-                                            </Permission>
-                                            
-                                            {/* Các nút khác */}
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-upload me-1"></i> Import file
+                                        className="filter-toggle-btn"
+                                        onClick={() => setIsFilterVisible(false)}
+                                        title="Thu gọn bộ lọc"
+                                    >
+                                        <i className="fas fa-chevron-left"></i>
                                             </button>
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-download me-1"></i> Xuất file
-                                            </button>
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-cog"></i>
-                                            </button>
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-question-circle"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Search results info */}
-                                {searchText && (
-                                    <div className="search-results-info">
-                                        <small>
-                                            <i className="fas fa-info-circle me-1"></i>
-                                            Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {sortedPromotions.length} kết quả
-                                        </small>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Header với tiêu đề */}
-                            <div className="d-flex align-items-center justify-content-between p-3 border-bottom bg-white flex-shrink-0">
-                                <div className="d-flex align-items-center gap-2">
-                                    <h4 className="mb-0 fw-bold text-primary">Danh sách khuyến mãi</h4>
-                                    {/* Filter Toggle Button */}
-                                    <FilterToggleButton
-                                        key={`toggle-${isFilterVisible}`}
-                                        isVisible={isFilterVisible}
-                                        onToggle={() => {
-                                            setIsPulsing(true);
-                                            setTimeout(() => setIsPulsing(false), 600);
-                                            toggleFilterVisibility();
-                                        }}
-                                        isPulsing={isPulsing}
-                                    />
                                 </div>
                             </div>
+                        )}
 
-                            {/* Data Table */}
-                            <div className="flex-grow-1 overflow-auto">
-                                <div className="p-3">
+                        {/* Table Card */}
+                        <div className="table-card-wrapper flex-grow-1">
+                            {/* Nút mở lại filter khi đã thu gọn - hiện trên tablet và desktop */}
+                            {!isFilterVisible && (
+                                <button
+                                    className="filter-toggle-btn-open d-none d-md-flex"
+                                    onClick={() => setIsFilterVisible(true)}
+                                    title="Mở bộ lọc"
+                                >
+                                    <i className="fas fa-chevron-right"></i>
+                                </button>
+                            )}
+                            <div className="table-card">
                                     <DataTables
                                         name="Danh sách khuyến mãi"
                                         columns={columns}
@@ -534,8 +539,8 @@ const PromotionList = () => {
                                         onSelectedRows={setSelectedRows}
                                         hideSearch={true}
                                         showSummary={true}
+                                    tableHeight="calc(100vh - 220px)"
                                     />
-                                </div>
                             </div>
                         </div>
                     </div>

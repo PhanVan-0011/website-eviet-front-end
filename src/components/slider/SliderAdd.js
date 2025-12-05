@@ -130,7 +130,7 @@ const SliderAdd = () => {
                     <form onSubmit={handleSubmit(handleSubmitForm)}>
                         <div className="row g-4">
                             {/* Thông tin cơ bản */}
-                            <div className="col-lg-6">
+                            <div className="col-12 col-lg-6">
                                 <div className="card shadow-sm border-0 h-100">
                                     <div className="card-header bg-white border-bottom-0 pb-0">
                                         <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-info-circle me-2"></i>Thông tin cơ bản</h5>
@@ -186,7 +186,7 @@ const SliderAdd = () => {
                                 </div>
                             </div>
                             {/* Hình ảnh slider */}
-                            <div className="col-lg-6">
+                            <div className="col-12 col-lg-6">
                                 <div className="card shadow-sm border-0 h-100">
                                     <div className="card-header bg-white border-bottom-0 pb-0">
                                         <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-image me-2"></i>Hình ảnh slider</h5>
@@ -252,14 +252,14 @@ const SliderAdd = () => {
                         </div>
                         {/* Liên kết slider */}
                         <div className="row mt-4">
-                            <div className="col-lg-12">
+                            <div className="col-12">
                                 <div className="card shadow-sm border-0">
                                     <div className="card-header bg-white border-bottom-0 pb-0">
                                         <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-link me-2"></i>Liên kết slider</h5>
                                     </div>
                                     <div className="card-body pt-2">
                                         <div className="row mb-3">
-                                            <div className="col-md-6">
+                                            <div className="col-12 col-md-6 mb-3 mb-md-0">
                                                 <div className="mb-3">
                                                     <label htmlFor="inputLinkType" className="form-label fw-semibold">
                                                         Loại liên kết
@@ -279,7 +279,7 @@ const SliderAdd = () => {
                                                     {errors.link_type && <div className="text-danger mt-1 small">{errors.link_type.message}</div>}
                                                 </div>
                                             </div>
-                                            <div className="col-md-6">
+                                            <div className="col-12 col-md-6">
                                                 {linkType === "product" && (
                                                     <div className="mb-3">
                                                         <label htmlFor="inputLinkIdProduct" className="form-label fw-semibold">
@@ -362,7 +362,7 @@ const SliderAdd = () => {
                         </div>
                         {/* Mô tả slider */}
                         <div className="row mt-4">
-                            <div className="col-lg-12">
+                            <div className="col-12">
                                 <div className="card shadow-sm border-0">
                                     <div className="card-header bg-white border-bottom-0 pb-0">
                                         <h5 className="mb-0 fw-semibold text-secondary"><i className="fas fa-align-left me-2"></i>Mô tả slider</h5>
@@ -386,18 +386,18 @@ const SliderAdd = () => {
                         </div>
                         {/* Nút hành động */}
                         <div className="row mt-4 mb-4">
-                            <div className="col-lg-12">
-                                <div className="d-flex justify-content-center gap-2">
+                            <div className="col-12">
+                                <div className="d-flex flex-column flex-md-row justify-content-center gap-2">
                                     <button
                                         type="button"
-                                        className="btn btn-secondary w-25"
+                                        className="btn btn-secondary w-100 w-md-auto"
                                         onClick={() => navigation('/slider')}
                                         disabled={isSubmitting}
                                     >
                                         Hủy bỏ
                                     </button>
                                     <button
-                                        className="btn btn-primary w-25"
+                                        className="btn btn-primary w-100 w-md-auto"
                                         type="submit"
                                         disabled={isSubmitting}
                                     >

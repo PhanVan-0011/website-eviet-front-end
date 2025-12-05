@@ -126,11 +126,11 @@ const ComboDetail = () => {
     return (
         <div id="layoutSidenav_content">
             <main>
-                <div className="container-fluid px-4">
-                    <div className="d-flex align-items-center justify-content-between mt-4 mb-2">
-                        <h2 className="mb-0">Chi tiết combo #{combo.id}</h2>
+                <div className="container-fluid px-3 px-md-4">
+                    <div className="d-flex align-items-center justify-content-between mt-3 mt-md-4 mb-2">
+                        <h2 className="mb-0 detail-page-header">Chi tiết combo #{combo.id}</h2>
                     </div>
-                    <ol className="breadcrumb mb-4">
+                    <ol className="breadcrumb mb-3 mb-md-4 detail-breadcrumb">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item"><Link to="/combo">Combo</Link></li>
                         <li className="breadcrumb-item active">Chi tiết</li>
@@ -138,10 +138,10 @@ const ComboDetail = () => {
 
                     <div className="card border">
                         {/* Tab Navigation */}
-                        <ul className="nav nav-tabs" id="comboDetailTabs" role="tablist" style={{borderBottom: '2px solid #dee2e6'}}>
+                        <ul className="nav nav-tabs flex-wrap" id="comboDetailTabs" role="tablist" style={{borderBottom: '2px solid #dee2e6'}}>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'thong-tin' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'thong-tin' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('thong-tin')}
                                     style={{ 
@@ -151,7 +151,6 @@ const ComboDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'thong-tin' ? '500' : 'normal'
                                     }}
@@ -161,7 +160,7 @@ const ComboDetail = () => {
                             </li>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'mo-ta' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'mo-ta' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('mo-ta')}
                                     style={{ 
@@ -171,17 +170,17 @@ const ComboDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'mo-ta' ? '500' : 'normal'
                                     }}
                                 >
-                                    Mô tả chi tiết
+                                    <span className="d-none d-md-inline">Mô tả chi tiết</span>
+                                    <span className="d-md-none">Mô tả</span>
                                 </button>
                             </li>
                             <li className="nav-item" role="presentation">
                                 <button
-                                    className={`nav-link ${activeTab === 'chi-nhanh' ? 'active' : ''}`}
+                                    className={`nav-link detail-tab-nav ${activeTab === 'chi-nhanh' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('chi-nhanh')}
                                     style={{ 
@@ -191,24 +190,24 @@ const ComboDetail = () => {
                                         textDecoration: 'none',
                                         backgroundColor: 'transparent',
                                         border: 'none',
-                                        padding: '0.5rem 1rem',
                                         cursor: 'pointer',
                                         fontWeight: activeTab === 'chi-nhanh' ? '500' : 'normal'
                                     }}
                                 >
-                                    Chi nhánh áp dụng
+                                    <span className="d-none d-md-inline">Chi nhánh áp dụng</span>
+                                    <span className="d-md-none">Chi nhánh</span>
                                 </button>
                             </li>
                         </ul>
 
-                        <div style={{ padding: '1.5rem' }}>
+                        <div className="detail-card">
                             {/* Tab Thông tin */}
                             {activeTab === 'thong-tin' && (
                                 <div>
                                     {/* Header: Hình ảnh + Thông tin combo */}
-                                    <div style={{display: 'flex', gap: '1.5rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #dee2e6'}}>
+                                    <div className="d-flex flex-column flex-md-row detail-info-grid" style={{marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #dee2e6'}}>
                                         {/* Cột trái: Hình ảnh */}
-                                        <div style={{flex: '0 0 35%'}}>
+                                        <div className="w-100 w-md-auto mb-3 mb-md-0" style={{flex: '0 0 35%'}}>
                                             <div style={{display: 'flex', gap: '0.75rem'}}>
                                                 {/* Hình ảnh chính */}
                                                 <div style={{flex: 1}}>
@@ -228,8 +227,10 @@ const ComboDetail = () => {
                                                                         borderRadius: 8,
                                                                         background: '#f8f9fa',
                                                                         border: '1px solid #dee2e6',
-                                                                        height: 300,
-                                                                        display: 'block'
+                                                                        height: 'auto',
+                                                                        maxHeight: '300px',
+                                                                        display: 'block',
+                                                                        objectFit: 'contain'
                                                                     }}
                                                                     title="Bấm để xem lớn"
                                                                     onClick={() => handleImgClick(displayImg)}
@@ -305,9 +306,9 @@ const ComboDetail = () => {
                                         </div>
 
                                         {/* Cột phải: Thông tin combo */}
-                                        <div style={{flex: '0 0 65%'}}>
+                                        <div className="w-100 w-md-auto" style={{flex: '0 0 65%'}}>
                                             {/* Tên combo */}
-                                            <h3 style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
+                                            <h3 className="h4 h-md-3" style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
                                                 {combo.name}
                                             </h3>
 
@@ -326,7 +327,7 @@ const ComboDetail = () => {
                                             </div>
 
                                             {/* Lưới thông tin */}
-                                            <div className="row">
+                                            <div className="row detail-info-grid">
                                                 <InfoItem label="Mã combo" value={combo.combo_code || combo.id} />
                                                 <InfoItem label="Số sản phẩm" value={combo.items ? combo.items.length : 0} />
                                                 <InfoItem label="Giá cửa hàng" value={formatVNDWithUnit(combo.base_store_price)} isDanger />
@@ -342,10 +343,10 @@ const ComboDetail = () => {
 
                                     {/* Sản phẩm trong combo */}
                                     {combo.items && combo.items.length > 0 && (
-                                        <div className="mt-4">
-                                            <h6 className="fw-bold mb-3">Sản phẩm trong combo</h6>
+                                        <div className="mt-3 mt-md-4">
+                                            <h6 className="fw-bold mb-2 mb-md-3">Sản phẩm trong combo</h6>
                                             <div className="table-responsive">
-                                                <table className="table table-bordered">
+                                                <table className="table table-bordered detail-table">
                                                     <thead>
                                                         <tr>
                                                             <th style={{ width: '5%' }}>#</th>
@@ -531,16 +532,16 @@ const ComboDetail = () => {
                     </div>
 
                     {/* Nút thao tác */}
-                    <div className="row mt-4 mb-4">
-                        <div className="col-12 d-flex justify-content-center gap-2">
+                    <div className="row mt-3 mt-md-4 mb-3 mb-md-4">
+                        <div className="col-12 d-flex justify-content-center detail-action-buttons">
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
-                                <i className="fas fa-arrow-left me-1"></i>Quay lại
+                                <i className="fas fa-arrow-left me-1"></i><span className="d-none d-sm-inline">Quay lại</span>
                             </button>
                             <Link className="btn btn-primary btn-sm" to={`/combo/${combo.id}`}>
-                                <i className="fas fa-edit me-1"></i>Sửa combo
+                                <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa combo</span>
                             </Link>
                             <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
-                                <i className="fas fa-trash-alt me-1"></i>Xóa combo
+                                <i className="fas fa-trash-alt me-1"></i><span className="d-none d-sm-inline">Xóa combo</span>
                             </button>
                         </div>
                     </div>

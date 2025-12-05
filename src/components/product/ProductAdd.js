@@ -424,7 +424,7 @@ const ProductAdd = () => {
                                         {activeTab === 'thong-tin' && (
                                             <div className="tab-pane fade show active">
                                                 <div className="row mb-3">
-                                                    <div className="col-md-6">
+                                                    <div className="col-12 col-md-6">
                                                         <div className="mb-3">
                                                             <label htmlFor="inputProductCode" className="form-label fw-semibold">
                                                                 Mã sản phẩm
@@ -438,7 +438,7 @@ const ProductAdd = () => {
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className="col-md-6">
+                                                    <div className="col-12 col-md-6">
                                                         <div className="mb-3">
                                                             <label htmlFor="inputName" className="form-label fw-semibold">
                                                                 Tên sản phẩm <span style={{color: 'red'}}>*</span>
@@ -455,7 +455,7 @@ const ProductAdd = () => {
                                                 </div>
 
                                                 <div className="row mb-3">
-                                                    <div className="col-md-4">
+                                                    <div className="col-12 col-md-4">
                                                         <div className="mb-3">
                                                             <label htmlFor="inputCostPrice" className="form-label fw-semibold">
                                                                 Giá vốn (VNĐ)
@@ -473,7 +473,7 @@ const ProductAdd = () => {
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className="col-md-4">
+                                                    <div className="col-12 col-md-4">
                                                         <div className="mb-3">
                                                             <label htmlFor="inputBaseStorePrice" className="form-label fw-semibold">
                                                                 Giá bán tại cửa hàng (VNĐ)
@@ -491,7 +491,7 @@ const ProductAdd = () => {
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className="col-md-4">
+                                                    <div className="col-12 col-md-4">
                                                         <div className="mb-3">
                                                             <label htmlFor="inputBaseAppPrice" className="form-label fw-semibold">
                                                                 Giá bán trên App (VNĐ)
@@ -512,7 +512,7 @@ const ProductAdd = () => {
                                                 </div>
 
                                                 <div className="row mb-3">
-                                                    <div className="col-md-4">
+                                                    <div className="col-12 col-md-4">
                                                         <div className="mb-3">
                                                             <label htmlFor="inputBaseUnit" className="form-label fw-semibold">
                                                                 Đơn vị cơ bản <span style={{color: 'red'}}>*</span>
@@ -526,7 +526,7 @@ const ProductAdd = () => {
                                                             {isSubmitted && errors.base_unit && <div className="text-danger mt-1">{errors.base_unit.message}</div>}
                                                         </div>
                                                     </div>
-                                                    <div className="col-md-4">
+                                                    <div className="col-12 col-md-4">
                                                         <div className="mb-3">
                                                             <label htmlFor="inputStock" className="form-label fw-semibold">
                                                                 Tồn kho
@@ -542,7 +542,7 @@ const ProductAdd = () => {
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className="col-md-4">
+                                                    <div className="col-12 col-md-4">
                                                         <div className="mb-3">
                                                             <label className="form-label fw-semibold">
                                                                 Bán trực tiếp
@@ -564,7 +564,7 @@ const ProductAdd = () => {
                                                 </div>
 
                                                 <div className="row mb-3">
-                                                    <div className="col-md-6">
+                                                    <div className="col-12 col-md-6">
                                                         <div className="mb-3">
                                                             <label htmlFor="inputStatus" className="form-label fw-semibold">
                                                                 Trạng thái <span style={{color: 'red'}}>*</span>
@@ -581,7 +581,7 @@ const ProductAdd = () => {
                                                             {isSubmitted && errors.status && <div className="text-danger mt-1">{errors.status.message}</div>}
                                                         </div>
                                                     </div>
-                                                    <div className="col-md-6">
+                                                    <div className="col-12 col-md-6">
                                                         <div className="mb-3">
                                                             <label className="form-label fw-semibold">
                                                                 Danh mục <span style={{ color: 'red' }}>*</span>
@@ -749,8 +749,8 @@ const ProductAdd = () => {
                                                                                     <tbody>
                                                                                         {unitConversions.map((unit, index) => (
                                                                                             <tr key={index}>
-                                                                                                <td style={{ verticalAlign: 'middle' }}>
-                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                                                                <td className="align-middle">
+                                                                                                    <div className="d-flex flex-column align-items-center" style={{ gap: '4px' }}>
                                                                                                         <input
                                                                                                             type="text"
                                                                                                             className={`form-control ${isSubmitted && !unit.unit_name ? 'is-invalid' : ''}`}
@@ -767,8 +767,8 @@ const ProductAdd = () => {
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </td>
-                                                                                                <td style={{ verticalAlign: 'middle' }}>
-                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                                                                <td className="align-middle">
+                                                                                                    <div className="d-flex flex-column align-items-center" style={{ gap: '4px' }}>
                                                                                                         <input
                                                                                                             type="number"
                                                                                                             className={`form-control ${isSubmitted && (!unit.conversion_factor || unit.conversion_factor <= 0) ? 'is-invalid' : ''}`}
@@ -788,8 +788,8 @@ const ProductAdd = () => {
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </td>
-                                                                                                <td style={{ verticalAlign: 'middle' }}>
-                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                                <td className="align-middle">
+                                                                                                    <div className="d-flex flex-column align-items-center">
                                                                                                         <input
                                                                                                             type="text"
                                                                                                             className="form-control"
@@ -807,8 +807,8 @@ const ProductAdd = () => {
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </td>
-                                                                                                <td style={{ verticalAlign: 'middle' }}>
-                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                                <td className="align-middle">
+                                                                                                    <div className="d-flex flex-column align-items-center">
                                                                                                         <input
                                                                                                             type="text"
                                                                                                             className="form-control"
@@ -826,8 +826,8 @@ const ProductAdd = () => {
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </td>
-                                                                                                <td style={{ verticalAlign: 'middle' }}>
-                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                                <td className="align-middle">
+                                                                                                    <div className="d-flex flex-column align-items-center">
                                                                                                         <input
                                                                                                             type="text"
                                                                                                             className="form-control"
@@ -844,8 +844,8 @@ const ProductAdd = () => {
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </td>
-                                                                                                <td style={{ verticalAlign: 'middle' }}>
-                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                                                                <td className="align-middle">
+                                                                                                    <div className="d-flex flex-column align-items-center" style={{ gap: '4px' }}>
                                                                                                         <div className="form-check">
                                                                                                             <input
                                                                                                                 className="form-check-input"
@@ -864,8 +864,8 @@ const ProductAdd = () => {
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </td>
-                                                                                                <td style={{ verticalAlign: 'middle' }}>
-                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                                                                <td className="align-middle">
+                                                                                                    <div className="d-flex flex-column align-items-center" style={{ gap: '4px' }}>
                                                                                                         <button
                                                                                                             type="button"
                                                                                                             className="btn btn-sm btn-danger"
@@ -917,7 +917,7 @@ const ProductAdd = () => {
                                                                 {attributes.map((attr, attrIndex) => (
                                                                     <div key={attrIndex} className="mb-4 border-bottom pb-3">
                                                                         <div className="row mb-3">
-                                                                            <div className="col-md-6">
+                                                                            <div className="col-12 col-md-6 mb-3 mb-md-0">
                                                                                 <label className="form-label fw-semibold">Thuộc tính <span style={{color: 'red'}}>*</span></label>
                                                                                 <input
                                                                                     type="text"
@@ -932,7 +932,7 @@ const ProductAdd = () => {
                                                                                 />
                                                                                 {isSubmitted && !attr.name && <div className="invalid-feedback d-block">Tên thuộc tính là bắt buộc</div>}
                                                                             </div>
-                                                                            <div className="col-md-2">
+                                                                            <div className="col-12 col-md-4 mb-3 mb-md-0">
                                                                                 <label className="form-label">Loại thuộc tính</label>
                                                                                 <select
                                                                                     className="form-select"
@@ -948,7 +948,7 @@ const ProductAdd = () => {
                                                                                     <option value="text">Ghi chú (Text Input)</option>
                                                                                 </select>
                                                                             </div>
-                                                                            <div className="col-md-2 d-flex align-items-end justify-content-center">
+                                                                            <div className="col-12 col-md-2 d-flex align-items-end justify-content-center">
                                                                                 <button
                                                                                     type="button"
                                                                                     className="btn btn-sm btn-danger"
@@ -962,13 +962,13 @@ const ProductAdd = () => {
                                                                         {/* Hiển thị giá trị cho select và checkbox */}
                                                                         {(attr.type === 'select' || attr.type === 'checkbox') && (
                                                                             <div className="row mb-3">
-                                                                                <div className="col-md-12">
+                                                                                <div className="col-12">
                                                                                     <div className="mb-2">
                                                                                         <label className="form-label">Giá trị</label>
                                                                                     </div>
                                                                                     {attr.values.map((value, valueIndex) => (
                                                                                         <div key={valueIndex} className="row mb-2">
-                                                                                            <div className="col-md-4">
+                                                                                            <div className="col-12 col-md-4 mb-2 mb-md-0">
                                                                                                 <input
                                                                                                     type="text"
                                                                                                     className={`form-control ${isSubmitted && !value.value ? 'is-invalid' : ''}`}
@@ -983,7 +983,7 @@ const ProductAdd = () => {
                                                                                                 />
                                                                                                 {isSubmitted && !value.value && <div className="invalid-feedback d-block">Giá trị là bắt buộc</div>}
                                                                                             </div>
-                                                                                            <div className="col-md-2">
+                                                                                            <div className="col-6 col-md-2 mb-2 mb-md-0">
                                                                                                 <input
                                                                                                     type="text"
                                                                                                     className="form-control"
@@ -997,7 +997,7 @@ const ProductAdd = () => {
                                                                                                     placeholder="Phụ thu"
                                                                                                 />
                                                                                             </div>
-                                                                                            <div className="col-md-2">
+                                                                                            <div className="col-6 col-md-2 mb-2 mb-md-0">
                                                                                                 <div className="form-check">
                                                                                                     <input
                                                                                                         className="form-check-input"
@@ -1016,7 +1016,7 @@ const ProductAdd = () => {
                                                                                                     <label className="form-check-label">Mặc định</label>
                                                                                                 </div>
                                                                                             </div>
-                                                                                            <div className="col-md-2 d-flex align-items-center justify-content-center">
+                                                                                            <div className="col-12 col-md-2 d-flex align-items-center justify-content-center">
                                                                                                 <button
                                                                                                     type="button"
                                                                                                     className="btn btn-sm btn-danger"
@@ -1162,17 +1162,17 @@ const ProductAdd = () => {
                                     </div>
 
                                     <div className="mt-4 mb-0">
-                                        <div className="d-flex justify-content-center gap-2">
+                                        <div className="d-flex flex-column flex-md-row justify-content-center gap-2">
                                             <button
                                                 type="button"
-                                                className="btn btn-secondary w-25"
+                                                className="btn btn-secondary w-100 w-md-auto"
                                                 onClick={() => navigation('/product')}
                                                 disabled={isSubmitting}
                                             >
                                                 Hủy bỏ
                                             </button>
                                             <button
-                                                className="btn btn-primary w-25"
+                                                className="btn btn-primary w-100 w-md-auto"
                                                 type="submit"
                                                 disabled={isSubmitting}
                                             >

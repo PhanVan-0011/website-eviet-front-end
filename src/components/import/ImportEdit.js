@@ -675,7 +675,44 @@ const ImportEdit = () => {
   }
 
   return (
-    <div className="container-fluid mt-4" style={{ height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column', paddingBottom: 0, overflow: 'hidden' }}>
+    <div className="container-fluid mt-4 import-container" style={{ display: 'flex', flexDirection: 'column', paddingBottom: 0 }}>
+      <style>{`
+        @media (min-width: 1024px) {
+          .import-container {
+            height: calc(100vh - 80px);
+            overflow: hidden;
+          }
+          .import-body {
+            overflow: hidden;
+          }
+          .import-edit-left-section {
+            flex: 0 0 60% !important;
+            max-width: 60% !important;
+            order: 1;
+          }
+          .import-edit-right-section {
+            flex: 0 0 40% !important;
+            max-width: 40% !important;
+            order: 2;
+          }
+        }
+        @media (max-width: 1023.98px) {
+          .import-container {
+            height: auto;
+            overflow: visible;
+            padding-bottom: 20px;
+          }
+          .import-body {
+            overflow: visible;
+          }
+          .import-edit-left-section {
+            order: 1;
+          }
+          .import-edit-right-section {
+            order: 2;
+          }
+        }
+      `}</style>
       {/* Nút quay lại + Thanh tìm kiếm cùng 1 hàng */}
       <div className="d-flex align-items-center mb-3 gap-2">
         <button
@@ -736,9 +773,9 @@ const ImportEdit = () => {
       </div>
 
       {/* Main Content - 2 khối song song */}
-      <div className="d-flex gap-3 flex-grow-1" style={{ minHeight: 0, paddingBottom: '1rem', overflow: 'hidden' }}>
+      <div className="d-flex flex-column flex-lg-row gap-3 flex-grow-1 import-body" style={{ minHeight: 0, paddingBottom: '1rem' }}>
         {/* Phần bên trái - Bảng (60%) */}
-        <div style={{ width: '60%', display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+        <div className="w-100 import-edit-left-section" style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
           {/* Bảng sản phẩm */}
           <div className="card shadow-sm" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
             <div className="card-header bg-light">
@@ -862,7 +899,7 @@ const ImportEdit = () => {
         </div>
 
         {/* Phần bên phải - Thông tin phiếu nhập (40%) */}
-        <div style={{ width: '40%', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div className="w-100 import-edit-right-section" style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <div className="card shadow-sm" style={{ display: 'flex', flexDirection: 'column', minHeight: 0, height: '100%' }}>
             <div className="card-header bg-light">
               <h6 className="mb-0 fw-bold">Thông tin phiếu nhập</h6>

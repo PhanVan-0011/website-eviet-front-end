@@ -4,7 +4,7 @@ import DataTables from '../common/DataTables'
 import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Dropdown } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
 import ImageList from '../common/ImageList';
 import ImageWithZoom from '../common/ImageWithZoom';
@@ -57,19 +57,22 @@ const UnitDropdown = ({ product, selectedUnitIndex, onUnitChange }) => {
                 className="btn-sm p-0"
                 onClick={() => setShowDropdown(!showDropdown)}
                 style={{
-                    fontSize: '0.9rem',
+                    fontSize: 'inherit',
                     textDecoration: 'none',
-                    color: '#0066cc',
+                    color: 'inherit',
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.3rem',
+                    gap: '0.2rem',
                     background: 'none',
-                    border: 'none'
+                    border: 'none',
+                    padding: 0,
+                    lineHeight: '1'
                 }}
+                title="Click để đổi đơn vị"
             >
                 <span>{getDisplayUnit(selectedUnitIndex)}</span>
-                <i className="fas fa-chevron-down" style={{ fontSize: '0.65rem' }}></i>
+                <i className="fas fa-chevron-down" style={{ fontSize: '0.6rem', opacity: 0.7 }}></i>
             </button>
 
             {showDropdown && (
@@ -510,24 +513,48 @@ const ProductList = () => {
                 const hasUnitConversions = row.unit_conversions && row.unit_conversions.length > 0;
                 const selectedUnitIndex = selectedUnits[row.id] || 0;
                 
+                // Lấy tên đơn vị hiện tại
+                const getCurrentUnitName = () => {
+                    if (selectedUnitIndex === 0) {
+                        return row.base_unit || '';
+                    }
+                    return row.unit_conversions?.[selectedUnitIndex - 1]?.unit_name || '';
+                };
+                
+                const currentUnitName = getCurrentUnitName();
+                
                 return (
-                    <div style={{ minWidth: '180px' }}>
-                        <div className="fw-bold mb-1">{row.name}</div>
-                        <div style={{ fontSize: '0.9rem' }}>
-                            {hasUnitConversions && (
+                    <div 
+                        className="product-name-cell" 
+                        style={{ 
+                            minWidth: '180px',
+                            wordWrap: 'break-word',
+                            wordBreak: 'break-word',
+                            whiteSpace: 'normal',
+                            lineHeight: '1.5'
+                        }} 
+                        title={row.name}
+                    >
+                        <span className="name fw-bold" style={{ display: 'inline' }}>
+                            {row.name}
+                            {hasUnitConversions && currentUnitName && (
                                 <>
-                                    <span style={{ color: '#0066cc' }}>- </span>
-                                    <UnitDropdown
-                                        product={row}
-                                        selectedUnitIndex={selectedUnitIndex}
-                                        onUnitChange={handleUnitChange}
-                                    />
+                                    {' '}
+                                    <span className="text-primary" style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center' }}>
+                                        (
+                                        <UnitDropdown
+                                            product={row}
+                                            selectedUnitIndex={selectedUnitIndex}
+                                            onUnitChange={handleUnitChange}
+                                        />
+                                        )
+                                    </span>
                                 </>
                             )}
                             {!hasUnitConversions && row.base_unit && (
-                                <span style={{ color: '#0066cc' }}>- {row.base_unit}</span>
+                                <span className="text-primary" style={{ whiteSpace: 'nowrap' }}> ({row.base_unit})</span>
                             )}
-                        </div>
+                        </span>
                     </div>
                 );
             },
@@ -792,166 +819,202 @@ const ProductList = () => {
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
-                    <h1 className="mt-4"></h1>
-                    <ol className="breadcrumb mb-4">
-                        <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
-                        <li className="breadcrumb-item active">Danh sách sản phẩm</li>
-                    </ol>
+                    {/* Header row: Breadcrumb + Search + Actions */}
+                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom order-header-row" style={{ justifyContent: 'space-between', gap: '0.5rem' }}>
+                        {/* Left section: Breadcrumb */}
+                        <div className="d-flex align-items-center flex-shrink-0">
+                            <ol className="breadcrumb mb-0 d-none d-md-flex" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
+                                <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
+                                <li className="breadcrumb-item active">Danh sách sản phẩm</li>
+                            </ol>
+                        </div>
+                        
+                        {/* Search - ở giữa */}
+                        <div className="order-search-bar" style={{ margin: '0 auto' }}>
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
+                                    <i className="fas fa-search text-muted"></i>
+                                </span>
+                                <LiveSearch 
+                                    changeKeyword={setSearchText}
+                                    placeholder="Tìm theo mã, tên hàng"
+                                />
+                            </div>
+                        </div>
+                        
+                        {/* Actions - bên phải */}
+                        <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                            {/* Nút xóa khi có sản phẩm được chọn */}
+                            <Permission permission={PERMISSIONS.PRODUCTS_DELETE}>
+                                {selectedRows.length > 0 && (
+                                    <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
+                                        <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
+                                    </button>
+                                )}
+                            </Permission>
+                            
+                            {/* Nút tạo mới */}
+                            <Permission permission={PERMISSIONS.PRODUCTS_CREATE}>
+                                <Link className="btn btn-primary btn-sm" to="/product/add">
+                                    <i className="fas fa-plus me-1"></i>
+                                    <span className="d-none d-sm-inline">Tạo mới</span>
+                                </Link>
+                            </Permission>
+                            
+                            {/* Các button riêng lẻ - hiện trên >= 1280px */}
+                            <div className="order-action-buttons">
+                                <button className="btn btn-outline-secondary btn-sm">
+                                    <i className="fas fa-upload me-1"></i> Import
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm">
+                                    <i className="fas fa-download me-1"></i> Xuất file
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm" title="Cài đặt">
+                                    <i className="fas fa-cog"></i>
+                                </button>
+                                <button className="btn btn-outline-secondary btn-sm" title="Trợ giúp">
+                                    <i className="fas fa-question-circle"></i>
+                                </button>
+                            </div>
+                            
+                            {/* Dropdown menu cho các nút phụ - chỉ hiện khi < 1280px */}
+                            <div className="order-action-dropdown">
+                                <Dropdown>
+                                    <Dropdown.Toggle 
+                                        variant="outline-secondary" 
+                                        size="sm" 
+                                        className="d-flex align-items-center"
+                                        id="actions-dropdown"
+                                    >
+                                        <i className="fas fa-ellipsis-v"></i>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu align="end">
+                                        <Dropdown.Item>
+                                            <i className="fas fa-upload me-2"></i> Import
+                                        </Dropdown.Item>
+                                        <Dropdown.Item>
+                                            <i className="fas fa-download me-2"></i> Xuất file
+                                        </Dropdown.Item>
+                                        <Dropdown.Divider />
+                                        <Dropdown.Item>
+                                            <i className="fas fa-cog me-2"></i> Cài đặt
+                                        </Dropdown.Item>
+                                        <Dropdown.Item>
+                                            <i className="fas fa-question-circle me-2"></i> Trợ giúp
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </div>
+                        </div>
+                    </div>
                     
                     {/* Layout chính với FilterPanel và nội dung */}
-                    <div className="row g-0">
-                        {/* Filter Panel */}
-                        <div className={`position-relative filter-panel ${isFilterVisible ? 'col-md-2' : 'col-md-0'} transition-all d-flex flex-column`}>
-                            {isFilterVisible && (
-                                <div className="p-3 filter-content">
-                                    {/* <h6 className="fw-bold mb-3 text-primary text-center" style={{ fontSize: '0.9rem' }}>
-                                        <i className="fas fa-filter me-1"></i>
-                                        Sản phẩm
-                                    </h6> */}
+                    <div className="d-flex gap-4" style={{ gap: '16px' }}>
+                        {/* Filter Panel Card */}
+                        {isFilterVisible && (
+                            <div className="filter-card-wrapper" style={{ width: '240px', flexShrink: 0 }}>
+                                <div className="filter-card">
+                                    <div className="filter-card-content">
+                                        {/* Nhóm hàng */}
+                                        <FilterSelectMulti
+                                            label="Nhóm hàng"
+                                            value={filterValues.categories || []}
+                                            onChange={(selected) => updateFilter('categories', selected || [])}
+                                            options={categories.map(cat => ({
+                                                value: cat.id,
+                                                label: cat.name
+                                            }))}
+                                            placeholder="Chọn nhóm hàng"
+                                            onCreateNew={handleCreateCategory}
+                                            createNewLabel="Tạo mới"
+                                        />
 
-                                    {/* Nhóm hàng */}
-                                    <FilterSelectMulti
-                                        label="Nhóm hàng"
-                                        value={filterValues.categories || []}
-                                        onChange={(selected) => updateFilter('categories', selected || [])}
-                                        options={categories.map(cat => ({
-                                            value: cat.id,
-                                            label: cat.name
-                                        }))}
-                                        placeholder="Chọn nhóm hàng"
-                                        onCreateNew={handleCreateCategory}
-                                        createNewLabel="Tạo mới"
-                                    />
+                                        {/* Thời gian tạo */}
+                                        <FilterDateRange
+                                            label="Thời gian tạo"
+                                            value={filterValues.creationTime || { from: null, to: null }}
+                                            onChange={(dateRange) => updateFilter('creationTime', dateRange)}
+                                        />
 
-                                    {/* Thời gian tạo */}
-                                    <FilterDateRange
-                                        label="Thời gian tạo"
-                                        value={filterValues.creationTime || { from: null, to: null }}
-                                        onChange={(dateRange) => updateFilter('creationTime', dateRange)}
-                                    />
+                                        {/* Nhà cung cấp */}
+                                        <FilterSelectMulti
+                                            label="Nhà cung cấp"
+                                            value={filterValues.suppliers || []}
+                                            onChange={(selected) => updateFilter('suppliers', selected || [])}
+                                            options={suppliers.map(supplier => ({
+                                                value: supplier.id,
+                                                label: supplier.name
+                                            }))}
+                                            placeholder="Chọn nhà cung cấp"
+                                        />
 
-                                    {/* Nhà cung cấp */}
-                                    <FilterSelectMulti
-                                        label="Nhà cung cấp"
-                                        value={filterValues.suppliers || []}
-                                        onChange={(selected) => updateFilter('suppliers', selected || [])}
-                                        options={suppliers.map(supplier => ({
-                                            value: supplier.id,
-                                            label: supplier.name
-                                        }))}
-                                        placeholder="Chọn nhà cung cấp"
-                                    />
+                                        {/* Trạng thái sản phẩm */}
+                                        <FilterSelectSingle
+                                            label="Trạng thái sản phẩm"
+                                            value={filterValues.productStatus ? {
+                                                value: filterValues.productStatus,
+                                                label: filterValues.productStatus === 'active' ? 'Đang bán' : 'Ngừng bán'
+                                            } : null}
+                                            onChange={(selected) => updateFilter('productStatus', selected ? selected.value : 'active')}
+                                            options={[
+                                                { value: 'active', label: 'Đang bán' },
+                                                { value: 'inactive', label: 'Ngừng bán' }
+                                            ]}
+                                            placeholder="Chọn trạng thái"
+                                        />
 
-                                    {/* Trạng thái sản phẩm */}
-                                    <FilterSelectSingle
-                                        label="Trạng thái sản phẩm"
-                                        value={filterValues.productStatus ? {
-                                            value: filterValues.productStatus,
-                                            label: filterValues.productStatus === 'active' ? 'Đang bán' : 'Ngừng bán'
-                                        } : null}
-                                        onChange={(selected) => updateFilter('productStatus', selected ? selected.value : 'active')}
-                                        options={[
-                                            { value: 'active', label: 'Đang bán' },
-                                            { value: 'inactive', label: 'Ngừng bán' }
-                                        ]}
-                                        placeholder="Chọn trạng thái"
-                                    />
-
-                                    {/* Bán trực tiếp */}
-                                    <FilterButtonGroup
-                                        label="Bán trực tiếp"
-                                        value={filterValues.directSale || 'yes'}
-                                        onChange={(value) => updateFilter('directSale', value)}
-                                        options={[
-                                            { value: 'yes', label: 'Có' },
-                                            { value: 'no', label: 'Không' }
-                                        ]}
-                                    />
+                                        {/* Bán trực tiếp */}
+                                        <FilterButtonGroup
+                                            label="Bán trực tiếp"
+                                            value={filterValues.directSale || 'yes'}
+                                            onChange={(value) => updateFilter('directSale', value)}
+                                            options={[
+                                                { value: 'yes', label: 'Có' },
+                                                { value: 'no', label: 'Không' }
+                                            ]}
+                                        />
+                                    </div>
+                                    
+                                    {/* Toggle Button - Pill button ở mép phải */}
+                                    <button
+                                        className="filter-toggle-btn"
+                                        onClick={() => setIsFilterVisible(false)}
+                                        title="Thu gọn bộ lọc"
+                                    >
+                                        <i className="fas fa-chevron-left"></i>
+                                    </button>
                                 </div>
-                            )}
-                        </div>
-
-                        {/* Nội dung chính */}
-                        <div className={`main-content-area ${isFilterVisible ? 'col-md-10' : 'col-md-12'} transition-all d-flex flex-column ${!isFilterVisible ? 'expanded' : ''}`}>
-                            {/* Search bar với các nút action */}
-                            <div className="p-3 border-bottom bg-light search-bar">
-                                <div className="row align-items-center">
-                                    <div className="col-md-4">
-                                        <div className="input-group">
-                                            <span className="input-group-text">
-                                                <i className="fas fa-search"></i>
-                                            </span>
-                                            <LiveSearch 
-                                                changeKeyword={setSearchText}
-                                                placeholder="Tìm theo mã,tên hàng"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="col-md-8">
-                                        <div className="d-flex justify-content-end gap-2">
-                                            {/* Nút xóa khi có sản phẩm được chọn */}
-                                            <Permission permission={PERMISSIONS.PRODUCTS_DELETE}>
-                                                {selectedRows.length > 0 && (
-                                                    <button className="btn btn-danger" onClick={() => multiDelete(selectedRows)}>
-                                                        <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
-                                                    </button>
-                                                )}
-                                            </Permission>
-                                            
-                                            {/* Nút tạo mới */}
-                                            <Permission permission={PERMISSIONS.PRODUCTS_CREATE}>
-                                                <Link className="btn btn-primary" to="/product/add">
-                                                    <i className="fas fa-plus me-1"></i> Tạo mới
-                                                </Link>
-                                            </Permission>
-                                            
-                                            {/* Các nút khác */}
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-upload me-1"></i> Import file
-                                            </button>
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-download me-1"></i> Xuất file
-                                            </button>
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-cog"></i>
-                                            </button>
-                                            <button className="btn btn-secondary">
-                                                <i className="fas fa-question-circle"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Search results info */}
-                                {searchText && (
-                                    <div className="search-results-info">
-                                        <small>
-                                            <i className="fas fa-info-circle me-1"></i>
-                                            Đang tìm kiếm: "<strong>{searchText}</strong>" - Tìm thấy {sortedProducts.length} kết quả
-                                        </small>
-                                    </div>
-                                )}
                             </div>
+                        )}
 
-                            {/* Data Table */}
-                            <div className="flex-grow-1 overflow-auto">
-                                <div className="p-3">
-                    <DataTables
-                        name="Danh sách sản phẩm"
-                        columns={columns}
-                        data={sortedProducts}
-                        numOfPages={numOfPages}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        setItemOfPage={setItemOfPage}
-                        selectedRows={selectedRows}
-                        onSelectedRows={selectedRows => setSelectedRows(selectedRows)}
-                        hideSearch={true}
-                        showSummary={true}
-                        customSummaryData={{ 4: totalStockQuantity }}
-                        tableHeight="calc(100vh - 340px)"
-                    />
-                                </div>
+                        {/* Table Card */}
+                        <div className="table-card-wrapper flex-grow-1">
+                            {/* Nút mở lại filter khi đã thu gọn - hiện trên tablet và desktop */}
+                            {!isFilterVisible && (
+                                <button
+                                    className="filter-toggle-btn-open d-none d-md-flex"
+                                    onClick={() => setIsFilterVisible(true)}
+                                    title="Mở bộ lọc"
+                                >
+                                    <i className="fas fa-chevron-right"></i>
+                                </button>
+                            )}
+                            <div className="table-card">
+                                <DataTables
+                                    name="Danh sách sản phẩm"
+                                    columns={columns}
+                                    data={sortedProducts}
+                                    numOfPages={numOfPages}
+                                    currentPage={currentPage}
+                                    setCurrentPage={setCurrentPage}
+                                    setItemOfPage={setItemOfPage}
+                                    selectedRows={selectedRows}
+                                    onSelectedRows={selectedRows => setSelectedRows(selectedRows)}
+                                    hideSearch={true}
+                                    showSummary={true}
+                                    customSummaryData={{ 4: totalStockQuantity }}
+                                    tableHeight="calc(100vh - 180px)"
+                                />
                             </div>
                         </div>
                     </div>

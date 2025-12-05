@@ -9,6 +9,11 @@ const DataTables = (props) => {
    const [selectedRows, setSelectedRows] = useState([]);
    const isFirstRender = useRef(true);
    
+   // Tính toán tableHeight động dựa trên có phân trang hay không
+   // Khi có phân trang, vẫn giữ nguyên chiều cao để hiển thị nhiều item hơn
+   // Pagination nằm ngoài datatable-compact nên không ảnh hưởng đến chiều cao scroll
+   const dynamicTableHeight = tableHeight;
+   
    // Đồng bộ selectedRows từ props (controlled component)
    useEffect(() => {
        if (Array.isArray(externalSelectedRows)) {
@@ -208,18 +213,21 @@ const DataTables = (props) => {
         const { visibleIdx, newWidths } = calculateColumnWidths();
         
         let widthIdx = 0;
-        return columns.map((col, index) =>
-            visibleColumns.includes(index) && (
-                <th
-                    key={index}
-                    scope="col"
-                    style={col.thClass ? { ...col.thClass, width: newWidths[widthIdx++] } : { width: newWidths[widthIdx++] }}
-                    className={`text-dark fw-bold ${col.thClass || ""}`}
-                >
-                    {typeof col.title === "function" ? col.title() : col.title}
-                </th>
-            )
-        );
+        return columns
+            .map((col, index) => {
+                if (!visibleColumns.includes(index)) return null;
+                return (
+                    <th
+                        key={index}
+                        scope="col"
+                        style={{ width: newWidths[widthIdx++] }}
+                        className="datatable-th"
+                    >
+                        {typeof col.title === "function" ? col.title() : col.title}
+                    </th>
+                );
+            })
+            .filter(Boolean);
     };
 
     const renderFilterHeader = () => {
@@ -239,47 +247,36 @@ const DataTables = (props) => {
     const renderSummaryRow = () => {
         if (!showSummary) return null;
         
-        // Sử dụng customSummaryData nếu được cung cấp, nếu không tính từ data hiện tại
         const summary = Object.keys(customSummaryData).length > 0 ? customSummaryData : calculateSummary();
         const { visibleIdx, newWidths } = calculateColumnWidths();
         let widthIdx = 0;
         
         return (
-            <tr className="table-info fw-bold" style={{ backgroundColor: '#e3f2fd' }}>
-                {!hideSelected && (
-                    <td style={{ width: '1%' }}>
-                    </td>
-                )}
-                {columns.map((col, colIndex) => {
-                    if (!visibleColumns.includes(colIndex)) return null;
-                    
-                    const title = typeof col.title === "function" ? col.title() : col.title;
-                    const titleStr = typeof title === 'string' ? title : '';
-                    const isSummableColumn = titleStr.toLowerCase().includes('tổng') || 
-                                           titleStr.toLowerCase().includes('nợ') || 
-                                           titleStr.toLowerCase().includes('giá') || 
-                                           titleStr.toLowerCase().includes('tiền') ||
-                                           titleStr.toLowerCase().includes('số lượng') ||
-                                           titleStr.toLowerCase().includes('tồn') ||
-                                           col.summarizable === true;
-                    
-                    return (
-                        <td
-                            key={colIndex}
-                            style={col.tdClass ? { ...col.tdClass, width: newWidths[widthIdx++] } : { width: newWidths[widthIdx++] }}
-                            className={col.tdClass || ""}
-                        >
-                            {isSummableColumn && summary[colIndex] !== undefined ? (
-                                // Sử dụng cùng format với cột gốc nhưng in đậm
-                                <div className="fw-bold">
-                                    {formatSummaryValue(summary[colIndex], col, titleStr)}
-                                </div>
-                            ) : (
-                                ''
-                            )}
-                        </td>
-                    );
-                })}
+            <tr key="summary" className="datatable-summary-row">
+                {!hideSelected && <td className="datatable-checkbox-col"></td>}
+                {columns
+                    .map((col, colIndex) => {
+                        if (!visibleColumns.includes(colIndex)) return null;
+                        
+                        const title = typeof col.title === "function" ? col.title() : col.title;
+                        const titleStr = typeof title === 'string' ? title : '';
+                        const isSummableColumn = titleStr.toLowerCase().includes('tổng') || 
+                                               titleStr.toLowerCase().includes('nợ') || 
+                                               titleStr.toLowerCase().includes('giá') || 
+                                               titleStr.toLowerCase().includes('tiền') ||
+                                               titleStr.toLowerCase().includes('số lượng') ||
+                                               titleStr.toLowerCase().includes('tồn') ||
+                                               col.summarizable === true;
+                        
+                        return (
+                            <td key={`summary-${colIndex}`} style={{ width: newWidths[widthIdx++] }} className="datatable-td">
+                                {isSummableColumn && summary[colIndex] !== undefined ? (
+                                    <strong>{formatSummaryValue(summary[colIndex], col, titleStr)}</strong>
+                                ) : ''}
+                            </td>
+                        );
+                    })
+                    .filter(Boolean)}
             </tr>
         );
     };
@@ -319,14 +316,14 @@ const DataTables = (props) => {
     const renderTableData = () => {
         const { visibleIdx, newWidths } = calculateColumnWidths();
         
-        return (
-            data.map((row, index) => {
-                if (!row) return null;
+        return data
+            .filter(row => row != null)
+            .map((row, index) => {
                 let widthIdx = 0;
                 return (
-                    <tr key={row.id || index}>
+                    <tr key={row.id || `row-${index}`}>
                         {!hideSelected && (
-                            <td style={{ width: '1%' }}>
+                            <td className="datatable-checkbox-col">
                                 <input
                                     type="checkbox"
                                     checked={selectedRows.includes(String(row.id))}
@@ -336,21 +333,19 @@ const DataTables = (props) => {
                                 />
                             </td>
                         )}
-                        {columns.map((col, colIndex) =>
-                            visibleColumns.includes(colIndex) && (
-                                <td
-                                    key={colIndex}
-                                    style={col.tdClass ? { ...col.tdClass, width: newWidths[widthIdx++] } : { width: newWidths[widthIdx++] }}
-                                    className={col.tdClass || ""}
-                                >
-                                    {col.element ? col.element(row) : ''}
-                                </td>
-                            )
-                        )}
+                        {columns
+                            .map((col, colIndex) => {
+                                if (!visibleColumns.includes(colIndex)) return null;
+                                return (
+                                    <td key={`${row.id}-${colIndex}`} style={{ width: newWidths[widthIdx++] }} className="datatable-td">
+                                        {col.element ? col.element(row) : ''}
+                                    </td>
+                                );
+                            })
+                            .filter(Boolean)}
                     </tr>
                 );
-            })
-        );
+            });
     };
 
     const renderPagination = () => {
@@ -389,121 +384,99 @@ const DataTables = (props) => {
   const visibleColumnCount = props.columns ? props.columns.filter((_, idx) => visibleColumns.includes(idx)).length : 0;
   const tableMinWidth = visibleColumnCount >= 9 ? 1600 : 1200;
   return (
-    <div className="card mb-4">
-            <div className="card-header d-flex justify-content-between align-items-center">
-                <div>
-                    <i className="fas fa-table me-1"></i>
-                    {name}
-                </div>
-                <div style={{ position: "relative" }}>
-                    <button
-                        type="button"
-                        style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer" }}
-                        onClick={() => {
-                            setShowColumnSelector((prev) => !prev);
-                            console.log("showColumnSelector", showColumnSelector);
-                        }}
-                        title="Chọn cột hiển thị"
-                    >
-                        <i className="fas fa-bars"></i>
-                    </button>
-                    {showColumnSelector && (
-                        <div
-                            ref={columnSelectorRef}
-                            style={{
-                                position: "absolute",
-                                right: 0,
-                                top: "100%",
-                                background: "#fff",
-                                border: "1px solid #ccc",
-                                zIndex: 1000,
-                                padding: 10,
-                                minWidth: 200,
-                                boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
-                            }}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div className="datatable-compact" style={{ flex: 1, minHeight: 0 }}>
+                {/* Header row với hiển thị mục và column selector */}
+                <div className="datatable-toolbar">
+                    <div className="datatable-entries">
+                        <span className="text-muted small">Hiển thị</span>
+                        <select 
+                            className="form-select form-select-sm datatable-select-small"
+                            onChange={(e) => setItemOfPage(e.target.value)}
+                            defaultValue="25"
                         >
-                            <strong>Chọn cột hiển thị</strong>
-                            <div>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span className="text-muted small">mục</span>
+                    </div>
+                    <div className="datatable-actions">
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-light datatable-column-btn"
+                            onClick={() => setShowColumnSelector((prev) => !prev)}
+                            title="Chọn cột hiển thị"
+                        >
+                            <i className="fas fa-bars"></i>
+                        </button>
+                        {showColumnSelector && (
+                            <div ref={columnSelectorRef} className="datatable-column-selector">
+                                <div className="datatable-column-selector-title">Chọn cột hiển thị</div>
                                 {columns.map((col, idx) => (
-                                    <div key={idx}>
+                                    <div key={idx} className="datatable-column-item">
                                         <input
                                             type="checkbox"
                                             checked={visibleColumns.includes(idx)}
                                             onChange={() => handleColumnToggle(idx)}
                                             id={`col-toggle-${idx}`}
                                         />
-                                        <label htmlFor={`col-toggle-${idx}`} style={{ marginLeft: 8 }}>
+                                        <label htmlFor={`col-toggle-${idx}`}>
                                             {typeof col.title === "function" ? col.title() : col.title}
                                         </label>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-            <div className="card-body">
-                <div className="row mb-3">
-                    <div className="col-md-6 d-flex align-items-center">
-                        <label className="me-2 mb-0" htmlFor="entriesSelect">Hiển thị</label>
-                        <select id="entriesSelect" className="htmlFor-select w-auto" onChange={(e) => setItemOfPage(e.target.value)}>
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="25" selected>25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                        <span className="ms-2">mục</span>
+                        )}
                     </div>
-                    {!hideSearch && (
-                        <div className="col-md-6 d-flex justify-content-end">
-                            <label className="me-2 mb-0" htmlFor="searchBox">Tìm kiếm:</label>
+                </div>
+                
+                {/* Search inline (nếu cần) */}
+                {!hideSearch && (
+                    <div className="datatable-search">
+                        <label className="text-muted" htmlFor="searchBox">Tìm kiếm:</label>
+                        <div className="datatable-search-input">
                             <LiveSearch changeKeyword={changeKeyword}/>
                         </div>
-                    )}
-                </div>
-                {/* Vùng scroll cho thân bảng: header cố định (sticky) */}
-                <div style={{ width: '100%', overflow: 'auto', maxHeight: tableHeight, borderTop: '#dee2e6 1px solid' }}>
-                    <table className="table table-bordered table-hover " id="datatablesSimple" style={{minWidth: tableMinWidth, width: '100%'}} cellSpacing="0">
-                        {data.length > 0 && (
-                            <thead className="custom-table" style={{ backgroundColor: '#f8f9fa', position: 'sticky', top: 0, zIndex: 3, borderTop: '#dee2e6 1px solid' }}>
-                                {renderFilterHeader()}
+                    </div>
+                )}
+                
+                {/* Vùng scroll cho thân bảng */}
+                <div className="datatable-scroll" style={{ flex: 1, minHeight: 0 }}>
+                    <table className="table table-compact mb-0" style={{ minWidth: tableMinWidth }}>
+                        <thead className="datatable-header">
+                            {filterHeader && renderFilterHeader()}
+                            {data.length > 0 && (
                                 <tr>
                                     {!hideSelected && (
-                                        <th style={{ width: '1%' }} className="text-dark fw-bold">
-                                            <input type="checkbox" checked={data.length === selectedRows.length && data.length > 0 ? true : false} className="form-check-input" onChange={handleCheckedAll}/>
+                                        <th className="datatable-checkbox-col">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={data.length === selectedRows.length && data.length > 0} 
+                                                className="form-check-input" 
+                                                onChange={handleCheckedAll}
+                                            />
                                         </th>
                                     )}
                                     {renderTableHeader()}
                                 </tr>
-                            </thead>
-                        )}
-                        {data.length > 0 && (
-                            <tfoot>
-                                <tr>
-                                    {!hideSelected && <td></td>}
-                                    {/* {renderTableHeader()} */}
-                                </tr>
-                            </tfoot>
-                        )}
+                            )}
+                        </thead>
                         <tbody>
                             {isLoading ? (
-                                <tr>
-                                    <td colSpan={(!hideSelected ? 1 : 0) + columns.length} className="text-center py-5">
-                                        <div className="d-flex flex-column align-items-center justify-content-center" style={{opacity:0.8}}>
-                                            <div className="spinner-border text-primary mb-2" style={{width:48, height:48}} role="status"></div>
-                                            <div className="fw-bold text-secondary" style={{fontSize:20}}>Đang tải dữ liệu...</div>
-                                        </div>
+                                <tr key="loading">
+                                    <td colSpan={(!hideSelected ? 1 : 0) + columns.length} className="datatable-empty">
+                                        <div className="spinner-border text-primary mb-2" role="status"></div>
+                                        <div>Đang tải dữ liệu...</div>
                                     </td>
                                 </tr>
                             ) : data.length === 0 ? (
-                                <tr>
-                                    <td colSpan={(!hideSelected ? 1 : 0) + columns.length} className="text-center py-5">
-                                        <div className="d-flex flex-column align-items-center justify-content-center" style={{opacity:0.8}}>
-                                            <i className="fas fa-database mb-2" style={{fontSize:48, color:'#bdbdbd'}}></i>
-                                            <div className="fw-bold text-secondary" style={{fontSize:20}}>Không có dữ liệu</div>
-                                            <div className="text-muted" style={{fontSize:14}}>Không tìm thấy dòng dữ liệu nào phù hợp.</div>
-                                        </div>
+                                <tr key="empty">
+                                    <td colSpan={(!hideSelected ? 1 : 0) + columns.length} className="datatable-empty">
+                                        <i className="fas fa-database mb-2"></i>
+                                        <div>Không có dữ liệu</div>
+                                        <small className="text-muted">Không tìm thấy dòng dữ liệu nào phù hợp.</small>
                                     </td>
                                 </tr>
                             ) : (
@@ -515,17 +488,17 @@ const DataTables = (props) => {
                         </tbody>
                     </table>
                 </div>
-            </div>
-            {numOfPages > 1 && 
-                <div className="row">
-                    <div className="col-12 d-flex justify-content-center">
-                        <ul className="pagination">
-                            {renderPagination()}
-                        </ul>
-                    </div>
-                </div>
-            }
         </div>
+        
+        {/* Pagination - nằm ngoài khối bọc dữ liệu bảng, chỉ chiếm chiều cao tối thiểu */}
+        {numOfPages > 1 && (
+            <div className="datatable-pagination" style={{ flexShrink: 0 }}>
+                <ul className="pagination pagination-sm mb-0">
+                    {renderPagination()}
+                </ul>
+            </div>
+        )}
+    </div>
   )
 }
 

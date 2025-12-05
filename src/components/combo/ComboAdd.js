@@ -475,7 +475,7 @@ const ComboAdd = () => {
                                     {activeTab === 'thong-tin' && (
                                         <div className="tab-pane fade show active">
                                             <div className="row mb-3">
-                                                <div className="col-md-6">
+                                                <div className="col-12 col-md-6">
                                                     <div className="mb-3">
                                                         <label htmlFor="inputComboCode" className="form-label fw-semibold">
                                                             Mã combo
@@ -532,8 +532,23 @@ const ComboAdd = () => {
                                                             placeholder="Nhập giá App"
                                                         />
                                                     </div>
+                                                    <div className="mb-3">
+                                                        <label htmlFor="inputStatus" className="form-label fw-semibold">
+                                                            Trạng thái <span style={{ color: 'red' }}>*</span>
+                                                        </label>
+                                                        <select
+                                                            className="form-select"
+                                                            id="inputStatus"
+                                                            {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
+                                                            defaultValue="1"
+                                                        >
+                                                            <option value="1">Đang kinh doanh</option>
+                                                            <option value="0">Ngừng kinh doanh</option>
+                                                        </select>
+                                                        {isSubmitted && errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
+                                                    </div>
                                                 </div>
-                                                <div className="col-md-6">
+                                                <div className="col-12 col-md-6">
                                                     {/* Hình ảnh */}
                                                     <div className="row mb-3">
                                                         <div className="col-md-12">
@@ -591,32 +606,9 @@ const ComboAdd = () => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div className="row mb-3">
-                                                <div className="col-md-6">
-                                                    <div className="mb-3">
-                                                        <label htmlFor="inputStatus" className="form-label fw-semibold">
-                                                            Trạng thái <span style={{ color: 'red' }}>*</span>
-                                                        </label>
-                                                        <select
-                                                            className="form-select"
-                                                            id="inputStatus"
-                                                            {...register('is_active', { required: 'Trạng thái là bắt buộc' })}
-                                                            defaultValue="1"
-                                                        >
-                                                            <option value="1">Đang kinh doanh</option>
-                                                            <option value="0">Ngừng kinh doanh</option>
-                                                        </select>
-                                                        {isSubmitted && errors.is_active && <div className="text-danger mt-1 small">{errors.is_active.message}</div>}
-                                                    </div>
-
-                                                </div>
-                                                {/* Ngày bắt đầu và kết thúc */}
-                                                <div className="col-md-6 d-flex justify-content-center">
-
-                                                    <div className="row">
-                                                        <div className="col-md-6">
+                                                    {/* Ngày bắt đầu và kết thúc - chỉ hiển thị trên màn hình 768px-1024px */}
+                                                    <div className="d-none d-md-block d-lg-none">
+                                                        <div className="mb-3">
                                                             <label htmlFor="inputStartDate" className="form-label fw-semibold">
                                                                 Thời gian bắt đầu <span style={{ color: 'red' }}>*</span>
                                                             </label>
@@ -646,10 +638,8 @@ const ComboAdd = () => {
                                                                 <input type="hidden" {...register('start_date', { required: 'Thời gian bắt đầu là bắt buộc' })} />
                                                             </div>
                                                             {isSubmitted && errors.start_date && <div className="text-danger mt-1 small">{errors.start_date.message}</div>}
-
                                                         </div>
-
-                                                        <div className="col-md-6">
+                                                        <div className="mb-3">
                                                             <label htmlFor="inputEndDate" className="form-label fw-semibold">
                                                                 Thời gian kết thúc <span style={{ color: 'red' }}>*</span>
                                                             </label>
@@ -679,20 +669,148 @@ const ComboAdd = () => {
                                                                 <input type="hidden" {...register('end_date', { required: 'Thời gian kết thúc là bắt buộc' })} />
                                                             </div>
                                                             {isSubmitted && errors.end_date && <div className="text-danger mt-1 small">{errors.end_date.message}</div>}
-
                                                         </div>
-
                                                     </div>
-
+                                                    {/* Ngày bắt đầu và kết thúc - chỉ hiển thị trên màn hình >= 1024px */}
+                                                    <div className="d-none d-lg-block">
+                                                        <div className="row">
+                                                            <div className="col-12 col-xl-6 mb-3 mb-xl-0">
+                                                                <label htmlFor="inputStartDateLarge" className="form-label fw-semibold">
+                                                                    Thời gian bắt đầu <span style={{ color: 'red' }}>*</span>
+                                                                </label>
+                                                                <div className="d-flex align-items-center" style={{ gap: '4px' }}>
+                                                                    <DatePicker
+                                                                        selected={startDatePicker}
+                                                                        onChange={date => {
+                                                                            setStartDatePicker(date);
+                                                                            setStartDate(date);
+                                                                            setValue('start_date', date, { shouldValidate: true });
+                                                                        }}
+                                                                        locale={vi}
+                                                                        dateFormat="dd/MM/yyyy HH:mm"
+                                                                        className="form-control"
+                                                                        placeholderText="Chọn thời gian bắt đầu"
+                                                                        id="inputStartDateLarge"
+                                                                        autoComplete="off"
+                                                                        showTimeSelect
+                                                                        timeFormat="HH:mm"
+                                                                        timeIntervals={15}
+                                                                        timeCaption="Giờ"
+                                                                        popperPlacement="bottom-start"
+                                                                    />
+                                                                    <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{ height: '38px' }} onClick={() => document.getElementById('inputStartDateLarge')?.focus()}>
+                                                                        <i className="fas fa-calendar-alt text-secondary"></i>
+                                                                    </button>
+                                                                    <input type="hidden" {...register('start_date', { required: 'Thời gian bắt đầu là bắt buộc' })} />
+                                                                </div>
+                                                                {isSubmitted && errors.start_date && <div className="text-danger mt-1 small">{errors.start_date.message}</div>}
+                                                            </div>
+                                                            <div className="col-12 col-xl-6">
+                                                                <label htmlFor="inputEndDateLarge" className="form-label fw-semibold">
+                                                                    Thời gian kết thúc <span style={{ color: 'red' }}>*</span>
+                                                                </label>
+                                                                <div className="d-flex align-items-center" style={{ gap: '4px' }}>
+                                                                    <DatePicker
+                                                                        selected={endDatePicker}
+                                                                        onChange={date => {
+                                                                            setEndDatePicker(date);
+                                                                            setEndDate(date);
+                                                                            setValue('end_date', date, { shouldValidate: true });
+                                                                        }}
+                                                                        locale={vi}
+                                                                        dateFormat="dd/MM/yyyy HH:mm"
+                                                                        className="form-control"
+                                                                        placeholderText="Chọn thời gian kết thúc"
+                                                                        id="inputEndDateLarge"
+                                                                        autoComplete="off"
+                                                                        showTimeSelect
+                                                                        timeFormat="HH:mm"
+                                                                        timeIntervals={15}
+                                                                        timeCaption="Giờ"
+                                                                        popperPlacement="bottom-start"
+                                                                    />
+                                                                    <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{ height: '38px' }} onClick={() => document.getElementById('inputEndDateLarge')?.focus()}>
+                                                                        <i className="fas fa-calendar-alt text-secondary"></i>
+                                                                    </button>
+                                                                    <input type="hidden" {...register('end_date', { required: 'Thời gian kết thúc là bắt buộc' })} />
+                                                                </div>
+                                                                {isSubmitted && errors.end_date && <div className="text-danger mt-1 small">{errors.end_date.message}</div>}
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-
+                                            </div>
+                                            {/* Ngày bắt đầu và kết thúc - chỉ hiển thị trên mobile (< 768px) */}
+                                            <div className="row mb-3 d-md-none">
+                                                <div className="col-12 mb-3">
+                                                    <label htmlFor="inputStartDateMobile" className="form-label fw-semibold">
+                                                        Thời gian bắt đầu <span style={{ color: 'red' }}>*</span>
+                                                    </label>
+                                                    <div className="d-flex align-items-center" style={{ gap: '4px' }}>
+                                                        <DatePicker
+                                                            selected={startDatePicker}
+                                                            onChange={date => {
+                                                                setStartDatePicker(date);
+                                                                setStartDate(date);
+                                                                setValue('start_date', date, { shouldValidate: true });
+                                                            }}
+                                                            locale={vi}
+                                                            dateFormat="dd/MM/yyyy HH:mm"
+                                                            className="form-control"
+                                                            placeholderText="Chọn thời gian bắt đầu"
+                                                            id="inputStartDateMobile"
+                                                            autoComplete="off"
+                                                            showTimeSelect
+                                                            timeFormat="HH:mm"
+                                                            timeIntervals={15}
+                                                            timeCaption="Giờ"
+                                                            popperPlacement="bottom-start"
+                                                        />
+                                                        <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{ height: '38px' }} onClick={() => document.getElementById('inputStartDateMobile')?.focus()}>
+                                                            <i className="fas fa-calendar-alt text-secondary"></i>
+                                                        </button>
+                                                        <input type="hidden" {...register('start_date', { required: 'Thời gian bắt đầu là bắt buộc' })} />
+                                                    </div>
+                                                    {isSubmitted && errors.start_date && <div className="text-danger mt-1 small">{errors.start_date.message}</div>}
+                                                </div>
+                                                <div className="col-12">
+                                                    <label htmlFor="inputEndDateMobile" className="form-label fw-semibold">
+                                                        Thời gian kết thúc <span style={{ color: 'red' }}>*</span>
+                                                    </label>
+                                                    <div className="d-flex align-items-center" style={{ gap: '4px' }}>
+                                                        <DatePicker
+                                                            selected={endDatePicker}
+                                                            onChange={date => {
+                                                                setEndDatePicker(date);
+                                                                setEndDate(date);
+                                                                setValue('end_date', date, { shouldValidate: true });
+                                                            }}
+                                                            locale={vi}
+                                                            dateFormat="dd/MM/yyyy HH:mm"
+                                                            className="form-control"
+                                                            placeholderText="Chọn thời gian kết thúc"
+                                                            id="inputEndDateMobile"
+                                                            autoComplete="off"
+                                                            showTimeSelect
+                                                            timeFormat="HH:mm"
+                                                            timeIntervals={15}
+                                                            timeCaption="Giờ"
+                                                            popperPlacement="bottom-start"
+                                                        />
+                                                        <button type="button" tabIndex={-1} className="btn p-0 border-0 bg-transparent" style={{ height: '38px' }} onClick={() => document.getElementById('inputEndDateMobile')?.focus()}>
+                                                            <i className="fas fa-calendar-alt text-secondary"></i>
+                                                        </button>
+                                                        <input type="hidden" {...register('end_date', { required: 'Thời gian kết thúc là bắt buộc' })} />
+                                                    </div>
+                                                    {isSubmitted && errors.end_date && <div className="text-danger mt-1 small">{errors.end_date.message}</div>}
+                                                </div>
                                             </div>
 
 
 
                                             {/* Sản phẩm trong combo */}
                                             <div className="row mt-4">
-                                                <div className="col-lg-12">
+                                                <div className="col-12">
                                                     <div className="card shadow-sm border-0">
                                                         <div className="card-header d-flex justify-content-between align-items-center">
                                                             <h6 className="mb-0">Sản phẩm trong combo</h6>
@@ -912,10 +1030,10 @@ const ComboAdd = () => {
 
                                 {/* Nút hành động */}
                                 <div className="mt-4 mb-0">
-                                    <div className="d-flex justify-content-center gap-2">
+                                    <div className="d-flex flex-column flex-md-row justify-content-center gap-2">
                                         <button
                                             type="button"
-                                            className="btn btn-danger w-25 font-weight-bold"
+                                            className="btn btn-danger w-100 w-md-auto font-weight-bold"
                                             onClick={() => setShowDeleteModal(true)}
                                             disabled={true}
                                             style={{ opacity: 0.5, cursor: 'not-allowed' }}
@@ -924,14 +1042,14 @@ const ComboAdd = () => {
                                         </button>
                                         <button
                                             type="button"
-                                            className="btn btn-secondary w-25"
+                                            className="btn btn-secondary w-100 w-md-auto"
                                             onClick={() => navigation('/combo')}
                                             disabled={isSubmitting}
                                         >
                                             Hủy bỏ
                                         </button>
                                         <button
-                                            className="btn btn-primary w-25"
+                                            className="btn btn-primary w-100 w-md-auto"
                                             type="submit"
                                             disabled={isSubmitting}
                                         >

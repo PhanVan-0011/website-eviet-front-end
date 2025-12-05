@@ -141,26 +141,26 @@ const OrderDetail = () => {
     return (
         <div id="layoutSidenav_content">
             <main>
-                <div className="container-fluid px-4">
-                    <div className="d-flex align-items-center justify-content-between mt-4 mb-2">
-                        <h2 className="mb-0">Chi tiết đơn hàng #{order.id}</h2>
+                <div className="container-fluid px-3 px-md-4">
+                    <div className="d-flex align-items-center justify-content-between mt-3 mt-md-4 mb-2">
+                        <h2 className="mb-0 detail-page-header">Chi tiết đơn hàng #{order.id}</h2>
                     </div>
-                    <ol className="breadcrumb mb-4">
+                    <ol className="breadcrumb mb-3 mb-md-4 detail-breadcrumb">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item"><Link to="/order">Đơn hàng</Link></li>
                         <li className="breadcrumb-item active">Chi tiết</li>
                     </ol>
 
-                    <div className="row g-3 align-items-stretch">
+                    <div className="row g-2 g-md-3 align-items-stretch">
                         {/* Thông tin đơn hàng & thanh toán */}
-                        <div className="col-lg-6 d-flex">
-                            <div className="card shadow-sm border-0 flex-fill ">
-                                <div className="card-header py-2 background-detail">
+                        <div className="col-12 col-lg-6 d-flex">
+                            <div className="card shadow-sm border-0 flex-fill">
+                                <div className="card-header py-2 background-detail detail-card-header">
                                     <h6 className="mb-0 fw-bold">
                                         <i className="fas fa-file-invoice me-2"></i>Thông tin đơn hàng & thanh toán
                                     </h6>
                                 </div>
-                                <div className="card-body p-3">
+                                <div className="card-body p-2 p-md-3 detail-card">
                                     {/* Thông tin đơn hàng - Compact */}
                                     <div className="row g-2 mb-3">
                                         <div className="col-6">
@@ -239,16 +239,16 @@ const OrderDetail = () => {
                             </div>
                         </div>
                         {/* Danh sách sản phẩm */}
-                        <div className="col-lg-6 d-flex">
+                        <div className="col-12 col-lg-6 d-flex">
                             <div className="card shadow-sm border-0 flex-fill">
-                                <div className="card-header py-2 background-detail">
+                                <div className="card-header py-2 background-detail detail-card-header">
                                     <h6 className="mb-0 fw-bold">
                                         <i className="fas fa-box-open me-2"></i>Sản phẩm trong đơn ({order.order_details?.length || 0} sản phẩm)
                                     </h6>
                                 </div>
                                 <div className="card-body p-0">
                                     <div className="table-responsive">
-                                        <table className="table table-hover align-middle mb-0 table-sm">
+                                        <table className="table table-hover align-middle mb-0 table-sm detail-table">
                                             <thead className="table-light">
                                                 <tr>
                                                     <th style={{ width: 40 }}>#</th>
@@ -363,26 +363,26 @@ const OrderDetail = () => {
                     </div>
 
                     {/* Nút thao tác - Compact */}
-                    <div className="row mb-4">
-                        <div className="col-12 d-flex justify-content-center gap-2" style={{ marginTop: 20 }}>
+                    <div className="row mb-3 mb-md-4">
+                        <div className="col-12 d-flex justify-content-center detail-action-buttons" style={{ marginTop: 20 }}>
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
-                                <i className="fas fa-arrow-left me-1"></i>Quay lại
+                                <i className="fas fa-arrow-left me-1"></i><span className="d-none d-sm-inline">Quay lại</span>
                             </button>
-                            {order.status === 'pending' && (
+                                    {order.status === 'pending' && (
                                 <>
                                     <button
                                         className="btn btn-danger btn-sm"
                                         onClick={() => handleUpdateStatus(order.id, 'cancelled')}
                                         title="Hủy đơn hàng"
                                     >
-                                        <i className="fas fa-times me-1"></i> Hủy
+                                        <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy</span>
                                     </button>
                                     <button
                                         className="btn btn-success btn-sm"
                                         onClick={() => handleUpdateStatus(order.id, 'processing')}
                                         title="Duyệt đơn hàng"
                                     >
-                                        <i className="fas fa-check me-1"></i> Duyệt
+                                        <i className="fas fa-check me-1"></i><span className="d-none d-sm-inline">Duyệt</span>
                                     </button>
                                 </>
                             )}
@@ -393,14 +393,14 @@ const OrderDetail = () => {
                                         onClick={() => handleUpdateStatus(order.id, 'cancelled')}
                                         title="Hủy đơn hàng"
                                     >
-                                        <i className="fas fa-times me-1"></i> Hủy
+                                        <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy</span>
                                     </button>
                                     <button
                                         className="btn btn-warning btn-sm"
                                         onClick={() => handleUpdateStatus(order.id, 'shipped')}
                                         title="Xác nhận đã gửi hàng"
                                     >
-                                        <i className="fas fa-truck me-1"></i> Gửi hàng
+                                        <i className="fas fa-truck me-1"></i><span className="d-none d-sm-inline">Gửi hàng</span>
                                     </button>
                                 </>
                             )}
@@ -411,14 +411,14 @@ const OrderDetail = () => {
                                         onClick={() => handleUpdateStatus(order.id, 'cancelled')}
                                         title="Hủy đơn hàng"
                                     >
-                                        <i className="fas fa-times me-1"></i> Hủy
+                                        <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy</span>
                                     </button>
                                     <button
                                         className="btn btn-info btn-sm"
                                         onClick={() => handleUpdateStatus(order.id, 'delivered')}
                                         title="Xác nhận đã giao"
                                     >
-                                        <i className="fas fa-box-open me-1"></i> Đã giao
+                                        <i className="fas fa-box-open me-1"></i><span className="d-none d-sm-inline">Đã giao</span>
                                     </button>
                                 </>
                             )}
