@@ -746,21 +746,23 @@ const PromotionUpdate = () => {
                         {/* Nút hành động */}
                         <div className="row mt-4 mb-4">
                             <div className="col-12">
-                                <div className="d-flex flex-column flex-md-row justify-content-center gap-2">
+                                <div className="d-flex justify-content-center detail-action-buttons">
                                     <button
                                         type="button"
-                                        className="btn btn-secondary w-100 w-md-auto"
+                                        className="btn btn-outline-secondary btn-sm"
                                         onClick={() => navigation('/promotion')}
                                         disabled={isSubmitting}
                                     >
-                                        Hủy bỏ
+                                        <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy bỏ</span>
                                     </button>
                                     <button
-                                        className="btn btn-primary w-100 w-md-auto"
+                                        className="btn btn-primary btn-sm"
                                         type="submit"
                                         disabled={isSubmitting}
                                     >
-                                        {isSubmitting ? "Đang gửi..." : "Cập nhật"}
+                                        <i className="fas fa-check me-1"></i>
+                                        <span className="d-none d-sm-inline">{isSubmitting ? "Đang gửi..." : "Cập nhật"}</span>
+                                        {isSubmitting && <span className="d-sm-none">...</span>}
                                     </button>
                                 </div>
                             </div>

@@ -1,6 +1,5 @@
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import LiveSearch from './LiveSearch';
-import { useRef } from 'react';
 
 
 const DataTables = (props) => {
@@ -8,6 +7,7 @@ const DataTables = (props) => {
    const { name, columns, data, numOfPages, currentPage, setCurrentPage, setItemOfPage, changeKeyword, onSelectedRows, selectedRows: externalSelectedRows, filterHeader, hideSelected, hideSearch = false, isLoading = false, showSummary = false, customSummaryData = {}, tableHeight = '60vh' } = props;
    const [selectedRows, setSelectedRows] = useState([]);
    const isFirstRender = useRef(true);
+   
    
    // Tính toán tableHeight động dựa trên có phân trang hay không
    // Khi có phân trang, vẫn giữ nguyên chiều cao để hiển thị nhiều item hơn
@@ -40,20 +40,6 @@ const DataTables = (props) => {
            onSelectedRows(selectedRows);
        }
     }, [selectedRows]);
-
-    // // Clear selected rows when data changes (e.g., after delete)
-    // useEffect(() => {
-    //     if (data && data.length === 0) {
-    //         setSelectedRows([]);
-    //     } else if (data && selectedRows.length > 0) {
-    //         // Remove selected rows that no longer exist in data
-    //         const existingIds = data.map(row => String(row.id));
-    //         const validSelectedRows = selectedRows.filter(id => existingIds.includes(id));
-    //         if (validSelectedRows.length !== selectedRows.length) {
-    //             setSelectedRows(validSelectedRows);
-    //         }
-    //     }
-    // }, [data, selectedRows]);
 
     // --- Lưu trạng thái cột hiển thị vào localStorage mỗi khi visibleColumns thay đổi ---
     useEffect(() => {
@@ -383,6 +369,7 @@ const DataTables = (props) => {
 
   const visibleColumnCount = props.columns ? props.columns.filter((_, idx) => visibleColumns.includes(idx)).length : 0;
   const tableMinWidth = visibleColumnCount >= 9 ? 1600 : 1200;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="datatable-compact" style={{ flex: 1, minHeight: 0 }}>
@@ -444,10 +431,11 @@ const DataTables = (props) => {
                 
                 {/* Vùng scroll cho thân bảng */}
                 <div className="datatable-scroll" style={{ flex: 1, minHeight: 0 }}>
-                    <table className="table table-compact mb-0" style={{ minWidth: tableMinWidth }}>
-                        <thead className="datatable-header">
-                            {filterHeader && renderFilterHeader()}
-                            {data.length > 0 && (
+                    <table className={`table table-compact mb-0 ${(isLoading || data.length === 0) ? 'datatable-empty-state' : ''}`} style={{ minWidth: (isLoading || data.length === 0) ? '100%' : tableMinWidth }}>
+                        {/* Ẩn thead khi không có dữ liệu để không hiển thị border */}
+                        {(!isLoading && data.length > 0) && (
+                            <thead className="datatable-header">
+                                {filterHeader && renderFilterHeader()}
                                 <tr>
                                     {!hideSelected && (
                                         <th className="datatable-checkbox-col">
@@ -461,8 +449,8 @@ const DataTables = (props) => {
                                     )}
                                     {renderTableHeader()}
                                 </tr>
-                            )}
-                        </thead>
+                            </thead>
+                        )}
                         <tbody>
                             {isLoading ? (
                                 <tr key="loading">
@@ -487,17 +475,17 @@ const DataTables = (props) => {
                             )}
                         </tbody>
                     </table>
+                    
+                    {/* Pagination - nằm cuối nội dung bảng, chỉ hiển thị khi scroll xuống */}
+                    {numOfPages > 1 && (
+                        <div className="datatable-pagination-inline">
+                            <ul className="pagination pagination-sm mb-0">
+                                {renderPagination()}
+                            </ul>
+                        </div>
+                    )}
                 </div>
         </div>
-        
-        {/* Pagination - nằm ngoài khối bọc dữ liệu bảng, chỉ chiếm chiều cao tối thiểu */}
-        {numOfPages > 1 && (
-            <div className="datatable-pagination" style={{ flexShrink: 0 }}>
-                <ul className="pagination pagination-sm mb-0">
-                    {renderPagination()}
-                </ul>
-            </div>
-        )}
     </div>
   )
 }

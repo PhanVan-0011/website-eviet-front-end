@@ -140,31 +140,31 @@ const GroupSupplierList = () => {
             <main>
                 <div className="container-fluid px-4">
                     {/* Header row: Breadcrumb + Search + Actions */}
-                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom group-supplier-header-row" style={{ justifyContent: 'space-between', gap: '0.5rem' }}>
-                        {/* Left section: Breadcrumb */}
-                        <div className="d-flex align-items-center flex-shrink-0">
+                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom group-supplier-header-row">
+                        {/* Left section: Breadcrumb + Search - chiếm 50% */}
+                        <div className="group-supplier-left-section d-flex align-items-center gap-3">
                             {/* Breadcrumb - ẩn trên tablet */}
-                            <ol className="breadcrumb mb-0 d-none d-md-flex" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
+                            <ol className="breadcrumb mb-0 d-none d-md-flex flex-shrink-0" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
                                 <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                                 <li className="breadcrumb-item active">Danh sách nhóm nhà cung cấp</li>
                             </ol>
-                        </div>
-                        
-                        {/* Search - ở giữa */}
-                        <div className="group-supplier-search-bar" style={{ margin: '0 auto' }}>
-                            <div className="input-group input-group-sm">
-                                <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
-                                    <i className="fas fa-search text-muted"></i>
-                                </span>
-                                <LiveSearch 
-                                    changeKeyword={setSearchText}
-                                    placeholder="Tìm theo tên nhóm nhà cung cấp..."
-                                />
+                            
+                            {/* Search - rộng hơn và canh trái */}
+                            <div className="group-supplier-search-bar flex-grow-1">
+                                <div className="input-group input-group-sm">
+                                    <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
+                                        <i className="fas fa-search text-muted"></i>
+                                    </span>
+                                    <LiveSearch 
+                                        changeKeyword={setSearchText}
+                                        placeholder="Tìm theo tên nhóm nhà cung cấp..."
+                                    />
+                                </div>
                             </div>
                         </div>
                             
-                        {/* Actions - bên phải */}
-                        <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                        {/* Actions - bên phải - chiếm 50% */}
+                        <div className="group-supplier-right-section d-flex align-items-center gap-2 justify-content-end">
                             {/* Nút xóa khi có nhóm được chọn */}
                             {selectedRows.length > 0 && (
                                 <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>

@@ -116,24 +116,26 @@ const GroupSupplierAdd = () => {
                                     </div>
 
                                     <div className="mt-4 mb-0">
-                                        <div className="d-flex justify-content-center gap-2">
+                                        <div className="d-flex justify-content-center detail-action-buttons">
                                             <button
                                                 type="button"
-                                                className="btn btn-secondary w-25"
+                                                className="btn btn-outline-secondary btn-sm"
                                                 onClick={() => navigation('/group-supplier')}
                                                 disabled={isSubmitting}
                                             >
-                                                Hủy bỏ
+                                                <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy bỏ</span>
                                             </button>
                                             <button
-                                                className="btn btn-primary w-25"
+                                                className="btn btn-primary btn-sm"
                                                 type="submit"
                                                 disabled={isSubmitting}
                                             >
-                                                {isSubmitting ? "Đang gửi..." : "Thêm mới"}
+                                                <i className="fas fa-check me-1"></i>
+                                                <span className="d-none d-sm-inline">{isSubmitting ? "Đang gửi..." : "Thêm mới"}</span>
+                                                {isSubmitting && <span className="d-sm-none">...</span>}
                                             </button>
                                         </div>
-                                     </div>
+                                    </div>
                                 </form>
                             </div>
                         </div>

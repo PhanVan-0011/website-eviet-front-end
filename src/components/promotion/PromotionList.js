@@ -340,30 +340,30 @@ const PromotionList = () => {
             <main>
                 <div className="container-fluid px-4">
                     {/* Header row: Breadcrumb + Search + Actions */}
-                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom order-header-row" style={{ justifyContent: 'space-between', gap: '0.5rem' }}>
-                        {/* Left section: Breadcrumb */}
-                        <div className="d-flex align-items-center flex-shrink-0">
-                            <ol className="breadcrumb mb-0 d-none d-md-flex" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
+                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom promotion-header-row">
+                        {/* Left section: Breadcrumb + Search - chiếm 50% */}
+                        <div className="promotion-left-section d-flex align-items-center gap-3">
+                            <ol className="breadcrumb mb-0 d-none d-md-flex flex-shrink-0" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
                                 <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                                 <li className="breadcrumb-item active">Danh sách khuyến mãi</li>
                             </ol>
-                        </div>
-                        
-                        {/* Search - ở giữa */}
-                        <div className="order-search-bar" style={{ margin: '0 auto' }}>
-                            <div className="input-group input-group-sm">
-                                <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
-                                    <i className="fas fa-search text-muted"></i>
-                                </span>
-                                <LiveSearch 
-                                    changeKeyword={setSearchText}
-                                    placeholder="Tìm theo tên, mã khuyến mãi..."
-                                />
+                            
+                            {/* Search - rộng hơn và canh trái */}
+                            <div className="promotion-search-bar flex-grow-1">
+                                <div className="input-group input-group-sm">
+                                    <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
+                                        <i className="fas fa-search text-muted"></i>
+                                    </span>
+                                    <LiveSearch 
+                                        changeKeyword={setSearchText}
+                                        placeholder="Tìm theo tên, mã khuyến mãi..."
+                                    />
+                                </div>
                             </div>
                         </div>
                         
-                        {/* Actions - bên phải */}
-                        <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                        {/* Actions - bên phải - chiếm 50% */}
+                        <div className="promotion-right-section d-flex align-items-center gap-2 justify-content-end">
                             {/* Nút xóa khi có khuyến mãi được chọn */}
                             <Permission permission={PERMISSIONS.PROMOTIONS_DELETE}>
                                 {selectedRows.length > 0 && (

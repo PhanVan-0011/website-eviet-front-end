@@ -1030,30 +1030,32 @@ const ComboAdd = () => {
 
                                 {/* Nút hành động */}
                                 <div className="mt-4 mb-0">
-                                    <div className="d-flex flex-column flex-md-row justify-content-center gap-2">
+                                    <div className="d-flex justify-content-center detail-action-buttons">
                                         <button
                                             type="button"
-                                            className="btn btn-danger w-100 w-md-auto font-weight-bold"
+                                            className="btn btn-danger btn-sm"
                                             onClick={() => setShowDeleteModal(true)}
                                             disabled={true}
                                             style={{ opacity: 0.5, cursor: 'not-allowed' }}
                                         >
-                                            Xóa
+                                            <i className="fas fa-trash me-1"></i><span className="d-none d-sm-inline">Xóa</span>
                                         </button>
                                         <button
                                             type="button"
-                                            className="btn btn-secondary w-100 w-md-auto"
+                                            className="btn btn-outline-secondary btn-sm"
                                             onClick={() => navigation('/combo')}
                                             disabled={isSubmitting}
                                         >
-                                            Hủy bỏ
+                                            <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy bỏ</span>
                                         </button>
                                         <button
-                                            className="btn btn-primary w-100 w-md-auto"
+                                            className="btn btn-primary btn-sm"
                                             type="submit"
                                             disabled={isSubmitting}
                                         >
-                                            {isSubmitting ? "Đang gửi..." : "Thêm mới"}
+                                            <i className="fas fa-check me-1"></i>
+                                            <span className="d-none d-sm-inline">{isSubmitting ? "Đang gửi..." : "Thêm mới"}</span>
+                                            {isSubmitting && <span className="d-sm-none">...</span>}
                                         </button>
                                     </div>
                                 </div>

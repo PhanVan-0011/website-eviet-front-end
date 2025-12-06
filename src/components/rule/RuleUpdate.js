@@ -177,21 +177,23 @@ const RuleUpdate = () => {
                                         {errors.permissions && <div className="text-danger">{errors.permissions.message}</div>}
                                     </div>
                                 </div>
-                                <div className="mt-auto py-3 bg-white d-flex justify-content-center gap-2">
+                                <div className="mt-auto py-3 bg-white d-flex justify-content-center detail-action-buttons">
                                     <button
                                         type="button"
-                                        className="btn btn-secondary w-25"
+                                        className="btn btn-outline-secondary btn-sm"
                                         onClick={() => navigate('/rule')}
                                         disabled={isSubmitting}
                                     >
-                                        Hủy bỏ
+                                        <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy bỏ</span>
                                     </button>
                                     <button
-                                        className="btn btn-primary w-25"
+                                        className="btn btn-primary btn-sm"
                                         type="submit"
                                         disabled={isSubmitting}
                                     >
-                                        {isSubmitting ? "Đang gửi..." : "Cập nhật"}
+                                        <i className="fas fa-check me-1"></i>
+                                        <span className="d-none d-sm-inline">{isSubmitting ? "Đang gửi..." : "Cập nhật"}</span>
+                                        {isSubmitting && <span className="d-sm-none">...</span>}
                                     </button>
                                 </div>
                             </form>

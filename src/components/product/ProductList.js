@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import DataTables from '../common/DataTables'
 import requestApi from '../../helpers/api';
@@ -26,18 +27,38 @@ const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 // Component Dropdown custom cho chọn đơn vị
 const UnitDropdown = ({ product, selectedUnitIndex, onUnitChange }) => {
     const [showDropdown, setShowDropdown] = useState(false);
+    const buttonRef = useRef(null);
     const dropdownRef = useRef(null);
+    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
     const hasUnitConversions = product.unit_conversions && product.unit_conversions.length > 0;
+
+    // Tính toán vị trí dropdown khi mở
+    useEffect(() => {
+        if (showDropdown && buttonRef.current) {
+            const buttonRect = buttonRef.current.getBoundingClientRect();
+            setDropdownPosition({
+                top: buttonRect.bottom + window.scrollY + 4,
+                left: buttonRect.left + window.scrollX
+            });
+        }
+    }, [showDropdown]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            if (
+                buttonRef.current && 
+                !buttonRef.current.contains(event.target) &&
+                dropdownRef.current && 
+                !dropdownRef.current.contains(event.target)
+            ) {
                 setShowDropdown(false);
             }
         };
-        document.addEventListener('mousedown', handleClickOutside);
+        if (showDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }, [showDropdown]);
 
     const getDisplayUnit = (unitIndex) => {
         if (unitIndex === 0) {
@@ -51,39 +72,42 @@ const UnitDropdown = ({ product, selectedUnitIndex, onUnitChange }) => {
     }
 
     return (
-        <div ref={dropdownRef} className="position-relative d-inline-block">
-            <button
-                type="button"
-                className="btn-sm p-0"
-                onClick={() => setShowDropdown(!showDropdown)}
-                style={{
-                    fontSize: 'inherit',
-                    textDecoration: 'none',
-                    color: 'inherit',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.2rem',
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    lineHeight: '1'
-                }}
-                title="Click để đổi đơn vị"
-            >
-                <span>{getDisplayUnit(selectedUnitIndex)}</span>
-                <i className="fas fa-chevron-down" style={{ fontSize: '0.6rem', opacity: 0.7 }}></i>
-            </button>
-
-            {showDropdown && (
-                <div
-                    className="position-absolute"
+        <>
+            <div className="d-inline-block">
+                <button
+                    ref={buttonRef}
+                    type="button"
+                    className="btn-sm p-0"
+                    onClick={() => setShowDropdown(!showDropdown)}
                     style={{
-                        left: 0,
-                        top: '100%',
-                        marginTop: '0.25rem',
+                        fontSize: 'inherit',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.2rem',
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        lineHeight: '1'
+                    }}
+                    title="Click để đổi đơn vị"
+                >
+                    <span>{getDisplayUnit(selectedUnitIndex)}</span>
+                    <i className="fas fa-chevron-down" style={{ fontSize: '0.6rem', opacity: 0.7 }}></i>
+                </button>
+            </div>
+
+            {showDropdown && typeof document !== 'undefined' && createPortal(
+                <div
+                    ref={dropdownRef}
+                    style={{
+                        position: 'absolute',
+                        top: dropdownPosition.top,
+                        left: dropdownPosition.left,
                         minWidth: '150px',
-                        zIndex: 9999,
+                        zIndex: 10000,
                         border: '1px solid #ddd',
                         borderRadius: '0.25rem',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
@@ -102,7 +126,8 @@ const UnitDropdown = ({ product, selectedUnitIndex, onUnitChange }) => {
                             border: 'none',
                             fontWeight: selectedUnitIndex === 0 ? 'bold' : 'normal',
                             cursor: 'pointer',
-                            fontSize: '0.9rem'
+                            fontSize: '0.9rem',
+                            width: '100%'
                         }}
                     >
                         {product.base_unit} <span className="">(Cơ bản)</span>
@@ -122,15 +147,17 @@ const UnitDropdown = ({ product, selectedUnitIndex, onUnitChange }) => {
                                 fontWeight: selectedUnitIndex === idx + 1 ? 'bold' : 'normal',
                                 cursor: 'pointer',
                                 fontSize: '0.9rem',
-                                borderTop: '1px solid #f0f0f0'
+                                borderTop: '1px solid #f0f0f0',
+                                width: '100%'
                             }}
                         >
                             {unit.unit_name}
                         </button>
                     ))}
-                </div>
+                </div>,
+                document.body
             )}
-        </div>
+        </>
     );
 };
 
@@ -820,30 +847,30 @@ const ProductList = () => {
             <main>
                 <div className="container-fluid px-4">
                     {/* Header row: Breadcrumb + Search + Actions */}
-                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom order-header-row" style={{ justifyContent: 'space-between', gap: '0.5rem' }}>
-                        {/* Left section: Breadcrumb */}
-                        <div className="d-flex align-items-center flex-shrink-0">
-                            <ol className="breadcrumb mb-0 d-none d-md-flex" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
+                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom product-header-row">
+                        {/* Left section: Breadcrumb + Search - chiếm 50% */}
+                        <div className="product-left-section d-flex align-items-center gap-3">
+                            <ol className="breadcrumb mb-0 d-none d-md-flex flex-shrink-0" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
                                 <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                                 <li className="breadcrumb-item active">Danh sách sản phẩm</li>
                             </ol>
-                        </div>
-                        
-                        {/* Search - ở giữa */}
-                        <div className="order-search-bar" style={{ margin: '0 auto' }}>
-                            <div className="input-group input-group-sm">
-                                <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
-                                    <i className="fas fa-search text-muted"></i>
-                                </span>
-                                <LiveSearch 
-                                    changeKeyword={setSearchText}
-                                    placeholder="Tìm theo mã, tên hàng"
-                                />
+                            
+                            {/* Search - rộng hơn và canh trái */}
+                            <div className="product-search-bar flex-grow-1">
+                                <div className="input-group input-group-sm">
+                                    <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
+                                        <i className="fas fa-search text-muted"></i>
+                                    </span>
+                                    <LiveSearch 
+                                        changeKeyword={setSearchText}
+                                        placeholder="Tìm theo mã, tên"
+                                    />
+                                </div>
                             </div>
                         </div>
                         
-                        {/* Actions - bên phải */}
-                        <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                        {/* Actions - bên phải - chiếm 50% */}
+                        <div className="product-right-section d-flex align-items-center gap-2 justify-content-end">
                             {/* Nút xóa khi có sản phẩm được chọn */}
                             <Permission permission={PERMISSIONS.PRODUCTS_DELETE}>
                                 {selectedRows.length > 0 && (
