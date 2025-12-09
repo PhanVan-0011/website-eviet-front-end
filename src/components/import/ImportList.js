@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import DataTables from '../common/DataTables'
 import requestApi from '../../helpers/api';
@@ -56,6 +56,9 @@ const ImportList = () => {
     const [isFilterVisible, setIsFilterVisible] = useState(true);
     const [isPulsing, setIsPulsing] = useState(false);
     const [showFilterOffcanvas, setShowFilterOffcanvas] = useState(false);
+    
+    // Ref để track itemOfPage trước đó, tránh reset ở lần đầu mount
+    const prevItemOfPageRef = useRef(itemOfPage);
 
     // Sort states
     const [sortField, setSortField] = useState('');
@@ -89,7 +92,18 @@ const ImportList = () => {
 
     // Gọi lại API khi filter thay đổi
     useEffect(() => {
-        let query = `?page=${currentPage}&limit=${itemOfPage}`;
+        // Reset về trang 1 khi thay đổi số items/trang (không phải lần đầu mount)
+        const itemOfPageChanged = prevItemOfPageRef.current !== itemOfPage && prevItemOfPageRef.current !== null;
+        let pageToUse = currentPage;
+        
+        if (itemOfPageChanged && currentPage !== 1) {
+            // Nếu itemOfPage thay đổi và đang không ở trang 1, reset về trang 1
+            pageToUse = 1;
+            setCurrentPage(1);
+        }
+        prevItemOfPageRef.current = itemOfPage;
+        
+        let query = `?page=${pageToUse}&limit=${itemOfPage}`;
         
         // Tìm kiếm keyword (mã phiếu)
         if (searchText) query += `&keyword=${searchText}`;
@@ -123,8 +137,13 @@ const ImportList = () => {
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/purchase-invoices${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
-            setInvoices(response.data.data);
-            setNumOfPages(response.data.pagination.last_page);
+            // Chỉ update invoices khi có data, không clear nếu data rỗng
+            if (response.data && response.data.data) {
+                setInvoices(response.data.data);
+            }
+            if (response.data && response.data.pagination && response.data.pagination.last_page) {
+                setNumOfPages(response.data.pagination.last_page);
+            }
         }).catch((error) => {
             dispatch(actions.controlLoading(false));
             console.log('Error:', error);

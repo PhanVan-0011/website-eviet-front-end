@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import DataTables from '../common/DataTables'
 import requestApi from '../../helpers/api';
@@ -37,6 +37,9 @@ const CategoriesList = () => {
     });
     const [isFilterVisible, setIsFilterVisible] = useState(true);
     const [isPulsing, setIsPulsing] = useState(false);
+    
+    // Ref để track itemOfPage trước đó, tránh reset ở lần đầu mount
+    const prevItemOfPageRef = useRef(itemOfPage);
 
     const updateFilter = (key, value) => {
         setFilterValues(prev => ({ ...prev, [key]: value }));
@@ -208,7 +211,18 @@ const CategoriesList = () => {
     }
 
     useEffect(() => {
-        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
+        // Reset về trang 1 khi thay đổi số items/trang (không phải lần đầu mount)
+        const itemOfPageChanged = prevItemOfPageRef.current !== itemOfPage && prevItemOfPageRef.current !== null;
+        let pageToUse = currentPage;
+        
+        if (itemOfPageChanged && currentPage !== 1) {
+            // Nếu itemOfPage thay đổi và đang không ở trang 1, reset về trang 1
+            pageToUse = 1;
+            setCurrentPage(1);
+        }
+        prevItemOfPageRef.current = itemOfPage;
+        
+        let query = `?limit=${itemOfPage}&page=${pageToUse}&keyword=${searchText}`;
         
         // Thêm filter status
         if (filterValues.status !== 'all') {
@@ -225,8 +239,13 @@ const CategoriesList = () => {
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/categories${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
-            setCategories(response.data.data);
-            setNumOfPages(response.data.pagination.last_page);
+            // Chỉ update categories khi có data, không clear nếu data rỗng
+            if (response.data && response.data.data) {
+                setCategories(response.data.data);
+            }
+            if (response.data && response.data.pagination && response.data.pagination.last_page) {
+                setNumOfPages(response.data.pagination.last_page);
+            }
         }).catch((error) => {
             dispatch(actions.controlLoading(false));
         });

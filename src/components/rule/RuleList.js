@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import DataTables from '../common/DataTables';
 import requestApi from '../../helpers/api';
@@ -22,6 +22,9 @@ const RuleList = () => {
     const [typeDelete, setTypeDelete] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [refresh, setRefresh] = useState(Date.now());
+    
+    // Ref để track itemOfPage trước đó, tránh reset ở lần đầu mount
+    const prevItemOfPageRef = useRef(itemOfPage);
 
     const columns = [
         { title: "Tên vai trò", element: row => row.display_name ? `${row.display_name} (${row.name})` : row.name, width: '20%'},
@@ -120,12 +123,28 @@ const RuleList = () => {
     };
 
     useEffect(() => {
-        const query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
+        // Reset về trang 1 khi thay đổi số items/trang (không phải lần đầu mount)
+        const itemOfPageChanged = prevItemOfPageRef.current !== itemOfPage && prevItemOfPageRef.current !== null;
+        let pageToUse = currentPage;
+        
+        if (itemOfPageChanged && currentPage !== 1) {
+            // Nếu itemOfPage thay đổi và đang không ở trang 1, reset về trang 1
+            pageToUse = 1;
+            setCurrentPage(1);
+        }
+        prevItemOfPageRef.current = itemOfPage;
+        
+        const query = `?limit=${itemOfPage}&page=${pageToUse}&keyword=${searchText}`;
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/roles${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
-            setRoles(response.data.data);
-            setNumOfPages(response.data.pagination.last_page);
+            // Chỉ update roles khi có data, không clear nếu data rỗng
+            if (response.data && response.data.data) {
+                setRoles(response.data.data);
+            }
+            if (response.data && response.data.pagination && response.data.pagination.last_page) {
+                setNumOfPages(response.data.pagination.last_page);
+            }
         }).catch((error) => {
             dispatch(actions.controlLoading(false));
             console.log("Error fetching roles: ", error);

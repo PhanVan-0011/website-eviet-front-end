@@ -13219,8 +13219,27 @@ div.col-sm-8 textarea.form-control.import-notes {
 .group-supplier-search-bar,
 .rule-search-bar {
     flex: 1 1 auto !important;
-    min-width: 200px !important;
+    min-width: 250px !important;
     max-width: 100% !important;
+}
+
+@media (min-width: 768px) {
+    .order-search-bar,
+    .user-search-bar,
+    .product-search-bar,
+    .post-search-bar,
+    .promotion-search-bar,
+    .slider-search-bar,
+    .combo-search-bar,
+    .category-search-bar,
+    .supplier-search-bar,
+    .branch-search-bar,
+    .import-search-bar,
+    .admin-search-bar,
+    .group-supplier-search-bar,
+    .rule-search-bar {
+        min-width: 250px !important;
+    }
 }
 
 @media (min-width: 992px) {
@@ -13289,20 +13308,6 @@ div.col-sm-8 textarea.form-control.import-notes {
     gap: 0.5rem !important;
 }
 
-.branch-search-bar {
-    flex: 0 1 auto !important;
-    max-width: 500px !important;
-    min-width: 300px !important;
-    margin: 0 auto !important;
-}
-
-@media (min-width: 1280px) {
-    .branch-search-bar {
-        max-width: 700px !important;
-        min-width: 400px !important;
-    }
-}
-
 .branch-action-buttons {
     display: none !important;
 }
@@ -13331,20 +13336,6 @@ div.col-sm-8 textarea.form-control.import-notes {
     align-items: center !important;
     justify-content: space-between !important;
     gap: 0.5rem !important;
-}
-
-.supplier-search-bar {
-    flex: 0 1 auto !important;
-    max-width: 500px !important;
-    min-width: 300px !important;
-    margin: 0 auto !important;
-}
-
-@media (min-width: 1280px) {
-    .supplier-search-bar {
-        max-width: 700px !important;
-        min-width: 400px !important;
-    }
 }
 
 .supplier-action-buttons {
@@ -13377,20 +13368,6 @@ div.col-sm-8 textarea.form-control.import-notes {
     gap: 0.5rem !important;
 }
 
-.group-supplier-search-bar {
-    flex: 0 1 auto !important;
-    max-width: 500px !important;
-    min-width: 300px !important;
-    margin: 0 auto !important;
-}
-
-@media (min-width: 1280px) {
-    .group-supplier-search-bar {
-        max-width: 700px !important;
-        min-width: 400px !important;
-    }
-}
-
 .group-supplier-action-buttons {
     display: none !important;
 }
@@ -13419,20 +13396,6 @@ div.col-sm-8 textarea.form-control.import-notes {
     align-items: center !important;
     justify-content: space-between !important;
     gap: 0.5rem !important;
-}
-
-.import-search-bar {
-    flex: 0 1 auto !important;
-    max-width: 500px !important;
-    min-width: 300px !important;
-    margin: 0 auto !important;
-}
-
-@media (min-width: 1280px) {
-    .import-search-bar {
-        max-width: 700px !important;
-        min-width: 400px !important;
-    }
 }
 
 .import-action-buttons {
@@ -13465,20 +13428,6 @@ div.col-sm-8 textarea.form-control.import-notes {
     gap: 0.5rem !important;
 }
 
-.user-search-bar {
-    flex: 0 1 auto !important;
-    max-width: 500px !important;
-    min-width: 300px !important;
-    margin: 0 auto !important;
-}
-
-@media (min-width: 1280px) {
-    .user-search-bar {
-        max-width: 700px !important;
-        min-width: 400px !important;
-    }
-}
-
 .user-action-buttons {
     display: none !important;
 }
@@ -13509,20 +13458,6 @@ div.col-sm-8 textarea.form-control.import-notes {
     gap: 0.5rem !important;
 }
 
-.admin-search-bar {
-    flex: 0 1 auto !important;
-    max-width: 500px !important;
-    min-width: 300px !important;
-    margin: 0 auto !important;
-}
-
-@media (min-width: 1280px) {
-    .admin-search-bar {
-        max-width: 700px !important;
-        min-width: 400px !important;
-    }
-}
-
 .admin-action-buttons {
     display: none !important;
 }
@@ -13551,20 +13486,6 @@ div.col-sm-8 textarea.form-control.import-notes {
     align-items: center !important;
     justify-content: space-between !important;
     gap: 0.5rem !important;
-}
-
-.rule-search-bar {
-    flex: 0 1 auto !important;
-    max-width: 500px !important;
-    min-width: 300px !important;
-    margin: 0 auto !important;
-}
-
-@media (min-width: 1280px) {
-    .rule-search-bar {
-        max-width: 700px !important;
-        min-width: 400px !important;
-    }
 }
 
 .rule-action-buttons {
@@ -14009,6 +13930,24 @@ div.col-sm-8 textarea.form-control.import-notes {
 
 /* ===== RESPONSIVE OPTIMIZATION FOR TABLET/IPAD (768px - 991.98px) ===== */
 @media (min-width: 768px) and (max-width: 991.98px) {
+  /* Ẩn breadcrumb trên tablet để tiết kiệm không gian */
+  .product-left-section .breadcrumb,
+  .branch-left-section .breadcrumb,
+  .supplier-left-section .breadcrumb,
+  .group-supplier-left-section .breadcrumb,
+  .import-left-section .breadcrumb,
+  .user-left-section .breadcrumb,
+  .admin-left-section .breadcrumb,
+  .rule-left-section .breadcrumb,
+  .order-left-section .breadcrumb,
+  .post-left-section .breadcrumb,
+  .promotion-left-section .breadcrumb,
+  .slider-left-section .breadcrumb,
+  .combo-left-section .breadcrumb,
+  .category-left-section .breadcrumb {
+    display: none !important;
+  }
+  
   /* Filter sidebar - width nhỏ hơn, font-size nhỏ hơn, giữ nguyên chiều cao */
   .filter-card-wrapper {
     width: 200px !important;
@@ -14077,6 +14016,55 @@ div.col-sm-8 textarea.form-control.import-notes {
   /* Đảm bảo icon và text trong button không bị wrap */
   .order-actions-cell .btn i {
     margin-right: 0.25rem !important;
+  }
+  
+  /* Tối ưu header row trên tablet - đảm bảo search bar không che button */
+  .branch-header-row,
+  .supplier-header-row,
+  .group-supplier-header-row,
+  .import-header-row,
+  .user-header-row,
+  .admin-header-row,
+  .rule-header-row {
+    flex-wrap: nowrap !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Search bar responsive trên tablet */
+  .branch-search-bar,
+  .supplier-search-bar,
+  .group-supplier-search-bar,
+  .import-search-bar,
+  .user-search-bar,
+  .admin-search-bar,
+  .rule-search-bar {
+    flex: 1 1 auto !important;
+    max-width: none !important;
+  }
+  
+  /* Right section - đảm bảo button không bị wrap */
+  .branch-right-section,
+  .supplier-right-section,
+  .group-supplier-right-section,
+  .import-right-section,
+  .user-right-section,
+  .admin-right-section,
+  .rule-right-section {
+    flex-shrink: 0 !important;
+    flex-wrap: nowrap !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Left section - cho phép search bar co lại */
+  .branch-left-section,
+  .supplier-left-section,
+  .group-supplier-left-section,
+  .import-left-section,
+  .user-left-section,
+  .admin-left-section,
+  .rule-left-section {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
   }
 }
 

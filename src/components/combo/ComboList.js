@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import DataTables from '../common/DataTables';
 import requestApi from '../../helpers/api';
@@ -42,6 +42,9 @@ const ComboList = () => {
     });
     const [isFilterVisible, setIsFilterVisible] = useState(true);
     const [isPulsing, setIsPulsing] = useState(false);
+    
+    // Ref để track itemOfPage trước đó, tránh reset ở lần đầu mount
+    const prevItemOfPageRef = useRef(itemOfPage);
 
     // Sort states
     const [sortField, setSortField] = useState('');
@@ -65,7 +68,18 @@ const ComboList = () => {
 
     // Lấy danh sách combo với filter
     useEffect(() => {
-        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${debouncedSearchText}`;
+        // Reset về trang 1 khi thay đổi số items/trang (không phải lần đầu mount)
+        const itemOfPageChanged = prevItemOfPageRef.current !== itemOfPage && prevItemOfPageRef.current !== null;
+        let pageToUse = currentPage;
+        
+        if (itemOfPageChanged && currentPage !== 1) {
+            // Nếu itemOfPage thay đổi và đang không ở trang 1, reset về trang 1
+            pageToUse = 1;
+            setCurrentPage(1);
+        }
+        prevItemOfPageRef.current = itemOfPage;
+        
+        let query = `?limit=${itemOfPage}&page=${pageToUse}&keyword=${debouncedSearchText}`;
         
         // New filter panel filters
         if (filterValues.status && filterValues.status !== 'all') {
@@ -79,8 +93,13 @@ const ComboList = () => {
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/combos${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
-            setCombos(response.data.data);
-            setNumOfPages(response.data.pagination ? response.data.pagination.last_page : 1);
+            // Chỉ update combos khi có data, không clear nếu data rỗng
+            if (response.data && response.data.data) {
+                setCombos(response.data.data);
+            }
+            if (response.data && response.data.pagination && response.data.pagination.last_page) {
+                setNumOfPages(response.data.pagination.last_page);
+            }
         }).catch(() => {
             dispatch(actions.controlLoading(false));
         });

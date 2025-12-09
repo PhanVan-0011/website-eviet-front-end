@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import DataTables from '../common/DataTables'
 import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
@@ -258,6 +258,9 @@ const ProductList = () => {
     
     // State để lưu đơn vị được chọn cho mỗi sản phẩm (key: product_id, value: unit_index)
     const [selectedUnits, setSelectedUnits] = useState({});
+    
+    // Ref để track itemOfPage trước đó, tránh reset ở lần đầu mount
+    const prevItemOfPageRef = useRef(itemOfPage);
 
     // Hàm thay đổi đơn vị cho sản phẩm
     const handleUnitChange = (productId, unitIndex) => {
@@ -311,6 +314,14 @@ const ProductList = () => {
 
     const updateFilter = (key, value) => {
         setFilterValues(prev => ({ ...prev, [key]: value }));
+        
+        // Nếu xóa filter nhóm hàng, xóa category_id khỏi URL
+        if (key === 'categories' && (!value || value.length === 0)) {
+            const newParams = new URLSearchParams(location.search);
+            newParams.delete('category_id');
+            const newSearch = newParams.toString();
+            navigate(`${location.pathname}${newSearch ? '?' + newSearch : ''}`, { replace: true });
+        }
     };
 
     const toggleFilterVisibility = () => {
@@ -343,6 +354,7 @@ const ProductList = () => {
     const [sortOrder, setSortOrder] = useState('asc');
 
     const location = useLocation();
+    const navigate = useNavigate();
     const params = new URLSearchParams(location.search);
     const categoryIdParam = params.get('category_id') || '';
     const [filterCategory, setFilterCategory] = useState(categoryIdParam);
@@ -383,17 +395,49 @@ const ProductList = () => {
         });
     }, []);
 
+    // Set filter category từ URL parameter
+    useEffect(() => {
+        if (categoryIdParam && categories.length > 0) {
+            const category = categories.find(cat => cat.id.toString() === categoryIdParam.toString());
+            if (category) {
+                // Chỉ set nếu chưa được set hoặc đang khác với giá trị hiện tại
+                const currentCategoryId = filterValues.categories && filterValues.categories.length > 0 
+                    ? filterValues.categories[0].value 
+                    : null;
+                
+                if (currentCategoryId !== category.id) {
+                    setFilterValues(prev => ({
+                        ...prev,
+                        categories: [{ value: category.id, label: category.name }]
+                    }));
+                }
+            }
+        }
+    }, [categoryIdParam, categories]);
+
     // 3. Gọi lại API khi filter thay đổi
     useEffect(() => {
+        // Reset về trang 1 khi thay đổi số items/trang (không phải lần đầu mount)
+        const itemOfPageChanged = prevItemOfPageRef.current !== itemOfPage && prevItemOfPageRef.current !== null;
+        let pageToUse = currentPage;
+        
+        if (itemOfPageChanged && currentPage !== 1) {
+            // Nếu itemOfPage thay đổi và đang không ở trang 1, reset về trang 1
+            pageToUse = 1;
+            setCurrentPage(1);
+        }
+        prevItemOfPageRef.current = itemOfPage;
+        
         // Tạo query string cho filter
-        let query = `?page=${currentPage}&limit=${itemOfPage}`;
+        let query = `?page=${pageToUse}&limit=${itemOfPage}`;
         
         // Tìm kiếm keyword
         if (searchText) query += `&keyword=${searchText}`;
         
-        // Lọc danh mục
-        if (filterValues.categories && filterValues.categories.length > 0) {
-            query += `&category_id=${filterValues.categories[0].value}`;
+        // Lọc danh mục - ưu tiên categoryIdParam từ URL
+        const categoryIdToUse = categoryIdParam || (filterValues.categories && filterValues.categories.length > 0 ? filterValues.categories[0].value : null);
+        if (categoryIdToUse) {
+            query += `&category_id=${categoryIdToUse}`;
         }
         
         // Lọc nhà cung cấp
@@ -420,8 +464,13 @@ const ProductList = () => {
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/products${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
-            setProducts(response.data.data);
-            setNumOfPages(response.data.pagination.last_page);
+            // Chỉ update products khi có data, không clear nếu data rỗng
+            if (response.data && response.data.data) {
+                setProducts(response.data.data);
+            }
+            if (response.data && response.data.pagination) {
+                setNumOfPages(response.data.pagination.last_page);
+            }
         }).catch((error) => {
             dispatch(actions.controlLoading(false));
         });
@@ -429,8 +478,9 @@ const ProductList = () => {
         // Lấy tổng tồn kho toàn bộ (không phân trang)
         let summaryQuery = '';
         if (searchText) summaryQuery += `?keyword=${searchText}`;
-        if (filterValues.categories && filterValues.categories.length > 0) {
-            summaryQuery += (summaryQuery ? '&' : '?') + `category_id=${filterValues.categories[0].value}`;
+        const categoryIdForSummary = categoryIdParam || (filterValues.categories && filterValues.categories.length > 0 ? filterValues.categories[0].value : null);
+        if (categoryIdForSummary) {
+            summaryQuery += (summaryQuery ? '&' : '?') + `category_id=${categoryIdForSummary}`;
         }
         if (filterValues.suppliers && filterValues.suppliers.length > 0) {
             summaryQuery += (summaryQuery ? '&' : '?') + `supplier_id=${filterValues.suppliers[0].value}`;
@@ -461,7 +511,8 @@ const ProductList = () => {
         itemOfPage,
         searchText,
         filterValues,
-        refresh
+        refresh,
+        categoryIdParam
     ]);
 
     // 4. Sort products (API đã filter rồi, chỉ cần sort)

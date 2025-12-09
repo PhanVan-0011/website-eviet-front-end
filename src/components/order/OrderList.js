@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import DataTables from '../common/DataTables';
 import requestApi from '../../helpers/api';
@@ -46,6 +46,9 @@ const OrderList = () => {
     const [isFilterVisible, setIsFilterVisible] = useState(true);
     const [isPulsing, setIsPulsing] = useState(false);
     const [showFilterOffcanvas, setShowFilterOffcanvas] = useState(false);
+    
+    // Ref để track itemOfPage trước đó, tránh reset ở lần đầu mount
+    const prevItemOfPageRef = useRef(itemOfPage);
 
     // Sort states
     const [sortField, setSortField] = useState('');
@@ -86,7 +89,18 @@ const OrderList = () => {
 
     // Lấy danh sách đơn hàng với filter
     useEffect(() => {
-        let query = `?limit=${itemOfPage}&page=${currentPage}&keyword=${searchText}`;
+        // Reset về trang 1 khi thay đổi số items/trang (không phải lần đầu mount)
+        const itemOfPageChanged = prevItemOfPageRef.current !== itemOfPage && prevItemOfPageRef.current !== null;
+        let pageToUse = currentPage;
+        
+        if (itemOfPageChanged && currentPage !== 1) {
+            // Nếu itemOfPage thay đổi và đang không ở trang 1, reset về trang 1
+            pageToUse = 1;
+            setCurrentPage(1);
+        }
+        prevItemOfPageRef.current = itemOfPage;
+        
+        let query = `?limit=${itemOfPage}&page=${pageToUse}&keyword=${searchText}`;
         
         // New filter panel filters
         if (filterValues.status && filterValues.status !== 'all') {
@@ -106,8 +120,13 @@ const OrderList = () => {
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/orders${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
-            setOrders(response.data.data);
-            setNumOfPages(response.data.last_page || 1);
+            // Chỉ update orders khi có data, không clear nếu data rỗng
+            if (response.data && response.data.data) {
+                setOrders(response.data.data);
+            }
+            if (response.data && response.data.last_page) {
+                setNumOfPages(response.data.last_page);
+            }
         }).catch(() => {
             dispatch(actions.controlLoading(false));
         });

@@ -654,14 +654,35 @@ const Import = () => {
             overflow: hidden;
           }
           .import-left-section {
-            flex: 0 0 60% !important;
-            max-width: 60% !important;
+            flex: 0 0 64% !important;
+            max-width: 64% !important;
+            width: 64% !important;
+            min-width: 64% !important;
             order: 1;
           }
           .import-right-section {
-            flex: 0 0 40% !important;
-            max-width: 40% !important;
+            flex: 0 0 35% !important;
+            max-width: 35% !important;
+            width: 35% !important;
+            min-width: 35% !important;
             order: 2;
+          }
+          .import-left-section table {
+            table-layout: fixed;
+            width: 100%;
+            min-width: 100%;
+          }
+          .import-left-section .card {
+            min-height: 0;
+            width: 100%;
+          }
+          .import-right-section .card {
+            min-height: 0;
+            width: 100%;
+          }
+          .import-left-section,
+          .import-right-section {
+            flex-shrink: 0;
           }
         }
         @media (max-width: 1023.98px) {
@@ -743,7 +764,7 @@ const Import = () => {
       {/* Main Content - 2 khối song song */}
       <div className="d-flex flex-column flex-lg-row gap-3 flex-grow-1 import-body" style={{ minHeight: 0, paddingBottom: '1rem' }}>
         {/* Phần bên trái - Bảng (60%) */}
-        <div className="w-100 import-left-section" style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+        <div className="import-left-section" style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
           {/* Bảng sản phẩm */}
           <div className="card shadow-sm" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
             <div className="card-header bg-light">
@@ -867,7 +888,7 @@ const Import = () => {
         </div>
 
         {/* Phần bên phải - Thông tin phiếu nhập (40%) */}
-        <div className="w-100 import-right-section" style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div className="import-right-section" style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <div className="card shadow-sm" style={{ display: 'flex', flexDirection: 'column', minHeight: 0, height: '100%' }}>
             <div className="card-header bg-light">
               <h6 className="mb-0 fw-bold">Thông tin phiếu nhập</h6>
