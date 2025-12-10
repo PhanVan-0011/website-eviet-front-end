@@ -14066,6 +14066,119 @@ div.col-sm-8 textarea.form-control.import-notes {
     min-width: 0 !important;
     flex: 1 1 auto !important;
   }
+  
+  /* Áp dụng cho màn hình từ Tablet trở lên nhưng nhỏ hơn Desktop lớn */
+  .import-left-section,
+  .import-right-section,
+  .import-edit-left-section,
+  .import-edit-right-section {
+    width: 100% !important; /* Bắt buộc rộng 100% */
+    flex: none !important;  /* Bỏ qua tính toán co giãn của flex */
+    max-width: 100% !important;
+
+  }
+
+  /* Đảm bảo container cha xếp dọc */
+  .import-body {
+    flex-direction: column !important;
+  }
+
+  /* Đảm bảo thẻ Card bên trong cũng hưởng ứng theo */
+  .import-left-section .card,
+  .import-right-section .card {
+      width: 100% !important;
+  }
+}
+
+/* ===== DESKTOP (≥ 992px) - Cho phép scroll ngang bảng khi nội dung quá rộng ===== */
+@media (min-width: 992px) {
+  /* Cho phép scroll ngang cho bảng danh sách sản phẩm nhập trên desktop */
+  .import-left-section .table-responsive,
+  .import-edit-left-section .table-responsive {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Set min-width cho bảng để đảm bảo hiển thị tốt */
+  .import-left-section .table-responsive table,
+  .import-edit-left-section .table-responsive table {
+    min-width: 100%;
+    width: auto;
+    table-layout: auto !important; /* Cho phép bảng tự điều chỉnh chiều rộng theo nội dung */
+  }
+  
+  /* Set min-width cho từng cột để đảm bảo hiển thị nội dung tốt */
+  .import-left-section .table-responsive table th:nth-child(1),
+  .import-edit-left-section .table-responsive table th:nth-child(1),
+  .import-left-section .table-responsive table td:nth-child(1),
+  .import-edit-left-section .table-responsive table td:nth-child(1) {
+    min-width: 50px; /* Cột Xóa */
+  }
+  
+  .import-left-section .table-responsive table th:nth-child(2),
+  .import-edit-left-section .table-responsive table th:nth-child(2),
+  .import-left-section .table-responsive table td:nth-child(2),
+  .import-edit-left-section .table-responsive table td:nth-child(2) {
+    min-width: 50px; /* Cột STT */
+  }
+  
+  .import-left-section .table-responsive table th:nth-child(3),
+  .import-edit-left-section .table-responsive table th:nth-child(3),
+  .import-left-section .table-responsive table td:nth-child(3),
+  .import-edit-left-section .table-responsive table td:nth-child(3) {
+    min-width: 120px; /* Cột Mã hàng */
+  }
+  
+  .import-left-section .table-responsive table th:nth-child(4),
+  .import-edit-left-section .table-responsive table th:nth-child(4),
+  .import-left-section .table-responsive table td:nth-child(4),
+  .import-edit-left-section .table-responsive table td:nth-child(4) {
+    min-width: 200px; /* Cột Tên hàng */
+  }
+  
+  .import-left-section .table-responsive table th:nth-child(5),
+  .import-edit-left-section .table-responsive table th:nth-child(5),
+  .import-left-section .table-responsive table td:nth-child(5),
+  .import-edit-left-section .table-responsive table td:nth-child(5) {
+    min-width: 100px; /* Cột ĐVT */
+  }
+  
+  .import-left-section .table-responsive table th:nth-child(6),
+  .import-edit-left-section .table-responsive table th:nth-child(6),
+  .import-left-section .table-responsive table td:nth-child(6),
+  .import-edit-left-section .table-responsive table td:nth-child(6) {
+    min-width: 100px; /* Cột Số lượng */
+  }
+  
+  .import-left-section .table-responsive table th:nth-child(7),
+  .import-edit-left-section .table-responsive table th:nth-child(7),
+  .import-left-section .table-responsive table td:nth-child(7),
+  .import-edit-left-section .table-responsive table td:nth-child(7) {
+    min-width: 130px; /* Cột Đơn giá */
+  }
+  
+  .import-left-section .table-responsive table th:nth-child(8),
+  .import-edit-left-section .table-responsive table th:nth-child(8),
+  .import-left-section .table-responsive table td:nth-child(8),
+  .import-edit-left-section .table-responsive table td:nth-child(8) {
+    min-width: 130px; /* Cột Thành tiền */
+  }
+  
+  /* Đảm bảo thead sticky hoạt động đúng khi scroll */
+  .import-left-section .table-responsive thead,
+  .import-edit-left-section .table-responsive thead {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background-color: #f8f9fa !important;
+  }
+  
+  /* Đảm bảo các th trong thead cũng có background */
+  .import-left-section .table-responsive thead th,
+  .import-edit-left-section .table-responsive thead th {
+    background-color: #f8f9fa !important;
+  }
 }
 
 /* ===== RESPONSIVE OPTIMIZATION FOR MOBILE (< 768px) ===== */

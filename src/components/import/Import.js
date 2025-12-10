@@ -764,7 +764,7 @@ const Import = () => {
       {/* Main Content - 2 khối song song */}
       <div className="d-flex flex-column flex-lg-row gap-3 flex-grow-1 import-body" style={{ minHeight: 0, paddingBottom: '1rem' }}>
         {/* Phần bên trái - Bảng (60%) */}
-        <div className="import-left-section" style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+        <div className="import-left-section w-100" style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
           {/* Bảng sản phẩm */}
           <div className="card shadow-sm" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
             <div className="card-header bg-light">
@@ -888,7 +888,7 @@ const Import = () => {
         </div>
 
         {/* Phần bên phải - Thông tin phiếu nhập (40%) */}
-        <div className="import-right-section" style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div className="import-right-section w-100" style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <div className="card shadow-sm" style={{ display: 'flex', flexDirection: 'column', minHeight: 0, height: '100%' }}>
             <div className="card-header bg-light">
               <h6 className="mb-0 fw-bold">Thông tin phiếu nhập</h6>
