@@ -122,6 +122,15 @@ const AdminList = () => {
     const [showAssignRole, setShowAssignRole] = useState(false);
     const [assignUserId, setAssignUserId] = useState(null);
     const [roles, setRoles] = useState([]);
+    // Khởi tạo selectedBranchId từ localStorage NGAY LẬP TỨC để tránh hiển thị "all" rồi mới load branch_id
+    const [selectedBranchId, setSelectedBranchId] = useState(() => {
+        const savedBranchId = localStorage.getItem('selectedBranchId');
+        // Nếu là 'null' hoặc null thì không có branch_id (Tất cả chi nhánh)
+        if (!savedBranchId || savedBranchId === 'null' || savedBranchId === '0') {
+            return null;
+        }
+        return parseInt(savedBranchId);
+    });
 
     // Filter states
     const [filterValues, setFilterValues] = useState({
@@ -175,6 +184,9 @@ const AdminList = () => {
         } else if (sortField === 'roles') {
             aValue = Array.isArray(a.roles) ? a.roles.map(r => r.display_name || r.name).join(', ') : '';
             bValue = Array.isArray(b.roles) ? b.roles.map(r => r.display_name || r.name).join(', ') : '';
+        } else if (sortField === 'branch') {
+            aValue = a.branch ? (a.branch.name || '') : '';
+            bValue = b.branch ? (b.branch.name || '') : '';
         } else {
             if (typeof aValue === 'string') aValue = aValue.toLowerCase();
             if (typeof bValue === 'string') bValue = bValue.toLowerCase();
@@ -279,7 +291,16 @@ const AdminList = () => {
             element: row => Array.isArray(row.roles) && row.roles.length > 0
                 ? row.roles.map(r => r.display_name || r.name).join(", ")
                 : <span className="text-muted">Chưa có</span>,
-            width: '14%'
+            width: '12%'
+        },
+        {
+            title: () => (
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('branch')}>
+                    Chi nhánh {renderSortIcon('branch')}
+                </span>
+            ),
+            element: row => row.branch ? row.branch.name : <span className="text-muted">Chưa có</span>,
+            width: '12%'
         },
         {
             title: () => (
@@ -374,6 +395,28 @@ const AdminList = () => {
         });
     }, []);
 
+    // Lắng nghe sự kiện thay đổi chi nhánh từ Header
+    useEffect(() => {
+        // Lắng nghe sự kiện branchChanged từ Header để cập nhật real-time
+        const handleBranchChange = (event) => {
+            const branch = event.detail;
+            if (branch && branch.id !== null) {
+                setSelectedBranchId(branch.id);
+            } else {
+                // "Tất cả chi nhánh" - không có branch_id
+                setSelectedBranchId(null);
+            }
+            // Trigger refresh để fetch lại data với branch_id mới
+            // KHÔNG clear data cũ, chỉ trigger fetch - data sẽ được update khi fetch xong
+            setRefresh(Date.now());
+        };
+
+        window.addEventListener('branchChanged', handleBranchChange);
+        return () => {
+            window.removeEventListener('branchChanged', handleBranchChange);
+        };
+    }, []);
+
     // Lấy danh sách admins với filter
     useEffect(() => {
         // Reset về trang 1 khi thay đổi số items/trang (không phải lần đầu mount)
@@ -396,6 +439,13 @@ const AdminList = () => {
         if (filterValues.role && filterValues.role !== 'all') {
             query += `&role_name=${filterValues.role}`;
         }
+        // Lọc theo chi nhánh từ Header - ĐỌC TRỰC TIẾP TỪ LOCALSTORAGE để tránh race condition
+        // Đảm bảo luôn có giá trị đúng ngay từ đầu, không phải đợi state update
+        const currentBranchId = localStorage.getItem('selectedBranchId');
+        // Chỉ thêm branch_id vào query nếu không phải "Tất cả chi nhánh" (null hoặc 'null')
+        if (currentBranchId && currentBranchId !== 'null' && currentBranchId !== '0') {
+            query += `&branch_id=${currentBranchId}`;
+        }
         if (filterValues.dateRange?.from && filterValues.dateRange?.to) {
             query += `&start_date=${moment(filterValues.dateRange.from).format('YYYY-MM-DD')}`;
             query += `&end_date=${moment(filterValues.dateRange.to).format('YYYY-MM-DD')}`;
@@ -404,9 +454,13 @@ const AdminList = () => {
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/admins${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
-            // Chỉ update users khi có data, không clear nếu data rỗng
+            // Update users khi có data mới
+            // KHÔNG clear data cũ trước khi có data mới để tránh flash "không có dữ liệu"
             if (response.data && response.data.data) {
                 setUsers(response.data.data);
+            } else {
+                // Chỉ clear khi thực sự không có data (không phải đang loading)
+                setUsers([]);
             }
             if (response.data && response.data.last_page) {
                 setNumOfPages(response.data.last_page);
@@ -414,8 +468,16 @@ const AdminList = () => {
         }).catch((error) => {
             dispatch(actions.controlLoading(false));
             console.log("Error fetching admins: ", error);
+            // Không clear data khi có lỗi để tránh flash - giữ data cũ
         });
     }, [currentPage, itemOfPage, searchText, filterValues, refresh, dispatch]);
+    
+    // Thêm useEffect riêng để trigger reload khi branch thay đổi (từ event hoặc localStorage)
+    useEffect(() => {
+        // Khi selectedBranchId thay đổi, trigger refresh để fetch lại data
+        // Nhưng vì đã đọc trực tiếp từ localStorage trong query, nên chỉ cần trigger refresh
+        setRefresh(Date.now());
+    }, [selectedBranchId]);
   return (
     <div id="layoutSidenav_content">
         <main>

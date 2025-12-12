@@ -35,15 +35,34 @@ const AdminUpdate = () => {
      const [oldAvatar, setOldAvatar] = useState(null);
      const [selectedRoles, setSelectedRoles] = useState([]);
      const roleOptions = roles.map(role => ({ value: role.id, label: role.display_name || role.name }));
+     
+     // State cho branches và branch_id
+     const [branches, setBranches] = useState([]);
+     const [selectedBranch, setSelectedBranch] = useState(null);
+     const branchOptions = branches.map(branch => ({ value: branch.id, label: branch.name }));
+     
+     // State cho giới tính và trạng thái
+     const [selectedGender, setSelectedGender] = useState(null);
+     const [selectedStatus, setSelectedStatus] = useState(null);
+     const genderOptions = [
+         { value: 'male', label: 'Nam' },
+         { value: 'female', label: 'Nữ' },
+         { value: 'other', label: 'Khác' }
+     ];
+     const statusOptions = [
+         { value: '1', label: 'Hoạt động' },
+         { value: '0', label: 'Không Hoạt động' }
+     ];
 
     useEffect(() => {
-        // Lấy dữ liệu user và roles song song
+        // Lấy dữ liệu user, roles và branches song song
         const fetchAll = async () => {
             try {
                 dispatch(actions.controlLoading(true));
-                const [userRes, rolesRes] = await Promise.all([
+                const [userRes, rolesRes, branchesRes] = await Promise.all([
                     requestApi(`api/admin/admins/${params.id}`, 'GET'),
-                    requestApi('api/admin/roles?limit=1000', 'GET', [])
+                    requestApi('api/admin/roles?limit=1000', 'GET', []),
+                    requestApi('api/admin/branches?limit=1000', 'GET', [])
                 ]);
                 // Xử lý user
                 const data = userRes.data.data;
@@ -52,7 +71,9 @@ const AdminUpdate = () => {
                 setValue('phone', data.phone);
                 setValue('email', data.email);
                 setValue('gender', data.gender);
+                setSelectedGender(data.gender);
                 setValue('is_active', data.is_active ? "1" : "0");
+                setSelectedStatus(data.is_active ? "1" : "0");
                 if (data.date_of_birth) {
                     const date = moment(data.date_of_birth, ['DD/MM/YYYY', 'YYYY-MM-DD']).toDate();
                     setDob(date);
@@ -69,8 +90,14 @@ const AdminUpdate = () => {
                     setSelectedRoles(roleIds);
                     setValue('role_ids', roleIds);
                 }
-                // Xử lý roles
+                // Xử lý branch_id
+                if (data.branch_id) {
+                    setSelectedBranch(data.branch_id);
+                    setValue('branch_id', data.branch_id);
+                }
+                // Xử lý roles và branches
                 if (rolesRes.data && rolesRes.data.data) setRoles(rolesRes.data.data);
+                if (branchesRes.data && branchesRes.data.data) setBranches(branchesRes.data.data);
                 dispatch(actions.controlLoading(false));
             } catch (error) {
                 dispatch(actions.controlLoading(false));
@@ -80,9 +107,11 @@ const AdminUpdate = () => {
         fetchAll();
     }, [params.id, setValue]);
     const handleSubmitForm = async (data) => {
-        // Validate role_ids
-        const valid = await trigger('role_ids');
-        if (!valid) return;
+        // Validate role_ids, branch_id và gender
+        const validRole = await trigger('role_ids');
+        const validBranch = await trigger('branch_id');
+        const validGender = await trigger('gender');
+        if (!validRole || !validBranch || !validGender) return;
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
@@ -249,38 +278,101 @@ const AdminUpdate = () => {
                                 <div className="row mb-3">
                                     <div className="col-md-6">
                                         <div className="mb-3">
-                                            <label htmlFor="inputGender" className="form-label fw-semibold">
+                                            <label className="form-label fw-semibold">
                                                 Giới tính <span style={{ color: 'red' }}>*</span>
                                             </label>
-                                            <select
-                                                className="form-select"
-                                                id="inputGender"
-                                                {...register('gender', { required: 'Giới tính là bắt buộc' })}
-                                                defaultValue=""
-                                            >
-                                                <option value="" disabled>Chọn giới tính</option>
-                                                <option value="male">Nam</option>
-                                                <option value="female">Nữ</option>
-                                                <option value="other">Khác</option>
-                                            </select>
+                                            <Select
+                                                options={genderOptions}
+                                                value={genderOptions.find(opt => opt.value === selectedGender)}
+                                                onChange={opt => {
+                                                    const value = opt ? opt.value : null;
+                                                    setSelectedGender(value);
+                                                    setValue('gender', value, { shouldValidate: true });
+                                                }}
+                                                placeholder="Chọn giới tính..."
+                                                classNamePrefix="react-select"
+                                                styles={{
+                                                    ...selectStyles,
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                                                }}
+                                                menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                menuPosition="fixed"
+                                                onBlur={() => trigger('gender')}
+                                            />
+                                            <input
+                                                type="hidden"
+                                                {...register('gender', {
+                                                    required: 'Giới tính là bắt buộc!'
+                                                })}
+                                            />
                                             {errors.gender && <div className="text-danger mt-1">{errors.gender.message}</div>}
                                         </div>
                                     </div>
                                     <div className="col-md-6">
                                         <div className="mb-3">
-                                            <label htmlFor="is_active" className="form-label fw-semibold">
+                                            <label className="form-label fw-semibold">
                                                 Trạng thái
                                             </label>
-                                            <select className="form-select" id="is_active" {...register('is_active', { required: true })}>
-                                                <option value="1">Hoạt động</option>
-                                                <option value="0">Không Hoạt động</option>
-                                            </select>
+                                            <Select
+                                                options={statusOptions}
+                                                value={statusOptions.find(opt => opt.value === selectedStatus)}
+                                                onChange={opt => {
+                                                    const value = opt ? opt.value : '1';
+                                                    setSelectedStatus(value);
+                                                    setValue('is_active', value, { shouldValidate: true });
+                                                }}
+                                                placeholder="Chọn trạng thái..."
+                                                classNamePrefix="react-select"
+                                                styles={{
+                                                    ...selectStyles,
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                                                }}
+                                                menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                menuPosition="fixed"
+                                            />
+                                            <input
+                                                type="hidden"
+                                                {...register('is_active', { required: true })}
+                                            />
                                         </div>
                                     </div>
                                 </div>
-                                {/* Vai trò - hiển thị trên màn hình 768px-1024px */}
-                                <div className="row mb-3 d-md-block d-lg-none">
-                                    <div className="col-12">
+
+                                {/* Chi nhánh và Vai trò - cùng hàng */}
+                                <div className="row mb-3">
+                                    <div className="col-md-6">
+                                        <div className="mb-3">
+                                            <label className="form-label fw-semibold">
+                                                Chi nhánh <span style={{ color: 'red' }}>*</span>
+                                            </label>
+                                            <Select
+                                                options={branchOptions}
+                                                value={branchOptions.find(opt => opt.value === selectedBranch)}
+                                                onChange={opt => {
+                                                    const value = opt ? opt.value : null;
+                                                    setSelectedBranch(value);
+                                                    setValue('branch_id', value, { shouldValidate: true });
+                                                }}
+                                                placeholder="Chọn chi nhánh..."
+                                                classNamePrefix="react-select"
+                                                styles={{
+                                                    ...selectStyles,
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                                                }}
+                                                menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                menuPosition="fixed"
+                                                onBlur={() => trigger('branch_id')}
+                                            />
+                                            <input
+                                                type="hidden"
+                                                {...register('branch_id', {
+                                                    required: 'Chi nhánh là bắt buộc!'
+                                                })}
+                                            />
+                                            {errors.branch_id && <div className="text-danger mt-1">{errors.branch_id.message}</div>}
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6">
                                         <div className="mb-3">
                                             <label className="form-label fw-semibold">
                                                 Vai trò <span style={{ color: 'red' }}>*</span>
@@ -310,11 +402,11 @@ const AdminUpdate = () => {
                                                     validate: value => (value && value.length > 0) || 'Phải chọn ít nhất 1 vai trò!'
                                                 })}
                                             />
-                                            {errors.role_ids && <div className="text-danger">{errors.role_ids.message}</div>}
+                                            {errors.role_ids && <div className="text-danger mt-1">{errors.role_ids.message}</div>}
                                         </div>
                                     </div>
                                 </div>
-                                {/* Ảnh đại diện và Ngày sinh - cùng hàng trên 768px-1024px */}
+                                {/* Ảnh đại diện và Ngày sinh */}
                                 <div className="row mb-3">
                                     <div className="col-12 col-md-6">
                                         <div className="mb-3">
@@ -399,42 +491,6 @@ const AdminUpdate = () => {
                                                     isClearable
                                                 />
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* Vai trò - chỉ hiển thị trên màn hình >= 1024px */}
-                                <div className="row mb-3 d-none d-lg-block">
-                                    <div className="col-12">
-                                        <div className="mb-3">
-                                            <label className="form-label fw-semibold">
-                                                Vai trò <span style={{ color: 'red' }}>*</span>
-                                            </label>
-                                            <Select
-                                                options={roleOptions}
-                                                isMulti
-                                                value={roleOptions.filter(opt => selectedRoles.includes(String(opt.value)) || selectedRoles.includes(opt.value))}
-                                                onChange={opts => {
-                                                    const values = opts ? opts.map(opt => opt.value) : [];
-                                                    setSelectedRoles(values);
-                                                    setValue('role_ids', values, { shouldValidate: true });
-                                                }}
-                                                placeholder="Tìm kiếm & chọn vai trò..."
-                                                classNamePrefix="react-select"
-                                                styles={{
-                                                    ...selectStyles,
-                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
-                                                }}
-                                                menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
-                                                menuPosition="fixed"
-                                                onBlur={() => trigger('role_ids')}
-                                            />
-                                            <input
-                                                type="hidden"
-                                                {...register('role_ids', {
-                                                    validate: value => (value && value.length > 0) || 'Phải chọn ít nhất 1 vai trò!'
-                                                })}
-                                            />
-                                            {errors.role_ids && <div className="text-danger">{errors.role_ids.message}</div>}
                                         </div>
                                     </div>
                                 </div>

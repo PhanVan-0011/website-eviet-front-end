@@ -134,6 +134,9 @@ const AdminDetail = () => {
                                         <span key={r.id} className="badge bg-info text-dark me-1">{r.display_name || r.name}</span>
                                     )) : <span className="text-muted">Chưa có</span>}
                                 </div>
+                                <div className="col-md-6 mb-2">
+                                    <strong>Chi nhánh:</strong> {user.branch ? user.branch.name : <span className="text-muted">Chưa có</span>}
+                                </div>
                             </div>
                         </div>
                     </div>
