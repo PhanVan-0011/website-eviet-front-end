@@ -138,13 +138,13 @@ const ComboDetail = () => {
 
                     <div className="card border">
                         {/* Tab Navigation */}
-                        <ul className="nav nav-tabs flex-wrap" id="comboDetailTabs" role="tablist" style={{borderBottom: '2px solid #dee2e6'}}>
+                        <ul className="nav nav-tabs flex-wrap" id="comboDetailTabs" role="tablist" style={{ borderBottom: '2px solid #dee2e6' }}>
                             <li className="nav-item" role="presentation">
                                 <button
                                     className={`nav-link detail-tab-nav ${activeTab === 'thong-tin' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('thong-tin')}
-                                    style={{ 
+                                    style={{
                                         color: activeTab === 'thong-tin' ? '#007bff' : '#6c757d',
                                         borderBottomColor: activeTab === 'thong-tin' ? '#007bff' : 'transparent',
                                         borderBottomWidth: activeTab === 'thong-tin' ? '2px' : '1px',
@@ -163,7 +163,7 @@ const ComboDetail = () => {
                                     className={`nav-link detail-tab-nav ${activeTab === 'mo-ta' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('mo-ta')}
-                                    style={{ 
+                                    style={{
                                         color: activeTab === 'mo-ta' ? '#007bff' : '#6c757d',
                                         borderBottomColor: activeTab === 'mo-ta' ? '#007bff' : 'transparent',
                                         borderBottomWidth: activeTab === 'mo-ta' ? '2px' : '1px',
@@ -183,7 +183,7 @@ const ComboDetail = () => {
                                     className={`nav-link detail-tab-nav ${activeTab === 'chi-nhanh' ? 'active' : ''}`}
                                     type="button"
                                     onClick={() => setActiveTab('chi-nhanh')}
-                                    style={{ 
+                                    style={{
                                         color: activeTab === 'chi-nhanh' ? '#007bff' : '#6c757d',
                                         borderBottomColor: activeTab === 'chi-nhanh' ? '#007bff' : 'transparent',
                                         borderBottomWidth: activeTab === 'chi-nhanh' ? '2px' : '1px',
@@ -205,82 +205,82 @@ const ComboDetail = () => {
                             {activeTab === 'thong-tin' && (
                                 <div>
                                     {/* Header: Hình ảnh + Thông tin combo */}
-                                    <div className="d-flex flex-column flex-md-row detail-info-grid" style={{marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #dee2e6'}}>
+                                    <div className="d-flex flex-column flex-md-row detail-info-grid" style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #dee2e6' }}>
                                         {/* Cột trái: Hình ảnh */}
-                                        <div className="w-100 w-md-auto mb-3 mb-md-0" style={{flex: '0 0 35%'}}>
-                                            <div style={{display: 'flex', gap: '0.75rem'}}>
+                                        <div className="w-100 w-md-auto mb-3 mb-md-0" style={{ flex: '0 0 35%' }}>
+                                            <div style={{ display: 'flex', gap: '0.75rem' }}>
                                                 {/* Hình ảnh chính */}
-                                                <div style={{flex: 1}}>
+                                                <div style={{ flex: 1 }}>
                                                     {combo.image_urls && combo.image_urls.length > 0 ? (
-                                                    (() => {
+                                                        (() => {
                                                             const featuredImg = combo.image_urls.find(img => img.is_featured === 1);
                                                             const displayImg = featuredImg || combo.image_urls[0];
-                                                        return (
-                                                            <div style={{position: 'relative'}}>
-                                                                <img
-                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + (displayImg.main_url || displayImg.thumb_url)}
-                                                                    alt={combo.name}
-                                                                    className="img-thumbnail w-100"
-                                                                    style={{
-                                                                        objectFit: 'fill',
-                                                                        cursor: 'pointer',
-                                                                        borderRadius: 8,
-                                                                        background: '#f8f9fa',
-                                                                        border: '1px solid #dee2e6',
-                                                                        height: 'auto',
-                                                                        maxHeight: '300px',
-                                                                        display: 'block',
-                                                                        objectFit: 'contain'
-                                                                    }}
-                                                                    title="Bấm để xem lớn"
-                                                                    onClick={() => handleImgClick(displayImg)}
-                                                                />
+                                                            return (
+                                                                <div style={{ position: 'relative' }}>
+                                                                    <img
+                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + (displayImg.main_url || displayImg.thumb_url)}
+                                                                        alt={combo.name}
+                                                                        className="img-thumbnail w-100"
+                                                                        style={{
+                                                                            objectFit: 'fill',
+                                                                            cursor: 'pointer',
+                                                                            borderRadius: 8,
+                                                                            background: '#f8f9fa',
+                                                                            border: '1px solid #dee2e6',
+                                                                            height: 'auto',
+                                                                            maxHeight: '300px',
+                                                                            display: 'block',
+                                                                            objectFit: 'contain'
+                                                                        }}
+                                                                        title="Bấm để xem lớn"
+                                                                        onClick={() => handleImgClick(displayImg)}
+                                                                    />
 
-                                                                {/* Modal xem ảnh full */}
-                                                                {showModal && modalImg && (
-                                                                    <Modal show={showModal} onHide={handleCloseModal} centered>
-                                                                        <Modal.Body style={{ position: 'relative', padding: 0, background: 'transparent', border: 0 }}>
-                                                                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
-                                                                                <img
-                                                                                    src={process.env.REACT_APP_API_URL + 'api/images/' + (modalImg.main_url || modalImg.thumb_url)}
-                                                                                    alt={combo.name + '-modal-full'}
-                                                                                    style={{
-                                                                                        maxWidth: '80vw',
-                                                                                        maxHeight: '80vh',
-                                                                                        objectFit: 'contain',
-                                                                                        display: 'block',
-                                                                                        margin: '0 auto',
-                                                                                        borderRadius: 8
-                                                                                    }}
-                                                                                />
-                                                                            </div>
-                                                                        </Modal.Body>
-                                                                    </Modal>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })()
-                                                ) : (
-                                                    <div
-                                                        style={{
-                                                            width: '100%',
-                                                            height: 300,
-                                                            borderRadius: 8,
-                                                            background: '#f8f9fa',
-                                                            border: '1px solid #dee2e6',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}
-                                                    >
-                                                        <i className="fas fa-image" style={{ fontSize: 60, color: '#adb5bd' }}></i>
-                                                    </div>
-                                                )}
+                                                                    {/* Modal xem ảnh full */}
+                                                                    {showModal && modalImg && (
+                                                                        <Modal show={showModal} onHide={handleCloseModal} centered>
+                                                                            <Modal.Body style={{ position: 'relative', padding: 0, background: 'transparent', border: 0 }}>
+                                                                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+                                                                                    <img
+                                                                                        src={process.env.REACT_APP_API_URL + 'api/images/' + (modalImg.main_url || modalImg.thumb_url)}
+                                                                                        alt={combo.name + '-modal-full'}
+                                                                                        style={{
+                                                                                            maxWidth: '80vw',
+                                                                                            maxHeight: '80vh',
+                                                                                            objectFit: 'contain',
+                                                                                            display: 'block',
+                                                                                            margin: '0 auto',
+                                                                                            borderRadius: 8
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            </Modal.Body>
+                                                                        </Modal>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })()
+                                                    ) : (
+                                                        <div
+                                                            style={{
+                                                                width: '100%',
+                                                                height: 300,
+                                                                borderRadius: 8,
+                                                                background: '#f8f9fa',
+                                                                border: '1px solid #dee2e6',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}
+                                                        >
+                                                            <i className="fas fa-image" style={{ fontSize: 60, color: '#adb5bd' }}></i>
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 {/* Ảnh phụ nhỏ bên phải */}
                                                 {combo.image_urls && combo.image_urls.filter(img => img.is_featured !== 1).length > 0 && (
-                                                    <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem', width: 'auto'}}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: 'auto' }}>
                                                         {combo.image_urls.filter(img => img.is_featured !== 1).map((img, idx) => (
                                                             <img
                                                                 key={img.id}
@@ -306,14 +306,14 @@ const ComboDetail = () => {
                                         </div>
 
                                         {/* Cột phải: Thông tin combo */}
-                                        <div className="w-100 w-md-auto" style={{flex: '0 0 65%'}}>
+                                        <div className="w-100 w-md-auto" style={{ flex: '0 0 65%' }}>
                                             {/* Tên combo */}
-                                            <h3 className="h4 h-md-3" style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
+                                            <h3 className="h4 h-md-3" style={{ marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000' }}>
                                                 {combo.name}
                                             </h3>
 
                                             {/* Badges */}
-                                            <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem'}}>
+                                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                                                 {combo.is_active === true ? (
                                                     <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Đang áp dụng</span>
                                                 ) : (
@@ -363,7 +363,15 @@ const ComboDetail = () => {
                                                                 <td>
                                                                     {item.image_url ? (
                                                                         <img
-                                                                            src={item.image_url.startsWith('http') ? item.image_url : urlImage + item.image_url}
+                                                                        src={
+                                                                            item.image_url.startsWith('http')
+                                                                                ? item.image_url
+                                                                                : urlImage +
+                                                                                  item.image_url.replace(
+                                                                                      /\/([^/]+)$/,
+                                                                                      '/thumb/$1'
+                                                                                  )
+                                                                        }
                                                                             alt={item.name}
                                                                             className="img-thumbnail"
                                                                             style={{
@@ -406,15 +414,15 @@ const ComboDetail = () => {
                                     {combo.items && combo.items.length > 0 ? (
                                         <div className="table-responsive">
                                             <table className="table table-bordered">
-                                                    <thead>
-                                                        <tr>
-                                                            <th style={{ width: '5%' }}>#</th>
-                                                            <th style={{ width: '10%' }}>Ảnh</th>
-                                                            <th style={{ width: '50%' }}>Sản phẩm</th>
-                                                            <th className="text-center" style={{ width: '20%' }}>Giá</th>
-                                                            <th className="text-center" style={{ width: '15%' }}>SL</th>
-                                                        </tr>
-                                                    </thead>
+                                                <thead>
+                                                    <tr>
+                                                        <th style={{ width: '5%' }}>#</th>
+                                                        <th style={{ width: '10%' }}>Ảnh</th>
+                                                        <th style={{ width: '50%' }}>Sản phẩm</th>
+                                                        <th className="text-center" style={{ width: '20%' }}>Giá</th>
+                                                        <th className="text-center" style={{ width: '15%' }}>SL</th>
+                                                    </tr>
+                                                </thead>
                                                 <tbody>
                                                     {combo.items.map((item, idx) => (
                                                         <tr key={idx}>
@@ -422,7 +430,15 @@ const ComboDetail = () => {
                                                             <td>
                                                                 {item.image_url ? (
                                                                     <img
-                                                                        src={item.image_url.startsWith('http') ? item.image_url : urlImage + item.image_url}
+                                                                        src={
+                                                                            item.image_url.startsWith('http')
+                                                                                ? item.image_url
+                                                                                : urlImage +
+                                                                                item.image_url.replace(
+                                                                                    /\/([^/]+)$/,
+                                                                                    '/thumb/$1'
+                                                                                )
+                                                                        }
                                                                         alt={item.name}
                                                                         className="img-thumbnail"
                                                                         style={{
@@ -466,30 +482,30 @@ const ComboDetail = () => {
                             {/* Tab Mô tả */}
                             {activeTab === 'mo-ta' && (
                                 <div className="tab-pane fade show active">
-                                    <div style={{ 
-                                        height: '400px', 
+                                    <div style={{
+                                        height: '400px',
                                         overflowY: 'auto',
                                         paddingRight: '10px',
                                         border: '1px solid #dee2e6',
                                         borderRadius: '6px',
                                         padding: '15px'
                                     }}>
-                                    {combo.description
-                                        ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(combo.description)) }} />
-                                        : <div className="text-center text-muted py-5">
-                                            <i className="fas fa-file-alt fa-3x mb-3 opacity-50"></i>
-                                            <p className="mb-0">Chưa có mô tả combo</p>
-                                        </div>
-                                    }
+                                        {combo.description
+                                            ? <div dangerouslySetInnerHTML={{ __html: cleanHtml(oembedToIframe(combo.description)) }} />
+                                            : <div className="text-center text-muted py-5">
+                                                <i className="fas fa-file-alt fa-3x mb-3 opacity-50"></i>
+                                                <p className="mb-0">Chưa có mô tả combo</p>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
-                            </div>
                             )}
 
                             {/* Tab Chi nhánh áp dụng */}
                             {activeTab === 'chi-nhanh' && (
                                 <div className="tab-pane fade show active">
-                                    <div style={{ 
-                                        height: '400px', 
+                                    <div style={{
+                                        height: '400px',
                                         overflowY: 'auto',
                                         paddingRight: '10px',
                                         border: '1px solid #dee2e6',
