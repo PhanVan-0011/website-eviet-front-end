@@ -372,22 +372,28 @@ const ImportList = () => {
             element: row => (
                 <div className="d-flex align-items-center gap-1">
                     {/* Xem chi tiết - luôn hiển thị */}
-                    <Link className="btn btn-info btn-sm" to={`/import/detail/${row.id}`} title="Xem chi tiết">
-                        <i className="fas fa-eye"></i>
-                    </Link>
+                    <Permission permission={PERMISSIONS.PURCHASE_INVOICES_VIEW}>
+                        <Link className="btn btn-info btn-sm" to={`/import/detail/${row.id}`} title="Xem chi tiết">
+                            <i className="fas fa-eye"></i>
+                        </Link>
+                    </Permission>
                     
                     {/* Sửa - hiển thị cả draft và received */}
                     {(row?.status === 'draft' || row?.status === 'received') && (
-                        <Link className="btn btn-primary btn-sm" to={`/import/edit/${row.id}`} title="Chỉnh sửa">
-                            <i className="fas fa-edit"></i>
-                        </Link>
+                        <Permission permission={PERMISSIONS.PURCHASE_INVOICES_UPDATE}>
+                            <Link className="btn btn-primary btn-sm" to={`/import/edit/${row.id}`} title="Chỉnh sửa">
+                                <i className="fas fa-edit"></i>
+                            </Link>
+                        </Permission>
                     )}
                     
                     {/* Xóa - hiển thị chỉ draft */}
                     {row?.status === 'draft' && (
-                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)} title="Xóa">
-                            <i className="fas fa-trash"></i>
-                        </button>
+                        <Permission permission={PERMISSIONS.PURCHASE_INVOICES_DELETE}>
+                            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)} title="Xóa">
+                                <i className="fas fa-trash"></i>
+                            </button>
+                        </Permission>
                     )}
 
                     {/* Hủy phiếu nếu đã nhập hàng */}
@@ -554,17 +560,21 @@ const ImportList = () => {
                                 const invoice = invoices.find(inv => String(inv.id) === String(id));
                                 return invoice && invoice.status === 'draft';
                             }) && (
-                                <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
-                                    <i className="fas fa-trash me-1"></i>
-                                    <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
-                                </button>
+                                <Permission permission={PERMISSIONS.PURCHASE_INVOICES_DELETE}>
+                                    <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
+                                        <i className="fas fa-trash me-1"></i>
+                                        <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
+                                    </button>
+                                </Permission>
                             )}
                             
                             {/* Nút tạo mới */}
-                            <Link className="btn btn-primary btn-sm" to="/import/add">
-                                <i className="fas fa-plus me-1"></i>
-                                <span className="d-none d-sm-inline">Tạo mới</span>
-                            </Link>
+                            <Permission permission={PERMISSIONS.PURCHASE_INVOICES_CREATE}>
+                                <Link className="btn btn-primary btn-sm" to="/import/add">
+                                    <i className="fas fa-plus me-1"></i>
+                                    <span className="d-none d-sm-inline">Tạo mới</span>
+                                </Link>
+                            </Permission>
                             
                             {/* Các button riêng lẻ - hiện trên >= 1280px */}
                             <div className="import-action-buttons">

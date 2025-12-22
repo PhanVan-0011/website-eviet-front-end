@@ -7,6 +7,8 @@ import * as actions from '../../redux/actions/index';
 import { toast } from 'react-toastify';
 import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig , toastSuccessConfig} from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 import { cleanHtml, oembedToIframe } from '../../helpers/formatData';
 import { formatVNDWithUnit } from '../../helpers/formatMoney';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
@@ -627,12 +629,16 @@ const ProductDetail = () => {
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
                                 <i className="fas fa-arrow-left me-1"></i><span className="d-none d-sm-inline">Quay lại</span>
                             </button>
-                            <Link className="btn btn-primary btn-sm" to={`/product/${product.id}`}>
-                                <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa sản phẩm</span>
-                            </Link>
-                            <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
-                                <i className="fas fa-trash-alt me-1"></i><span className="d-none d-sm-inline">Xóa sản phẩm</span>
-                            </button>
+                            <Permission permission={PERMISSIONS.PRODUCTS_UPDATE}>
+                                <Link className="btn btn-primary btn-sm" to={`/product/${product.id}`}>
+                                    <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa sản phẩm</span>
+                                </Link>
+                            </Permission>
+                            <Permission permission={PERMISSIONS.PRODUCTS_DELETE}>
+                                <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
+                                    <i className="fas fa-trash-alt me-1"></i><span className="d-none d-sm-inline">Xóa sản phẩm</span>
+                                </button>
+                            </Permission>
                         </div>
                     </div>
                 </div>

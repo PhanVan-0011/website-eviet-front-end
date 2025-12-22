@@ -7,6 +7,8 @@ import { toast } from 'react-toastify';
 import moment from 'moment';
 import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 import { cleanHtml,oembedToIframe} from '../../helpers/formatData';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 const PromotionDetail = () => {
@@ -325,12 +327,16 @@ const PromotionDetail = () => {
                     {/* Button thao tác ra ngoài card, căn giữa, margin-top */}
                     <div className="row mb-3 mb-md-4">
                         <div className="col-12 d-flex justify-content-center detail-action-buttons">
-                            <Link className="btn btn-primary btn-sm" to={`/promotion/${promotion.id}`}>
-                                <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa khuyến mãi</span>
-                            </Link>
-                            <button className="btn btn-danger btn-sm" onClick={handleDelete}>
-                                <i className="fas fa-trash-alt me-1"></i><span className="d-none d-sm-inline">Xóa khuyến mãi</span>
-                            </button>
+                            <Permission permission={PERMISSIONS.PROMOTIONS_UPDATE}>
+                                <Link className="btn btn-primary btn-sm" to={`/promotion/${promotion.id}`}>
+                                    <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa khuyến mãi</span>
+                                </Link>
+                            </Permission>
+                            <Permission permission={PERMISSIONS.PROMOTIONS_DELETE}>
+                                <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+                                    <i className="fas fa-trash-alt me-1"></i><span className="d-none d-sm-inline">Xóa khuyến mãi</span>
+                                </button>
+                            </Permission>
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
                                 <i className="fas fa-arrow-left me-1"></i><span className="d-none d-sm-inline">Quay lại</span>
                             </button>

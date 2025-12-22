@@ -6,6 +6,8 @@ import * as actions from '../../redux/actions/index';
 import { toast } from 'react-toastify';
 import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 import moment from 'moment';
 
 // Component hiển thị từng field thông tin
@@ -368,9 +370,11 @@ const ImportDetail = () => {
                             </button>
                             {invoice.status === 'draft' && (
                                 <>
-                                    <Link className="btn btn-primary btn-sm" to={`/import/edit/${invoice.id}`}>
-                                        <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa phiếu nhập</span>
-                                    </Link>
+                                    <Permission permission={PERMISSIONS.PURCHASE_INVOICES_UPDATE}>
+                                        <Link className="btn btn-primary btn-sm" to={`/import/edit/${invoice.id}`}>
+                                            <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa phiếu nhập</span>
+                                        </Link>
+                                    </Permission>
                                 </>
                             )}
                             {invoice.status === 'received' && (

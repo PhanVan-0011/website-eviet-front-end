@@ -8,6 +8,8 @@ import { Modal, Button, Offcanvas, Dropdown } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 import moment from 'moment';
 import {
     FilterSelectSingle,
@@ -181,12 +183,27 @@ const AdminList = () => {
         } else if (sortField === 'updated_at') {
             aValue = new Date(a.updated_at);
             bValue = new Date(b.updated_at);
-        } else if (sortField === 'roles') {
-            aValue = Array.isArray(a.roles) ? a.roles.map(r => r.display_name || r.name).join(', ') : '';
-            bValue = Array.isArray(b.roles) ? b.roles.map(r => r.display_name || r.name).join(', ') : '';
+        } else if (sortField === 'role') {
+            aValue = a.role ? (a.role.display_name || a.role.name || '') : '';
+            bValue = b.role ? (b.role.display_name || b.role.name || '') : '';
         } else if (sortField === 'branch') {
-            aValue = a.branch ? (a.branch.name || '') : '';
-            bValue = b.branch ? (b.branch.name || '') : '';
+            // Xử lý trường hợp có nhiều chi nhánh
+            if (Array.isArray(a.branches) && a.branches.length > 0) {
+                aValue = a.branches.map(b => b.name || (typeof b === 'string' ? b : '')).filter(Boolean).join(", ");
+            } else if (a.branch) {
+                aValue = typeof a.branch === 'string' ? a.branch : (a.branch.name || '');
+            } else {
+                // Nếu không có branch hay branches, dùng "Tất cả chi nhánh" để sort
+                aValue = 'Tất cả chi nhánh';
+            }
+            if (Array.isArray(b.branches) && b.branches.length > 0) {
+                bValue = b.branches.map(b => b.name || (typeof b === 'string' ? b : '')).filter(Boolean).join(", ");
+            } else if (b.branch) {
+                bValue = typeof b.branch === 'string' ? b.branch : (b.branch.name || '');
+            } else {
+                // Nếu không có branch hay branches, dùng "Tất cả chi nhánh" để sort
+                bValue = 'Tất cả chi nhánh';
+            }
         } else {
             if (typeof aValue === 'string') aValue = aValue.toLowerCase();
             if (typeof bValue === 'string') bValue = bValue.toLowerCase();
@@ -284,13 +301,16 @@ const AdminList = () => {
         },
         {
             title: () => (
-                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('roles')}>
-                    Vai trò {renderSortIcon('roles')}
+                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('role')}>
+                    Vai trò {renderSortIcon('role')}
                 </span>
             ),
-            element: row => Array.isArray(row.roles) && row.roles.length > 0
-                ? row.roles.map(r => r.display_name || r.name).join(", ")
-                : <span className="text-muted">Chưa có</span>,
+            element: row => {
+                if (row.role) {
+                    return row.role.display_name || row.role.name || '';
+                }
+                return <span className="text-muted">Chưa có</span>;
+            },
             width: '12%'
         },
         {
@@ -299,7 +319,18 @@ const AdminList = () => {
                     Chi nhánh {renderSortIcon('branch')}
                 </span>
             ),
-            element: row => row.branch ? row.branch.name : <span className="text-muted">Chưa có</span>,
+            element: row => {
+                // Xử lý trường hợp có nhiều chi nhánh (branches là array)
+                if (Array.isArray(row.branches) && row.branches.length > 0) {
+                    return row.branches.map(b => b.name || (typeof b === 'string' ? b : '')).filter(Boolean).join(", ");
+                }
+                // Xử lý trường hợp có 1 chi nhánh (branch là object)
+                if (row.branch) {
+                    return typeof row.branch === 'string' ? row.branch : (row.branch.name || '');
+                }
+                // Nếu không có branch hay branches, hiển thị "Tất cả chi nhánh"
+                return <span className="text-primary fw-semibold">Tất cả chi nhánh</span>;
+            },
             width: '12%'
         },
         {
@@ -318,15 +349,21 @@ const AdminList = () => {
             title: "Hành động", 
             element: row => (
                 <div className="d-flex align-items-center">
-                    <Link className="btn btn-info btn-sm me-1" to={`/admin/detail/${row.id}`} title="Xem chi tiết">
-                        <i className="fas fa-eye"></i>
-                    </Link>
-                    <Link className="btn btn-primary btn-sm me-1" to={`/admin/${row.id}`} title="Chỉnh sửa">
-                        <i className="fas fa-edit"></i>
-                    </Link>
-                    <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)} title="Xóa">
-                        <i className="fas fa-trash"></i>
-                    </button>
+                    <Permission permission={PERMISSIONS.ADMIN_USERS_VIEW}>
+                        <Link className="btn btn-info btn-sm me-1" to={`/admin/detail/${row.id}`} title="Xem chi tiết">
+                            <i className="fas fa-eye"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.ADMIN_USERS_UPDATE}>
+                        <Link className="btn btn-primary btn-sm me-1" to={`/admin/${row.id}`} title="Chỉnh sửa">
+                            <i className="fas fa-edit"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.ADMIN_USERS_DELETE}>
+                        <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)} title="Xóa">
+                            <i className="fas fa-trash"></i>
+                        </button>
+                    </Permission>
                 </div>
             ), 
             width: '13%'
@@ -520,17 +557,21 @@ const AdminList = () => {
                     <div className="admin-right-section d-flex align-items-center gap-2 justify-content-end">
                         {/* Nút xóa khi có nhân viên được chọn */}
                         {selectedRows.length > 0 && (
-                            <button className="btn btn-danger btn-sm" onClick={multiDelete}>
-                                <i className="fas fa-trash me-1"></i>
-                                <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
-                            </button>
+                            <Permission permission={PERMISSIONS.ADMIN_USERS_DELETE}>
+                                <button className="btn btn-danger btn-sm" onClick={multiDelete}>
+                                    <i className="fas fa-trash me-1"></i>
+                                    <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
+                                </button>
+                            </Permission>
                         )}
                         
                         {/* Nút tạo mới */}
-                        <Link className="btn btn-primary btn-sm" to="/admin/add">
-                            <i className="fas fa-plus me-1"></i>
-                            <span className="d-none d-sm-inline">Tạo mới</span>
-                        </Link>
+                        <Permission permission={PERMISSIONS.ADMIN_USERS_CREATE}>
+                            <Link className="btn btn-primary btn-sm" to="/admin/add">
+                                <i className="fas fa-plus me-1"></i>
+                                <span className="d-none d-sm-inline">Tạo mới</span>
+                            </Link>
+                        </Permission>
                         
                         {/* Các button riêng lẻ - hiện trên >= 1280px */}
                         <div className="admin-action-buttons">

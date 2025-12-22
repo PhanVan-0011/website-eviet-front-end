@@ -4,6 +4,8 @@ import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import requestApi from '../../helpers/api';
 import { formatDate } from '../../tools/formatData';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 import ImageList from '../common/ImageList';
 
 const CategoryDetail = () => {
@@ -194,12 +196,14 @@ const CategoryDetail = () => {
                                     >
                                         <i className="fas fa-arrow-left me-1"></i> Quay lại
                                     </Link>
-                                    <Link 
-                                        to={`/category/${category.id}/edit`} 
-                                        className="btn btn-primary"
-                                    >
-                                        <i className="fas fa-edit me-1"></i> Chỉnh sửa
-                                    </Link>
+                                    <Permission permission={PERMISSIONS.CATEGORIES_UPDATE}>
+                                        <Link 
+                                            to={`/category/${category.id}/edit`} 
+                                            className="btn btn-primary"
+                                        >
+                                            <i className="fas fa-edit me-1"></i> Chỉnh sửa
+                                        </Link>
+                                    </Permission>
                                 </div>
                             </div>
                         </div>

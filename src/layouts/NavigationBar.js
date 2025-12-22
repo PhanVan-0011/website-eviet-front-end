@@ -17,23 +17,23 @@ const NavigationBar = () => {
   const mainPermissions = [PERMISSIONS.DASHBOARD_VIEW];
   const salePermissions = [PERMISSIONS.ORDERS_VIEW, PERMISSIONS.PROMOTIONS_VIEW];
   const contentPermissions = [
-    PERMISSIONS.CATEGORIES_MANAGE,
+    PERMISSIONS.CATEGORIES_VIEW,
     PERMISSIONS.PRODUCTS_VIEW,
-    PERMISSIONS.POSTS_MANAGE,
-    PERMISSIONS.SLIDERS_MANAGE,
-    PERMISSIONS.COMBOS_MANAGE,
-    PERMISSIONS.BRANCHES_MANAGE,
+    PERMISSIONS.POSTS_VIEW,
+    PERMISSIONS.SLIDERS_VIEW,
+    PERMISSIONS.COMBOS_VIEW,
   ];
   const supplierPermissions = [
     PERMISSIONS.SUPPLIERS_VIEW,
-    PERMISSIONS.GROUP_SUPPLIERS_MANAGE,
   ];
   const systemPermissions = [
-    PERMISSIONS.USERS_MANAGE, 
-    PERMISSIONS.ROLES_MANAGE,
-    PERMISSIONS.BRANCHES_MANAGE,
+    PERMISSIONS.BRANCHES_VIEW,
     PERMISSIONS.SUPPLIERS_VIEW,
-    PERMISSIONS.GROUP_SUPPLIERS_MANAGE,
+    PERMISSIONS.GROUP_SUPPLIERS_VIEW,
+    PERMISSIONS.PURCHASE_INVOICES_VIEW,
+    PERMISSIONS.USERS_VIEW, 
+    PERMISSIONS.ADMIN_USERS_VIEW,
+    PERMISSIONS.ROLES_VIEW,
   ];
 
   return (
@@ -86,7 +86,7 @@ const NavigationBar = () => {
                   Nội dung
                 </a>
                 <ul className="dropdown-menu">
-                  <Permission permission={PERMISSIONS.CATEGORIES_MANAGE}>
+                  <Permission permission={PERMISSIONS.CATEGORIES_VIEW}>
                     <li>
                       <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/category">
                         <i className="fas fa-list me-2"></i>
@@ -102,7 +102,7 @@ const NavigationBar = () => {
                       </Link>
                     </li>
                   </Permission>
-                  <Permission permission={PERMISSIONS.POSTS_MANAGE}>
+                  <Permission permission={PERMISSIONS.POSTS_VIEW}>
                     <li>
                       <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/post">
                         <i className="fas fa-newspaper me-2"></i>
@@ -110,7 +110,7 @@ const NavigationBar = () => {
                       </Link>
                     </li>
                   </Permission>
-                  <Permission permission={PERMISSIONS.SLIDERS_MANAGE}>
+                  <Permission permission={PERMISSIONS.SLIDERS_VIEW}>
                     <li>
                       <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/slider">
                         <i className="fas fa-sliders-h me-2"></i>
@@ -118,7 +118,7 @@ const NavigationBar = () => {
                       </Link>
                     </li>
                   </Permission>
-                  <Permission permission={PERMISSIONS.COMBOS_MANAGE}>
+                  <Permission permission={PERMISSIONS.COMBOS_VIEW}>
                     <li>
                       <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/combo">
                         <i className="fas fa-gift me-2"></i>
@@ -140,41 +140,49 @@ const NavigationBar = () => {
                   Hệ thống
                 </a>
                 <ul className="dropdown-menu">
-                  {/* Chi nhánh - hiển thị luôn không cần permission */}
-                  <li>
-                    <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/branch">
-                      <i className="fas fa-building me-2"></i>
-                      Quản lý chi nhánh
-                    </Link>
-                  </li>
+                  {/* Chi nhánh */}
+                  <Permission permission={PERMISSIONS.BRANCHES_VIEW}>
+                    <li>
+                      <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/branch">
+                        <i className="fas fa-building me-2"></i>
+                        Quản lý chi nhánh
+                      </Link>
+                    </li>
+                  </Permission>
                   
-                  {/* Nhà cung cấp - hiển thị luôn không cần permission */}
-                  <li>
-                    <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/supplier">
-                      <i className="fas fa-truck me-2"></i>
-                      Nhà cung cấp
-                    </Link>
-                  </li>
+                  {/* Nhà cung cấp */}
+                  <Permission permission={PERMISSIONS.SUPPLIERS_VIEW}>
+                    <li>
+                      <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/supplier">
+                        <i className="fas fa-truck me-2"></i>
+                        Nhà cung cấp
+                      </Link>
+                    </li>
+                  </Permission>
                   
-                  {/* Nhóm nhà cung cấp - hiển thị luôn không cần permission */}
-                  <li>
-                    <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/group-supplier">
-                      <i className="fas fa-users me-2"></i>
-                      Nhóm nhà cung cấp
-                    </Link>
-                  </li>
+                  {/* Nhóm nhà cung cấp */}
+                  <Permission permission={PERMISSIONS.GROUP_SUPPLIERS_VIEW}>
+                    <li>
+                      <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/group-supplier">
+                        <i className="fas fa-users me-2"></i>
+                        Nhóm nhà cung cấp
+                      </Link>
+                    </li>
+                  </Permission>
                   
                   {/* Nhập hàng */}
-                  <li>
-                    <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/import">
-                      <i className="fas fa-box-open me-2"></i>
-                      Nhập hàng
-                    </Link>
-                  </li>
+                  <Permission permission={PERMISSIONS.PURCHASE_INVOICES_VIEW}>
+                    <li>
+                      <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/import">
+                        <i className="fas fa-box-open me-2"></i>
+                        Nhập hàng
+                      </Link>
+                    </li>
+                  </Permission>
                   
                   <li><hr className="dropdown-divider" /></li>
                   
-                  <Permission permission={PERMISSIONS.USERS_MANAGE}>
+                  <Permission permission={PERMISSIONS.USERS_VIEW}>
                     <li>
                       <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/user">
                         <i className="fas fa-users me-2"></i>
@@ -182,7 +190,7 @@ const NavigationBar = () => {
                       </Link>
                     </li>
                   </Permission>
-                  <Permission permission={PERMISSIONS.ROLES_MANAGE}>
+                  <Permission permission={PERMISSIONS.ADMIN_USERS_VIEW}>
                     <li>
                       <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/admin">
                         <i className="fas fa-user me-2"></i>
@@ -190,7 +198,7 @@ const NavigationBar = () => {
                       </Link>
                     </li>
                   </Permission>
-                  <Permission permission={PERMISSIONS.ROLES_MANAGE}>
+                  <Permission permission={PERMISSIONS.ROLES_VIEW}>
                     <li>
                       <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/rule">
                         <i className="fas fa-user-shield me-2"></i>

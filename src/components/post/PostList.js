@@ -8,6 +8,8 @@ import { Modal, Button, Dropdown } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import moment from 'moment';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 import ImageWithZoom from '../common/ImageWithZoom';
 import {
     FilterSelectSingle,
@@ -216,15 +218,21 @@ const PostList = () => {
             title: "Hành động",
             element: row => (
                 <div className="d-flex align-items-center">
-                    <Link className="btn btn-info btn-sm me-1" to={`/post/detail/${row.id}`}>
-                        <i className="fas fa-eye"></i>
-                    </Link>
-                    <Link className="btn btn-primary btn-sm me-1" to={`/post/${row.id}`}>
-                        <i className="fas fa-edit"></i>
-                    </Link>
-                    <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}>
-                        <i className="fas fa-trash"></i>
-                    </button>
+                    <Permission permission={PERMISSIONS.POSTS_VIEW}>
+                        <Link className="btn btn-info btn-sm me-1" to={`/post/detail/${row.id}`}>
+                            <i className="fas fa-eye"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.POSTS_UPDATE}>
+                        <Link className="btn btn-primary btn-sm me-1" to={`/post/${row.id}`}>
+                            <i className="fas fa-edit"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.POSTS_DELETE}>
+                        <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}>
+                            <i className="fas fa-trash"></i>
+                        </button>
+                    </Permission>
                 </div>
             ),
             width: "10%"
@@ -316,16 +324,20 @@ const PostList = () => {
                         <div className="post-right-section d-flex align-items-center gap-2 justify-content-end">
                             {/* Nút xóa khi có bài viết được chọn */}
                             {selectedRows.length > 0 && (
-                                <button className="btn btn-danger btn-sm" onClick={multiDelete}>
-                                    <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
-                                </button>
+                                <Permission permission={PERMISSIONS.POSTS_DELETE}>
+                                    <button className="btn btn-danger btn-sm" onClick={multiDelete}>
+                                        <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
+                                    </button>
+                                </Permission>
                             )}
                             
                             {/* Nút tạo mới */}
-                            <Link className="btn btn-primary btn-sm" to="/post/add">
-                                <i className="fas fa-plus me-1"></i>
-                                <span className="d-none d-sm-inline">Tạo mới</span>
-                            </Link>
+                            <Permission permission={PERMISSIONS.POSTS_CREATE}>
+                                <Link className="btn btn-primary btn-sm" to="/post/add">
+                                    <i className="fas fa-plus me-1"></i>
+                                    <span className="d-none d-sm-inline">Tạo mới</span>
+                                </Link>
+                            </Permission>
                             
                             {/* Các button riêng lẻ - hiện trên >= 1280px */}
                             <div className="order-action-buttons">

@@ -7,6 +7,8 @@ import requestApi from '../../helpers/api';
 import { toast } from 'react-toastify';
 import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig'
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images';
 
 const CategoryUpdate = () => {
@@ -294,14 +296,16 @@ const CategoryUpdate = () => {
                                     </div>
                                     <div className="mt-4 mb-0">
                                         <div className="d-flex justify-content-center detail-action-buttons">
-                                            <button
-                                                type="button"
-                                                className="btn btn-danger btn-sm"
-                                                onClick={() => setShowModal(true)}
-                                                disabled={isSubmitting}
-                                            >
-                                                <i className="fas fa-trash me-1"></i><span className="d-none d-sm-inline">Xóa</span>
-                                            </button>
+                                            <Permission permission={PERMISSIONS.CATEGORIES_DELETE}>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-danger btn-sm"
+                                                    onClick={() => setShowModal(true)}
+                                                    disabled={isSubmitting}
+                                                >
+                                                    <i className="fas fa-trash me-1"></i><span className="d-none d-sm-inline">Xóa</span>
+                                                </button>
+                                            </Permission>
                                             <button
                                                 type="button"
                                                 className="btn btn-outline-secondary btn-sm"

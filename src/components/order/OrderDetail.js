@@ -5,6 +5,8 @@ import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import { toast } from 'react-toastify';
 import requestApi from '../../helpers/api';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 import {formatVNDWithUnit, formatVND } from '../../helpers/formatMoney';
 
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
@@ -370,56 +372,68 @@ const OrderDetail = () => {
                             </button>
                                     {order.status === 'pending' && (
                                 <>
-                                    <button
-                                        className="btn btn-danger btn-sm"
-                                        onClick={() => handleUpdateStatus(order.id, 'cancelled')}
-                                        title="Hủy đơn hàng"
-                                    >
-                                        <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy</span>
-                                    </button>
-                                    <button
-                                        className="btn btn-success btn-sm"
-                                        onClick={() => handleUpdateStatus(order.id, 'processing')}
-                                        title="Duyệt đơn hàng"
-                                    >
-                                        <i className="fas fa-check me-1"></i><span className="d-none d-sm-inline">Duyệt</span>
-                                    </button>
+                                    <Permission permission={PERMISSIONS.ORDERS_CANCEL}>
+                                        <button
+                                            className="btn btn-danger btn-sm"
+                                            onClick={() => handleUpdateStatus(order.id, 'cancelled')}
+                                            title="Hủy đơn hàng"
+                                        >
+                                            <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy</span>
+                                        </button>
+                                    </Permission>
+                                    <Permission permission={PERMISSIONS.ORDERS_UPDATE_STATUS}>
+                                        <button
+                                            className="btn btn-success btn-sm"
+                                            onClick={() => handleUpdateStatus(order.id, 'processing')}
+                                            title="Duyệt đơn hàng"
+                                        >
+                                            <i className="fas fa-check me-1"></i><span className="d-none d-sm-inline">Duyệt</span>
+                                        </button>
+                                    </Permission>
                                 </>
                             )}
                             {order.status === 'processing' && (
                                 <>
-                                    <button
-                                        className="btn btn-danger btn-sm"
-                                        onClick={() => handleUpdateStatus(order.id, 'cancelled')}
-                                        title="Hủy đơn hàng"
-                                    >
-                                        <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy</span>
-                                    </button>
-                                    <button
-                                        className="btn btn-warning btn-sm"
-                                        onClick={() => handleUpdateStatus(order.id, 'shipped')}
-                                        title="Xác nhận đã gửi hàng"
-                                    >
-                                        <i className="fas fa-truck me-1"></i><span className="d-none d-sm-inline">Gửi hàng</span>
-                                    </button>
+                                    <Permission permission={PERMISSIONS.ORDERS_CANCEL}>
+                                        <button
+                                            className="btn btn-danger btn-sm"
+                                            onClick={() => handleUpdateStatus(order.id, 'cancelled')}
+                                            title="Hủy đơn hàng"
+                                        >
+                                            <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy</span>
+                                        </button>
+                                    </Permission>
+                                    <Permission permission={PERMISSIONS.ORDERS_UPDATE_STATUS}>
+                                        <button
+                                            className="btn btn-warning btn-sm"
+                                            onClick={() => handleUpdateStatus(order.id, 'shipped')}
+                                            title="Xác nhận đã gửi hàng"
+                                        >
+                                            <i className="fas fa-truck me-1"></i><span className="d-none d-sm-inline">Gửi hàng</span>
+                                        </button>
+                                    </Permission>
                                 </>
                             )}
                             {order.status === 'shipped' && (
                                 <>
-                                    <button
-                                        className="btn btn-danger btn-sm"
-                                        onClick={() => handleUpdateStatus(order.id, 'cancelled')}
-                                        title="Hủy đơn hàng"
-                                    >
-                                        <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy</span>
-                                    </button>
-                                    <button
-                                        className="btn btn-info btn-sm"
-                                        onClick={() => handleUpdateStatus(order.id, 'delivered')}
-                                        title="Xác nhận đã giao"
-                                    >
-                                        <i className="fas fa-box-open me-1"></i><span className="d-none d-sm-inline">Đã giao</span>
-                                    </button>
+                                    <Permission permission={PERMISSIONS.ORDERS_CANCEL}>
+                                        <button
+                                            className="btn btn-danger btn-sm"
+                                            onClick={() => handleUpdateStatus(order.id, 'cancelled')}
+                                            title="Hủy đơn hàng"
+                                        >
+                                            <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy</span>
+                                        </button>
+                                    </Permission>
+                                    <Permission permission={PERMISSIONS.ORDERS_UPDATE_STATUS}>
+                                        <button
+                                            className="btn btn-info btn-sm"
+                                            onClick={() => handleUpdateStatus(order.id, 'delivered')}
+                                            title="Xác nhận đã giao"
+                                        >
+                                            <i className="fas fa-box-open me-1"></i><span className="d-none d-sm-inline">Đã giao</span>
+                                        </button>
+                                    </Permission>
                                 </>
                             )}
                         </div>

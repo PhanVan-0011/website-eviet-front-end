@@ -7,6 +7,8 @@ import * as actions from '../../redux/actions/index';
 import { useDispatch } from 'react-redux';
 import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 const AdminDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -130,24 +132,40 @@ const AdminDetail = () => {
                                     <strong>Ngày cập nhật:</strong> {formatDate(user.updated_at)}
                                 </div>
                                 <div className="col-md-6 mb-2">
-                                    <strong>Vai trò:</strong> {user.roles && user.roles.length > 0 ? user.roles.map(r => (
-                                        <span key={r.id} className="badge bg-info text-dark me-1">{r.display_name || r.name}</span>
-                                    )) : <span className="text-muted">Chưa có</span>}
+                                    <strong>Vai trò:</strong> {user.role ? (
+                                        <span className="badge bg-info text-dark">{user.role.display_name || user.role.name}</span>
+                                    ) : <span className="text-muted">Chưa có</span>}
                                 </div>
                                 <div className="col-md-6 mb-2">
-                                    <strong>Chi nhánh:</strong> {user.branch ? user.branch.name : <span className="text-muted">Chưa có</span>}
+                                    <strong>Chi nhánh:</strong> {
+                                        // Xử lý trường hợp có nhiều chi nhánh (branches là array)
+                                        Array.isArray(user.branches) && user.branches.length > 0 ? (
+                                            user.branches.map(b => b.name || (typeof b === 'string' ? b : '')).filter(Boolean).join(", ")
+                                        ) : 
+                                        // Xử lý trường hợp có 1 chi nhánh (branch là object)
+                                        user.branch ? (
+                                            typeof user.branch === 'string' ? user.branch : (user.branch.name || '')
+                                        ) : (
+                                            // Nếu không có branch hay branches, hiển thị "Tất cả chi nhánh"
+                                            <span className="text-primary fw-semibold">Tất cả chi nhánh</span>
+                                        )
+                                    }
                                 </div>
                             </div>
                         </div>
                     </div>
                     {/* 3 button nằm ngoài card, căn giữa */}
                     <div className="d-flex justify-content-center gap-3 mt-4">
-                        <button className="btn btn-danger px-4" onClick={() => setShowModal(true)} disabled={deleting}>
-                            <i className="fas fa-trash-alt me-1"></i> Xóa
-                        </button>
-                        <button className="btn btn-primary px-4" onClick={() => navigate(`/admin/${user.id}`)}>
-                            <i className="fas fa-edit me-1"></i> Cập nhật
-                        </button>
+                        <Permission permission={PERMISSIONS.ADMIN_USERS_DELETE}>
+                            <button className="btn btn-danger px-4" onClick={() => setShowModal(true)} disabled={deleting}>
+                                <i className="fas fa-trash-alt me-1"></i> Xóa
+                            </button>
+                        </Permission>
+                        <Permission permission={PERMISSIONS.ADMIN_USERS_UPDATE}>
+                            <button className="btn btn-primary px-4" onClick={() => navigate(`/admin/${user.id}`)}>
+                                <i className="fas fa-edit me-1"></i> Cập nhật
+                            </button>
+                        </Permission>
                         <button className="btn btn-outline-secondary px-4" onClick={() => navigate(-1)}>
                             <i className="fas fa-arrow-left me-1"></i> Quay lại
                         </button>

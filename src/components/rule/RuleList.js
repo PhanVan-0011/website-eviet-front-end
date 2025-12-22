@@ -9,6 +9,8 @@ import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import LiveSearch from '../common/LiveSearch';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 
 const RuleList = () => {
     const [roles, setRoles] = useState([]);
@@ -53,12 +55,16 @@ const RuleList = () => {
         {
             title: "Hành động", element: row => (
                 <div className="d-flex align-items-center gap-1" style={{ flexWrap: 'nowrap' }}>
-                    <Link className="btn btn-primary btn-sm px-2 py-1" to={`/rule/${row.id}`} title="Chỉnh sửa">
-                        <i className="fas fa-edit"></i>
-                    </Link>
-                    <button className="btn btn-danger btn-sm px-2 py-1" onClick={() => handleDelete(row.id)} title="Xóa">
-                        <i className="fas fa-trash"></i>
-                    </button>
+                    <Permission permission={PERMISSIONS.ROLES_UPDATE}>
+                        <Link className="btn btn-primary btn-sm px-2 py-1" to={`/rule/${row.id}`} title="Chỉnh sửa">
+                            <i className="fas fa-edit"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.ROLES_DELETE}>
+                        <button className="btn btn-danger btn-sm px-2 py-1" onClick={() => handleDelete(row.id)} title="Xóa">
+                            <i className="fas fa-trash"></i>
+                        </button>
+                    </Permission>
                 </div>
             ),
             width: '18%'
@@ -183,17 +189,21 @@ const RuleList = () => {
                         <div className="rule-right-section d-flex align-items-center gap-2 justify-content-end">
                             {/* Nút xóa khi có vai trò được chọn */}
                             {selectedRows.length > 0 && (
-                                <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
-                                    <i className="fas fa-trash me-1"></i>
-                                    <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
-                                </button>
+                                <Permission permission={PERMISSIONS.ROLES_DELETE}>
+                                    <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
+                                        <i className="fas fa-trash me-1"></i>
+                                        <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
+                                    </button>
+                                </Permission>
                             )}
                             
                             {/* Nút tạo mới */}
-                            <Link className="btn btn-primary btn-sm" to="/rule/add">
-                                <i className="fas fa-plus me-1"></i>
-                                <span className="d-none d-sm-inline">Tạo mới</span>
-                            </Link>
+                            <Permission permission={PERMISSIONS.ROLES_CREATE}>
+                                <Link className="btn btn-primary btn-sm" to="/rule/add">
+                                    <i className="fas fa-plus me-1"></i>
+                                    <span className="d-none d-sm-inline">Tạo mới</span>
+                                </Link>
+                            </Permission>
                             
                             {/* Các button riêng lẻ - hiện trên >= 1280px */}
                             <div className="rule-action-buttons">

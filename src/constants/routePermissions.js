@@ -3,22 +3,29 @@ import { PERMISSIONS } from './permissions';
 export const ROUTE_PERMISSIONS = {
   '/': PERMISSIONS.DASHBOARD_VIEW,
 
-  // User/Admin
-  '/user': PERMISSIONS.USERS_MANAGE,
-  '/user/add': PERMISSIONS.USERS_MANAGE,
-  '/user/:id': PERMISSIONS.USERS_MANAGE,
-  '/admin': PERMISSIONS.USERS_MANAGE,
-  '/admin/add': PERMISSIONS.USERS_MANAGE,
-  '/admin/:id': PERMISSIONS.USERS_MANAGE,
-  '/admin/detail/:id': PERMISSIONS.USERS_MANAGE,
+  // Khách hàng
+  '/user': PERMISSIONS.USERS_VIEW,
+  '/user/add': PERMISSIONS.USERS_CREATE,
+  '/user/:id': PERMISSIONS.USERS_UPDATE,
+  '/user/detail/:id': PERMISSIONS.USERS_VIEW,
+
+  // Nhân viên/Admin
+  '/admin': PERMISSIONS.ADMIN_USERS_VIEW,
+  '/admin/add': PERMISSIONS.ADMIN_USERS_CREATE,
+  '/admin/:id': PERMISSIONS.ADMIN_USERS_UPDATE,
+  '/admin/detail/:id': PERMISSIONS.ADMIN_USERS_VIEW,
 
   // Danh mục
-  '/category': PERMISSIONS.CATEGORIES_MANAGE,
-  '/category/add': PERMISSIONS.CATEGORIES_MANAGE,
-  '/category/:id': PERMISSIONS.CATEGORIES_MANAGE,
+  '/category': PERMISSIONS.CATEGORIES_VIEW,
+  '/category/add': PERMISSIONS.CATEGORIES_CREATE,
+  '/category/:id': PERMISSIONS.CATEGORIES_UPDATE,
+  '/category/detail/:id': PERMISSIONS.CATEGORIES_VIEW,
 
-  // Chi nhánh - không cần check quyền
-  // '/branch': PERMISSIONS.BRANCHES_MANAGE,
+  // Chi nhánh
+  '/branch': PERMISSIONS.BRANCHES_VIEW,
+  '/branch/add': PERMISSIONS.BRANCHES_CREATE,
+  '/branch/:id': PERMISSIONS.BRANCHES_UPDATE,
+  '/branch/detail/:id': PERMISSIONS.BRANCHES_VIEW,
 
   // Sản phẩm
   '/product': PERMISSIONS.PRODUCTS_VIEW,
@@ -27,10 +34,10 @@ export const ROUTE_PERMISSIONS = {
   '/product/detail/:id': PERMISSIONS.PRODUCTS_VIEW,
 
   // Bài viết
-  '/post': PERMISSIONS.POSTS_MANAGE,
-  '/post/add': PERMISSIONS.POSTS_MANAGE,
-  '/post/:id': PERMISSIONS.POSTS_MANAGE,
-  '/post/detail/:id': PERMISSIONS.POSTS_MANAGE,
+  '/post': PERMISSIONS.POSTS_VIEW,
+  '/post/add': PERMISSIONS.POSTS_CREATE,
+  '/post/:id': PERMISSIONS.POSTS_UPDATE,
+  '/post/detail/:id': PERMISSIONS.POSTS_VIEW,
 
   // Đơn hàng
   '/order': PERMISSIONS.ORDERS_VIEW,
@@ -38,15 +45,16 @@ export const ROUTE_PERMISSIONS = {
   '/order/detail/:id': PERMISSIONS.ORDERS_VIEW,
 
   // Slider
-  '/slider': PERMISSIONS.SLIDERS_MANAGE,
-  '/slider/add': PERMISSIONS.SLIDERS_MANAGE,
-  '/slider/:id': PERMISSIONS.SLIDERS_MANAGE,
+  '/slider': PERMISSIONS.SLIDERS_VIEW,
+  '/slider/add': PERMISSIONS.SLIDERS_CREATE,
+  '/slider/:id': PERMISSIONS.SLIDERS_UPDATE,
+  '/slider/detail/:id': PERMISSIONS.SLIDERS_VIEW,
 
   // Combo
-  '/combo': PERMISSIONS.COMBOS_MANAGE,
-  '/combo/detail/:id': PERMISSIONS.COMBOS_MANAGE,
-  '/combo/add': PERMISSIONS.COMBOS_MANAGE,
-  '/combo/:id': PERMISSIONS.COMBOS_MANAGE,
+  '/combo': PERMISSIONS.COMBOS_VIEW,
+  '/combo/detail/:id': PERMISSIONS.COMBOS_VIEW,
+  '/combo/add': PERMISSIONS.COMBOS_CREATE,
+  '/combo/:id': PERMISSIONS.COMBOS_UPDATE,
 
   // Khuyến mãi
   '/promotion': PERMISSIONS.PROMOTIONS_VIEW,
@@ -54,9 +62,27 @@ export const ROUTE_PERMISSIONS = {
   '/promotion/add': PERMISSIONS.PROMOTIONS_CREATE,
   '/promotion/:id': PERMISSIONS.PROMOTIONS_UPDATE,
 
+  // Nhà cung cấp
+  '/supplier': PERMISSIONS.SUPPLIERS_VIEW,
+  '/supplier/add': PERMISSIONS.SUPPLIERS_CREATE,
+  '/supplier/:id': PERMISSIONS.SUPPLIERS_UPDATE,
+  '/supplier/detail/:id': PERMISSIONS.SUPPLIERS_VIEW,
+
+  // Nhập hàng
+  '/import': PERMISSIONS.PURCHASE_INVOICES_VIEW,
+  '/import/add': PERMISSIONS.PURCHASE_INVOICES_CREATE,
+  '/import/:id': PERMISSIONS.PURCHASE_INVOICES_UPDATE,
+  '/import/detail/:id': PERMISSIONS.PURCHASE_INVOICES_VIEW,
+
+  // Nhóm nhà cung cấp
+  '/group-supplier': PERMISSIONS.GROUP_SUPPLIERS_VIEW,
+  '/group-supplier/add': PERMISSIONS.GROUP_SUPPLIERS_CREATE,
+  '/group-supplier/:id': PERMISSIONS.GROUP_SUPPLIERS_UPDATE,
+  '/group-supplier/detail/:id': PERMISSIONS.GROUP_SUPPLIERS_VIEW,
+
   // Phân quyền
-  '/rule': PERMISSIONS.ROLES_MANAGE,
-  '/rule/add': PERMISSIONS.ROLES_MANAGE,
-  '/rule/:id': PERMISSIONS.ROLES_MANAGE,
-  // ... thêm các route khác nếu cần
+  '/rule': PERMISSIONS.ROLES_VIEW,
+  '/rule/add': PERMISSIONS.ROLES_CREATE,
+  '/rule/:id': PERMISSIONS.ROLES_UPDATE,
+  '/rule/detail/:id': PERMISSIONS.ROLES_VIEW,
 };

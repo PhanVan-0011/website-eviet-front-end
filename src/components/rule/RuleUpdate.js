@@ -6,6 +6,8 @@ import * as actions from '../../redux/actions/index';
 import requestApi from '../../helpers/api';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 
 const RuleUpdate = () => {
     const navigate = useNavigate();
@@ -186,15 +188,17 @@ const RuleUpdate = () => {
                                     >
                                         <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy bỏ</span>
                                     </button>
-                                    <button
-                                        className="btn btn-primary btn-sm"
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                    >
-                                        <i className="fas fa-check me-1"></i>
-                                        <span className="d-none d-sm-inline">{isSubmitting ? "Đang gửi..." : "Cập nhật"}</span>
-                                        {isSubmitting && <span className="d-sm-none">...</span>}
-                                    </button>
+                                    <Permission permission={PERMISSIONS.ROLES_UPDATE}>
+                                        <button
+                                            className="btn btn-primary btn-sm"
+                                            type="submit"
+                                            disabled={isSubmitting}
+                                        >
+                                            <i className="fas fa-check me-1"></i>
+                                            <span className="d-none d-sm-inline">{isSubmitting ? "Đang gửi..." : "Cập nhật"}</span>
+                                            {isSubmitting && <span className="d-sm-none">...</span>}
+                                        </button>
+                                    </Permission>
                                 </div>
                             </form>
                         </div>

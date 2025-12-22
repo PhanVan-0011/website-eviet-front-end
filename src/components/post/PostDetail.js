@@ -7,6 +7,8 @@ import * as actions from '../../redux/actions/index';
 import { Modal, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 import { cleanHtml,oembedToIframe } from '../../helpers/formatData';
 const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
@@ -287,12 +289,16 @@ const PostDetail = () => {
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
                                 <i className="fas fa-arrow-left me-1"></i>Quay lại
                             </button>
-                            <Link className="btn btn-primary btn-sm" to={`/post/${post.id}`}>
-                                <i className="fas fa-edit me-1"></i>Sửa bài viết
-                            </Link>
-                            <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
-                                <i className="fas fa-trash-alt me-1"></i>Xóa bài viết
-                            </button>
+                            <Permission permission={PERMISSIONS.POSTS_UPDATE}>
+                                <Link className="btn btn-primary btn-sm" to={`/post/${post.id}`}>
+                                    <i className="fas fa-edit me-1"></i>Sửa bài viết
+                                </Link>
+                            </Permission>
+                            <Permission permission={PERMISSIONS.POSTS_DELETE}>
+                                <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
+                                    <i className="fas fa-trash-alt me-1"></i>Xóa bài viết
+                                </button>
+                            </Permission>
                         </div>
                     </div>
                 </div>

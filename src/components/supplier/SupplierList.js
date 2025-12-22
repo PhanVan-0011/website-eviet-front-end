@@ -274,26 +274,32 @@ const SupplierList = () => {
                 if (!row || !row.id) return <div></div>;
                 return (
                     <div className="d-flex align-items-center gap-1">
-                        <Link
-                            className="btn btn-info btn-sm px-2 py-1"
-                            to={`/supplier/detail/${row.id}`}
-                            title="Xem chi tiết"
-                        >
-                            <i className="fas fa-eye"></i>
-                        </Link>
-                        <Link
-                            className="btn btn-primary btn-sm px-2 py-1"
-                            to={`/supplier/${row.id}`}
-                            title="Chỉnh sửa"
-                        >
-                            <i className="fas fa-edit"></i>
-                        </Link>
-                        <button
-                            className="btn btn-danger btn-sm px-2 py-1"
-                            onClick={() => handleDelete(row.id)}
-                            title="Xóa">
-                            <i className="fas fa-trash"></i>
-                        </button>
+                        <Permission permission={PERMISSIONS.SUPPLIERS_VIEW}>
+                            <Link
+                                className="btn btn-info btn-sm px-2 py-1"
+                                to={`/supplier/detail/${row.id}`}
+                                title="Xem chi tiết"
+                            >
+                                <i className="fas fa-eye"></i>
+                            </Link>
+                        </Permission>
+                        <Permission permission={PERMISSIONS.SUPPLIERS_UPDATE}>
+                            <Link
+                                className="btn btn-primary btn-sm px-2 py-1"
+                                to={`/supplier/${row.id}`}
+                                title="Chỉnh sửa"
+                            >
+                                <i className="fas fa-edit"></i>
+                            </Link>
+                        </Permission>
+                        <Permission permission={PERMISSIONS.SUPPLIERS_DELETE}>
+                            <button
+                                className="btn btn-danger btn-sm px-2 py-1"
+                                onClick={() => handleDelete(row.id)}
+                                title="Xóa">
+                                <i className="fas fa-trash"></i>
+                            </button>
+                        </Permission>
                     </div>
                 );
             },
@@ -400,17 +406,21 @@ const SupplierList = () => {
                         <div className="supplier-right-section d-flex align-items-center gap-2 justify-content-end">
                             {/* Nút xóa khi có nhà cung cấp được chọn */}
                             {selectedRows.length > 0 && (
-                                <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
-                                    <i className="fas fa-trash me-1"></i>
-                                    <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
-                                </button>
+                                <Permission permission={PERMISSIONS.SUPPLIERS_DELETE}>
+                                    <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
+                                        <i className="fas fa-trash me-1"></i>
+                                        <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
+                                    </button>
+                                </Permission>
                             )}
                             
                             {/* Nút tạo mới */}
-                            <Link className="btn btn-primary btn-sm" to="/supplier/add">
-                                <i className="fas fa-plus me-1"></i>
-                                <span className="d-none d-sm-inline">Tạo mới</span>
-                            </Link>
+                            <Permission permission={PERMISSIONS.SUPPLIERS_CREATE}>
+                                <Link className="btn btn-primary btn-sm" to="/supplier/add">
+                                    <i className="fas fa-plus me-1"></i>
+                                    <span className="d-none d-sm-inline">Tạo mới</span>
+                                </Link>
+                            </Permission>
                             
                             {/* Các button riêng lẻ - hiện trên >= 1280px */}
                             <div className="supplier-action-buttons">

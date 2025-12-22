@@ -14,6 +14,11 @@ import {vi} from 'date-fns/locale';
 import Select from 'react-select';
 import { selectStyles } from '../common/FilterComponents';
 
+// Constants cho branch scope
+const SCOPE_ALL_BRANCHES = 'all_branches'; // Tự động chọn tất cả branches
+const SCOPE_SINGLE_BRANCH = 'single_branch'; // Chỉ được chọn 1 branch
+const SCOPE_MULTIPLE_BRANCHES = 'multiple_branches'; // Chọn nhiều branches (ít nhất 1)
+
 const AdminAdd = () => {
     const navigation = useNavigate();
     const {
@@ -28,15 +33,18 @@ const AdminAdd = () => {
 
     // State cho ngày sinh
     const [dob, setDob] = useState(null);
-    // State cho roles và role_ids
+    // State cho roles và role_id (chỉ 1 vai trò)
     const [roles, setRoles] = useState([]);
-    const [selectedRoles, setSelectedRoles] = useState([]);
+    const [selectedRole, setSelectedRole] = useState(null);
     const roleOptions = roles.map(role => ({ value: role.id, label: role.display_name || role.name }));
     
-    // State cho branches và branch_id
+    // State cho branches và branch_ids (đa chi nhánh)
     const [branches, setBranches] = useState([]);
-    const [selectedBranch, setSelectedBranch] = useState(null);
+    const [selectedBranches, setSelectedBranches] = useState([]);
     const branchOptions = branches.map(branch => ({ value: branch.id, label: branch.name }));
+    
+    // State cho branch scope (tính từ selected roles)
+    const [branchScope, setBranchScope] = useState(null);
     
     // State cho giới tính và trạng thái
     const [selectedGender, setSelectedGender] = useState(null);
@@ -70,6 +78,52 @@ const AdminAdd = () => {
         setValue('is_active', '1');
     }, [setValue]);
 
+    // Tính toán branch scope dựa trên selected role
+    useEffect(() => {
+        if (!selectedRole || roles.length === 0) {
+            setBranchScope(null);
+            return;
+        }
+
+        // Lấy role object đã chọn
+        const selectedRoleObject = roles.find(r => String(r.id) === String(selectedRole) || r.id === selectedRole);
+        
+        if (!selectedRoleObject) {
+            setBranchScope(null);
+            return;
+        }
+
+        // Lấy scope từ role đã chọn
+        const scope = selectedRoleObject.branch_scope;
+
+        // Xử lý theo scope
+        if (scope === SCOPE_ALL_BRANCHES) {
+            setBranchScope(SCOPE_ALL_BRANCHES);
+            // Tự động chọn tất cả branches
+            const allBranchIds = branches.map(b => b.id);
+            setSelectedBranches(allBranchIds);
+            setValue('branch_ids', allBranchIds, { shouldValidate: true });
+        } else if (scope === SCOPE_MULTIPLE_BRANCHES) {
+            setBranchScope(SCOPE_MULTIPLE_BRANCHES);
+        } else if (scope === SCOPE_SINGLE_BRANCH) {
+            setBranchScope(SCOPE_SINGLE_BRANCH);
+            // Nếu đã chọn nhiều hơn 1 branch, chỉ giữ lại branch đầu tiên
+            if (selectedBranches.length > 1) {
+                const firstBranch = [selectedBranches[0]];
+                setSelectedBranches(firstBranch);
+                setValue('branch_ids', firstBranch, { shouldValidate: true });
+            }
+        } else {
+            // Mặc định là single_branch nếu không có scope
+            setBranchScope(SCOPE_SINGLE_BRANCH);
+            if (selectedBranches.length > 1) {
+                const firstBranch = [selectedBranches[0]];
+                setSelectedBranches(firstBranch);
+                setValue('branch_ids', firstBranch, { shouldValidate: true });
+            }
+        }
+    }, [selectedRole, roles, branches, setValue]);
+
     const onChangeImage = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -101,33 +155,54 @@ const AdminAdd = () => {
         if (data.role_ids && !Array.isArray(data.role_ids)) {
             data.role_ids = [data.role_ids];
         }
-        // Validate role_ids, branch_id và gender
-        const validRole = await trigger('role_ids');
-        const validBranch = await trigger('branch_id');
+        // Validate role_id, branch_ids và gender
+        const validRole = await trigger('role_id');
+        const validBranch = await trigger('branch_ids');
         const validGender = await trigger('gender');
         if (!validRole || !validBranch || !validGender) return;
         // Đưa ngày sinh vào data nếu có chọn
         if (dob) {
             data.date_of_birth = dob.toISOString().split('T')[0];
         }
-        // Log dữ liệu trước khi submit
-        console.log('Dữ liệu submit:', data);
-        console.log('Ảnh đại diện:', imageFile);
         setIsSubmitting(true);
         try {
             dispatch(actions.controlLoading(true));
             const formData = new FormData();
             Object.keys(data).forEach(key => {
-                if (key !== 'imageFile' && key !== 'role_ids') formData.append(key, data[key]);
+                if (key !== 'imageFile' && key !== 'role_id' && key !== 'branch_ids') formData.append(key, data[key]);
             });
-            // Gửi role_ids dạng array
-            if (Array.isArray(data.role_ids)) {
-                data.role_ids.forEach(id => formData.append('role_ids[]', id));
+            // Gửi role_id (single value)
+            if (data.role_id) {
+                formData.append('role_id', data.role_id);
+            }
+            // Gửi branch_ids dạng array
+            if (Array.isArray(data.branch_ids)) {
+                data.branch_ids.forEach(id => formData.append('branch_ids[]', id));
             }
             if (imageFile) {
                 formData.append('image_url', imageFile);
             }
-            console.log(formData);
+            
+            // Hiển thị dữ liệu FormData trước khi gửi API
+            console.log('=== DỮ LIỆU GỬI LÊN API (AdminAdd) ===');
+            console.log('Form Data Object:', data);
+            console.log('Selected Role:', selectedRole);
+            console.log('Selected Branches:', selectedBranches);
+            console.log('Date of Birth:', dob ? dob.toISOString().split('T')[0] : null);
+            console.log('Image File:', imageFile ? imageFile.name : null);
+            
+            // Hiển thị tất cả entries trong FormData
+            const formDataEntries = {};
+            for (let pair of formData.entries()) {
+                if (pair[0] === 'image_url') {
+                    formDataEntries[pair[0]] = `[File: ${pair[1].name}]`;
+                } else {
+                    formDataEntries[pair[0]] = pair[1];
+                }
+            }
+            console.log('FormData Entries:', formDataEntries);
+            console.log('========================================');
+            
             const response = await requestApi('api/admin/admins', 'POST', formData, 'json', 'multipart/form-data');
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
@@ -337,40 +412,8 @@ const AdminAdd = () => {
                                         </div>
                                     </div>
 
-                                    {/* Chi nhánh và Vai trò - cùng hàng */}
+                                    {/* Vai trò và Chi nhánh - cùng hàng */}
                                     <div className="row mb-3">
-                                        <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold">
-                                                    Chi nhánh <span style={{ color: 'red' }}>*</span>
-                                                </label>
-                                                <Select
-                                                    options={branchOptions}
-                                                    value={branchOptions.find(opt => opt.value === selectedBranch)}
-                                                    onChange={opt => {
-                                                        const value = opt ? opt.value : null;
-                                                        setSelectedBranch(value);
-                                                        setValue('branch_id', value, { shouldValidate: true });
-                                                    }}
-                                                    placeholder="Chọn chi nhánh..."
-                                                    classNamePrefix="react-select"
-                                                    styles={{
-                                                        ...selectStyles,
-                                                        menuPortal: (base) => ({ ...base, zIndex: 9999 })
-                                                    }}
-                                                    menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
-                                                    menuPosition="fixed"
-                                                    onBlur={() => trigger('branch_id')}
-                                                />
-                                                <input
-                                                    type="hidden"
-                                                    {...register('branch_id', {
-                                                        required: 'Chi nhánh là bắt buộc!'
-                                                    })}
-                                                />
-                                                {errors.branch_id && <div className="text-danger mt-1">{errors.branch_id.message}</div>}
-                                            </div>
-                                        </div>
                                         <div className="col-md-6">
                                             <div className="mb-3">
                                                 <label className="form-label fw-semibold">
@@ -378,14 +421,15 @@ const AdminAdd = () => {
                                                 </label>
                                                 <Select
                                                     options={roleOptions}
-                                                    isMulti
-                                                    value={roleOptions.filter(opt => selectedRoles.includes(String(opt.value)) || selectedRoles.includes(opt.value))}
-                                                    onChange={opts => {
-                                                        const values = opts ? opts.map(opt => opt.value) : [];
-                                                        setSelectedRoles(values);
-                                                        setValue('role_ids', values, { shouldValidate: true });
+                                                    value={roleOptions.find(opt => opt.value === selectedRole)}
+                                                    onChange={opt => {
+                                                        const value = opt ? opt.value : null;
+                                                        setSelectedRole(value);
+                                                        setValue('role_id', value, { shouldValidate: true });
+                                                        // Trigger validation lại cho branch_ids khi role thay đổi
+                                                        setTimeout(() => trigger('branch_ids'), 100);
                                                     }}
-                                                    placeholder="Tìm kiếm & chọn vai trò..."
+                                                    placeholder="Chọn vai trò..."
                                                     classNamePrefix="react-select"
                                                     styles={{
                                                         ...selectStyles,
@@ -393,15 +437,83 @@ const AdminAdd = () => {
                                                     }}
                                                     menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                                                     menuPosition="fixed"
-                                                    onBlur={() => trigger('role_ids')}
+                                                    onBlur={() => trigger('role_id')}
                                                 />
                                                 <input
                                                     type="hidden"
-                                                    {...register('role_ids', {
-                                                        validate: value => (value && value.length > 0) || 'Phải chọn ít nhất 1 vai trò!'
+                                                    {...register('role_id', {
+                                                        required: 'Vai trò là bắt buộc!'
                                                     })}
                                                 />
-                                                {errors.role_ids && <div className="text-danger mt-1">{errors.role_ids.message}</div>}
+                                                {errors.role_id && <div className="text-danger mt-1">{errors.role_id.message}</div>}
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label fw-semibold">
+                                                    Chi nhánh <span style={{ color: 'red' }}>*</span>
+                                                </label>
+                                                <Select
+                                                    options={branchOptions}
+                                                    isMulti={branchScope !== SCOPE_SINGLE_BRANCH}
+                                                    value={branchOptions.filter(opt => selectedBranches.includes(String(opt.value)) || selectedBranches.includes(opt.value))}
+                                                    onChange={opts => {
+                                                        let values = [];
+                                                        
+                                                        if (branchScope === SCOPE_SINGLE_BRANCH) {
+                                                            // Single select mode: opts là object đơn lẻ
+                                                            values = opts ? [opts.value] : [];
+                                                        } else {
+                                                            // Multi select mode: opts là array
+                                                            values = opts ? (Array.isArray(opts) ? opts.map(opt => opt.value) : [opts.value]) : [];
+                                                        }
+                                                        
+                                                        setSelectedBranches(values);
+                                                        setValue('branch_ids', values, { shouldValidate: true });
+                                                    }}
+                                                    placeholder={
+                                                        branchScope === SCOPE_ALL_BRANCHES 
+                                                            ? "Tự động áp dụng cho tất cả chi nhánh" 
+                                                            : branchScope === SCOPE_SINGLE_BRANCH
+                                                            ? "Chọn 1 chi nhánh..."
+                                                            : "Tìm kiếm & chọn chi nhánh..."
+                                                    }
+                                                    isDisabled={branchScope === SCOPE_ALL_BRANCHES}
+                                                    classNamePrefix="react-select"
+                                                    styles={{
+                                                        ...selectStyles,
+                                                        menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                                                    }}
+                                                    menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                    menuPosition="fixed"
+                                                    onBlur={() => trigger('branch_ids')}
+                                                />
+                                                {branchScope === SCOPE_ALL_BRANCHES && (
+                                                    <small className="text-muted d-block mt-1">
+                                                        <i className="fas fa-info-circle me-1"></i>
+                                                        Vai trò này tự động áp dụng cho tất cả chi nhánh
+                                                    </small>
+                                                )}
+                                                <input
+                                                    type="hidden"
+                                                    {...register('branch_ids', {
+                                                        validate: (value) => {
+                                                            if (branchScope === SCOPE_ALL_BRANCHES) {
+                                                                return true; // Không cần validate nếu là all_branches
+                                                            }
+                                                            if (!value || value.length === 0) {
+                                                                return branchScope === SCOPE_SINGLE_BRANCH 
+                                                                    ? 'Phải chọn 1 chi nhánh!' 
+                                                                    : 'Phải chọn ít nhất 1 chi nhánh!';
+                                                            }
+                                                            if (branchScope === SCOPE_SINGLE_BRANCH && value.length > 1) {
+                                                                return 'Vai trò này chỉ được chọn 1 chi nhánh!';
+                                                            }
+                                                            return true;
+                                                        }
+                                                    })}
+                                                />
+                                                {errors.branch_ids && <div className="text-danger mt-1">{errors.branch_ids.message}</div>}
                                             </div>
                                         </div>
                                     </div>

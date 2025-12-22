@@ -7,6 +7,8 @@ import * as actions from '../../redux/actions/index';
 import { toast } from 'react-toastify';
 import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 import { cleanHtml, oembedToIframe } from '../../helpers/formatData';
 import { formatVNDWithUnit } from '../../helpers/formatMoney';
 import moment from 'moment';
@@ -553,12 +555,16 @@ const ComboDetail = () => {
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
                                 <i className="fas fa-arrow-left me-1"></i><span className="d-none d-sm-inline">Quay lại</span>
                             </button>
-                            <Link className="btn btn-primary btn-sm" to={`/combo/${combo.id}`}>
-                                <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa combo</span>
-                            </Link>
-                            <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
-                                <i className="fas fa-trash-alt me-1"></i><span className="d-none d-sm-inline">Xóa combo</span>
-                            </button>
+                            <Permission permission={PERMISSIONS.COMBOS_UPDATE}>
+                                <Link className="btn btn-primary btn-sm" to={`/combo/${combo.id}`}>
+                                    <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa combo</span>
+                                </Link>
+                            </Permission>
+                            <Permission permission={PERMISSIONS.COMBOS_DELETE}>
+                                <button className="btn btn-danger btn-sm" onClick={handleOpenDeleteModal}>
+                                    <i className="fas fa-trash-alt me-1"></i><span className="d-none d-sm-inline">Xóa combo</span>
+                                </button>
+                            </Permission>
                         </div>
                     </div>
                 </div>

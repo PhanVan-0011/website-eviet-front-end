@@ -8,6 +8,8 @@ import { Modal, Button, Offcanvas, Dropdown } from 'react-bootstrap';
 import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
+import Permission from '../common/Permission';
+import { PERMISSIONS } from '../../constants/permissions';
 import {
     FilterButtonGroup,
     FilterDateRange,
@@ -85,12 +87,16 @@ const BranchList = () => {
             title: "Hành động", 
             element: row => (
                 <div className="d-flex gap-1">
-                    <Link className="btn btn-primary btn-sm" to={`/branch/${row.id}`} title="Chỉnh sửa">
-                        <i className="fas fa-edit"></i>
-                    </Link>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)} title="Xóa">
-                        <i className="fas fa-trash"></i>
-                    </button>
+                    <Permission permission={PERMISSIONS.BRANCHES_UPDATE}>
+                        <Link className="btn btn-primary btn-sm" to={`/branch/${row.id}`} title="Chỉnh sửa">
+                            <i className="fas fa-edit"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.BRANCHES_DELETE}>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)} title="Xóa">
+                            <i className="fas fa-trash"></i>
+                        </button>
+                    </Permission>
                 </div>
             ),
             width: "12%"
@@ -238,17 +244,21 @@ const BranchList = () => {
                         <div className="branch-right-section d-flex align-items-center gap-2 justify-content-end">
                             {/* Nút xóa khi có chi nhánh được chọn */}
                             {selectedRows.length > 0 && (
-                                <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
-                                    <i className="fas fa-trash me-1"></i>
-                                    <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
-                                </button>
+                                <Permission permission={PERMISSIONS.BRANCHES_DELETE}>
+                                    <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
+                                        <i className="fas fa-trash me-1"></i>
+                                        <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
+                                    </button>
+                                </Permission>
                             )}
                             
                             {/* Nút tạo mới */}
-                            <Link className="btn btn-primary btn-sm" to="/branch/add">
-                                <i className="fas fa-plus me-1"></i>
-                                <span className="d-none d-sm-inline">Tạo mới</span>
-                            </Link>
+                            <Permission permission={PERMISSIONS.BRANCHES_CREATE}>
+                                <Link className="btn btn-primary btn-sm" to="/branch/add">
+                                    <i className="fas fa-plus me-1"></i>
+                                    <span className="d-none d-sm-inline">Tạo mới</span>
+                                </Link>
+                            </Permission>
                             
                             {/* Các button riêng lẻ - hiện trên >= 1280px */}
                             <div className="branch-action-buttons">
