@@ -51,7 +51,7 @@ const GroupSupplierUpdate = () => {
             dispatch(actions.controlLoading(true));
             const response = await requestApi(
                 `api/admin/supplier-groups/${params.id}`,
-                'POST',
+                'PUT',
                 data
             );
             dispatch(actions.controlLoading(false));
