@@ -56,14 +56,14 @@ const RuleList = () => {
             title: "Hành động", element: row => (
                 <div className="d-flex align-items-center gap-1" style={{ flexWrap: 'nowrap' }}>
                     <Permission permission={PERMISSIONS.ROLES_UPDATE}>
-                        <Link className="btn btn-primary btn-sm px-2 py-1" to={`/rule/${row.id}`} title="Chỉnh sửa">
-                            <i className="fas fa-edit"></i>
-                        </Link>
+                    <Link className="btn btn-primary btn-sm px-2 py-1" to={`/rule/${row.id}`} title="Chỉnh sửa">
+                        <i className="fas fa-edit"></i>
+                    </Link>
                     </Permission>
                     <Permission permission={PERMISSIONS.ROLES_DELETE}>
-                        <button className="btn btn-danger btn-sm px-2 py-1" onClick={() => handleDelete(row.id)} title="Xóa">
-                            <i className="fas fa-trash"></i>
-                        </button>
+                    <button className="btn btn-danger btn-sm px-2 py-1" onClick={() => handleDelete(row.id)} title="Xóa">
+                        <i className="fas fa-trash"></i>
+                    </button>
                     </Permission>
                 </div>
             ),
@@ -190,19 +190,19 @@ const RuleList = () => {
                             {/* Nút xóa khi có vai trò được chọn */}
                             {selectedRows.length > 0 && (
                                 <Permission permission={PERMISSIONS.ROLES_DELETE}>
-                                    <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
-                                        <i className="fas fa-trash me-1"></i>
-                                        <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
-                                    </button>
+                                <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
+                                    <i className="fas fa-trash me-1"></i>
+                                    <span className="d-none d-sm-inline">Xóa ({selectedRows.length})</span>
+                                </button>
                                 </Permission>
                             )}
                             
                             {/* Nút tạo mới */}
                             <Permission permission={PERMISSIONS.ROLES_CREATE}>
-                                <Link className="btn btn-primary btn-sm" to="/rule/add">
-                                    <i className="fas fa-plus me-1"></i>
-                                    <span className="d-none d-sm-inline">Tạo mới</span>
-                                </Link>
+                            <Link className="btn btn-primary btn-sm" to="/rule/add">
+                                <i className="fas fa-plus me-1"></i>
+                                <span className="d-none d-sm-inline">Tạo mới</span>
+                            </Link>
                             </Permission>
                             
                             {/* Các button riêng lẻ - hiện trên >= 1280px */}

@@ -189,15 +189,15 @@ const RuleUpdate = () => {
                                         <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy bỏ</span>
                                     </button>
                                     <Permission permission={PERMISSIONS.ROLES_UPDATE}>
-                                        <button
-                                            className="btn btn-primary btn-sm"
-                                            type="submit"
-                                            disabled={isSubmitting}
-                                        >
-                                            <i className="fas fa-check me-1"></i>
-                                            <span className="d-none d-sm-inline">{isSubmitting ? "Đang gửi..." : "Cập nhật"}</span>
-                                            {isSubmitting && <span className="d-sm-none">...</span>}
-                                        </button>
+                                    <button
+                                        className="btn btn-primary btn-sm"
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                    >
+                                        <i className="fas fa-check me-1"></i>
+                                        <span className="d-none d-sm-inline">{isSubmitting ? "Đang gửi..." : "Cập nhật"}</span>
+                                        {isSubmitting && <span className="d-sm-none">...</span>}
+                                    </button>
                                     </Permission>
                                 </div>
                             </form>
