@@ -67,10 +67,10 @@ export const PERMISSIONS = {
     BRANCHES_DELETE: 'branches.delete',
   
     // Nhóm nhà cung cấp
-    GROUP_SUPPLIERS_VIEW: 'group_suppliers.view',
-    GROUP_SUPPLIERS_CREATE: 'group_suppliers.create',
-    GROUP_SUPPLIERS_UPDATE: 'group_suppliers.update',
-    GROUP_SUPPLIERS_DELETE: 'group_suppliers.delete',
+    GROUP_SUPPLIERS_VIEW: 'supplier-groups.view',
+    GROUP_SUPPLIERS_CREATE: 'supplier-groups.create',
+    GROUP_SUPPLIERS_UPDATE: 'supplier-groups.update',
+    GROUP_SUPPLIERS_DELETE: 'supplier-groups.delete',
   
     // Khách hàng
     USERS_VIEW: 'users.view',

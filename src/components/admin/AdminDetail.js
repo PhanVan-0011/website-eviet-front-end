@@ -9,6 +9,17 @@ import { Modal, Button } from 'react-bootstrap';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
+import moment from 'moment';
+
+// Component hiển thị từng field thông tin
+const InfoItem = ({ label, value, isDanger = false }) => (
+    <div className="col-md-3 mb-3">
+        <div className="text-muted small mb-1">{label}</div>
+        <div className={`fw-semibold border-bottom pb-2 ${isDanger ? 'text-danger' : ''}`}>
+            {value ?? 'Chưa có'}
+        </div>
+    </div>
+);
 const AdminDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -56,138 +67,146 @@ const AdminDetail = () => {
             </div>     
         );
     }
-    if (!user) return (
-        <div className="container-fluid px-4">
-            <div className="mt-4 mb-3">
-                <h1 className="mt-4">Chi tiết nhân viên</h1>
-                <ol className="breadcrumb mb-4">
-                    <li className="breadcrumb-item"><Link to="/admin">Danh sách nhân viên</Link></li>
-                    <li className="breadcrumb-item active">Chi tiết nhân viên</li>
-                </ol>
+    if (!user) {
+        return (
+            <div className="container-fluid px-4">
+                <div className="mt-4 mb-3">
+                    <h1 className="mt-4">Chi tiết nhân viên</h1>
+                    <ol className="breadcrumb mb-4">
+                        <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
+                        <li className="breadcrumb-item"><Link to="/admin">Danh sách nhân viên</Link></li>
+                        <li className="breadcrumb-item active">Chi tiết</li>
+                    </ol>
+                </div>
+                
+                <div className="d-flex flex-column justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+                    <img
+                        src="https://cdn-icons-png.flaticon.com/512/6134/6134065.png"
+                        alt="Không tìm thấy nhân viên"
+                        style={{ width: 120, marginBottom: 24, opacity: 0.85 }}
+                    />
+                    <h2 className="text-danger mb-2" style={{ fontWeight: 700 }}>
+                        Không tìm thấy nhân viên!
+                    </h2>
+                    <p className="text-secondary mb-4 fs-5 text-center" style={{ maxWidth: 400 }}>
+                        Nhân viên bạn tìm kiếm không tồn tại hoặc đã bị xóa khỏi hệ thống.<br />
+                        Vui lòng kiểm tra lại hoặc quay về trang danh sách nhân viên.
+                    </p>
+                    <Link to="/admin" className="btn btn-outline-primary px-4 py-2">
+                        <i className="fas fa-arrow-left me-2"></i>Quay về danh sách nhân viên
+                    </Link>
+                </div>
             </div>
-            <div className="d-flex flex-column justify-content-center align-items-center bg-light rounded-3 shadow-sm" style={{ minHeight: '60vh' }}>
-                <img
-                    src="https://cdn-icons-png.flaticon.com/512/6134/6134065.png"
-                    alt="Không tìm thấy nhân viên"
-                    style={{ width: 120, marginBottom: 24, opacity: 0.85 }}
-                />
-                <h2 className="text-danger mb-2" style={{ fontWeight: 700 }}>
-                    Không tìm thấy nhân viên!
-                </h2>
-                <p className="text-secondary mb-4 fs-5 text-center" style={{ maxWidth: 400 }}>
-                    Nhân viên bạn tìm kiếm không tồn tại hoặc đã bị xóa khỏi hệ thống.<br />
-                    Vui lòng kiểm tra lại hoặc quay về trang danh sách nhân viên.
-                </p>
-                <Link to="/admin" className="btn btn-outline-primary px-4 py-2">
-                    <i className="fas fa-arrow-left me-2"></i>Quay về danh sách nhân viên
-                </Link>
-            </div>
-        </div>
-    );
+        );
+    }
 
     return (
         <div id="layoutSidenav_content">
             <main>
-                <div className="container-fluid px-4">
-                    <h1 className="mt-4">Chi tiết nhân viên</h1>
-                    <ol className="breadcrumb mb-4">
-                        <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
+                <div className="container-fluid px-3 px-md-4">
+                    <div className="d-flex align-items-center justify-content-between mt-3 mt-md-4 mb-2">
+                        <h2 className="mb-0 detail-page-header">Chi tiết nhân viên #{user.id}</h2>
+                    </div>
+                    <ol className="breadcrumb mb-3 mb-md-4 detail-breadcrumb">
+                        <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                         <li className="breadcrumb-item"><Link to="/admin">Danh sách nhân viên</Link></li>
-                        <li className="breadcrumb-item active">Chi tiết nhân viên</li>
+                        <li className="breadcrumb-item active">Chi tiết</li>
                     </ol>
-                    <div className="card mb-3 bg-light rounded-3 shadow-sm">
-                        <div className="card-header">
-                            <i className="fas fa-user me-1"></i> Thông tin nhân viên
-                        </div>
-                        <div className="card-body">
-                            <div className="row mb-3">
-                                <div className="col-md-6 mb-2">
-                                    <strong>Họ tên:</strong> {user.name}
+
+                    <div className="card border">
+                        <div className="detail-card">
+                            {/* Header: Thông tin nhân viên */}
+                            <div style={{marginBottom: '1.5rem', paddingBottom: '1.5rem'}}>
+                                {/* Tên nhân viên */}
+                                <h3 className="h4 h-md-3" style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
+                                    {user.name}
+                                </h3>
+
+                                {/* Badges */}
+                                <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem'}}>
+                                    {user.is_active ? (
+                                        <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Hoạt động</span>
+                                    ) : (
+                                        <span className="badge bg-danger"><i className="fas fa-ban me-1"></i>Không hoạt động</span>
+                                    )}
+                                    {user.is_verified ? (
+                                        <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Đã xác thực</span>
+                                    ) : (
+                                        <span className="badge bg-warning text-dark"><i className="fas fa-exclamation-circle me-1"></i>Chưa xác thực</span>
+                                    )}
+                                    {user.role && (
+                                        <span className="badge bg-info text-dark"><i className="fas fa-user-shield me-1"></i>{user.role.display_name || user.role.name}</span>
+                                    )}
                                 </div>
-                                <div className="col-md-6 mb-2">
-                                    <strong>Email:</strong> {user.email}
-                                </div>
-                                <div className="col-md-6 mb-2">
-                                    <strong>Số điện thoại:</strong> {user.phone}
-                                </div>
-                                <div className="col-md-6 mb-2">
-                                    <strong>Trạng thái:</strong> {user.is_active ? <span className="badge bg-success">Hoạt động</span> : <span className="badge bg-secondary">Không hoạt động</span>}
-                                </div>
-                                <div className="col-md-6 mb-2">
-                                    <strong>Giới tính:</strong> {user.gender === 'male' ? 'Nam' : user.gender === 'female' ? 'Nữ' : 'Khác'}
-                                </div>
-                                <div className="col-md-6 mb-2">
-                                    <strong>Ngày sinh:</strong> {user.date_of_birth || <span className="text-muted">Chưa cập nhật</span>}
-                                </div>
-                                <div className="col-md-6 mb-2">
-                                    <strong>Địa chỉ:</strong> {user.address}
-                                </div>
-                                <div className="col-md-6 mb-2">
-                                    <strong>Xác thực:</strong> {user.is_verified ? <span className="badge bg-success">Đã xác thực</span> : <span className="badge bg-warning text-dark">Chưa xác thực</span>}
-                                </div>
-                                <div className="col-md-6 mb-2">
-                                    <strong>Ngày tạo:</strong> {formatDate(user.created_at)}
-                                </div>
-                                <div className="col-md-6 mb-2">
-                                    <strong>Ngày cập nhật:</strong> {formatDate(user.updated_at)}
-                                </div>
-                                <div className="col-md-6 mb-2">
-                                    <strong>Vai trò:</strong> {user.role ? (
-                                        <span className="badge bg-info text-dark">{user.role.display_name || user.role.name}</span>
-                                    ) : <span className="text-muted">Chưa có</span>}
-                                </div>
-                                <div className="col-md-6 mb-2">
-                                    <strong>Chi nhánh:</strong> {
-                                        // Xử lý trường hợp có nhiều chi nhánh (branches là array)
-                                        Array.isArray(user.branches) && user.branches.length > 0 ? (
-                                            user.branches.map(b => b.name || (typeof b === 'string' ? b : '')).filter(Boolean).join(", ")
-                                        ) : 
-                                        // Xử lý trường hợp có 1 chi nhánh (branch là object)
-                                        user.branch ? (
-                                            typeof user.branch === 'string' ? user.branch : (user.branch.name || '')
-                                        ) : (
-                                            // Nếu không có branch hay branches, hiển thị "Tất cả chi nhánh"
-                                            <span className="text-primary fw-semibold">Tất cả chi nhánh</span>
-                                        )
-                                    }
+
+                                {/* Lưới thông tin */}
+                                <div className="row detail-info-grid">
+                                    <InfoItem label="Họ tên" value={user.name} />
+                                    <InfoItem label="Email" value={user.email} />
+                                    <InfoItem label="Số điện thoại" value={user.phone} />
+                                    <InfoItem label="Giới tính" value={user.gender === 'male' ? 'Nam' : user.gender === 'female' ? 'Nữ' : 'Khác'} />
+
+                                    <InfoItem label="Ngày sinh" value={user.date_of_birth || 'Chưa cập nhật'} />
+                                    <InfoItem label="Địa chỉ" value={user.address} />
+                                    <InfoItem label="Trạng thái" value={user.is_active ? 'Hoạt động' : 'Không hoạt động'} />
+                                    <InfoItem label="Xác thực" value={user.is_verified ? 'Đã xác thực' : 'Chưa xác thực'} />
+
+                                    <InfoItem label="Vai trò" value={user.role ? (user.role.display_name || user.role.name) : 'Chưa có'} />
+                                    <InfoItem 
+                                        label="Chi nhánh" 
+                                        value={
+                                            Array.isArray(user.branches) && user.branches.length > 0
+                                                ? user.branches.map(b => b.name || (typeof b === 'string' ? b : '')).filter(Boolean).join(", ")
+                                                : user.branch
+                                                    ? (typeof user.branch === 'string' ? user.branch : (user.branch.name || ''))
+                                                    : 'Tất cả chi nhánh'
+                                        }
+                                    />
+                                    <InfoItem label="Ngày tạo" value={user.created_at ? moment(user.created_at).format('DD/MM/YYYY') : 'Chưa có'} />
+                                    <InfoItem label="Ngày cập nhật" value={user.updated_at ? moment(user.updated_at).format('DD/MM/YYYY') : 'Chưa có'} />
                                 </div>
                             </div>
+
+        
                         </div>
                     </div>
-                    {/* 3 button nằm ngoài card, căn giữa */}
-                    <div className="d-flex justify-content-center gap-3 mt-4">
-                        <Permission permission={PERMISSIONS.ADMIN_USERS_DELETE}>
-                            <button className="btn btn-danger px-4" onClick={() => setShowModal(true)} disabled={deleting}>
-                                <i className="fas fa-trash-alt me-1"></i> Xóa
+
+                    {/* Nút thao tác */}
+                    <div className="row mt-3 mt-md-4 mb-3 mb-md-4">
+                        <div className="col-12 d-flex justify-content-center detail-action-buttons">
+                            <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
+                                <i className="fas fa-arrow-left me-1"></i><span className="d-none d-sm-inline">Quay lại</span>
                             </button>
-                        </Permission>
-                        <Permission permission={PERMISSIONS.ADMIN_USERS_UPDATE}>
-                            <button className="btn btn-primary px-4" onClick={() => navigate(`/admin/${user.id}`)}>
-                                <i className="fas fa-edit me-1"></i> Cập nhật
-                            </button>
-                        </Permission>
-                        <button className="btn btn-outline-secondary px-4" onClick={() => navigate(-1)}>
-                            <i className="fas fa-arrow-left me-1"></i> Quay lại
-                        </button>
-                        <Modal show={showModal} onHide={() => setShowModal(false)}>
-                            <Modal.Header closeButton>
-                                <Modal.Title>Xác nhận xóa</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                                <p>Bạn chắc chắn muốn xóa nhân viên này?</p>
-                            </Modal.Body>
-                            <Modal.Footer>
-                                <Button variant="secondary" onClick={() => setShowModal(false)} disabled={deleting}>
-                                    Hủy
-                                </Button>
-                                <Button variant="danger" onClick={async () => { setShowModal(false); await handleDelete(); }} disabled={deleting}>
-                                    Xóa
-                                </Button>
-                            </Modal.Footer>
-                        </Modal>
+                            <Permission permission={PERMISSIONS.ADMIN_USERS_UPDATE}>
+                                <Link className="btn btn-primary btn-sm" to={`/admin/${user.id}`}>
+                                    <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa nhân viên</span>
+                                </Link>
+                            </Permission>
+                            <Permission permission={PERMISSIONS.ADMIN_USERS_DELETE}>
+                                <button className="btn btn-danger btn-sm" onClick={() => setShowModal(true)} disabled={deleting}>
+                                    <i className="fas fa-trash-alt me-1"></i><span className="d-none d-sm-inline">Xóa nhân viên</span>
+                                </button>
+                            </Permission>
+                        </div>
                     </div>
                 </div>
             </main>
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Xác nhận xóa</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Bạn có chắc chắn muốn xóa nhân viên này?</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowModal(false)} disabled={deleting}>
+                        Hủy
+                    </Button>
+                    <Button variant="danger" onClick={async () => { setShowModal(false); await handleDelete(); }} disabled={deleting}>
+                        Xóa
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };
