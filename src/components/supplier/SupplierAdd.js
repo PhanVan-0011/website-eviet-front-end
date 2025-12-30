@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
@@ -9,6 +9,7 @@ import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig'
 
 const SupplierAdd = () => {
     const navigation = useNavigate();
+    const location = useLocation();
     const {
         register,
         handleSubmit,
@@ -66,7 +67,9 @@ const SupplierAdd = () => {
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm nhà cung cấp thành công!", toastSuccessConfig);
                 
-                navigation('/supplier');
+                // Quay lại trang trước đó nếu có, nếu không thì về danh sách nhà cung cấp
+                const returnTo = location.state?.returnTo || '/supplier';
+                navigation(returnTo);
                 
             } else {
                 toast.error(response.data.message || "Thêm nhà cung cấp thất bại", toastErrorConfig);
@@ -257,7 +260,10 @@ const SupplierAdd = () => {
                                             <button
                                                 type="button"
                                                 className="btn btn-outline-secondary btn-sm"
-                                                onClick={() => navigation('/supplier')}
+                                                onClick={() => {
+                                                    const returnTo = location.state?.returnTo || '/supplier';
+                                                    navigation(returnTo);
+                                                }}
                                                 disabled={isSubmitting}
                                             >
                                                 <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy bỏ</span>

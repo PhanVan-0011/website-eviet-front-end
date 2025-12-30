@@ -1,28 +1,25 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import DataTables from '../common/DataTables';
+import React, { useEffect, useState, useRef } from 'react'
+import { Link } from 'react-router-dom'
+import DataTables from '../common/DataTables'
 import requestApi from '../../helpers/api';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
 import { Modal, Button, Dropdown } from 'react-bootstrap';
+import { formatDate } from '../../tools/formatData';
 import { toast } from 'react-toastify';
-import moment from 'moment';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
-import ImageWithZoom from '../common/ImageWithZoom';
 import {
     FilterSelectSingle,
-    FilterSelectMulti,
     FilterButtonGroup,
     FilterDateRange,
     FilterToggleButton
 } from '../common/FilterComponents';
 import LiveSearch from '../common/LiveSearch';
-const urlImage = process.env.REACT_APP_API_URL + 'api/images/';
 
-const PostList = () => {
-    const [posts, setPosts] = useState([]);
+const PickupLocationList = () => {
+    const [pickupLocations, setPickupLocations] = useState([]);
     const [numOfPages, setNumOfPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemOfPage, setItemOfPage] = useState(25);
@@ -35,23 +32,17 @@ const PostList = () => {
     const [refresh, setRefresh] = useState(Date.now());
 
     // Filter states
+    const [branches, setBranches] = useState([]);
     const [filterValues, setFilterValues] = useState({
-        category: 'all',
-        status: 'all'
+        status: 'all',
+        branch_id: null,
+        dateRange: { from: null, to: null }
     });
     const [isFilterVisible, setIsFilterVisible] = useState(true);
     const [isPulsing, setIsPulsing] = useState(false);
     
     // Ref để track itemOfPage trước đó, tránh reset ở lần đầu mount
     const prevItemOfPageRef = useRef(itemOfPage);
-
-    // Data for filters
-    const [categories, setCategories] = useState([]);
-
-    // Sort states
-    const [sortField, setSortField] = useState('');
-    const [sortOrder, setSortOrder] = useState('asc');
-
 
     const updateFilter = (key, value) => {
         setFilterValues(prev => ({ ...prev, [key]: value }));
@@ -61,14 +52,128 @@ const PostList = () => {
         setIsFilterVisible(prev => !prev);
     };
 
-    // Lấy danh mục cho filter
+    // Lấy dữ liệu cho filter
     useEffect(() => {
-        requestApi('api/admin/categories?limit=1000', 'GET', []).then((response) => {
-            if (response.data && response.data.data) setCategories(response.data.data);
+        // Lấy chi nhánh
+        requestApi('api/admin/branches?limit=1000', 'GET', []).then((response) => {
+            if (response.data && response.data.data) setBranches(response.data.data);
         });
     }, []);
 
-    // Lấy danh sách bài viết
+    const columns = [
+        { 
+            title: "Tên địa điểm", 
+            element: row => row.name,
+            width: "20%"
+        },
+        { 
+            title: "Mô tả", 
+            element: row => row.description || '-',
+            width: "25%"
+        },
+        { 
+            title: "Chi nhánh", 
+            element: row => row.branch ? row.branch.name : '-',
+            width: "20%"
+        },
+        { 
+            title: "Ngày tạo", 
+            element: row => formatDate(row.created_at),
+            width: "12%"
+        },
+        { 
+            title: "Ngày cập nhật", 
+            element: row => formatDate(row.updated_at),
+            width: "12%"
+        },
+        {
+            title: "Trạng thái",
+            element: row => row.is_active
+                ? <span className="badge bg-success">Hiển thị</span>
+                : <span className="badge bg-secondary">Không hiển thị</span>,
+            width: "10%"
+        },
+        {
+            title: "Hành động", 
+            element: row => (
+                <div className="d-flex gap-1">
+                    <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_VIEW}>
+                        <Link className="btn btn-info btn-sm" to={`/pickup-location/detail/${row.id}`} title="Xem chi tiết">
+                            <i className="fas fa-eye"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_UPDATE}>
+                        <Link className="btn btn-primary btn-sm" to={`/pickup-location/${row.id}/edit`} title="Chỉnh sửa">
+                            <i className="fas fa-edit"></i>
+                        </Link>
+                    </Permission>
+                    <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_DELETE}>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)} title="Xóa">
+                            <i className="fas fa-trash"></i>
+                        </button>
+                    </Permission>
+                </div>
+            ),
+            width: "12%"
+        }
+    ];
+
+    // Handle single Delete
+    const handleDelete = (id) => {
+        setItemDelete(id);
+        setTypeDelete('single');
+        setShowModal(true);
+    }
+    // Handle Multi Delete
+    const multiDelete = () => {
+        setTypeDelete('multi');
+        setShowModal(true);
+    }
+    // Delete
+    const requestApiDelete = () => {
+        dispatch(actions.controlLoading(true));
+        if(typeDelete === 'single'){
+            requestApi(`api/admin/pickup-locations/${itemDelete}`, 'DELETE', []).then((response) => {
+                dispatch(actions.controlLoading(false));
+                setShowModal(false);
+                if (response.data && response.data.success) {
+                    toast.success(response.data.message || "Xóa địa điểm nhận hàng thành công!", toastSuccessConfig);
+                    setRefresh(Date.now());
+                } else {
+                    toast.error(response.data.message || "Xóa địa điểm nhận hàng thất bại", toastErrorConfig);
+                }
+            }).catch((e) => {
+                dispatch(actions.controlLoading(false));
+                setShowModal(false);
+                if (e.response && e.response.data && e.response.data.message) {
+                    toast.error(e.response.data.message, toastErrorConfig);
+                } else {
+                    toast.error("Server error", toastErrorConfig);
+                }
+            });
+        } else {
+            requestApi(`api/admin/pickup-locations/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
+                dispatch(actions.controlLoading(false));
+                setShowModal(false);
+                if (response.data && response.data.success) {
+                    toast.success(response.data.message || "Xóa địa điểm nhận hàng thành công!", toastSuccessConfig);
+                    setSelectedRows([]);
+                    setRefresh(Date.now());
+                } else {
+                    toast.error(response.data.message || "Xóa địa điểm nhận hàng thất bại", toastErrorConfig);
+                }
+            }).catch((e) => {
+                dispatch(actions.controlLoading(false));
+                setShowModal(false);
+                if (e.response && e.response.data && e.response.data.message) {
+                    toast.error(e.response.data.message, toastErrorConfig);
+                } else {
+                    toast.error("Server error", toastErrorConfig);
+                }
+            });
+        }
+    }
+
     useEffect(() => {
         // Reset về trang 1 khi thay đổi số items/trang (không phải lần đầu mount)
         const itemOfPageChanged = prevItemOfPageRef.current !== itemOfPage && prevItemOfPageRef.current !== null;
@@ -81,267 +186,86 @@ const PostList = () => {
         }
         prevItemOfPageRef.current = itemOfPage;
         
-        let query = `?limit=${itemOfPage}&page=${pageToUse}&keyword=${searchText}`;
+        let query = `?limit=${itemOfPage}&page=${pageToUse}`;
         
-        // New filter panel filters
-        if (filterValues.category && filterValues.category !== 'all') {
-            query += `&category_id=${filterValues.category}`;
+        // Tìm kiếm keyword
+        if (searchText) {
+            query += `&keyword=${encodeURIComponent(searchText)}`;
         }
-        if (filterValues.status && filterValues.status !== 'all') {
-            query += `&status=${filterValues.status}`;
+        
+        // Thêm filter status (is_active)
+        if (filterValues.status !== 'all') {
+            query += `&status=${filterValues.status === 'active' ? '1' : '0'}`;
         }
-
+        
+        // Thêm filter branch_id
+        if (filterValues.branch_id && filterValues.branch_id.value) {
+            query += `&branch_id=${filterValues.branch_id.value}`;
+        }
+        
+        // Thêm filter date range
+        if (filterValues.dateRange.from && filterValues.dateRange.to) {
+            const startDate = filterValues.dateRange.from.toISOString().split('T')[0];
+            const endDate = filterValues.dateRange.to.toISOString().split('T')[0];
+            query += `&start_date=${startDate}&end_date=${endDate}`;
+        }
+        
         dispatch(actions.controlLoading(true));
-        requestApi(`api/admin/posts${query}`, 'GET', []).then((response) => {
+        requestApi(`api/admin/pickup-locations${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
-            // Chỉ update posts khi có data, không clear nếu data rỗng
+            // Chỉ update pickupLocations khi có data, không clear nếu data rỗng
             if (response.data && response.data.data) {
-                setPosts(response.data.data);
+                setPickupLocations(response.data.data);
             }
             if (response.data && response.data.pagination && response.data.pagination.last_page) {
                 setNumOfPages(response.data.pagination.last_page);
             }
-        }).catch(() => {
+        }).catch((error) => {
             dispatch(actions.controlLoading(false));
         });
-    }, [currentPage, itemOfPage, searchText, filterValues, refresh, dispatch]);
-
-    // Sắp xếp
-    const sortedPosts = [...posts].sort((a, b) => {
-        if (!sortField) return 0;
-        let aValue = a[sortField];
-        let bValue = b[sortField];
-
-        if (sortField === 'category') {
-            aValue = a.categories && a.categories[0] ? a.categories[0].name : '';
-            bValue = b.categories && b.categories[0] ? b.categories[0].name : '';
-        }
-        if (sortField === 'status') {
-            aValue = a.status;
-            bValue = b.status;
-        }
-        if (typeof aValue === 'string') aValue = aValue.toLowerCase();
-        if (typeof bValue === 'string') bValue = bValue.toLowerCase();
-
-        if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-        return 0;
-    });
-
-    const handleSort = (field) => {
-        if (sortField === field) {
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-        } else {
-            setSortField(field);
-            setSortOrder('asc');
-        }
-    };
-
-    const renderSortIcon = (field) => {
-        if (sortField !== field) return <i className="fas fa-sort text-secondary ms-1"></i>;
-        return sortOrder === 'asc'
-            ? <i className="fas fa-sort-up text-primary ms-1"></i>
-            : <i className="fas fa-sort-down text-primary ms-1"></i>;
-    };
-
-    // Columns
-    const columns = [
-        {
-            title: () => (
-                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('title')}>
-                    Tiêu đề {renderSortIcon('title')}
-                </span>
-            ),
-            element: row => row.title,
-            width: "22%"
-        },
-        {
-            title: "Hình ảnh",
-            element: row => (
-                row.featured_image && row.featured_image.thumb_url ? (
-                    <ImageWithZoom
-                        src={urlImage + row.featured_image.thumb_url}
-                        zoomSrc={row.featured_image.main_url ? urlImage + row.featured_image.main_url : urlImage + row.featured_image.thumb_url}
-                        alt={row.title}
-                    />
-                ) : (
-                    <ImageWithZoom icon alt="Không có ảnh" />
-                )
-            ),
-            width: "12%"
-        },
-        {
-            title: () => (
-                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('category')}>
-                    Danh mục {renderSortIcon('category')}
-                </span>
-            ),
-            element: row =>
-                row.categories && row.categories.length > 0
-                    ? (
-                        <div className="d-flex flex-wrap gap-1">
-                            {row.categories.map((cat, index) => (
-                                <span key={index} className="badge bg-primary">
-                                    {cat.name}
-                                </span>
-                            ))}
-                        </div>
-                    )
-                    : <span className="text-muted">Chưa phân loại</span>,
-            width: "18%"
-        },
-        {
-            title: () => (
-                <span style={{ cursor: 'pointer' }} onClick={() => handleSort('status')}>
-                    Trạng thái {renderSortIcon('status')}
-                </span>
-            ),
-            element: row =>
-                row.status === 1
-                    ? <span className="badge bg-success">Hiển thị</span>
-                    : <span className="badge bg-secondary">Ẩn</span>,
-            width: "10%"
-        },
-        {
-            title: "Ngày tạo",
-            element: row => (
-                <>
-                    <span>{moment(row.created_at).format('HH:mm')}</span><br />
-                    <span>{moment(row.created_at).format('DD-MM-YYYY')}</span>
-                </>
-            ),
-            width: "12%"
-        },
-        {
-            title: "Ngày cập nhật",
-            element: row => (
-                <>
-                    <span>{moment(row.updated_at).format('HH:mm')}</span><br />
-                    <span>{moment(row.updated_at).format('DD-MM-YYYY')}</span>
-                </>
-            ),
-            width: "12%"
-        },
-        {
-            title: "Hành động",
-            element: row => (
-                <div className="d-flex align-items-center">
-                    <Permission permission={PERMISSIONS.POSTS_VIEW}>
-                        <Link className="btn btn-info btn-sm me-1" to={`/post/detail/${row.id}`}>
-                            <i className="fas fa-eye"></i>
-                        </Link>
-                    </Permission>
-                    <Permission permission={PERMISSIONS.POSTS_UPDATE}>
-                        <Link className="btn btn-primary btn-sm me-1" to={`/post/${row.id}`}>
-                            <i className="fas fa-edit"></i>
-                        </Link>
-                    </Permission>
-                    <Permission permission={PERMISSIONS.POSTS_DELETE}>
-                        <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}>
-                            <i className="fas fa-trash"></i>
-                        </button>
-                    </Permission>
-                </div>
-            ),
-            width: "10%"
-        }
-    ];
-
-    // Xử lý xóa
-    const handleDelete = (id) => {
-        setItemDelete(id);
-        setTypeDelete('single');
-        setShowModal(true);
-    };
-    const multiDelete = () => {
-        setTypeDelete('multi');
-        setShowModal(true);
-    };
-    const requestApiDelete = () => {
-        dispatch(actions.controlLoading(true));
-        if (typeDelete === 'single') {
-            requestApi(`api/admin/posts/${itemDelete}`, 'DELETE', []).then((response) => {
-                dispatch(actions.controlLoading(false));
-                setShowModal(false);
-                if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa bài viết thành công!", toastSuccessConfig);
-                    setRefresh(Date.now());
-                } else {
-                    toast.error(response.data.message || "Xóa bài viết thất bại", toastErrorConfig);
-                }
-            }).catch((e) => {
-                dispatch(actions.controlLoading(false));
-                setShowModal(false);
-                if (e.response && e.response.data && e.response.data.message) {
-                    toast.error(e.response.data.message, toastErrorConfig);
-                } else {
-                    toast.error("Server error", toastErrorConfig);
-                }
-            });
-        } else {
-            requestApi(`api/admin/posts/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
-                dispatch(actions.controlLoading(false));
-                setShowModal(false);
-                if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa bài viết thành công!", toastSuccessConfig);
-                    setSelectedRows([]); // Clear selected rows after successful deletion
-                    setRefresh(Date.now());
-                } else {
-                    toast.error(response.data.message || "Xóa bài viết thất bại", toastErrorConfig);
-                }
-            }).catch((e) => {
-                dispatch(actions.controlLoading(false));
-                setShowModal(false);
-                if (e.response && e.response.data && e.response.data.message) {
-                    toast.error(e.response.data.message, toastErrorConfig);
-                } else {
-                    toast.error("Server error", toastErrorConfig);
-                }
-            });
-        }
-    };
+    }, [currentPage, itemOfPage, searchText, refresh, filterValues]);
 
     return (
         <div id="layoutSidenav_content">
             <main>
                 <div className="container-fluid px-4">
                     {/* Header row: Breadcrumb + Search + Actions */}
-                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom post-header-row">
+                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom pickup-location-header-row">
                         {/* Left section: Breadcrumb + Search - chiếm 50% */}
-                        <div className="post-left-section d-flex align-items-center gap-3">
+                        <div className="pickup-location-left-section d-flex align-items-center gap-3">
                             <ol className="breadcrumb mb-0 d-none d-md-flex flex-shrink-0" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
                                 <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
-                                <li className="breadcrumb-item active">Danh sách bài viết</li>
+                                <li className="breadcrumb-item active">Danh sách địa điểm nhận hàng</li>
                             </ol>
                             
                             {/* Search - rộng hơn và canh trái */}
-                            <div className="post-search-bar flex-grow-1">
+                            <div className="pickup-location-search-bar">
                                 <div className="input-group input-group-sm">
                                     <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
                                         <i className="fas fa-search text-muted"></i>
                                     </span>
                                     <LiveSearch 
                                         changeKeyword={setSearchText}
-                                        placeholder="Tìm theo tiêu đề, nội dung..."
+                                        placeholder="Tìm theo tên địa điểm..."
                                     />
                                 </div>
                             </div>
                         </div>
                         
                         {/* Actions - bên phải - chiếm 50% */}
-                        <div className="post-right-section d-flex align-items-center gap-2 justify-content-end">
-                            {/* Nút xóa khi có bài viết được chọn */}
+                        <div className="pickup-location-right-section d-flex align-items-center gap-2 justify-content-end">
+                            {/* Nút xóa khi có địa điểm được chọn */}
                             {selectedRows.length > 0 && (
-                                <Permission permission={PERMISSIONS.POSTS_DELETE}>
-                                    <button className="btn btn-danger btn-sm" onClick={multiDelete}>
+                                <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_DELETE}>
+                                    <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
                                         <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
                                     </button>
                                 </Permission>
                             )}
                             
                             {/* Nút tạo mới */}
-                            <Permission permission={PERMISSIONS.POSTS_CREATE}>
-                                <Link className="btn btn-primary btn-sm" to="/post/add">
+                            <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_CREATE}>
+                                <Link className="btn btn-primary btn-sm" to="/pickup-location/add">
                                     <i className="fas fa-plus me-1"></i>
                                     <span className="d-none d-sm-inline">Tạo mới</span>
                                 </Link>
@@ -401,40 +325,35 @@ const PostList = () => {
                             <div className="filter-card-wrapper" style={{ width: '240px', flexShrink: 0 }}>
                                 <div className="filter-card">
                                     <div className="filter-card-content">
-                                        {/* Danh mục */}
-                                        <FilterSelectSingle
-                                            label="Danh mục"
-                                            value={filterValues.category ? {
-                                                value: filterValues.category,
-                                                label: filterValues.category === 'all' ? 'Tất cả' : 
-                                                       categories.find(cat => cat.id == filterValues.category)?.name || filterValues.category
-                                            } : null}
-                                            onChange={(selected) => updateFilter('category', selected ? selected.value : 'all')}
+                                        {/* Trạng thái */}
+                                        <FilterButtonGroup
+                                            label="Trạng thái"
+                                            value={filterValues.status || 'all'}
+                                            onChange={(value) => updateFilter('status', value)}
                                             options={[
                                                 { value: 'all', label: 'Tất cả' },
-                                                ...categories.map(cat => ({
-                                                    value: cat.id,
-                                                    label: cat.name
-                                                }))
+                                                { value: 'active', label: 'Hiển thị' },
+                                                { value: 'inactive', label: 'Không hiển thị' }
                                             ]}
-                                            placeholder="Chọn danh mục"
                                         />
 
-                                        {/* Trạng thái */}
+                                        {/* Chi nhánh */}
                                         <FilterSelectSingle
-                                            label="Trạng thái"
-                                            value={filterValues.status ? {
-                                                value: filterValues.status,
-                                                label: filterValues.status === 'all' ? 'Tất cả' : 
-                                                       filterValues.status === '1' ? 'Hiển thị' : 'Ẩn'
-                                            } : null}
-                                            onChange={(selected) => updateFilter('status', selected ? selected.value : 'all')}
-                                            options={[
-                                                { value: 'all', label: 'Tất cả' },
-                                                { value: '1', label: 'Hiển thị' },
-                                                { value: '0', label: 'Ẩn' }
-                                            ]}
-                                            placeholder="Chọn trạng thái"
+                                            label="Chi nhánh"
+                                            value={filterValues.branch_id}
+                                            onChange={(selected) => updateFilter('branch_id', selected)}
+                                            options={branches.map(branch => ({
+                                                value: branch.id,
+                                                label: branch.name
+                                            }))}
+                                            placeholder="Chọn chi nhánh"
+                                        />
+
+                                        {/* Thời gian tạo */}
+                                        <FilterDateRange
+                                            label="Thời gian tạo"
+                                            value={filterValues.dateRange || { from: null, to: null }}
+                                            onChange={(dateRange) => updateFilter('dateRange', dateRange)}
                                         />
                                     </div>
                                     
@@ -462,19 +381,19 @@ const PostList = () => {
                                     <i className="fas fa-chevron-right"></i>
                                 </button>
                             )}
+                            
                             <div className="table-card">
                                 <DataTables
-                                    name="Danh sách bài viết"
+                                    name="Danh sách địa điểm nhận hàng"
                                     columns={columns}
-                                    data={sortedPosts}
+                                    data={pickupLocations}
                                     numOfPages={numOfPages}
                                     currentPage={currentPage}
                                     setCurrentPage={setCurrentPage}
                                     setItemOfPage={setItemOfPage}
-                                    selectedRows={selectedRows}
-                                    onSelectedRows={setSelectedRows}
                                     hideSearch={true}
-                                    showSummary={false}
+                                    selectedRows={selectedRows}
+                                    onSelectedRows={selectedRows => setSelectedRows(selectedRows)}
                                     tableHeight="calc(100vh - 220px)"
                                 />
                             </div>
@@ -482,28 +401,29 @@ const PostList = () => {
                     </div>
                 </div>
             </main>
-            <Modal show={showModal} onHide={() => { setShowModal(false); setItemDelete(null); setTypeDelete(null); }}>
+            <Modal show={showModal} onHide={() => {setShowModal(false); setItemDelete(null); setTypeDelete(null)}}>
                 <Modal.Header closeButton>
                     <Modal.Title>Xác nhận xóa</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {typeDelete === 'single' ? (
-                        <p>Bạn có chắc chắn muốn xóa bài viết này?</p>
+                        <p>Bạn có chắc chắn muốn xóa địa điểm nhận hàng này?</p>
                     ) : (
-                        <p>Bạn có chắc chắn muốn xóa các bài viết này?</p>
+                        <p>Bạn có chắc chắn muốn xóa các địa điểm nhận hàng này?</p>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
+                    <Button variant="secondary" onClick={() => {setShowModal(false)}}>
                         Hủy
                     </Button>
-                    <Button variant="danger" onClick={requestApiDelete}>
+                    <Button variant="danger" onClick={() => {requestApiDelete()}}>
                         Xóa
                     </Button>
                 </Modal.Footer>
             </Modal>
         </div>
-    );
-};
+    )
+}
 
-export default PostList;
+export default PickupLocationList
+

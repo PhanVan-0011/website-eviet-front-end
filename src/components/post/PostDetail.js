@@ -238,9 +238,16 @@ const PostDetail = () => {
                                         </div>
                                         <div className="col-6">
                                             <small className="text-muted d-block">Danh mục</small>
-                                            <span className="small">{post.categories && post.categories.length > 0 
-                                                ? post.categories.map(cat => cat.name).join(', ') 
-                                                : 'Chưa phân loại'}</span>
+                                            <div className="d-flex flex-wrap gap-1 mt-1">
+                                                {post.categories && post.categories.length > 0 
+                                                    ? post.categories.map((cat, index) => (
+                                                        <span key={index} className="badge bg-primary">
+                                                            {cat.name}
+                                                        </span>
+                                                    ))
+                                                    : <span className="text-muted small">Chưa phân loại</span>
+                                                }
+                                            </div>
                                         </div>
                                         <div className="col-6">
                                             <small className="text-muted d-block">Trạng thái</small>

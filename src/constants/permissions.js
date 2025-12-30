@@ -88,7 +88,13 @@ export const PERMISSIONS = {
     ROLES_VIEW: 'roles.view',
     ROLES_CREATE: 'roles.create',
     ROLES_UPDATE: 'roles.update',
-    ROLES_DELETE: 'roles.delete'
+    ROLES_DELETE: 'roles.delete',
+  
+    // Địa điểm nhận hàng
+    PICKUP_LOCATIONS_VIEW: 'pickup-locations.view',
+    PICKUP_LOCATIONS_CREATE: 'pickup-locations.create',
+    PICKUP_LOCATIONS_UPDATE: 'pickup-locations.update',
+    PICKUP_LOCATIONS_DELETE: 'pickup-locations.delete'
   };
 
   export const ALL_PERMISSIONS = Object.values(PERMISSIONS);

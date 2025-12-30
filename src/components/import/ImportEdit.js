@@ -765,6 +765,7 @@ const ImportEdit = () => {
           />
           <Link 
             to="/product/add" 
+            state={{ returnTo: `/import/edit/${id}` }}
             className="btn btn-outline-primary btn-sm position-absolute"
             title="Thêm sản phẩm mới"
             style={{ 

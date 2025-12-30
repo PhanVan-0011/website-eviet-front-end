@@ -62,6 +62,10 @@ import Import from './components/import/Import';
 import ImportEdit from './components/import/ImportEdit';
 import ImportList from './components/import/ImportList';
 import ImportDetail from './components/import/ImportDetail';
+import PickupLocationList from './components/pickup-location/PickupLocationList';
+import PickupLocationAdd from './components/pickup-location/PickupLocationAdd';
+import PickupLocationUpdate from './components/pickup-location/PickupLocationUpdate';
+import PickupLocationDetail from './components/pickup-location/PickupLocationDetail';
 function App() {
   return (
     <Routes>
@@ -122,6 +126,10 @@ function App() {
             <Route path="/import/add" element={<Import />} />
             <Route path="/import/edit/:id" element={<ImportEdit />} />
             <Route path="/import/detail/:id" element={<ImportDetail />} />
+            <Route path="/pickup-location" element={<PickupLocationList />} />
+            <Route path="/pickup-location/add" element={<PickupLocationAdd />} />
+            <Route path="/pickup-location/:id/edit" element={<PickupLocationUpdate />} />
+            <Route path="/pickup-location/detail/:id" element={<PickupLocationDetail />} />
           </Route>
         </Route>
         <Route element={<PublicRoutes />}>

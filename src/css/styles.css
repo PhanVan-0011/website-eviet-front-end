@@ -13152,7 +13152,8 @@ div.col-sm-8 textarea.form-control.import-notes {
 .import-header-row,
 .admin-header-row,
 .group-supplier-header-row,
-.rule-header-row {
+.rule-header-row,
+.pickup-location-header-row {
     display: flex !important;
     align-items: center !important;
     gap: 1rem !important;
@@ -13172,7 +13173,8 @@ div.col-sm-8 textarea.form-control.import-notes {
 .import-left-section,
 .admin-left-section,
 .group-supplier-left-section,
-.rule-left-section {
+.rule-left-section,
+.pickup-location-left-section {
     flex: 1 1 50% !important;
     min-width: 0;
     display: flex;
@@ -13194,7 +13196,8 @@ div.col-sm-8 textarea.form-control.import-notes {
 .import-right-section,
 .admin-right-section,
 .group-supplier-right-section,
-.rule-right-section {
+.rule-right-section,
+.pickup-location-right-section {
     flex: 1 1 50% !important;
     min-width: 0;
     display: flex;
@@ -13217,7 +13220,8 @@ div.col-sm-8 textarea.form-control.import-notes {
 .import-search-bar,
 .admin-search-bar,
 .group-supplier-search-bar,
-.rule-search-bar {
+.rule-search-bar,
+.pickup-location-search-bar {
     flex: 1 1 auto !important;
     min-width: 250px !important;
     max-width: 100% !important;
@@ -13237,7 +13241,8 @@ div.col-sm-8 textarea.form-control.import-notes {
     .import-search-bar,
     .admin-search-bar,
     .group-supplier-search-bar,
-    .rule-search-bar {
+    .rule-search-bar,
+    .pickup-location-search-bar {
         min-width: 250px !important;
     }
 }
@@ -13256,7 +13261,8 @@ div.col-sm-8 textarea.form-control.import-notes {
     .import-search-bar,
     .admin-search-bar,
     .group-supplier-search-bar,
-    .rule-search-bar {
+    .rule-search-bar,
+    .pickup-location-search-bar {
         min-width: 300px !important;
     }
 }

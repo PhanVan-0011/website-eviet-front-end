@@ -31,6 +31,7 @@ const NavigationBar = () => {
     PERMISSIONS.SUPPLIERS_VIEW,
     PERMISSIONS.GROUP_SUPPLIERS_VIEW,
     PERMISSIONS.PURCHASE_INVOICES_VIEW,
+    PERMISSIONS.PICKUP_LOCATIONS_VIEW,
     PERMISSIONS.USERS_VIEW, 
     PERMISSIONS.ADMIN_USERS_VIEW,
     PERMISSIONS.ROLES_VIEW,
@@ -176,6 +177,16 @@ const NavigationBar = () => {
                       <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/import">
                         <i className="fas fa-box-open me-2"></i>
                         Nhập hàng
+                      </Link>
+                    </li>
+                  </Permission>
+                  
+                  {/* Địa điểm nhận hàng */}
+                  <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_VIEW}>
+                    <li>
+                      <Link className="dropdown-item px-3 py-2 d-flex align-items-center" to="/pickup-location">
+                        <i className="fas fa-map-marker-alt me-2"></i>
+                        Địa điểm nhận hàng
                       </Link>
                     </li>
                   </Permission>

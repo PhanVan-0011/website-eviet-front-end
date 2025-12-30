@@ -38,6 +38,8 @@ const ImportList = () => {
     const [itemDelete, setItemDelete] = useState(null);
     const [typeDelete, setTypeDelete] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [itemCancel, setItemCancel] = useState(null);
+    const [showCancelModal, setShowCancelModal] = useState(false);
     const [refresh, setRefresh] = useState(Date.now());
 
     // Filter states
@@ -496,9 +498,16 @@ const ImportList = () => {
 
     // Handle Cancel Invoice
     const handleCancel = (id) => {
+        setItemCancel(id);
+        setShowCancelModal(true);
+    }
+
+    // Request Cancel Invoice
+    const requestApiCancel = () => {
         dispatch(actions.controlLoading(true));
-        requestApi(`api/admin/purchase-invoices/${id}/cancel`, 'PUT', {}).then((response) => {
+        requestApi(`api/admin/purchase-invoices/${itemCancel}/cancel`, 'PUT', {}).then((response) => {
             dispatch(actions.controlLoading(false));
+            setShowCancelModal(false);
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Hủy phiếu nhập hàng thành công!", toastSuccessConfig);
                 setRefresh(Date.now());
@@ -507,6 +516,7 @@ const ImportList = () => {
             }
         }).catch((e) => {
             dispatch(actions.controlLoading(false));
+            setShowCancelModal(false);
             if (e.response && e.response.data && e.response.data.message) {
                 toast.error(e.response.data.message, toastErrorConfig);
             } else {
@@ -827,6 +837,22 @@ const ImportList = () => {
                     </Button>
                     <Button variant="danger" onClick={() => {requestApiDelete()}}>
                         Xóa
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            <Modal show={showCancelModal} onHide={() => {setShowCancelModal(false); setItemCancel(null)}}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Xác nhận hủy phiếu</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Bạn có chắc chắn muốn hủy phiếu nhập hàng này?</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => {setShowCancelModal(false); setItemCancel(null)}}>
+                        Hủy
+                    </Button>
+                    <Button variant="warning" onClick={() => {requestApiCancel()}}>
+                        Xác nhận hủy
                     </Button>
                 </Modal.Footer>
             </Modal>

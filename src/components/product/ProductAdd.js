@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import * as actions from '../../redux/actions/index';
@@ -12,6 +12,7 @@ import { selectStyles } from '../common/FilterComponents';
 
 const ProductAdd = () => {
     const navigation = useNavigate();
+    const location = useLocation();
     const { register, handleSubmit, setValue, trigger, formState: { errors, isSubmitted } } = useForm();
     const dispatch = useDispatch();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -326,7 +327,9 @@ const ProductAdd = () => {
             dispatch(actions.controlLoading(false));
             if (response.data && response.data.success) {
                 toast.success(response.data.message || "Thêm sản phẩm thành công!", toastSuccessConfig);
-                navigation('/product');
+                // Quay lại trang trước đó nếu có, nếu không thì về danh sách sản phẩm
+                const returnTo = location.state?.returnTo || '/product';
+                navigation(returnTo);
             } else {
                 toast.error(response.data.message || "Thêm sản phẩm thất bại", toastErrorConfig);
             }
@@ -1166,7 +1169,10 @@ const ProductAdd = () => {
                                             <button
                                                 type="button"
                                                 className="btn btn-outline-secondary btn-sm"
-                                                onClick={() => navigation('/product')}
+                                                onClick={() => {
+                                                    const returnTo = location.state?.returnTo || '/product';
+                                                    navigation(returnTo);
+                                                }}
                                                 disabled={isSubmitting}
                                             >
                                                 <i className="fas fa-times me-1"></i><span className="d-none d-sm-inline">Hủy bỏ</span>

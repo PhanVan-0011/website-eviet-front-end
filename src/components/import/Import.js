@@ -706,7 +706,7 @@ const Import = () => {
       <div className="d-flex align-items-center mb-3 gap-2">
         <button
           className="btn btn-outline-secondary"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/import')}
         >
           <i className="fas fa-arrow-left"></i>
         </button>
@@ -746,6 +746,7 @@ const Import = () => {
           />
           <Link 
             to="/product/add" 
+            state={{ returnTo: '/import/add' }}
             className="btn btn-outline-primary btn-sm position-absolute"
             title="Thêm sản phẩm mới"
             style={{ 
@@ -970,6 +971,7 @@ const Import = () => {
                     />
                     <Link 
                       to="/supplier/add" 
+                      state={{ returnTo: '/import/add' }}
                       className="btn btn-outline-primary btn-sm position-absolute"
                       title="Thêm nhà cung cấp mới"
                       style={{ 

@@ -34,6 +34,7 @@ const Sidebar = () => {
     PERMISSIONS.SUPPLIERS_VIEW,
     PERMISSIONS.GROUP_SUPPLIERS_VIEW,
     PERMISSIONS.PURCHASE_INVOICES_VIEW,
+    PERMISSIONS.PICKUP_LOCATIONS_VIEW,
     PERMISSIONS.USERS_VIEW, 
     PERMISSIONS.ADMIN_USERS_VIEW,
     PERMISSIONS.ROLES_VIEW
@@ -140,6 +141,12 @@ const Sidebar = () => {
                   <Link className={`nav-link ${isActive('/import') ? 'active' : ''}`} to="/import">
                     <div className="sb-nav-link-icon"><i className="fas fa-box-open"></i></div>
                     Nhập hàng
+                  </Link>
+                </Permission>
+                <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_VIEW}>
+                  <Link className={`nav-link ${isActive('/pickup-location') ? 'active' : ''}`} to="/pickup-location">
+                    <div className="sb-nav-link-icon"><i className="fas fa-map-marker-alt"></i></div>
+                    Địa điểm nhận hàng
                   </Link>
                 </Permission>
                 <Permission permission={PERMISSIONS.USERS_VIEW}>
