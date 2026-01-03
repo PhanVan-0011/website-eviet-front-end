@@ -13153,7 +13153,8 @@ div.col-sm-8 textarea.form-control.import-notes {
 .admin-header-row,
 .group-supplier-header-row,
 .rule-header-row,
-.pickup-location-header-row {
+.pickup-location-header-row,
+.time-slot-header-row {
     display: flex !important;
     align-items: center !important;
     gap: 1rem !important;
@@ -13174,7 +13175,8 @@ div.col-sm-8 textarea.form-control.import-notes {
 .admin-left-section,
 .group-supplier-left-section,
 .rule-left-section,
-.pickup-location-left-section {
+.pickup-location-left-section,
+.time-slot-left-section {
     flex: 1 1 50% !important;
     min-width: 0;
     display: flex;
@@ -13197,7 +13199,8 @@ div.col-sm-8 textarea.form-control.import-notes {
 .admin-right-section,
 .group-supplier-right-section,
 .rule-right-section,
-.pickup-location-right-section {
+.pickup-location-right-section,
+.time-slot-right-section {
     flex: 1 1 50% !important;
     min-width: 0;
     display: flex;
@@ -13221,7 +13224,8 @@ div.col-sm-8 textarea.form-control.import-notes {
 .admin-search-bar,
 .group-supplier-search-bar,
 .rule-search-bar,
-.pickup-location-search-bar {
+.pickup-location-search-bar,
+.time-slot-search-bar {
     flex: 1 1 auto !important;
     min-width: 250px !important;
     max-width: 100% !important;
@@ -13242,7 +13246,8 @@ div.col-sm-8 textarea.form-control.import-notes {
     .admin-search-bar,
     .group-supplier-search-bar,
     .rule-search-bar,
-    .pickup-location-search-bar {
+    .pickup-location-search-bar,
+    .time-slot-search-bar {
         min-width: 250px !important;
     }
 }
@@ -13262,7 +13267,8 @@ div.col-sm-8 textarea.form-control.import-notes {
     .admin-search-bar,
     .group-supplier-search-bar,
     .rule-search-bar,
-    .pickup-location-search-bar {
+    .pickup-location-search-bar,
+    .time-slot-search-bar {
         min-width: 300px !important;
     }
 }

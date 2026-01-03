@@ -18,29 +18,35 @@ const InfoItem = ({ label, value, isDanger = false }) => (
     </div>
 );
 
-const PickupLocationDetail = () => {
+const TimeSlotDetail = () => {
     const params = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [pickupLocation, setPickupLocation] = useState(null);
+    const [timeSlot, setTimeSlot] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Lấy thông tin chi tiết địa điểm nhận hàng
+    // Format time từ HH:mm:ss sang HH:mm
+    const formatTime = (timeString) => {
+        if (!timeString) return '-';
+        return timeString.substring(0, 5); // Lấy HH:mm từ HH:mm:ss
+    };
+
+    // Lấy thông tin chi tiết khung giờ
     useEffect(() => {
-        const fetchPickupLocationData = async () => {
+        const fetchTimeSlotData = async () => {
             try {
                 dispatch(actions.controlLoading(true));
-                const response = await requestApi(`api/admin/pickup-locations/${params.id}`, 'GET');
-                setPickupLocation(response.data.data);
+                const response = await requestApi(`api/admin/time-slots/${params.id}`, 'GET');
+                setTimeSlot(response.data.data);
                 setLoading(false);
                 dispatch(actions.controlLoading(false));
             } catch (error) {
-                console.error("Error fetching pickup location data: ", error);
+                console.error("Error fetching time slot data: ", error);
                 setLoading(false);
                 dispatch(actions.controlLoading(false));
             }
         };
-        fetchPickupLocationData();
+        fetchTimeSlotData();
     }, [params.id, dispatch]);
 
     if (loading) {
@@ -52,14 +58,14 @@ const PickupLocationDetail = () => {
             </div>     
         );
     }
-    if (!pickupLocation) {
+    if (!timeSlot) {
         return (
             <div className="container-fluid px-4">
                 <div className="mt-4 mb-3">
-                    <h1 className="mt-4">Chi tiết địa điểm nhận hàng</h1>
+                    <h1 className="mt-4">Chi tiết khung giờ</h1>
                     <ol className="breadcrumb mb-4">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
-                        <li className="breadcrumb-item"><Link to="/pickup-location">Danh sách địa điểm nhận hàng</Link></li>
+                        <li className="breadcrumb-item"><Link to="/time-slot">Danh sách thời gian đặt hàng</Link></li>
                         <li className="breadcrumb-item active">Chi tiết</li>
                     </ol>
                 </div>
@@ -67,18 +73,18 @@ const PickupLocationDetail = () => {
                 <div className="d-flex flex-column justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
                     <img
                         src="https://cdn-icons-png.flaticon.com/512/6134/6134065.png"
-                        alt="Không tìm thấy địa điểm nhận hàng"
+                        alt="Không tìm thấy khung giờ"
                         style={{ width: 120, marginBottom: 24, opacity: 0.85 }}
                     />
                     <h2 className="text-danger mb-2" style={{ fontWeight: 700 }}>
-                        Không tìm thấy địa điểm nhận hàng!
+                        Không tìm thấy khung giờ!
                     </h2>
                     <p className="text-secondary mb-4 fs-5 text-center" style={{ maxWidth: 400 }}>
-                        Địa điểm nhận hàng bạn tìm kiếm không tồn tại hoặc đã bị xóa khỏi hệ thống.<br />
-                        Vui lòng kiểm tra lại hoặc quay về trang danh sách địa điểm nhận hàng.
+                        Khung giờ bạn tìm kiếm không tồn tại hoặc đã bị xóa khỏi hệ thống.<br />
+                        Vui lòng kiểm tra lại hoặc quay về trang danh sách thời gian đặt hàng.
                     </p>
-                    <Link to="/pickup-location" className="btn btn-outline-primary px-4 py-2">
-                        <i className="fas fa-arrow-left me-2"></i>Quay về danh sách địa điểm nhận hàng
+                    <Link to="/time-slot" className="btn btn-outline-primary px-4 py-2">
+                        <i className="fas fa-arrow-left me-2"></i>Quay về danh sách thời gian đặt hàng
                     </Link>
                 </div>
             </div>
@@ -90,50 +96,40 @@ const PickupLocationDetail = () => {
             <main>
                 <div className="container-fluid px-3 px-md-4">
                     <div className="d-flex align-items-center justify-content-between mt-3 mt-md-4 mb-2">
-                        <h2 className="mb-0 detail-page-header">Chi tiết địa điểm nhận hàng #{pickupLocation.id}</h2>
+                        <h2 className="mb-0 detail-page-header">Chi tiết khung giờ #{timeSlot.id}</h2>
                     </div>
                     <ol className="breadcrumb mb-3 mb-md-4 detail-breadcrumb">
                         <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
-                        <li className="breadcrumb-item"><Link to="/pickup-location">Danh sách địa điểm nhận hàng</Link></li>
+                        <li className="breadcrumb-item"><Link to="/time-slot">Danh sách thời gian đặt hàng</Link></li>
                         <li className="breadcrumb-item active">Chi tiết</li>
                     </ol>
 
                     <div className="card border">
                         <div className="detail-card">
-                            {/* Header: Thông tin địa điểm nhận hàng */}
+                            {/* Header: Thông tin khung giờ */}
                             <div style={{marginBottom: '1.5rem', paddingBottom: '1.5rem'}}>
-                                {/* Tên địa điểm */}
+                                {/* Tên khung giờ */}
                                 <h3 className="h4 h-md-3" style={{marginBottom: '0.75rem', marginTop: 0, fontWeight: 'bold', color: '#000'}}>
-                                    {pickupLocation.name}
+                                    {timeSlot.name}
                                 </h3>
 
                                 {/* Badges */}
                                 <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem'}}>
-                                    {pickupLocation.is_active ? (
+                                    {timeSlot.is_active ? (
                                         <span className="badge bg-success"><i className="fas fa-check-circle me-1"></i>Hiển thị</span>
                                     ) : (
                                         <span className="badge bg-secondary"><i className="fas fa-ban me-1"></i>Không hiển thị</span>
-                                    )}
-                                    {pickupLocation.branch && (
-                                        <span className="badge bg-primary"><i className="fas fa-building me-1"></i>{pickupLocation.branch.code}</span>
                                     )}
                                 </div>
 
                                 {/* Lưới thông tin */}
                                 <div className="row detail-info-grid">
-                                    <InfoItem label="Tên địa điểm" value={pickupLocation.name} />
-                                    <InfoItem label="Mô tả" value={pickupLocation.description || 'Chưa có mô tả'} />
-                                    <InfoItem 
-                                        label="Chi nhánh" 
-                                        value={
-                                            pickupLocation.branch 
-                                                ? `${pickupLocation.branch.code} - ${pickupLocation.branch.name}`
-                                                : 'Chưa có'
-                                        }
-                                    />
-                                    <InfoItem label="Trạng thái" value={pickupLocation.is_active ? 'Hiển thị' : 'Không hiển thị'} />
-                                    <InfoItem label="Ngày tạo" value={pickupLocation.created_at ? moment(pickupLocation.created_at).format('DD/MM/YYYY') : 'Chưa có'} />
-                                    <InfoItem label="Ngày cập nhật" value={pickupLocation.updated_at ? moment(pickupLocation.updated_at).format('DD/MM/YYYY') : 'Chưa có'} />
+                                    <InfoItem label="Tên ca bán" value={timeSlot.name} />
+                                    <InfoItem label="Thời gian bán hàng" value={`${formatTime(timeSlot.start_time)} - ${formatTime(timeSlot.end_time)}`} />
+                                    <InfoItem label="Thời gian giao hàng" value={`${formatTime(timeSlot.delivery_start_time)} - ${formatTime(timeSlot.delivery_end_time)}`} />
+                                    <InfoItem label="Trạng thái" value={timeSlot.is_active ? 'Hiển thị' : 'Không hiển thị'} />
+                                    <InfoItem label="Ngày tạo" value={timeSlot.created_at ? moment(timeSlot.created_at).format('DD/MM/YYYY') : 'Chưa có'} />
+                                    <InfoItem label="Ngày cập nhật" value={timeSlot.updated_at ? moment(timeSlot.updated_at).format('DD/MM/YYYY') : 'Chưa có'} />
                                 </div>
                             </div>
                         </div>
@@ -145,9 +141,9 @@ const PickupLocationDetail = () => {
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
                                 <i className="fas fa-arrow-left me-1"></i><span className="d-none d-sm-inline">Quay lại</span>
                             </button>
-                            <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_UPDATE}>
-                                <Link className="btn btn-primary btn-sm" to={`/pickup-location/${pickupLocation.id}/edit`}>
-                                    <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa địa điểm nhận hàng</span>
+                            <Permission permission={PERMISSIONS.TIME_SLOTS_UPDATE}>
+                                <Link className="btn btn-primary btn-sm" to={`/time-slot/${timeSlot.id}/edit`}>
+                                    <i className="fas fa-edit me-1"></i><span className="d-none d-sm-inline">Sửa khung giờ</span>
                                 </Link>
                             </Permission>
                         </div>
@@ -158,5 +154,5 @@ const PickupLocationDetail = () => {
     )
 }
 
-export default PickupLocationDetail
+export default TimeSlotDetail
 

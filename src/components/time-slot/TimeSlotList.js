@@ -11,13 +11,12 @@ import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
 import {
-    FilterSelectSingle,
     FilterButtonGroup
 } from '../common/FilterComponents';
 import LiveSearch from '../common/LiveSearch';
 
-const PickupLocationList = () => {
-    const [pickupLocations, setPickupLocations] = useState([]);
+const TimeSlotList = () => {
+    const [timeSlots, setTimeSlots] = useState([]);
     const [numOfPages, setNumOfPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemOfPage, setItemOfPage] = useState(25);
@@ -30,10 +29,8 @@ const PickupLocationList = () => {
     const [refresh, setRefresh] = useState(Date.now());
 
     // Filter states
-    const [branches, setBranches] = useState([]);
     const [filterValues, setFilterValues] = useState({
-        status: 'all',
-        branch_id: null
+        status: 'all'
     });
     const [isFilterVisible, setIsFilterVisible] = useState(true);
     const [isPulsing, setIsPulsing] = useState(false);
@@ -49,29 +46,35 @@ const PickupLocationList = () => {
         setIsFilterVisible(prev => !prev);
     };
 
-    // Lấy dữ liệu cho filter
-    useEffect(() => {
-        // Lấy chi nhánh
-        requestApi('api/admin/branches?limit=1000', 'GET', []).then((response) => {
-            if (response.data && response.data.data) setBranches(response.data.data);
-        });
-    }, []);
+    // Format time từ HH:mm:ss sang HH:mm
+    const formatTime = (timeString) => {
+        if (!timeString) return '-';
+        return timeString.substring(0, 5); // Lấy HH:mm từ HH:mm:ss
+    };
 
     const columns = [
         { 
-            title: "Tên địa điểm", 
+            title: "Tên ca bán", 
             element: row => row.name,
-            width: "20%"
+            width: "18%"
         },
         { 
-            title: "Mô tả", 
-            element: row => row.description || '-',
-            width: "25%"
+            title: "Thời gian bán", 
+            element: row => (
+                <span>
+                    {formatTime(row.start_time)} - {formatTime(row.end_time)}
+                </span>
+            ),
+            width: "15%"
         },
         { 
-            title: "Chi nhánh", 
-            element: row => row.branch ? row.branch.name : '-',
-            width: "20%"
+            title: "Thời gian giao hàng", 
+            element: row => (
+                <span>
+                    {formatTime(row.delivery_start_time)} - {formatTime(row.delivery_end_time)}
+                </span>
+            ),
+            width: "18%"
         },
         { 
             title: "Ngày tạo", 
@@ -94,17 +97,17 @@ const PickupLocationList = () => {
             title: "Hành động", 
             element: row => (
                 <div className="d-flex gap-1">
-                    <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_VIEW}>
-                        <Link className="btn btn-info btn-sm" to={`/pickup-location/detail/${row.id}`} title="Xem chi tiết">
+                    <Permission permission={PERMISSIONS.TIME_SLOTS_VIEW}>
+                        <Link className="btn btn-info btn-sm" to={`/time-slot/detail/${row.id}`} title="Xem chi tiết">
                             <i className="fas fa-eye"></i>
                         </Link>
                     </Permission>
-                    <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_UPDATE}>
-                        <Link className="btn btn-primary btn-sm" to={`/pickup-location/${row.id}/edit`} title="Chỉnh sửa">
+                    <Permission permission={PERMISSIONS.TIME_SLOTS_UPDATE}>
+                        <Link className="btn btn-primary btn-sm" to={`/time-slot/${row.id}/edit`} title="Chỉnh sửa">
                             <i className="fas fa-edit"></i>
                         </Link>
                     </Permission>
-                    <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_DELETE}>
+                    <Permission permission={PERMISSIONS.TIME_SLOTS_DELETE}>
                         <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)} title="Xóa">
                             <i className="fas fa-trash"></i>
                         </button>
@@ -130,14 +133,14 @@ const PickupLocationList = () => {
     const requestApiDelete = () => {
         dispatch(actions.controlLoading(true));
         if(typeDelete === 'single'){
-            requestApi(`api/admin/pickup-locations/${itemDelete}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/time-slots/${itemDelete}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa địa điểm nhận hàng thành công!", toastSuccessConfig);
+                    toast.success(response.data.message || "Xóa khung giờ thành công!", toastSuccessConfig);
                     setRefresh(Date.now());
                 } else {
-                    toast.error(response.data.message || "Xóa địa điểm nhận hàng thất bại", toastErrorConfig);
+                    toast.error(response.data.message || "Xóa khung giờ thất bại", toastErrorConfig);
                 }
             }).catch((e) => {
                 dispatch(actions.controlLoading(false));
@@ -149,15 +152,15 @@ const PickupLocationList = () => {
                 }
             });
         } else {
-            requestApi(`api/admin/pickup-locations/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
+            requestApi(`api/admin/time-slots/multi-delete?ids=${selectedRows.toString()}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
                 if (response.data && response.data.success) {
-                    toast.success(response.data.message || "Xóa địa điểm nhận hàng thành công!", toastSuccessConfig);
+                    toast.success(response.data.message || "Xóa khung giờ thành công!", toastSuccessConfig);
                     setSelectedRows([]);
                     setRefresh(Date.now());
                 } else {
-                    toast.error(response.data.message || "Xóa địa điểm nhận hàng thất bại", toastErrorConfig);
+                    toast.error(response.data.message || "Xóa khung giờ thất bại", toastErrorConfig);
                 }
             }).catch((e) => {
                 dispatch(actions.controlLoading(false));
@@ -192,20 +195,15 @@ const PickupLocationList = () => {
         
         // Thêm filter status (is_active)
         if (filterValues.status !== 'all') {
-            query += `&status=${filterValues.status === 'active' ? '1' : '0'}`;
-        }
-        
-        // Thêm filter branch_id
-        if (filterValues.branch_id && filterValues.branch_id.value) {
-            query += `&branch_id=${filterValues.branch_id.value}`;
+            query += `&is_active=${filterValues.status === 'active' ? '1' : '0'}`;
         }
         
         dispatch(actions.controlLoading(true));
-        requestApi(`api/admin/pickup-locations${query}`, 'GET', []).then((response) => {
+        requestApi(`api/admin/time-slots${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
-            // Chỉ update pickupLocations khi có data, không clear nếu data rỗng
+            // Chỉ update timeSlots khi có data, không clear nếu data rỗng
             if (response.data && response.data.data) {
-                setPickupLocations(response.data.data);
+                setTimeSlots(response.data.data);
             }
             if (response.data && response.data.pagination && response.data.pagination.last_page) {
                 setNumOfPages(response.data.pagination.last_page);
@@ -220,33 +218,33 @@ const PickupLocationList = () => {
             <main>
                 <div className="container-fluid px-4">
                     {/* Header row: Breadcrumb + Search + Actions */}
-                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom pickup-location-header-row">
+                    <div className="d-flex align-items-center py-2 mt-2 mb-2 border-bottom time-slot-header-row">
                         {/* Left section: Breadcrumb + Search - chiếm 50% */}
-                        <div className="pickup-location-left-section d-flex align-items-center gap-3">
+                        <div className="time-slot-left-section d-flex align-items-center gap-3">
                             <ol className="breadcrumb mb-0 d-none d-md-flex flex-shrink-0" style={{ fontSize: '0.9rem', marginBottom: 0 }}>
                                 <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
-                                <li className="breadcrumb-item active">Danh sách địa điểm nhận hàng</li>
+                                <li className="breadcrumb-item active">Danh sách thời gian đặt hàng</li>
                             </ol>
                             
                             {/* Search - rộng hơn và canh trái */}
-                            <div className="pickup-location-search-bar">
+                            <div className="time-slot-search-bar">
                                 <div className="input-group input-group-sm">
                                     <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
                                         <i className="fas fa-search text-muted"></i>
                                     </span>
                                     <LiveSearch 
                                         changeKeyword={setSearchText}
-                                        placeholder="Tìm theo tên địa điểm..."
+                                        placeholder="Tìm theo tên ca bán..."
                                     />
                                 </div>
                             </div>
                         </div>
                         
                         {/* Actions - bên phải - chiếm 50% */}
-                        <div className="pickup-location-right-section d-flex align-items-center gap-2 justify-content-end">
-                            {/* Nút xóa khi có địa điểm được chọn */}
+                        <div className="time-slot-right-section d-flex align-items-center gap-2 justify-content-end">
+                            {/* Nút xóa khi có khung giờ được chọn */}
                             {selectedRows.length > 0 && (
-                                <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_DELETE}>
+                                <Permission permission={PERMISSIONS.TIME_SLOTS_DELETE}>
                                     <button className="btn btn-danger btn-sm" onClick={() => multiDelete(selectedRows)}>
                                         <i className="fas fa-trash me-1"></i> Xóa ({selectedRows.length})
                                     </button>
@@ -254,8 +252,8 @@ const PickupLocationList = () => {
                             )}
                             
                             {/* Nút tạo mới */}
-                            <Permission permission={PERMISSIONS.PICKUP_LOCATIONS_CREATE}>
-                                <Link className="btn btn-primary btn-sm" to="/pickup-location/add">
+                            <Permission permission={PERMISSIONS.TIME_SLOTS_CREATE}>
+                                <Link className="btn btn-primary btn-sm" to="/time-slot/add">
                                     <i className="fas fa-plus me-1"></i>
                                     <span className="d-none d-sm-inline">Tạo mới</span>
                                 </Link>
@@ -326,18 +324,6 @@ const PickupLocationList = () => {
                                                 { value: 'inactive', label: 'Không hiển thị' }
                                             ]}
                                         />
-
-                                        {/* Chi nhánh */}
-                                        <FilterSelectSingle
-                                            label="Chi nhánh"
-                                            value={filterValues.branch_id}
-                                            onChange={(selected) => updateFilter('branch_id', selected)}
-                                            options={branches.map(branch => ({
-                                                value: branch.id,
-                                                label: branch.name
-                                            }))}
-                                            placeholder="Chọn chi nhánh"
-                                        />
                                     </div>
                                     
                                     {/* Toggle Button - Pill button ở mép phải */}
@@ -367,9 +353,9 @@ const PickupLocationList = () => {
                             
                             <div className="table-card">
                                 <DataTables
-                                    name="Danh sách địa điểm nhận hàng"
+                                    name="Danh sách thời gian đặt hàng"
                                     columns={columns}
-                                    data={pickupLocations}
+                                    data={timeSlots}
                                     numOfPages={numOfPages}
                                     currentPage={currentPage}
                                     setCurrentPage={setCurrentPage}
@@ -390,9 +376,9 @@ const PickupLocationList = () => {
                 </Modal.Header>
                 <Modal.Body>
                     {typeDelete === 'single' ? (
-                        <p>Bạn có chắc chắn muốn xóa địa điểm nhận hàng này?</p>
+                        <p>Bạn có chắc chắn muốn xóa khung giờ này?</p>
                     ) : (
-                        <p>Bạn có chắc chắn muốn xóa các địa điểm nhận hàng này?</p>
+                        <p>Bạn có chắc chắn muốn xóa các khung giờ này?</p>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
@@ -408,5 +394,5 @@ const PickupLocationList = () => {
     )
 }
 
-export default PickupLocationList
+export default TimeSlotList
 

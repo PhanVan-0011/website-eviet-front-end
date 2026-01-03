@@ -94,7 +94,13 @@ export const PERMISSIONS = {
     PICKUP_LOCATIONS_VIEW: 'pickup-locations.view',
     PICKUP_LOCATIONS_CREATE: 'pickup-locations.create',
     PICKUP_LOCATIONS_UPDATE: 'pickup-locations.update',
-    PICKUP_LOCATIONS_DELETE: 'pickup-locations.delete'
+    PICKUP_LOCATIONS_DELETE: 'pickup-locations.delete',
+  
+    // Thời gian đặt hàng
+    TIME_SLOTS_VIEW: 'time-slots.view',
+    TIME_SLOTS_CREATE: 'time-slots.create',
+    TIME_SLOTS_UPDATE: 'time-slots.update',
+    TIME_SLOTS_DELETE: 'time-slots.delete'
   };
 
   export const ALL_PERMISSIONS = Object.values(PERMISSIONS);

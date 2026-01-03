@@ -66,6 +66,10 @@ import PickupLocationList from './components/pickup-location/PickupLocationList'
 import PickupLocationAdd from './components/pickup-location/PickupLocationAdd';
 import PickupLocationUpdate from './components/pickup-location/PickupLocationUpdate';
 import PickupLocationDetail from './components/pickup-location/PickupLocationDetail';
+import TimeSlotList from './components/time-slot/TimeSlotList';
+import TimeSlotAdd from './components/time-slot/TimeSlotAdd';
+import TimeSlotUpdate from './components/time-slot/TimeSlotUpdate';
+import TimeSlotDetail from './components/time-slot/TimeSlotDetail';
 function App() {
   return (
     <Routes>
@@ -130,6 +134,10 @@ function App() {
             <Route path="/pickup-location/add" element={<PickupLocationAdd />} />
             <Route path="/pickup-location/:id/edit" element={<PickupLocationUpdate />} />
             <Route path="/pickup-location/detail/:id" element={<PickupLocationDetail />} />
+            <Route path="/time-slot" element={<TimeSlotList />} />
+            <Route path="/time-slot/add" element={<TimeSlotAdd />} />
+            <Route path="/time-slot/:id/edit" element={<TimeSlotUpdate />} />
+            <Route path="/time-slot/detail/:id" element={<TimeSlotDetail />} />
           </Route>
         </Route>
         <Route element={<PublicRoutes />}>
