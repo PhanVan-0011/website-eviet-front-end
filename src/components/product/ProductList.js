@@ -13,6 +13,8 @@ import { toast } from 'react-toastify';
 import { toastErrorConfig, toastSuccessConfig } from '../../tools/toastConfig';
 import Permission from '../common/Permission';
 import { PERMISSIONS } from '../../constants/permissions';
+import { formatVNDWithUnit } from '../../helpers/formatMoney';
+
 import {
     FilterSelectSingle,
     FilterSelectMulti,
@@ -161,12 +163,12 @@ const UnitDropdown = ({ product, selectedUnitIndex, onUnitChange }) => {
     );
 };
 
-const formatVND = (value) => {
-    if (typeof value !== 'number' && typeof value !== 'string') return '';
-    value = value.toString().replace(/\D/g, '');
-    if (!value) return '';
-    return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-};
+// const formatVND = (value) => {
+//     if (typeof value !== 'number' && typeof value !== 'string') return '';
+//     value = value.toString().replace(/\D/g, '');
+//     if (!value) return '';
+//     return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+// };
 
 // Hàm format số với phần thập phân
 const formatNumberWithDecimal = (value) => {
@@ -691,7 +693,7 @@ const ProductList = () => {
                 const unitData = getUnitData(row);
                 return (
                     <div>
-                        {formatVND(unitData.costPrice)} ₫
+                        {formatVNDWithUnit(unitData.costPrice)}
                     </div>
                 );
             },
@@ -707,7 +709,7 @@ const ProductList = () => {
                 const unitData = getUnitData(row);
                 return (
                     <div>
-                        {formatVND(parseInt(unitData.storePrice))} ₫
+                        {formatVNDWithUnit(unitData.storePrice)}
                     </div>
                 );
             },
@@ -723,7 +725,7 @@ const ProductList = () => {
                 const unitData = getUnitData(row);
                 return (
                     <div>
-                        {formatVND(parseInt(unitData.appPrice))} ₫
+                        {formatVNDWithUnit(unitData.appPrice)}
                     </div>
                 );
             },
