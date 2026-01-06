@@ -71,6 +71,31 @@ const BranchList = () => {
             element: row => row.phone_number,
             width: "15%"
         },
+        {
+            title: "Địa điểm nhận hàng",
+            element: row => {
+                const pickupLocations = row.pickup_locations || [];
+                if (pickupLocations.length === 0) {
+                    return <span className="badge bg-secondary">Chưa có</span>;
+                }
+                return (
+                    <div className="d-flex flex-wrap gap-1" style={{ maxWidth: '200px' }}>
+                        {pickupLocations.map((location, index) => {
+                            // Xử lý cả trường hợp location là object (có name) hoặc string
+                            const locationName = typeof location === 'string' 
+                                ? location 
+                                : (location.name || location.address || location.title || 'Địa điểm');
+                            return (
+                                <span key={index} className="badge bg-info text-dark">
+                                    {locationName}
+                                </span>
+                            );
+                        })}
+                    </div>
+                );
+            },
+            width: "15%"
+        },
         { 
             title: "Ngày tạo", 
             element: row => formatDate(row.created_at),

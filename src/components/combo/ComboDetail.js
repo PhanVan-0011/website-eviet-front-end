@@ -200,6 +200,26 @@ const ComboDetail = () => {
                                     <span className="d-md-none">Chi nhánh</span>
                                 </button>
                             </li>
+                            <li className="nav-item" role="presentation">
+                                <button
+                                    className={`nav-link detail-tab-nav ${activeTab === 'thoi-gian' ? 'active' : ''}`}
+                                    type="button"
+                                    onClick={() => setActiveTab('thoi-gian')}
+                                    style={{
+                                        color: activeTab === 'thoi-gian' ? '#007bff' : '#6c757d',
+                                        borderBottomColor: activeTab === 'thoi-gian' ? '#007bff' : 'transparent',
+                                        borderBottomWidth: activeTab === 'thoi-gian' ? '2px' : '1px',
+                                        textDecoration: 'none',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontWeight: activeTab === 'thoi-gian' ? '500' : 'normal'
+                                    }}
+                                >
+                                    <span className="d-none d-md-inline">Thời gian bán</span>
+                                    <span className="d-md-none">Thời gian</span>
+                                </button>
+                            </li>
                         </ul>
 
                         <div className="detail-card">
@@ -337,6 +357,30 @@ const ComboDetail = () => {
 
                                                 <InfoItem label="Thời gian bắt đầu" value={combo.start_date ? moment(combo.start_date).format('HH:mm DD/MM/YYYY') : 'N/A'} />
                                                 <InfoItem label="Thời gian kết thúc" value={combo.end_date ? moment(combo.end_date).format('HH:mm DD/MM/YYYY') : 'N/A'} />
+                                                <InfoItem 
+                                                    label="Thời gian bán" 
+                                                    value={
+                                                        combo.is_flexible_time === true || combo.is_flexible_time === 1 ? (
+                                                            <span className="badge bg-success">Bán linh hoạt</span>
+                                                        ) : (combo.time_slots && combo.time_slots.length > 0) ? (
+                                                            <div className="d-flex flex-wrap gap-1">
+                                                                {combo.time_slots.map((slot, idx) => {
+                                                                    const formatTime = (timeString) => {
+                                                                        if (!timeString) return '';
+                                                                        return timeString.substring(0, 5);
+                                                                    };
+                                                                    return (
+                                                                        <span key={idx} className="badge bg-info">
+                                                                            {formatTime(slot.start_time)}-{formatTime(slot.end_time)}
+                                                                        </span>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="badge bg-secondary">Chưa cấu hình</span>
+                                                        )
+                                                    }
+                                                />
                                                 <InfoItem label="Ngày tạo" value={formatDate(combo.created_at)} />
                                                 <InfoItem label="Ngày cập nhật" value={formatDate(combo.updated_at)} />
                                             </div>
@@ -541,6 +585,79 @@ const ComboDetail = () => {
                                             <div className="text-center text-muted py-5">
                                                 <i className="fas fa-store fa-3x mb-3 opacity-50"></i>
                                                 <p className="mb-0">Combo này áp dụng cho toàn bộ hệ thống</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab Thời gian bán */}
+                            {activeTab === 'thoi-gian' && (
+                                <div className="tab-pane fade show active">
+                                    <div style={{ 
+                                        height: '400px', 
+                                        overflowY: 'auto',
+                                        paddingRight: '10px',
+                                        border: '1px solid #dee2e6',
+                                        borderRadius: '6px',
+                                        padding: '15px'
+                                    }}>
+                                        {combo.is_flexible_time === true || combo.is_flexible_time === 1 ? (
+                                            <div className="text-center text-muted py-5">
+                                                <i className="fas fa-clock fa-3x mb-3 text-success"></i>
+                                                <p className="mb-0 fw-semibold text-success">Bán linh hoạt</p>
+                                                <p className="mb-0 small">Combo có thể bán ở bất kỳ thời gian nào</p>
+                                            </div>
+                                        ) : combo.time_slots && combo.time_slots.length > 0 ? (
+                                            <div>
+                                                <div className="mb-3">
+                                                    <h6 className="fw-bold mb-2">Thời gian bán cố định</h6>
+                                                    <p className="text-muted small mb-0">Combo chỉ bán trong các khung giờ sau:</p>
+                                                </div>
+                                                <div className="table-responsive">
+                                                    <table className="table table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Tên ca bán</th>
+                                                                <th>Thời gian bán</th>
+                                                                <th>Thời gian giao hàng</th>
+                                                                <th>Trạng thái</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {combo.time_slots.map((slot, idx) => {
+                                                                // Format time từ HH:mm:ss sang HH:mm
+                                                                const formatTime = (timeString) => {
+                                                                    if (!timeString) return '-';
+                                                                    return timeString.substring(0, 5);
+                                                                };
+                                                                return (
+                                                                    <tr key={idx}>
+                                                                        <td>{slot.name}</td>
+                                                                        <td>
+                                                                            {formatTime(slot.start_time)} - {formatTime(slot.end_time)}
+                                                                        </td>
+                                                                        <td>
+                                                                            {formatTime(slot.delivery_start_time)} - {formatTime(slot.delivery_end_time)}
+                                                                        </td>
+                                                                        <td>
+                                                                            {slot.is_active === true || slot.is_active === 1 ? (
+                                                                                <span className="badge bg-success">Hiển thị</span>
+                                                                            ) : (
+                                                                                <span className="badge bg-secondary">Không hiển thị</span>
+                                                                            )}
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center text-muted py-5">
+                                                <i className="fas fa-clock fa-3x mb-3 opacity-50"></i>
+                                                <p className="mb-0">Chưa cấu hình thời gian bán</p>
                                             </div>
                                         )}
                                     </div>

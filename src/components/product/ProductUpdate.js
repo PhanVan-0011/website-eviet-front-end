@@ -44,6 +44,11 @@ const ProductUpdate = () => {
     const [selectedBranches, setSelectedBranches] = useState([]);
     const [branchPrices, setBranchPrices] = useState([]);
     
+    // State cho tab Thời gian bán
+    const [timeSlots, setTimeSlots] = useState([]);
+    const [isFlexibleTime, setIsFlexibleTime] = useState(true);
+    const [selectedTimeSlotIds, setSelectedTimeSlotIds] = useState([]);
+    
     // State cho unit conversions
     const [unitConversions, setUnitConversions] = useState([]);
     
@@ -57,14 +62,15 @@ const ProductUpdate = () => {
     // Force re-render khi icon thay đổi
     const [, forceUpdate] = useState();
 
-    // Lấy dữ liệu sản phẩm và danh mục, chi nhánh
+    // Lấy dữ liệu sản phẩm và danh mục, chi nhánh, time slots
     useEffect(() => {
         const fetchData = async () => {
             try {
                 dispatch(actions.controlLoading(true));
-                const [catRes, branchRes, prodRes] = await Promise.all([
+                const [catRes, branchRes, timeSlotRes, prodRes] = await Promise.all([
                     requestApi('api/admin/categories/for-type?for=product', 'GET', []),
                     requestApi('api/admin/branches?limit=1000', 'GET', []),
+                    requestApi('api/admin/time-slots?limit=1000&is_active=1', 'GET', []),
                     requestApi(`api/admin/products/${params.id}`, 'GET')
                 ]);
                 
@@ -76,6 +82,12 @@ const ProductUpdate = () => {
                 // Xử lý chi nhánh
                 if (branchRes.data && branchRes.data.data) {
                     setBranches(branchRes.data.data);
+                }
+                
+                // Xử lý time slots - chỉ lấy các time slots active
+                if (timeSlotRes.data && timeSlotRes.data.data) {
+                    const activeTimeSlots = timeSlotRes.data.data.filter(slot => slot.is_active === true || slot.is_active === 1);
+                    setTimeSlots(activeTimeSlots);
                 }
                 
                 // Xử lý sản phẩm
@@ -146,6 +158,23 @@ const ProductUpdate = () => {
                 } else {
                     setApplyToAllBranches(true);
                     setSelectedBranches([]);
+                }
+                
+                // Thời gian bán
+                if (data.is_flexible_time === true || data.is_flexible_time === 1) {
+                    setIsFlexibleTime(true);
+                    setSelectedTimeSlotIds([]);
+                } else {
+                    setIsFlexibleTime(false);
+                    // Xử lý cả trường hợp time_slots (array objects) hoặc time_slot_ids (array numbers)
+                    if (data.time_slots && data.time_slots.length > 0) {
+                        const timeSlotIds = data.time_slots.map(slot => typeof slot === 'object' ? slot.id : slot);
+                        setSelectedTimeSlotIds(timeSlotIds);
+                    } else if (data.time_slot_ids && data.time_slot_ids.length > 0) {
+                        setSelectedTimeSlotIds(data.time_slot_ids);
+                    } else {
+                        setSelectedTimeSlotIds([]);
+                    }
                 }
                 
                 dispatch(actions.controlLoading(false));
@@ -409,6 +438,12 @@ const ProductUpdate = () => {
                 selectedBranches.forEach(id => formData.append('branch_ids[]', id));
                 formData.append('branch_prices_json', JSON.stringify(branchPrices));
             }
+            
+            // Thời gian bán
+            formData.append('is_flexible_time', isFlexibleTime ? 1 : 0);
+            if (!isFlexibleTime && selectedTimeSlotIds.length > 0) {
+                selectedTimeSlotIds.forEach(id => formData.append('time_slot_ids[]', id));
+            }
 
             // Log dữ liệu trước khi gửi
             const reviewData = {
@@ -431,7 +466,9 @@ const ProductUpdate = () => {
                 attributes,
                 applyToAllBranches,
                 selectedBranches,
-                branchPrices
+                branchPrices,
+                isFlexibleTime,
+                selectedTimeSlotIds
             };
             console.log('=== PRODUCT DATA BEFORE UPDATE ===', reviewData);
 
@@ -465,6 +502,17 @@ const ProductUpdate = () => {
     // Tạo options cho react-select
     const categoryOptions = categories.map(cat => ({ value: cat.id, label: cat.name }));
     const branchOptions = branches.map(branch => ({ value: branch.id, label: branch.name }));
+    
+    // Format time từ HH:mm:ss sang HH:mm
+    const formatTime = (timeString) => {
+        if (!timeString) return '';
+        return timeString.substring(0, 5); // Lấy HH:mm từ HH:mm:ss
+    };
+    
+    const timeSlotOptions = timeSlots.map(slot => ({ 
+        value: slot.id, 
+        label: `${slot.name} (${formatTime(slot.start_time)} - ${formatTime(slot.end_time)})` 
+    }));
 
     return (
         <div id="layoutSidenav_content">
@@ -537,6 +585,22 @@ const ProductUpdate = () => {
                                                
                                             >
                                                 Chi nhánh kinh doanh
+                                            </button>
+                                        </li>
+                                        <li className="nav-item" role="presentation">
+                                            <button
+                                                className={`nav-link ${activeTab === 'thoi-gian' ? 'active' : ''}`}
+                                                type="button"
+                                                onClick={() => setActiveTab('thoi-gian')}
+                                                style={{ 
+                                                    color: activeTab === 'thoi-gian' ? '#007bff' : '#6c757d',
+                                                    borderBottomColor: activeTab === 'thoi-gian' ? '#007bff' : 'transparent',
+                                                    borderBottomWidth: activeTab === 'thoi-gian' ? '2px' : '1px',
+                                                    textDecoration: 'none',
+                                                    backgroundColor: 'transparent !important',
+                                                }}
+                                            >
+                                                Thời gian bán
                                             </button>
                                         </li>
                                     </ul>
@@ -1281,6 +1345,72 @@ const ProductUpdate = () => {
                                                     </div>
                                                 )}
 
+                                            </div>
+                                        )}
+
+                                        {/* Tab Thời gian bán */}
+                                        {activeTab === 'thoi-gian' && (
+                                            <div className="tab-pane fade show active">
+                                                <div className="row mb-3">
+                                                    <div className="col-md-12">
+                                                        <div className="mb-3">
+                                                            <label className="form-label fw-semibold">Loại thời gian bán</label>
+                                                            <div className="form-check">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="radio"
+                                                                    name="timeType"
+                                                                    id="flexibleTime"
+                                                                    checked={isFlexibleTime}
+                                                                    onChange={() => {
+                                                                        setIsFlexibleTime(true);
+                                                                        setSelectedTimeSlotIds([]);
+                                                                    }}
+                                                                />
+                                                                <label className="form-check-label" htmlFor="flexibleTime">
+                                                                    Bán linh hoạt
+                                                                </label>
+                                                            </div>
+                                                            <div className="form-check">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="radio"
+                                                                    name="timeType"
+                                                                    id="fixedTime"
+                                                                    checked={!isFlexibleTime}
+                                                                    onChange={() => setIsFlexibleTime(false)}
+                                                                />
+                                                                <label className="form-check-label" htmlFor="fixedTime">
+                                                                    Thời gian cố định
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {!isFlexibleTime && (
+                                                    <div className="row mb-3">
+                                                        <div className="col-md-12">
+                                                            <div className="mb-3">
+                                                                <label className="form-label fw-semibold">Chọn khung giờ bán</label>
+                                                                <Select
+                                                                    options={timeSlotOptions}
+                                                                    isMulti
+                                                                    value={timeSlotOptions.filter(opt => selectedTimeSlotIds.includes(opt.value))}
+                                                                    onChange={opts => {
+                                                                        const values = opts ? opts.map(opt => opt.value) : [];
+                                                                        setSelectedTimeSlotIds(values);
+                                                                    }}
+                                                                    placeholder="Tìm kiếm & chọn khung giờ..."
+                                                                    classNamePrefix="react-select"
+                                                                    styles={selectStyles}
+                                                                    menuPortalTarget={document.body}
+                                                                    menuPosition="fixed"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>

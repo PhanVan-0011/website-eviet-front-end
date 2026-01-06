@@ -43,15 +43,21 @@ const ComboAdd = () => {
     const [applyToAllBranches, setApplyToAllBranches] = useState(true);
     const [selectedBranches, setSelectedBranches] = useState([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    
+    // State cho tab Thời gian bán
+    const [timeSlots, setTimeSlots] = useState([]);
+    const [isFlexibleTime, setIsFlexibleTime] = useState(true);
+    const [selectedTimeSlotIds, setSelectedTimeSlotIds] = useState([]);
 
-    // Lấy danh sách sản phẩm và chi nhánh
+    // Lấy danh sách sản phẩm, chi nhánh và time slots
     useEffect(() => {
         const fetchData = async () => {
             dispatch(actions.controlLoading(true));
             try {
-                const [productsRes, branchRes] = await Promise.all([
+                const [productsRes, branchRes, timeSlotRes] = await Promise.all([
                     requestApi('api/admin/products?limit=1000', 'GET', []),
-                    requestApi('api/admin/branches?limit=1000', 'GET', [])
+                    requestApi('api/admin/branches?limit=1000', 'GET', []),
+                    requestApi('api/admin/time-slots?limit=1000&is_active=1', 'GET', [])
                 ]);
 
                 if (productsRes.data && productsRes.data.data) {
@@ -59,6 +65,11 @@ const ComboAdd = () => {
                 }
                 if (branchRes.data && branchRes.data.data) {
                     setBranches(branchRes.data.data);
+                }
+                if (timeSlotRes.data && timeSlotRes.data.data) {
+                    // Chỉ lấy các time slots active
+                    const activeTimeSlots = timeSlotRes.data.data.filter(slot => slot.is_active === true || slot.is_active === 1);
+                    setTimeSlots(activeTimeSlots);
                 }
             } catch (error) {
                 toast.error("Không thể tải dữ liệu", toastErrorConfig);
@@ -72,6 +83,17 @@ const ComboAdd = () => {
     // Tạo options cho react-select
     const productOptions = products.map(p => ({ value: p.id, label: p.name + (p.size ? ` - ${p.size}` : '') + (p.category?.name ? ` (${p.category.name})` : ''), data: p }));
     const branchOptions = branches.map(branch => ({ value: branch.id, label: branch.name }));
+    
+    // Format time từ HH:mm:ss sang HH:mm
+    const formatTime = (timeString) => {
+        if (!timeString) return '';
+        return timeString.substring(0, 5); // Lấy HH:mm từ HH:mm:ss
+    };
+    
+    const timeSlotOptions = timeSlots.map(slot => ({ 
+        value: slot.id, 
+        label: `${slot.name} (${formatTime(slot.start_time)} - ${formatTime(slot.end_time)})` 
+    }));
 
     const getProductStock = (productId) => {
         if (!productId) return null;
@@ -372,6 +394,12 @@ const ComboAdd = () => {
             if (!applyToAllBranches && selectedBranches.length > 0) {
                 selectedBranches.forEach(id => formData.append('branch_ids[]', id));
             }
+            
+            // Thời gian bán
+            formData.append('is_flexible_time', isFlexibleTime ? 1 : 0);
+            if (!isFlexibleTime && selectedTimeSlotIds.length > 0) {
+                selectedTimeSlotIds.forEach(id => formData.append('time_slot_ids[]', id));
+            }
 
             const response = await requestApi(
                 'api/admin/combos',
@@ -465,6 +493,22 @@ const ComboAdd = () => {
                                             }}
                                         >
                                             Chi nhánh kinh doanh
+                                        </button>
+                                    </li>
+                                    <li className="nav-item" role="presentation">
+                                        <button
+                                            className={`nav-link ${activeTab === 'thoi-gian' ? 'active' : ''}`}
+                                            type="button"
+                                            onClick={() => setActiveTab('thoi-gian')}
+                                            style={{
+                                                color: activeTab === 'thoi-gian' ? '#007bff' : '#6c757d',
+                                                borderBottomColor: activeTab === 'thoi-gian' ? '#007bff' : 'transparent',
+                                                borderBottomWidth: activeTab === 'thoi-gian' ? '2px' : '1px',
+                                                textDecoration: 'none',
+                                                backgroundColor: 'transparent !important',
+                                            }}
+                                        >
+                                            Thời gian bán
                                         </button>
                                     </li>
                                 </ul>
@@ -1017,6 +1061,72 @@ const ComboAdd = () => {
                                                                     ...selectStyles,
                                                                     menuPortal: (base) => ({ ...base, zIndex: 9999 })
                                                                 }}
+                                                                menuPortalTarget={document.body}
+                                                                menuPosition="fixed"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Tab Thời gian bán */}
+                                    {activeTab === 'thoi-gian' && (
+                                        <div className="tab-pane fade show active">
+                                            <div className="row mb-3">
+                                                <div className="col-md-12">
+                                                    <div className="mb-3">
+                                                        <label className="form-label fw-semibold">Loại thời gian bán</label>
+                                                        <div className="form-check">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="radio"
+                                                                name="timeType"
+                                                                id="flexibleTime"
+                                                                checked={isFlexibleTime}
+                                                                onChange={() => {
+                                                                    setIsFlexibleTime(true);
+                                                                    setSelectedTimeSlotIds([]);
+                                                                }}
+                                                            />
+                                                            <label className="form-check-label" htmlFor="flexibleTime">
+                                                                Bán linh hoạt
+                                                            </label>
+                                                        </div>
+                                                        <div className="form-check">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="radio"
+                                                                name="timeType"
+                                                                id="fixedTime"
+                                                                checked={!isFlexibleTime}
+                                                                onChange={() => setIsFlexibleTime(false)}
+                                                            />
+                                                            <label className="form-check-label" htmlFor="fixedTime">
+                                                                Thời gian cố định
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {!isFlexibleTime && (
+                                                <div className="row mb-3">
+                                                    <div className="col-md-12">
+                                                        <div className="mb-3">
+                                                            <label className="form-label fw-semibold">Chọn khung giờ bán</label>
+                                                            <Select
+                                                                options={timeSlotOptions}
+                                                                isMulti
+                                                                value={timeSlotOptions.filter(opt => selectedTimeSlotIds.includes(opt.value))}
+                                                                onChange={opts => {
+                                                                    const values = opts ? opts.map(opt => opt.value) : [];
+                                                                    setSelectedTimeSlotIds(values);
+                                                                }}
+                                                                placeholder="Tìm kiếm & chọn khung giờ..."
+                                                                classNamePrefix="react-select"
+                                                                styles={selectStyles}
                                                                 menuPortalTarget={document.body}
                                                                 menuPosition="fixed"
                                                             />
