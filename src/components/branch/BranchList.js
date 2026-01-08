@@ -38,7 +38,7 @@ const BranchList = () => {
     const [isFilterVisible, setIsFilterVisible] = useState(true);
     const [isPulsing, setIsPulsing] = useState(false);
     const [showFilterOffcanvas, setShowFilterOffcanvas] = useState(false);
-    
+
     // Ref để track itemOfPage trước đó, tránh reset ở lần đầu mount
     const prevItemOfPageRef = useRef(itemOfPage);
 
@@ -50,26 +50,51 @@ const BranchList = () => {
         setIsFilterVisible(prev => !prev);
     };
 
+    // Format time từ HH:mm:ss sang HH:mm
+    const formatTime = (timeString) => {
+        if (!timeString) return '';
+        return timeString.substring(0, 5); // Lấy HH:mm từ HH:mm:ss
+    };
+
     const columns = [
-        { 
-            title: "Mã chi nhánh", 
+        {
+            title: "Mã chi nhánh",
             element: row => row.code,
-            width: "15%"
+            width: "10%"
         },
-        { 
-            title: "Tên chi nhánh", 
+        {
+            title: "Tên chi nhánh",
             element: row => row.name,
-            width: "25%"
+            width: "20%"
         },
-        { 
-            title: "Địa chỉ", 
-            element: row => row.address,
-            width: "30%"
-        },
-        { 
-            title: "Số điện thoại", 
+        // { 
+        //     title: "Địa chỉ", 
+        //     element: row => <span title={row.address}>{row.address}</span>,
+        //     width: "20%"
+        // },
+        {
+            title: "Số điện thoại",
             element: row => row.phone_number,
-            width: "15%"
+            width: "12%"
+        },
+        {
+            title: "Thời gian bán",
+            element: row => {
+                const timeSlots = row.time_slots || [];
+                if (timeSlots.length === 0) {
+                    return <span className="badge bg-success">Linh hoạt</span>;
+                }
+                return (
+                    <div className="d-flex flex-wrap gap-1" style={{ maxWidth: '300px' }}>
+                        {timeSlots.map((slot, index) => (
+                            <span key={index} className="badge bg-info text-dark">
+                                {slot.name} ({formatTime(slot.start_time)} - {formatTime(slot.end_time)})
+                            </span>
+                        ))}
+                    </div>
+                );
+            },
+            width: "25%"
         },
         {
             title: "Địa điểm nhận hàng",
@@ -82,11 +107,11 @@ const BranchList = () => {
                     <div className="d-flex flex-wrap gap-1" style={{ maxWidth: '200px' }}>
                         {pickupLocations.map((location, index) => {
                             // Xử lý cả trường hợp location là object (có name) hoặc string
-                            const locationName = typeof location === 'string' 
-                                ? location 
+                            const locationName = typeof location === 'string'
+                                ? location
                                 : (location.name || location.address || location.title || 'Địa điểm');
                             return (
-                                <span key={index} className="badge bg-info text-dark">
+                                <span key={index} className="badge bg-secondary text-white">
                                     {locationName}
                                 </span>
                             );
@@ -96,11 +121,6 @@ const BranchList = () => {
             },
             width: "15%"
         },
-        { 
-            title: "Ngày tạo", 
-            element: row => formatDate(row.created_at),
-            width: "12%"
-        },
         {
             title: "Trạng thái",
             element: row => (row.active === 1 || row.active === true)
@@ -109,9 +129,9 @@ const BranchList = () => {
             width: "10%"
         },
         {
-            title: "Hành động", 
+            title: "Hành động",
             element: row => (
-                <div className="d-flex gap-1">
+                <div className="d-flex gap-1 justify-content-center">
                     <Permission permission={PERMISSIONS.BRANCHES_UPDATE}>
                         <Link className="btn btn-primary btn-sm" to={`/branch/${row.id}`} title="Chỉnh sửa">
                             <i className="fas fa-edit"></i>
@@ -124,7 +144,7 @@ const BranchList = () => {
                     </Permission>
                 </div>
             ),
-            width: "12%"
+            width: "13%"
         }
     ];
 
@@ -134,17 +154,17 @@ const BranchList = () => {
         setTypeDelete('single');
         setShowModal(true);
     }
-    
+
     // Handle Multi Delete
     const multiDelete = () => {
         setTypeDelete('multi');
         setShowModal(true);
     }
-    
+
     // Delete
     const requestApiDelete = () => {
         dispatch(actions.controlLoading(true));
-        if(typeDelete === 'single'){
+        if (typeDelete === 'single') {
             requestApi(`api/admin/branches/${itemDelete}`, 'DELETE', []).then((response) => {
                 dispatch(actions.controlLoading(false));
                 setShowModal(false);
@@ -190,28 +210,28 @@ const BranchList = () => {
         // Reset về trang 1 khi thay đổi số items/trang (không phải lần đầu mount)
         const itemOfPageChanged = prevItemOfPageRef.current !== itemOfPage && prevItemOfPageRef.current !== null;
         let pageToUse = currentPage;
-        
+
         if (itemOfPageChanged && currentPage !== 1) {
             // Nếu itemOfPage thay đổi và đang không ở trang 1, reset về trang 1
             pageToUse = 1;
             setCurrentPage(1);
         }
         prevItemOfPageRef.current = itemOfPage;
-        
+
         let query = `?limit=${itemOfPage}&page=${pageToUse}&keyword=${searchText}`;
-        
+
         // Thêm filter status
         if (filterValues.status !== 'all') {
             query += `&active=${filterValues.status === 'active' ? '1' : '0'}`;
         }
-        
+
         // Thêm filter date range
         if (filterValues.dateRange.from && filterValues.dateRange.to) {
             const startDate = filterValues.dateRange.from.toISOString().split('T')[0];
             const endDate = filterValues.dateRange.to.toISOString().split('T')[0];
             query += `&start_date=${startDate}&end_date=${endDate}`;
         }
-        
+
         dispatch(actions.controlLoading(true));
         requestApi(`api/admin/branches${query}`, 'GET', []).then((response) => {
             dispatch(actions.controlLoading(false));
@@ -240,9 +260,9 @@ const BranchList = () => {
                                 <li className="breadcrumb-item"><Link to="/">Tổng quan</Link></li>
                                 <li className="breadcrumb-item active">Danh sách chi nhánh</li>
                             </ol>
-                            
+
                             {/* Nút Bộ lọc - chỉ hiện trên tablet/mobile */}
-                            <button 
+                            <button
                                 className="btn btn-outline-secondary btn-sm d-md-none flex-shrink-0"
                                 onClick={() => setShowFilterOffcanvas(true)}
                                 title="Bộ lọc"
@@ -250,21 +270,21 @@ const BranchList = () => {
                                 <i className="fas fa-filter me-1"></i>
                                 <span className="d-none d-sm-inline">Bộ lọc</span>
                             </button>
-                            
+
                             {/* Search - rộng hơn và canh trái */}
                             <div className="branch-search-bar flex-grow-1">
                                 <div className="input-group input-group-sm">
                                     <span className="input-group-text" style={{ backgroundColor: '#fff' }}>
                                         <i className="fas fa-search text-muted"></i>
                                     </span>
-                                    <LiveSearch 
+                                    <LiveSearch
                                         changeKeyword={setSearchText}
                                         placeholder="Tìm theo tên hoặc mã chi nhánh..."
                                     />
                                 </div>
                             </div>
                         </div>
-                            
+
                         {/* Actions - bên phải - chiếm 50% */}
                         <div className="branch-right-section d-flex align-items-center gap-2 justify-content-end">
                             {/* Nút xóa khi có chi nhánh được chọn */}
@@ -276,7 +296,7 @@ const BranchList = () => {
                                     </button>
                                 </Permission>
                             )}
-                            
+
                             {/* Nút tạo mới */}
                             <Permission permission={PERMISSIONS.BRANCHES_CREATE}>
                                 <Link className="btn btn-primary btn-sm" to="/branch/add">
@@ -284,7 +304,7 @@ const BranchList = () => {
                                     <span className="d-none d-sm-inline">Tạo mới</span>
                                 </Link>
                             </Permission>
-                            
+
                             {/* Các button riêng lẻ - hiện trên >= 1280px */}
                             <div className="branch-action-buttons">
                                 <button className="btn btn-outline-secondary btn-sm">
@@ -300,13 +320,13 @@ const BranchList = () => {
                                     <i className="fas fa-question-circle"></i>
                                 </button>
                             </div>
-                            
+
                             {/* Dropdown menu cho các nút phụ - chỉ hiện khi < 1280px */}
                             <div className="branch-action-dropdown">
                                 <Dropdown>
-                                    <Dropdown.Toggle 
-                                        variant="outline-secondary" 
-                                        size="sm" 
+                                    <Dropdown.Toggle
+                                        variant="outline-secondary"
+                                        size="sm"
                                         className="d-flex align-items-center"
                                         id="actions-dropdown"
                                     >
@@ -331,7 +351,7 @@ const BranchList = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* Layout chính với FilterPanel và nội dung */}
                     <div className="d-flex gap-4" style={{ gap: '16px' }}>
                         {/* Filter Panel Card - Hiển thị trên tablet và desktop, ẩn trên mobile */}
@@ -383,9 +403,9 @@ const BranchList = () => {
                                     <i className="fas fa-chevron-right"></i>
                                 </button>
                             )}
-                            
+
                             <div className="table-card">
-                                <DataTables 
+                                <DataTables
                                     name="Danh sách chi nhánh"
                                     columns={columns}
                                     data={branches}
@@ -395,15 +415,15 @@ const BranchList = () => {
                                     setItemOfPage={setItemOfPage}
                                     hideSearch={true}
                                     selectedRows={selectedRows}
-                                    onSelectedRows={ (selectedRows) => setSelectedRows(selectedRows)}
+                                    onSelectedRows={(selectedRows) => setSelectedRows(selectedRows)}
                                     tableHeight="calc(100vh - 220px)"
                                 />
                             </div>
                         </div>
 
                         {/* Offcanvas Filter cho Tablet/Mobile */}
-                        <Offcanvas 
-                            show={showFilterOffcanvas} 
+                        <Offcanvas
+                            show={showFilterOffcanvas}
                             onHide={() => setShowFilterOffcanvas(false)}
                             placement="start"
                             className="d-lg-none"
@@ -438,7 +458,7 @@ const BranchList = () => {
                     </div>
                 </div>
             </main>
-            <Modal show={showModal} onHide={() => {setShowModal(false); setItemDelete(null); setTypeDelete(null)}}>
+            <Modal show={showModal} onHide={() => { setShowModal(false); setItemDelete(null); setTypeDelete(null) }}>
                 <Modal.Header closeButton>
                     <Modal.Title>Xác nhận xóa</Modal.Title>
                 </Modal.Header>
@@ -450,10 +470,10 @@ const BranchList = () => {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => {setShowModal(false)}}>
+                    <Button variant="secondary" onClick={() => { setShowModal(false) }}>
                         Hủy
                     </Button>
-                    <Button variant="danger" onClick={() => {requestApiDelete()}}>
+                    <Button variant="danger" onClick={() => { requestApiDelete() }}>
                         Xóa
                     </Button>
                 </Modal.Footer>
